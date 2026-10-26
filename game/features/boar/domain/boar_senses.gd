@@ -1,6 +1,8 @@
 class_name BoarSenses
 extends RefCounted
 
+const Boar = preload("res://game/features/boar/domain/boar.gd")
+
 ## Shout deflection from the straight-away direction, degrees (D018, ASSUMPTION, tune in phase 1).
 const SHOUT_ANGLE_DEG := 30.0
 
