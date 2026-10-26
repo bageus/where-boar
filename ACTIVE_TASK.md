@@ -55,7 +55,8 @@ Phase 1 must prove the core rules (capture vs kill, escape, win/lose) before any
 - [ ] Given a boar has health 0, When it dies, Then it counts as DEAD and fades out after a delay.
 - [ ] Given a boar in a trap that is not broken by hunt end, When the hunt ends, Then it counts as captured.
 - [ ] Given no boar was caught or killed, When the hunt ends, Then results show an empty hunt with no defeat state.
-- [ ] Given a FLEE or PANIC boar reaches an escape point, Then it is ESCAPED immediately; a calm boar passing the point is not.
+- [ ] Given a FLEE or PANIC boar reaches an escape zone, Then it is ESCAPED immediately; a calm boar passing the zone is not.
+- [ ] Escape zones are shown on the minimap (UI part is phase 2; the domain only exposes zone count).
 - [ ] Tests pass in CI; `python tools/validate_project.py` passes.
 
 ## Plan
