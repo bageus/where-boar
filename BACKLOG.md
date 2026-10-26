@@ -22,8 +22,8 @@ The backlog contains approved work that is not currently active. Only one item m
 
 | ID | Phase | Outcome | Dependencies | Status |
 |---|---:|---|---|---|
-| P1-001 | 1 | Boar and hunt domain model with headless tests in CI | DISC-001 | ACTIVE |
-| P1-002 | 1 | Boar perception, panic and escape-zone choice in domain with tests | P1-001 | READY |
+| P1-001 | 1 | Boar and hunt domain model with headless tests in CI | DISC-001 | DONE |
+| P1-002 | 1 | Boar perception, panic and escape-zone choice in domain with tests | P1-001 | DONE |
 
 ## Planned
 

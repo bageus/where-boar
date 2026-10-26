@@ -1,7 +1,7 @@
 ---
 task_version: 1
 task_id: P1-001
-status: READY
+status: DONE
 phase: 1
 owner: AI
 updated: 2026-10-26
@@ -69,7 +69,7 @@ Phase 1 must prove the core rules (capture vs kill, escape, win/lose) before any
 
 ## Progress
 
-- Not started.
+- P1-001 and P1-002 implemented on one branch (PR #3); P1-002 adds `BoarSenses` (perception, shout ±30°, nearest escape zone, zone escape) and its tests.
 
 ## Decisions made during this task
 
