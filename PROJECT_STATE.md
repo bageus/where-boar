@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 1
 current_milestone: P1_LOGIC
-active_task_id: P1-001
-last_completed_task_id: DISC-001
+active_task_id: P1-002
+last_completed_task_id: P1-002
 build_status: NOT_RUN
 updated: 2026-10-26
 ---
@@ -27,7 +27,7 @@ P1_LOGIC — boar and hunt rules (M002, M004, M006, M007) proven by headless tes
 
 ## Active task
 
-P1-001 — boar and hunt domain model with headless tests. Status READY, not started.
+None. P1-001 and P1-002 done (boar, hunt, perception, escape rules); next is P2-001.
 
 ## Last completed work
 
@@ -56,8 +56,8 @@ P1-001 — boar and hunt domain model with headless tests. Status READY, not sta
 
 ## Next action
 
-Start P1-001: create features.boar and features.hunt domain classes with tests.
+Plan P2-001 (first-person hunter movement).
 
 ## Handoff notes
 
-Spec is READY. Work only inside ACTIVE_TASK.md (P1-001).
+Spec is READY. Plan the next task from BACKLOG.md.

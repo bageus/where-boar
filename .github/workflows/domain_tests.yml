@@ -29,4 +29,5 @@ jobs:
       - name: Run boar and hunt domain tests
         run: |
           godot --headless --path . -s game/features/boar/tests/run_boar_tests.gd
+          godot --headless --path . -s game/features/boar/tests/run_senses_tests.gd
           godot --headless --path . -s game/features/hunt/tests/run_hunt_tests.gd
