@@ -16,6 +16,7 @@ Follow the mode they select. Do not implement gameplay while `GAME_SPEC.md` is `
 - One active task at a time; stay inside its scope and update `PROJECT_STATE.md` and the task status when done.
 - On conflicting rules, stop and ask; never invent a rule.
 - Gameplay rules must run without a scene (engine-light classes, headless tests).
+- Until MVP is complete, push directly to `main` (owner's permission); no PR needed.
 - Limits: production `.gd` file max 600 lines (review above 300), test file max 900, function max 100.
 
 ## Checks
