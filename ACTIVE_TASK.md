@@ -4,7 +4,7 @@ task_id: NONE
 status: EMPTY
 phase: 0
 owner: NONE
-updated: {{YYYY-MM-DD}}
+updated: 2026-10-26
 ---
 
 # Active Task
