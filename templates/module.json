@@ -1,0 +1,15 @@
+{
+  "id": "features.module_name",
+  "layer": "features",
+  "purpose": "One sentence describing the gameplay capability owned by this module.",
+  "state_owner": [
+    "Authoritative mutable state owned only by this module."
+  ],
+  "public_api": [
+    "public/example_command.gd",
+    "public/example_event.gd"
+  ],
+  "dependencies": [
+    "core.example_contracts"
+  ]
+}

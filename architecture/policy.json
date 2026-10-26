@@ -1,0 +1,121 @@
+{
+  "version": 9,
+  "engine": {
+    "name": "Godot",
+    "major_version": 4,
+    "language": "GDScript",
+    "project_file": "project.godot"
+  },
+  "manifest_name": "module.json",
+  "source_roots": [
+    "game"
+  ],
+  "public_directories": [
+    "public"
+  ],
+  "unowned_res_prefixes": [
+    "assets/",
+    "content/",
+    "addons/"
+  ],
+  "autoload_allowed_layers": [
+    "bootstrap",
+    "infrastructure"
+  ],
+  "root_access_allowed_layers": [
+    "bootstrap",
+    "infrastructure"
+  ],
+  "required_files": [
+    "project.godot",
+    "GAME_SPEC.md",
+    "AGENTS.md",
+    "docs/ARCHITECTURE.md",
+    "architecture/policy.json",
+    "templates/module.json",
+    "tools/validate_architecture.py",
+    "templates/GAME_SPEC_TEMPLATE.md",
+    "tools/validate_game_spec.py",
+    "AI_START_HERE.md",
+    "PROJECT_STATE.md",
+    "ACTIVE_TASK.md",
+    "BACKLOG.md",
+    "docs/WORKING_AGREEMENT.md",
+    "docs/DISCOVERY_QUESTIONS.md",
+    "docs/GLOSSARY.md",
+    "tools/validate_workflow_state.py",
+    "tools/validate_project.py",
+    "tools/validate_source_size.py"
+  ],
+  "layers": {
+    "core": {
+      "allowed_dependency_layers": []
+    },
+    "features": {
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
+    },
+    "presentation": {
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
+    },
+    "infrastructure": {
+      "allowed_dependency_layers": [
+        "core",
+        "features"
+      ]
+    },
+    "bootstrap": {
+      "allowed_dependency_layers": [
+        "core",
+        "features",
+        "presentation",
+        "infrastructure",
+        "bootstrap"
+      ]
+    }
+  },
+  "module_required_fields": [
+    "id",
+    "layer",
+    "purpose",
+    "state_owner",
+    "public_api",
+    "dependencies"
+  ],
+  "godot_reference_extensions": [
+    ".gd",
+    ".tscn",
+    ".tres"
+  ],
+  "forbidden_patterns": [
+    "global mutable state",
+    "service locator",
+    "global signal bus",
+    "cross-module internal access",
+    "cyclic dependency",
+    "gameplay dependency on concrete infrastructure",
+    "dynamic cross-module res path",
+    "production feature/presentation current_scene access"
+  ],
+  "source_size_policy": {
+    "extensions": [
+      ".gd"
+    ],
+    "warning_lines": 300,
+    "error_lines": 600,
+    "test_warning_lines": 500,
+    "test_error_lines": 900,
+    "function_warning_lines": 50,
+    "function_error_lines": 100,
+    "excluded_path_prefixes": [
+      "addons/",
+      "generated/"
+    ],
+    "exceptions": []
+  }
+}

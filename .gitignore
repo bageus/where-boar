@@ -1,0 +1,26 @@
+# Godot generated files
+.godot/
+.import/
+.mono/
+
+# Local/editor files
+*.tmp
+*.translation
+.DS_Store
+Thumbs.db
+
+# Export output and engine packages
+/build/
+/export/
+*.pck
+*.zip
+*.exe
+*.x86_64
+*.apk
+*.aab
+*.wasm
+*.dmg
+
+# Python
+__pycache__/
+*.pyc
