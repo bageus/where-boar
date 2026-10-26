@@ -1,10 +1,10 @@
 ---
 state_version: 1
-status: DISCOVERY
-current_phase: 0
-current_milestone: NONE
-active_task_id: NONE
-last_completed_task_id: NONE
+status: IMPLEMENTATION
+current_phase: 1
+current_milestone: P1_LOGIC
+active_task_id: P1-001
+last_completed_task_id: DISC-001
 build_status: NOT_RUN
 updated: 2026-10-26
 ---
@@ -15,24 +15,24 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-The project is in discovery. Complete and approve `GAME_SPEC.md` before gameplay implementation.
+GAME_SPEC.md approved by the owner (READY). Phase 1 logic prototype has started.
 
 ## Current phase
 
-Phase 0 — Discovery and specification.
+Phase 1 — Logic prototype.
 
 ## Current milestone
 
-No implementation milestone exists yet.
+P1_LOGIC — boar and hunt rules (M002, M004, M006, M007) proven by headless tests. Prototype (phases 1–2) due 2026-11-02.
 
 ## Active task
 
-None. Discovery questions are the current work.
+P1-001 — boar and hunt domain model with headless tests. Status READY, not started.
 
 ## Last completed work
 
 - Repository workflow and architecture templates created.
-- GAME_SPEC.md drafted from TUSK_TRIBE_GDD v0.1 with first-person camera (2026-10-26).
+- DISC-001: GAME_SPEC.md drafted from TUSK_TRIBE_GDD v0.1, owner decisions recorded, approved as READY (2026-10-26).
 
 ## Build and validation
 
@@ -46,18 +46,18 @@ None. Discovery questions are the current work.
 
 ## Known blockers
 
-- None besides approval.
-- Owner approval of GAME_SPEC.md is pending.
+- None.
 
 ## Current risks
 
-- Concept and scope are not yet defined.
-- Technical choices may change after discovery.
+- Fast boars may be hard to read in first person.
+- One-week prototype deadline for a solo developer.
+- Godot is not installed in the AI cloud environment; headless tests must run in CI.
 
 ## Next action
 
-Get owner approval of GAME_SPEC.md, then set it to READY and plan the first Phase 1 task.
+Start P1-001: create features.boar and features.hunt domain classes with tests.
 
 ## Handoff notes
 
-No implementation is in progress. Preserve Discovery mode until the readiness gates pass.
+Spec is READY. Work only inside ACTIVE_TASK.md (P1-001).

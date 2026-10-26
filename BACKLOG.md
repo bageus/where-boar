@@ -1,8 +1,8 @@
 ---
 backlog_version: 1
-status: EMPTY
-current_milestone: DISCOVERY
-updated: {{YYYY-MM-DD}}
+status: ACTIVE
+current_milestone: P1_LOGIC
+updated: 2026-10-26
 ---
 
 # Backlog
@@ -20,13 +20,20 @@ The backlog contains approved work that is not currently active. Only one item m
 
 ## Ready queue
 
-No implementation tasks are ready while `GAME_SPEC.md` is `DRAFT`.
+| ID | Phase | Outcome | Dependencies | Status |
+|---|---:|---|---|---|
+| P1-001 | 1 | Boar and hunt domain model with headless tests in CI | DISC-001 | ACTIVE |
+| P1-002 | 1 | Boar perception, panic and escape-zone choice in domain with tests | P1-001 | READY |
 
 ## Planned
 
 | ID | Phase | Outcome | Dependencies | Status |
 |---|---:|---|---|---|
-| DISC-001 | 0 | Complete and approve game discovery | None | PLANNED |
+| P2-001 | 2 | First-person hunter movement and stamina on a grey test map (M001) | P1-002 | PLANNED |
+| P2-002 | 2 | Boar agent in scene with flee/panic steering (M002) | P2-001 | PLANNED |
+| P2-003 | 2 | Spear and net (M003, M004) | P2-002 | PLANNED |
+| P2-004 | 2 | Collision knockback (M005) | P2-002 | PLANNED |
+| P2-005 | 2 | Hunt flow: start button, goal, return, results (M007) | P2-003 | PLANNED |
 
 ## Icebox
 
@@ -34,10 +41,12 @@ Unapproved ideas and possible future features belong here.
 
 | ID | Idea | Why deferred | Reconsider when |
 |---|---|---|---|
-| — | None yet | — | — |
+| ICE-001 | Coop for 2–4 players with DOWNED | Not in MVP (D005) | After MVP |
+| ICE-002 | Traps, extra weapons, mounts, roosters, turkeys, buffs, biomes | Post-MVP scope | After MVP |
 
 ## Completed
 
 | ID | Outcome | Evidence |
 |---|---|---|
 | SETUP-001 | Repository architecture and AI workflow created | Git history and CI |
+| DISC-001 | Game discovery completed and approved | GAME_SPEC.md READY, decision D009 |
