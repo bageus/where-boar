@@ -1,0 +1,12 @@
+{
+  "id": "features.hunt",
+  "layer": "features",
+  "purpose": "Own the results of one hunt and the tusk rewards for them (M007).",
+  "state_owner": [
+    "Results of the current hunt"
+  ],
+  "public_api": [],
+  "dependencies": [
+    "features.boar"
+  ]
+}

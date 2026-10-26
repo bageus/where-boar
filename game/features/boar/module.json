@@ -1,0 +1,12 @@
+{
+  "id": "features.boar",
+  "layer": "features",
+  "purpose": "Own boar state: type, health, capture, death and escape (M002, M004, M006).",
+  "state_owner": [
+    "Boar runtime state for one hunt"
+  ],
+  "public_api": [
+    "public/boar_outcome.gd"
+  ],
+  "dependencies": []
+}
