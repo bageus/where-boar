@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 1
 current_milestone: P1_LOGIC
-active_task_id: none
+active_task_id: P1-002
 last_completed_task_id: P1-002
 build_status: NOT_RUN
 updated: 2026-10-26
