@@ -21,8 +21,8 @@ Phase 1 must prove the core rules (capture vs kill, escape, win/lose) before any
 
 ## In scope
 
-- `features.boar`: boar runtime state (WANDER, FLEE, PANIC, CHARGE, CAPTURED, DEAD, ESCAPED), health, transitions for hit, net capture, death and escape (M002 states, M004, M006).
-- `features.hunt`: hunt goal counter, success when the goal is reached and the hunter returns, failure when every remaining boar escaped or hunter health reaches zero, tusk reward per result (M007).
+- `features.boar`: boar runtime state (WANDER, FLEE, PANIC, CHARGE, TRAPPED, CAPTURED, DEAD, ESCAPED), type data, health, transitions for hit, net capture, trap capture, death and escape (M002, M004, M006).
+- `features.hunt`: hunt results counter per type and outcome, tusk reward per result (M007). No defeat state.
 - Headless test runner script and a CI job that installs Godot 4.7.2 and runs the tests.
 
 ## Out of scope
@@ -51,8 +51,11 @@ Phase 1 must prove the core rules (capture vs kill, escape, win/lose) before any
 - [ ] Given a FLEE boar, When it is hit without dying, Then it becomes PANIC.
 - [ ] Given a FLEE boar, When a net hits it, Then it becomes CAPTURED and the hunt goal counter increases.
 - [ ] Given CAPTURED or DEAD boars, When escape is requested, Then nothing changes.
-- [ ] Given 5 boars caught or killed, When the hunter returns, Then the hunt succeeds and tusks are awarded (captured worth more than killed).
-- [ ] Given the goal is not reached, When the last remaining boar escapes, Then the hunt fails with the prey already taken.
+- [ ] Given boars of several types are killed and captured, When the hunt ends, Then results list counts per type and tusks follow the reward table (captured worth more than killed).
+- [ ] Given a boar has health 0, When it dies, Then it counts as DEAD and fades out after a delay.
+- [ ] Given a boar in a trap that is not broken by hunt end, When the hunt ends, Then it counts as captured.
+- [ ] Given no boar was caught or killed, When the hunt ends, Then results show an empty hunt with no defeat state.
+- [ ] Given a FLEE boar enters an escape point, When it is inside for about 3 seconds, Then it is ESCAPED; a calm boar passing the point is not.
 - [ ] Tests pass in CI; `python tools/validate_project.py` passes.
 
 ## Plan
