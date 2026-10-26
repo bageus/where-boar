@@ -46,8 +46,8 @@ None. Discovery questions are the current work.
 
 ## Known blockers
 
-- GAME_SPEC.md contains unanswered discovery fields.
-- Working agreement has not been accepted.
+- None besides approval.
+- Owner approval of GAME_SPEC.md is pending.
 
 ## Current risks
 
@@ -56,7 +56,7 @@ None. Discovery questions are the current work.
 
 ## Next action
 
-Get owner answers for Group 0 (working agreement) and the [BLOCKER] list in GAME_SPEC.md section 26.
+Get owner approval of GAME_SPEC.md, then set it to READY and plan the first Phase 1 task.
 
 ## Handoff notes
 

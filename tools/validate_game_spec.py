@@ -115,7 +115,8 @@ def main() -> int:
         placeholders = PLACEHOLDER.findall(text)
         if placeholders:
             errors.append(f"{len(placeholders)} placeholder(s) remain")
-        blockers = text.count("[BLOCKER]")
+        # Backticked `[BLOCKER]` is the spec's own instruction text, not an open question.
+        blockers = text.count("[BLOCKER]") - text.count("`[BLOCKER]`")
         if blockers:
             errors.append(f"{blockers} blocking question marker(s) remain")
 
