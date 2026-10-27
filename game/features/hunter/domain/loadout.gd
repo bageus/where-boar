@@ -21,6 +21,12 @@ const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
 ## Trap item ids in the order G cycles through them (M015).
 const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]
 
+## Camp meals and their stamina bonus, the best first; the best one in stock is eaten (M012, ASSUMPTION).
+const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
+const WATER_BAG_ID := "item_water_bag"
+## Sips per hunt; the bag is refilled free in camp (ASSUMPTION).
+const WATER_SIPS := 3
+
 var spear_in_hand := true
 var nets := START_NETS
 var arrows := START_ARROWS
@@ -32,6 +38,8 @@ var used: Dictionary = {}
 var traps: Dictionary = {}
 ## Index into TRAP_IDS of the trap T places.
 var trap_index := 0
+var water_sips := 0
+var _meals: Dictionary = {}
 var _bought: Array[Weapon] = []
 
 
@@ -47,6 +55,10 @@ func equip(items: Dictionary) -> void:
 	traps.clear()
 	for item_id in TRAP_IDS:
 		traps[item_id] = items.get(item_id, 0)
+	_meals.clear()
+	for item_id in MEALS:
+		_meals[item_id] = items.get(item_id, 0)
+	water_sips = WATER_SIPS if items.get(WATER_BAG_ID, 0) > 0 else 0
 
 
 func has(weapon: Weapon) -> bool:
@@ -111,3 +123,20 @@ func place_trap() -> String:
 	traps[item_id] -= 1
 	used[item_id] = used.get(item_id, 0) + 1
 	return item_id
+
+
+## Eats the best meal in stock before a hunt; returns its stamina bonus, 0 without one.
+func eat_best_meal() -> float:
+	for item_id in MEALS:
+		if _meals[item_id] > 0:
+			_meals[item_id] -= 1
+			used[item_id] = used.get(item_id, 0) + 1
+			return MEALS[item_id]
+	return 0.0
+
+
+func drink() -> bool:
+	if water_sips == 0:
+		return false
+	water_sips -= 1
+	return true

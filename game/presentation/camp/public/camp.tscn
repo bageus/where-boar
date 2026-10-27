@@ -65,6 +65,11 @@ transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14, 0, 0)
 station_id = "hunting_hut"
 title = "Hunting hut"
 
+[node name="Campfire" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+station_id = "campfire"
+title = "Campfire (meal for the next hunt)"
+
 [node name="Hunter" parent="." instance=ExtResource("6_hunter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
 

@@ -40,6 +40,7 @@ func _ready() -> void:
 	for g in groups:
 		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones)
 	_hunter.equip(items)
+	_hunter.start_hunt()
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
 	_hunter.shouted.connect(_on_shouted)

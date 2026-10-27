@@ -39,6 +39,8 @@ const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
 ## ASSUMPTION (D013): one shout every 2 s.
 const SHOUT_COOLDOWN := 2.0
+## Stamina one sip of water gives back (M012, ASSUMPTION).
+const WATER_STAMINA := 40.0
 
 const Weapon = Loadout.Weapon
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
@@ -102,6 +104,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		shout()
 	elif event.is_action_pressed("bait"):
 		_place_bait()
+	elif event.is_action_pressed("drink"):
+		if loadout.drink():
+			stamina.drink(WATER_STAMINA)
 	elif event.is_action_pressed("trap_next"):
 		loadout.cycle_trap()
 	elif event.is_action_pressed("trap_place"):
@@ -123,6 +128,13 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 	_health_bar.value = health.value
 	if health.is_down():
 		downed.emit()
+
+
+## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012).
+func start_hunt() -> void:
+	stamina.eat(loadout.eat_best_meal())
+	_stamina_bar.max_value = stamina.max_value
+	_stamina_bar.value = stamina.value
 
 
 ## Scares boars in earshot sideways (M014); limited by a short cooldown.
@@ -258,5 +270,5 @@ func _update_hud() -> void:
 	for item_id in Loadout.BAIT_IDS:
 		bait_counts.append("%s %d" % [item_id.trim_prefix("item_"), loadout.baits.get(item_id, 0)])
 	var trap_id := loadout.selected_trap()
-	_bait_label.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d" % [
-		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0)]
+	_bait_label.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d    [Q] Water x%d" % [
+		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0), loadout.water_sips]

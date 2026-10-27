@@ -17,6 +17,7 @@ func _init() -> void:
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
 	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
+	failures += _check(_meal_and_water(), "best meal raises max stamina; water sips restore it")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -106,3 +107,17 @@ func _traps_cycle_and_run_out() -> bool:
 	loadout.cycle_trap()
 	return none and loadout.place_trap() == "item_snare" and loadout.place_trap() == "" \
 		and loadout.used == {"item_snare": 1}
+
+
+func _meal_and_water() -> bool:
+	var loadout := Loadout.new()
+	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1})
+	var stamina := Stamina.new()
+	stamina.eat(loadout.eat_best_meal())
+	var fed := is_equal_approx(stamina.max_value, 150.0) and is_equal_approx(stamina.value, 150.0)
+	stamina.value = 0.0
+	stamina.drink(40.0)
+	for i in Loadout.WATER_SIPS:
+		loadout.drink()
+	return fed and is_equal_approx(stamina.value, 40.0) and not loadout.drink() \
+		and loadout.used == {"item_feast": 1}

@@ -10,6 +10,8 @@ const REGEN := 15.0
 ## After running dry, sprint stays locked until stamina is back to this value.
 const RECOVER_AT := 20.0
 
+## MAX plus the meal eaten before the hunt (M012).
+var max_value := MAX
 var value := MAX
 var _exhausted := false
 
@@ -20,7 +22,7 @@ func tick(delta: float, wants_sprint: bool) -> bool:
 		value = maxf(0.0, value - SPRINT_COST * delta)
 		_exhausted = value == 0.0
 		return true
-	value = minf(MAX, value + REGEN * delta)
+	value = minf(max_value, value + REGEN * delta)
 	if value >= RECOVER_AT:
 		_exhausted = false
 	return false
@@ -32,3 +34,16 @@ func try_lunge() -> bool:
 		return false
 	value -= LUNGE_COST
 	return true
+
+
+## A camp meal raises the maximum for this hunt and starts it full (M012).
+func eat(bonus: float) -> void:
+	max_value = MAX + bonus
+	value = max_value
+
+
+## A sip from the water bag restores stamina at once, even mid-sprint (M012).
+func drink(amount: float) -> void:
+	value = minf(max_value, value + amount)
+	if value >= RECOVER_AT:
+		_exhausted = false
