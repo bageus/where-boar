@@ -14,6 +14,7 @@ radius = 0.08
 height = 0.16
 
 [node name="Stone" type="RigidBody3D"]
+collision_mask = 33
 mass = 0.2
 lock_rotation = true
 continuous_cd = true

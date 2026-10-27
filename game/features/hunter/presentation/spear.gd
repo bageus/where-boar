@@ -18,7 +18,8 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
-	if body is BoarBody:
+	# A boar or its larger hitbox (playtest 2026-10-27).
+	if body is BoarBody or body.has_method("spear_hit"):
 		body.spear_hit(DAMAGE)
 	set_deferred("freeze", true)
 	set_deferred("collision_layer", 0)

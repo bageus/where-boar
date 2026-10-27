@@ -279,7 +279,7 @@ func _attack() -> void:
 					_aim_power = 0.0
 			elif loadout.spear_in_hand:
 				$Camera/Hands.strike()
-				if _reach.get_collider() is BoarBody:
+				if _hits_boar(_reach.get_collider()):
 					_reach.get_collider().spear_hit(STAB_DAMAGE)
 		Weapon.NET:
 			if loadout.throw_net():
@@ -287,7 +287,7 @@ func _attack() -> void:
 				_throw(NetScene)
 		Weapon.CLUB:
 			var target := _reach.get_collider()
-			if target is BoarBody:
+			if _hits_boar(target):
 				target.spear_hit(CLUB_DAMAGE)
 				target.knock(-_camera.global_basis.z * CLUB_KNOCK)
 		Weapon.SLING:
@@ -295,6 +295,11 @@ func _attack() -> void:
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				_throw(ArrowScene, ARROW_SPEED, false)
+
+
+## A boar or its larger hitbox; wild birds and the hunter's mount do not take spear hits.
+func _hits_boar(target: Object) -> bool:
+	return target is BoarBody or (target != null and target.has_method("spear_hit"))
 
 
 ## Launches an item from the eye; kept ones (spear, net) can be picked up again.

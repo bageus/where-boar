@@ -17,6 +17,6 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
-	if body is BoarBody:
+	if body is BoarBody or body.has_method("spear_hit"):
 		body.spear_hit(damage)
 	queue_free()

@@ -118,3 +118,4 @@ renderer/rendering_method.mobile="gl_compatibility"
 [layer_names]
 
 3d_physics/layer_5="cover"
+3d_physics/layer_6="boar_hitbox"

@@ -16,6 +16,7 @@ bottom_radius = 0.02
 height = 0.8
 
 [node name="Arrow" type="RigidBody3D"]
+collision_mask = 33
 mass = 0.2
 lock_rotation = true
 continuous_cd = true

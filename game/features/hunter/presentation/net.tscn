@@ -14,6 +14,7 @@ material = SubResource("Mat_rope")
 size = Vector3(1.2, 0.05, 1.2)
 
 [node name="Net" type="RigidBody3D"]
+collision_mask = 33
 mass = 0.8
 lock_rotation = true
 continuous_cd = true
