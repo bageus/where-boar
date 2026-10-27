@@ -66,7 +66,14 @@ func _spear_throw_and_pick() -> bool:
 	var thrown := loadout.throw_spear()
 	var again := loadout.throw_spear()
 	loadout.pick_spear()
-	return thrown and not again and loadout.spear_in_hand
+	var single := thrown and not again and loadout.spear_in_hand
+	var armed := Loadout.new()
+	armed.equip({"item_spear": 5})
+	var three := armed.spears == 3 and armed.throw_spear() and armed.throw_spear() and armed.throw_spear()
+	var empty := not armed.throw_spear()
+	for i in 4:
+		armed.pick_spear()
+	return single and three and empty and armed.spears == 3
 
 
 func _nets_run_out() -> bool:

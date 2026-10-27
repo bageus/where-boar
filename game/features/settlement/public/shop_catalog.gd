@@ -1,12 +1,15 @@
 extends RefCounted
 
 ## What camp shops sell and for how many tusks (section 13; ASSUMPTION prices, D013).
-## unique items (weapons) are bought once; others stack. requires_caught names a boar type that must be in the pens.
+## unique items (weapons) are bought once; others stack, up to max when given.
+## requires_caught names a boar type that must be in the pens.
 
 const ITEMS := {
 	"item_club": {"name": "Club", "shop": "weapon_shop", "price": 30, "unique": true},
 	"item_sling": {"name": "Sling", "shop": "weapon_shop", "price": 25, "unique": true},
 	"item_bow": {"name": "Bow", "shop": "weapon_shop", "price": 50, "unique": true},
+	# Two extra spears on top of the one every hunter has: 3 to throw at most (owner, 2026-10-27).
+	"item_spear": {"name": "Extra spear", "shop": "weapon_shop", "price": 15, "unique": false, "max": 2},
 	"item_acorns": {"name": "Acorns (bait)", "shop": "hunting_hut", "price": 5, "unique": false},
 	"item_carrot": {"name": "Carrot (bait)", "shop": "hunting_hut", "price": 8, "unique": false},
 	"item_apple": {"name": "Apple (bait)", "shop": "hunting_hut", "price": 8, "unique": false},

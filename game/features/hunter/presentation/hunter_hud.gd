@@ -31,7 +31,7 @@ func show_stamina(value: float, max_value: float) -> void:
 
 func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 	var extras := [
-		" (in hand)" if loadout.spear_in_hand else " (thrown)",
+		" x%d" % loadout.spears if loadout.max_spears > 1 else (" (in hand)" if loadout.spear_in_hand else " (thrown)"),
 		" x%d" % loadout.nets,
 		"",
 		"",

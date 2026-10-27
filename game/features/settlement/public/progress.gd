@@ -43,10 +43,17 @@ func spend(cost: int) -> bool:
 ## Buys one catalog item; false when unknown, already owned (unique), locked or too expensive.
 func buy(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
-	if item.is_empty() or (item["unique"] and owns(item_id)) or not unlocked(item_id) or not spend(item["price"]):
+	if item.is_empty() or sold_out(item_id) or not unlocked(item_id) or not spend(item["price"]):
 		return false
 	items[item_id] = items.get(item_id, 0) + 1
 	return true
+
+
+## True when no more of item_id can be bought: a unique item owned, or a stack at its max.
+func sold_out(item_id: String) -> bool:
+	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
+	var have: int = items.get(item_id, 0)
+	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
 
 
 ## A saddle needs a caught boar of its type in the pens (D021).

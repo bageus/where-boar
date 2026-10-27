@@ -7,6 +7,9 @@ enum Weapon { SPEAR, NET, CLUB, SLING, BOW }
 ## ASSUMPTION: per hunt, balanced later (D013).
 const START_NETS := 3
 const START_ARROWS := 12
+## Every hunter carries one spear; extra spears bought in the armory raise it to 3 at most (owner, 2026-10-27).
+const SPEAR_ID := "item_spear"
+const MAX_SPEARS := 3
 
 ## Camp item id that unlocks each bought weapon.
 const ITEM_IDS := {
@@ -33,7 +36,12 @@ const PORTER_ARROWS := 6
 ## Camp item "item_saddle_<boar type id>" puts a saddle on a caught boar of that type.
 const SADDLE_PREFIX := "item_saddle_"
 
-var spear_in_hand := true
+## Spears carried right now; thrown ones are picked up again.
+var spears := 1
+var max_spears := 1
+var spear_in_hand: bool:
+	get:
+		return spears > 0
 var nets := START_NETS
 var arrows := START_ARROWS
 ## item_id -> bait carried this hunt.
@@ -71,6 +79,8 @@ func equip(items: Dictionary) -> void:
 	for item_id in items:
 		if item_id.begins_with(SADDLE_PREFIX) and items[item_id] > 0:
 			saddled.append(item_id.trim_prefix(SADDLE_PREFIX))
+	max_spears = mini(1 + items.get(SPEAR_ID, 0), MAX_SPEARS)
+	spears = max_spears
 	var porter: bool = items.get(PORTER_ID, 0) > 0
 	nets = START_NETS + (PORTER_NETS if porter else 0)
 	arrows = START_ARROWS + (PORTER_ARROWS if porter else 0)
@@ -81,14 +91,14 @@ func has(weapon: Weapon) -> bool:
 
 
 func throw_spear() -> bool:
-	if not spear_in_hand:
+	if spears == 0:
 		return false
-	spear_in_hand = false
+	spears -= 1
 	return true
 
 
 func pick_spear() -> void:
-	spear_in_hand = true
+	spears = mini(spears + 1, max_spears)
 
 
 func throw_net() -> bool:
