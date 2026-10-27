@@ -28,9 +28,12 @@ func speed(on_foot: float) -> float:
 	return type.flee_speed if type else on_foot
 
 
-## From the saddle only the spear is used, and only to stab.
+## From the saddle the rider stabs with the spear, shoots the bow and casts nets (owner, 2026-10-27);
+## no spear throws, club swings or sling shots.
 func allows(weapon: Loadout.Weapon, aiming: bool) -> bool:
-	return not type or (weapon == Loadout.Weapon.SPEAR and not aiming)
+	if not type:
+		return true
+	return weapon in [Loadout.Weapon.BOW, Loadout.Weapon.NET] or (weapon == Loadout.Weapon.SPEAR and not aiming)
 
 
 ## The armored mount barely moves when rammed, so its rider is not knocked off.

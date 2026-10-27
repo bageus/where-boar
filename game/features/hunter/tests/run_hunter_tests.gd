@@ -150,7 +150,8 @@ func _ride_by_mount_type() -> bool:
 	ride.mount(BoarTypes.find("aggressive_red"))
 	var angry := ride.rams() and not ride.shrugs_off_knock()
 	var stab_only := ride.allows(Loadout.Weapon.SPEAR, false) and not ride.allows(Loadout.Weapon.SPEAR, true) \
-		and not ride.allows(Loadout.Weapon.BOW, false)
+		and ride.allows(Loadout.Weapon.BOW, false) and ride.allows(Loadout.Weapon.NET, false) \
+		and not ride.allows(Loadout.Weapon.CLUB, false) and not ride.allows(Loadout.Weapon.SLING, false)
 	ride.dismount()
 	return on_foot and armored and angry and stab_only and not ride.is_riding()
 

@@ -242,7 +242,8 @@ func _physics_process(delta: float) -> void:
 	_aim_power = minf(1.0, _aim_power + delta / AIM_CHARGE_SECONDS) if aiming else 0.0
 	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if aiming else 1.0), minf(1.0, 12.0 * delta))
 	_hud.show_throw_power(aiming, _aim_power)
-	$Camera/Hands.pose(weapon == Weapon.SPEAR and loadout.spear_in_hand, weapon == Weapon.NET and loadout.nets > 0, aiming, _aim_power, delta)
+	var armed: bool = {Weapon.SPEAR: loadout.spear_in_hand, Weapon.NET: loadout.nets > 0, Weapon.BOW: loadout.arrows > 0}.get(weapon, true)
+	$Camera/Hands.pose(weapon, armed, aiming, _aim_power, delta)
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
 		velocity.x = direction.x * speed
@@ -286,14 +287,17 @@ func _attack() -> void:
 				$Camera/Hands.strike()
 				_throw(NetScene)
 		Weapon.CLUB:
+			$Camera/Hands.strike()
 			var target := _reach.get_collider()
 			if _hits_boar(target):
 				target.spear_hit(CLUB_DAMAGE)
 				target.knock(-_camera.global_basis.z * CLUB_KNOCK)
 		Weapon.SLING:
+			$Camera/Hands.strike()
 			_throw(StoneScene, SLING_SPEED, false)
 		Weapon.BOW:
 			if loadout.shoot_arrow():
+				$Camera/Hands.strike()
 				_throw(ArrowScene, ARROW_SPEED, false)
 
 

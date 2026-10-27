@@ -1,7 +1,7 @@
 extends Node3D
 
-## First-person view of what the hunter holds (playtest 2026-10-27): the spear or a net,
-## a quick stab, and the spear raised over the shoulder while aiming a throw.
+## First-person view of what the hunter holds (playtest 2026-10-27): one simple model per weapon,
+## a quick strike, and the spear raised over the shoulder while aiming a throw.
 
 const REST := Vector3(0.3, -0.35, -0.5)
 ## Aiming: raised as for a swing; pulled further back the stronger the throw.
@@ -14,14 +14,15 @@ const FOLLOW_RATE := 14.0
 
 var _striking := false
 
-@onready var _spear: Node3D = $Spear
-@onready var _net: Node3D = $Net
+## Children in Loadout.Weapon order: spear, net, club, sling, bow.
+@onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow]
 
 
-## spear and net: what is in hand right now; aiming with power 0..1 raises the spear.
-func pose(spear: bool, net: bool, aiming: bool, power: float, delta: float) -> void:
-	_spear.visible = spear
-	_net.visible = net
+## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets or arrows).
+## Aiming with power 0..1 raises the spear.
+func pose(weapon: int, armed: bool, aiming: bool, power: float, delta: float) -> void:
+	for i in _models.size():
+		_models[i].visible = armed and i == weapon
 	if _striking:
 		return
 	var target := RAISED + Vector3(0.0, 0.0, PULL_BACK * power) if aiming else REST
@@ -30,7 +31,7 @@ func pose(spear: bool, net: bool, aiming: bool, power: float, delta: float) -> v
 	rotation.x = lerpf(rotation.x, RAISED_TILT if aiming else 0.0, t)
 
 
-## A short jab forward and back (stab, club swing or net cast).
+## A short jab forward and back (stab, club swing, net cast, sling or bow shot).
 func strike() -> void:
 	_striking = true
 	var jab := create_tween()
