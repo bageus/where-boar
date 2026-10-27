@@ -19,7 +19,8 @@ horizontal_alignment = 1
 
 [node name="Goal" type="Label" parent="Box"]
 layout_mode = 2
-text = "Kill or catch as many boars as you can. Fleeing boars escape through the red zones.
+text = "In camp, walk to Start hunt and press E.
+Kill or catch as many boars as you can. Fleeing boars escape through the red zones.
 Return to the green camp zone and press E to end the hunt early."
 horizontal_alignment = 1
 
@@ -27,4 +28,4 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Start hunt"
+text = "Play"

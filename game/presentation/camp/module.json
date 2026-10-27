@@ -1,0 +1,14 @@
+{
+  "id": "presentation.camp",
+  "layer": "presentation",
+  "purpose": "First-person camp hub scene: stations to start a hunt and use camp shops, camp HUD (D017).",
+  "state_owner": [],
+  "public_api": [
+    "public/camp.tscn",
+    "public/camp.gd"
+  ],
+  "dependencies": [
+    "features.boar",
+    "features.hunter"
+  ]
+}

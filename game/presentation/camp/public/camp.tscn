@@ -1,0 +1,72 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
+[ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
+[ext_resource type="PackedScene" path="res://game/presentation/camp/props/fence.tscn" id="3_fence"]
+[ext_resource type="PackedScene" path="res://game/presentation/camp/props/tent.tscn" id="4_tent"]
+[ext_resource type="PackedScene" path="res://game/presentation/camp/props/station.tscn" id="5_station"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/public/hunter.tscn" id="6_hunter"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+
+[sub_resource type="Sky" id="Sky_res"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky_res")
+ambient_light_source = 3
+
+[node name="Camp" type="Node3D"]
+script = ExtResource("1_camp")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Ground" parent="." instance=ExtResource("2_ground")]
+
+[node name="FenceNorth" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
+
+[node name="FenceSouth" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
+
+[node name="FenceEast" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 20, 0, 0)
+
+[node name="FenceWest" parent="." instance=ExtResource("3_fence")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -20, 0, 0)
+
+[node name="Tent1" parent="." instance=ExtResource("4_tent")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -12)
+
+[node name="Tent2" parent="." instance=ExtResource("4_tent")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -12)
+
+[node name="Stations" type="Node3D" parent="."]
+
+[node name="StartHunt" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
+station_id = "start_hunt"
+title = "Start hunt"
+
+[node name="Hunter" parent="." instance=ExtResource("6_hunter")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Progress" type="Label" parent="Hud"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -420.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 200.0
+grow_horizontal = 0
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 22

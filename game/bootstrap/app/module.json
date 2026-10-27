@@ -11,6 +11,7 @@
     "features.boar",
     "features.settlement",
     "infrastructure.save",
+    "presentation.camp",
     "presentation.hunt_map",
     "presentation.menus"
   ]

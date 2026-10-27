@@ -1,10 +1,11 @@
 extends Node
 
-## Composition root: start screen -> hunt map -> results -> start screen (M007).
+## Composition root: start screen -> camp -> hunt map -> results -> camp (section 07).
 
 const StartScene = preload("res://game/presentation/menus/public/start_screen.tscn")
 const ResultsScene = preload("res://game/presentation/menus/public/results_screen.tscn")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
+const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const SaveStore = preload("res://game/infrastructure/save/public/save_store.gd")
 
@@ -23,7 +24,19 @@ func show_start() -> void:
 	var start := StartScene.instantiate()
 	_swap(start)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	start.get_node("%Start").pressed.connect(start_hunt)
+	start.get_node("%Start").pressed.connect(show_camp)
+
+
+func show_camp() -> void:
+	var camp := CampScene.instantiate()
+	_swap(camp)
+	camp.show_progress(progress.tusks, progress.caught)
+	camp.station_used.connect(_on_station_used)
+
+
+func _on_station_used(station_id: String) -> void:
+	if station_id == "start_hunt":
+		start_hunt()
 
 
 func start_hunt() -> void:
@@ -40,7 +53,7 @@ func _show_results(hunt: RefCounted) -> void:
 	_swap(results)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	results.show_results(hunt, progress.tusks)
-	results.get_node("%Again").pressed.connect(show_start)
+	results.get_node("%Again").pressed.connect(show_camp)
 
 
 func _swap(next: Node) -> void:

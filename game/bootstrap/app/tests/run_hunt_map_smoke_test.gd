@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Loads the main scene headless and checks the hunt wiring: start, boars spawn, see the hunter,
+## Loads the main scene headless and checks the hunt wiring: start, camp, boars spawn, see the hunter,
 ## react to a thrown net and spear, the goal counts the capture and returning to camp shows results.
 
 const MainScene = preload("res://game/bootstrap/app/main.tscn")
@@ -26,12 +26,18 @@ func _physics_process(_delta: float) -> bool:
 	_frame += 1
 	if _frame == 1:
 		_main.current.get_node("%Start").pressed.emit()
+		var camp: Node3D = _main.current
+		camp.hunter.global_position = camp.get_node("Stations/StartHunt").global_position + Vector3(0, 0, 1.5)
+		camp.hunter.interacted.emit()
 		_map = _main.current
+		_check(_map.name == "HuntMap", "start hunt station in camp opens the hunt")
 		return false
 	if _frame == 122:
 		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
 		_check("caught 1" in _main.current.get_node("%Summary").text, "results list the caught boar")
 		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
+		_main.current.get_node("%Again").pressed.emit()
+		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
 		print("hunt map smoke test: %d failure(s)" % _failures)
 		quit(1 if _failures else 0)
 	if _frame > 120:

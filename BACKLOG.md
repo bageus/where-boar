@@ -37,7 +37,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-001 | 3 | Hunter health, boar attack and CHARGE ram, hunt ends at zero health (M002, M005) | P2-005 | DONE |
 | P3-002 | 3 | Five boar types as .tres data, spawn by rarity, rewards by type | P3-001 | DONE |
 | P3-003 | 3 | Save tusks and caught animals (versioned JSON in user://, backup) | P2-005 | DONE |
-| P3-004 | 3 | First-person camp hub: menu, camp, start hunt, results back to camp | P3-003 | PLANNED |
+| P3-004 | 3 | First-person camp hub: menu, camp, start hunt, results back to camp | P3-003 | DONE |
 | P3-005 | 3 | Weapon shop; club, sling, bow (M013, D022) | P3-004 | PLANNED |
 | P3-006 | 3 | Shout and bait (M014, M011) | P3-004 | PLANNED |
 | P3-007 | 3 | Traps: pit, snare, tripwire, cage, fence; hunting hut (M015) | P3-005 | PLANNED |
