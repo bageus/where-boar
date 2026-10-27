@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/hunt_map/public/hunt_map.gd" id="1_map"]
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/ground.tscn" id="2_ground"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/hill.tscn" id="10_hill"]
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/river_segment.tscn" id="11_river"]
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/bush.tscn" id="12_bush"]
+[ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/stone_pile.tscn" id="13_stones"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 
@@ -981,6 +982,156 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.0, 0, -2.0)
 
 [node name="Bush201" parent="Props" instance=ExtResource("12_bush")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.2, 0, -37.6)
+
+[node name="StonePile1" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.4, 0, -47.6)
+
+[node name="StonePile2" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.0, 0, 50.7)
+
+[node name="StonePile3" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54.6, 0, -46.2)
+
+[node name="StonePile4" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.9, 0, 71.7)
+
+[node name="StonePile5" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.4, 0, 72.4)
+
+[node name="StonePile6" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54.8, 0, 59.8)
+
+[node name="StonePile7" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.0, 0, -33.9)
+
+[node name="StonePile8" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.6, 0, 26.6)
+
+[node name="StonePile9" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -54.5, 0, -72.0)
+
+[node name="StonePile10" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.1, 0, 19.7)
+
+[node name="StonePile11" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.5, 0, 3.0)
+
+[node name="StonePile12" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.7, 0, -12.2)
+
+[node name="StonePile13" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -69.2, 0, 39.0)
+
+[node name="StonePile14" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67.2, 0, 55.9)
+
+[node name="StonePile15" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.0, 0, -48.1)
+
+[node name="StonePile16" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.9, 0, 27.9)
+
+[node name="StonePile17" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.7, 0, -69.4)
+
+[node name="StonePile18" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.7, 0, 61.2)
+
+[node name="StonePile19" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.3, 0, 25.8)
+
+[node name="StonePile20" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.7, 0, -15.0)
+
+[node name="StonePile21" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0, 53.3)
+
+[node name="StonePile22" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.6, 0, 3.1)
+
+[node name="StonePile23" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.6, 0, -7.7)
+
+[node name="StonePile24" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.9, 0, 25.3)
+
+[node name="StonePile25" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.9, 0, 54.1)
+
+[node name="StonePile26" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.4, 0, -39.8)
+
+[node name="StonePile27" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.7, 0, 7.8)
+
+[node name="StonePile28" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.9, 0, 48.8)
+
+[node name="StonePile29" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -73.5, 0, 71.7)
+
+[node name="StonePile30" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -41.5, 0, -44.9)
+
+[node name="StonePile31" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5, 0, -30.2)
+
+[node name="StonePile32" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0, 22.6)
+
+[node name="StonePile33" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63.3, 0, 38.5)
+
+[node name="StonePile34" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.3, 0, 45.1)
+
+[node name="StonePile35" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.0, 0, -14.7)
+
+[node name="StonePile36" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 0, 29.2)
+
+[node name="StonePile37" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.2, 0, 42.8)
+
+[node name="StonePile38" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.4, 0, 11.2)
+
+[node name="StonePile39" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0, 0, 3.7)
+
+[node name="StonePile40" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.6, 0, 57.8)
+
+[node name="StonePile41" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.6, 0, 21.3)
+
+[node name="StonePile42" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.3, 0, -16.0)
+
+[node name="StonePile43" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.8, 0, 51.7)
+
+[node name="StonePile44" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.9, 0, -60.5)
+
+[node name="StonePile45" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.9, 0, -64.8)
+
+[node name="StonePile46" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.0, 0, 48.5)
+
+[node name="StonePile47" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.7, 0, -70.8)
+
+[node name="StonePile48" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.0, 0, 17.3)
+
+[node name="StonePile49" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -69.4)
+
+[node name="StonePile50" parent="Props" instance=ExtResource("13_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -71.5, 0, -63.5)
 
 [node name="PassWestRock1" parent="Props" instance=ExtResource("5_rock")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, -6)

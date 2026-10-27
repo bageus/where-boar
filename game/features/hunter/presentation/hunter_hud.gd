@@ -36,7 +36,7 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 		" x%d" % loadout.spears if loadout.max_spears > 1 else (" (in hand)" if loadout.spear_in_hand else " (thrown)"),
 		" x%d" % loadout.nets,
 		"",
-		"",
+		" x%d" % loadout.stones,
 		" x%d" % loadout.arrows,
 	]
 	for i in WEAPON_NAMES.size():

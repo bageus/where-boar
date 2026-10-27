@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 32
+const EXPECTED_CHECKS := 33
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -137,6 +137,11 @@ func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D
 	hunter.global_position = caught.global_position + Vector3(1.0, 0.0, 0.0)
 	hunter._pick_up()
 	_check(nets_before == 2 and spear_stays and hunter.loadout.nets == 3, "stuck spear stays in a running boar; net taken back from the caught one")
+	var pile: Node3D = _map.get_node("Props/StonePile1")
+	var stones: int = hunter.loadout.stones
+	hunter.global_position = pile.global_position
+	hunter._pick_up()
+	_check(hunter.loadout.stones == stones + 3 and pile.is_queued_for_deletion(), "a stone pile on the map refills the sling pouch")
 
 
 ## Esc pauses the camp; changing FOV applies to the hunter and is saved; Continue unpauses.

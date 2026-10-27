@@ -19,6 +19,7 @@ func _init() -> void:
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
 	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
+	failures += _check(_sling_stones_run_out_and_refill(), "sling stones run out, piles refill them, a new hunt restores the pouch")
 	failures += _check(_meal_and_water(), "carried meals stack on max stamina; water sips restore it")
 	failures += _check(_porter_and_any_trap(), "porter adds nets and arrows; any trap in stock can be set")
 	failures += _check(_ride_by_mount_type(), "mount type sets speed and perk; only the stab works when riding")
@@ -119,6 +120,18 @@ func _traps_cycle_and_run_out() -> bool:
 	loadout.cycle_trap()
 	return none and loadout.place_trap() == "item_snare" and loadout.place_trap() == "" \
 		and loadout.used == {"item_snare": 1}
+
+
+func _sling_stones_run_out_and_refill() -> bool:
+	var loadout := Loadout.new()
+	loadout.equip({"item_sling": 1})
+	for i in Loadout.START_STONES:
+		loadout.sling_stone()
+	var empty := not loadout.sling_stone()
+	loadout.pick_stones(3)
+	var refilled := loadout.stones == 3
+	loadout.equip({"item_sling": 1})
+	return empty and refilled and loadout.stones == Loadout.START_STONES
 
 
 func _meal_and_water() -> bool:

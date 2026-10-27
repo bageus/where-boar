@@ -201,6 +201,8 @@ func _place_bait() -> void:
 	bait_placed.emit(bait)
 
 
+## Map props in this group are stone piles; meta "stones" says how many each gives.
+const GROUND_STONES_GROUP := "stone_piles"
 ## Group of every trap the hunter or the trap setter put down; the minimap shows them.
 const PLACED_TRAPS_GROUP := "placed_traps"
 
@@ -247,7 +249,8 @@ func _physics_process(delta: float) -> void:
 	_aim_power = minf(1.0, _aim_power + delta / AIM_CHARGE_SECONDS) if aiming else 0.0
 	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if aiming else 1.0), minf(1.0, 12.0 * delta))
 	_hud.show_throw_power(aiming, _aim_power)
-	var armed: bool = {Weapon.SPEAR: loadout.spear_in_hand, Weapon.NET: loadout.nets > 0, Weapon.BOW: loadout.arrows > 0}.get(weapon, true)
+	var armed: bool = {Weapon.SPEAR: loadout.spear_in_hand, Weapon.NET: loadout.nets > 0,
+			Weapon.SLING: loadout.stones > 0, Weapon.BOW: loadout.arrows > 0}.get(weapon, true)
 	$Camera/Hands.pose(weapon, armed, aiming, _aim_power, delta)
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
@@ -298,8 +301,9 @@ func _attack() -> void:
 				target.spear_hit(CLUB_DAMAGE)
 				target.knock(-_camera.global_basis.z * CLUB_KNOCK)
 		Weapon.SLING:
-			$Camera/Hands.strike()
-			_throw(StoneScene, SLING_SPEED, false)
+			if loadout.sling_stone():
+				$Camera/Hands.strike()
+				_throw(StoneScene, SLING_SPEED)
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
@@ -336,8 +340,15 @@ func _pick_up() -> void:
 				loadout.pick_net()
 			"arrow":
 				loadout.pick_arrow()
+			"stone":
+				loadout.pick_stones(1)
 		_thrown.erase(item)
 		item.queue_free()
+	# Stone piles lying around the map (owner, 2026-10-27).
+	for pile: Node3D in get_tree().get_nodes_in_group(GROUND_STONES_GROUP):
+		if pile.global_position.distance_to(global_position) <= PICKUP_RADIUS:
+			loadout.pick_stones(pile.get_meta("stones", 1))
+			pile.queue_free()
 
 
 func _update_hud() -> void:

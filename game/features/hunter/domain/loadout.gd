@@ -7,6 +7,8 @@ enum Weapon { SPEAR, NET, CLUB, SLING, BOW }
 ## ASSUMPTION: per hunt, balanced later (D013).
 const START_NETS := 3
 const START_ARROWS := 12
+## Sling stones in the pouch at hunt start; more lie around the map (owner, 2026-10-27, ASSUMPTION count).
+const START_STONES := 5
 ## Every hunter carries one spear; extra spears bought in the armory raise it to 3 at most (owner, 2026-10-27).
 const SPEAR_ID := "item_spear"
 const MAX_SPEARS := 3
@@ -44,6 +46,7 @@ var spear_in_hand: bool:
 		return spears > 0
 var nets := START_NETS
 var arrows := START_ARROWS
+var stones := START_STONES
 ## item_id -> bait carried this hunt.
 var baits: Dictionary = {}
 ## item_id -> consumables spent this hunt; camp takes them out of stock afterwards.
@@ -83,7 +86,9 @@ func equip(items: Dictionary) -> void:
 	spears = max_spears
 	var porter: bool = items.get(PORTER_ID, 0) > 0
 	nets = START_NETS + (PORTER_NETS if porter else 0)
+	# Every hunt starts fully armed again: whatever was thrown and left behind comes back in camp.
 	arrows = START_ARROWS + (PORTER_ARROWS if porter else 0)
+	stones = START_STONES
 
 
 func has(weapon: Weapon) -> bool:
@@ -118,7 +123,18 @@ func pick_arrow() -> void:
 	arrows += 1
 
 
-## Arrows are spent on release and picked up again like spears; sling stones never run out.
+func pick_stones(count: int) -> void:
+	stones += count
+
+
+func sling_stone() -> bool:
+	if not has(Weapon.SLING) or stones == 0:
+		return false
+	stones -= 1
+	return true
+
+
+## Arrows are spent on release and picked up again like spears.
 func shoot_arrow() -> bool:
 	if not has(Weapon.BOW) or arrows == 0:
 		return false

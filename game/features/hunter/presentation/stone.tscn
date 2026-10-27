@@ -21,6 +21,7 @@ continuous_cd = true
 contact_monitor = true
 max_contacts_reported = 1
 script = ExtResource("1_missile")
+pickup_kind = "stone"
 damage = 1
 
 [node name="Collision" type="CollisionShape3D" parent="."]
