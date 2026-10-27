@@ -159,13 +159,23 @@ func _place_bait() -> void:
 
 ## Sets the selected trap on the ground 2 m ahead, facing the hunter's way (M015).
 func place_trap() -> void:
-	var item_id := loadout.place_trap()
+	_set_trap(loadout.place_trap(), Transform3D(global_basis, global_position - global_basis.z * 2.0))
+
+
+## The hired trap setter puts any trap from stock at where (M013); false when none is left.
+func set_trap_for_hunter(where: Transform3D) -> bool:
+	return _set_trap(loadout.place_any_trap(), where)
+
+
+func _set_trap(item_id: String, where: Transform3D) -> bool:
 	if item_id == "":
-		return
+		return false
 	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
 	trap.top_level = true
 	add_child(trap)
-	trap.global_transform = Transform3D(global_basis, global_position - global_basis.z * 2.0)
+	trap.global_transform = where
+	_update_hud()
+	return true
 
 
 func _physics_process(delta: float) -> void:

@@ -21,6 +21,9 @@ const GROUP_SIZES := [10, 3, 3, 3, 1, 1]
 const RETURN_RADIUS := 3.0
 ## ASSUMPTION (D013): how far a shout carries, metres.
 const SHOUT_RADIUS := 15.0
+## The hired trap setter covers this many escape zones, this far in front of each (ASSUMPTION).
+const SETTER_TRAPS := 2
+const SETTER_OFFSET := 5.0
 
 var hunt: Hunt
 ## Camp gear (item_id -> count), injected before the map enters the tree.
@@ -57,6 +60,8 @@ func _ready() -> void:
 		$Wild.add_child(animal)
 	_hunter.equip(items)
 	_hunter.start_hunt()
+	if items.get("item_trap_setter", 0) > 0:
+		_set_traps_at_zones(zones)
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
 	_hunter.shouted.connect(_on_shouted)
@@ -86,6 +91,15 @@ func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
 		boar.outcome_reached.connect(_on_outcome)
 		boar.held_changed.connect(_on_held_changed)
 		$Boars.add_child(boar)
+
+
+## Trap setter (M013): traps from stock go on the way into the first escape zones, towards the map centre.
+func _set_traps_at_zones(zones: Array[Vector2]) -> void:
+	for zone: Vector2 in zones.slice(0, SETTER_TRAPS):
+		var spot := zone - zone.normalized() * SETTER_OFFSET
+		var facing := Basis(Vector3.UP, atan2(zone.x, zone.y))
+		if not _hunter.set_trap_for_hunter(Transform3D(facing, Vector3(spot.x, 0.0, spot.y))):
+			return
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -5,11 +5,12 @@ extends SceneTree
 
 const MainScene = preload("res://game/bootstrap/app/main.tscn")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
 
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 24
+const EXPECTED_CHECKS := 25
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -44,6 +45,7 @@ func _physics_process(_delta: float) -> bool:
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
 		_buy_club(_main.current)
+		_check_trap_setter()
 		if _checks != EXPECTED_CHECKS:
 			_failures += 1
 			push_error("FAIL: ran %d of %d checks" % [_checks, EXPECTED_CHECKS])
@@ -110,6 +112,16 @@ func _physics_process(_delta: float) -> bool:
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()
 	return false
+
+
+## A hired trap setter puts two traps from stock at escape zones when a hunt starts.
+func _check_trap_setter() -> void:
+	var map: Node3D = MapScene.instantiate()
+	map.items = {"item_trap_setter": 1, "item_snare": 3}
+	root.add_child(map)
+	var traps := map.get_node("Hunter").get_children().filter(func(n: Node) -> bool: return n is Area3D)
+	_check(traps.size() == 2 and map.get_node("Hunter").loadout.traps["item_snare"] == 1, "trap setter sets two traps")
+	map.free()
 
 
 ## Uses the armory with enough tusks and buys the first item, the club.

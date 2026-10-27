@@ -19,6 +19,8 @@ const ITEMS := {
 	"item_stew": {"name": "Herb stew (+20 stamina)", "shop": "campfire", "price": 10, "unique": false},
 	"item_roast": {"name": "Roast (+35 stamina)", "shop": "campfire", "price": 18, "unique": false},
 	"item_feast": {"name": "Feast (+50 stamina)", "shop": "campfire", "price": 25, "unique": false},
+	"item_porter": {"name": "Porter (+2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
+	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true},
 }
 
 

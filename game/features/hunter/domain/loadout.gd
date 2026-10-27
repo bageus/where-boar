@@ -26,6 +26,10 @@ const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
 const WATER_BAG_ID := "item_water_bag"
 ## Sips per hunt; the bag is refilled free in camp (ASSUMPTION).
 const WATER_SIPS := 3
+## A hired porter carries extra nets and arrows (M013, ASSUMPTION).
+const PORTER_ID := "item_porter"
+const PORTER_NETS := 2
+const PORTER_ARROWS := 6
 
 var spear_in_hand := true
 var nets := START_NETS
@@ -59,6 +63,9 @@ func equip(items: Dictionary) -> void:
 	for item_id in MEALS:
 		_meals[item_id] = items.get(item_id, 0)
 	water_sips = WATER_SIPS if items.get(WATER_BAG_ID, 0) > 0 else 0
+	var porter: bool = items.get(PORTER_ID, 0) > 0
+	nets = START_NETS + (PORTER_NETS if porter else 0)
+	arrows = START_ARROWS + (PORTER_ARROWS if porter else 0)
 
 
 func has(weapon: Weapon) -> bool:
@@ -117,7 +124,18 @@ func selected_trap() -> String:
 
 ## Spends the selected trap; returns its item id, or "" when none is left.
 func place_trap() -> String:
-	var item_id := selected_trap()
+	return _spend_trap(selected_trap())
+
+
+## Spends the first trap in stock, any type; for the trap setter (M013).
+func place_any_trap() -> String:
+	for item_id in TRAP_IDS:
+		if traps.get(item_id, 0) > 0:
+			return _spend_trap(item_id)
+	return ""
+
+
+func _spend_trap(item_id: String) -> String:
 	if traps.get(item_id, 0) == 0:
 		return ""
 	traps[item_id] -= 1
