@@ -21,6 +21,7 @@ const PICKUP_RADIUS := 2.5
 const MOUSE_SENSITIVITY := 0.002
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
+const STUN_SECONDS := 1.0
 
 enum Weapon { SPEAR, NET }
 
@@ -29,11 +30,13 @@ var loadout := Loadout.new()
 var weapon := Weapon.SPEAR
 ## Spears and nets this hunter threw that are still in the world.
 var _thrown: Array[RigidBody3D] = []
+var _stun := 0.0
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
 @onready var _stamina_bar: ProgressBar = $Hud/Stamina
-@onready var _weapon_label: Label = $Hud/Weapon
+@onready var _slot_spear: Label = $Hud/Hotbar/Spear
+@onready var _slot_net: Label = $Hud/Hotbar/Net
 
 
 func _ready() -> void:
@@ -61,7 +64,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	_update_hud()
 
 
+## Rammed by a boar (M005): thrown back and out of control for a moment.
+func knock(impulse: Vector3) -> void:
+	velocity = impulse
+	_stun = STUN_SECONDS
+
+
 func _physics_process(delta: float) -> void:
+	if _stun > 0.0:
+		_stun -= delta
+		velocity += get_gravity() * delta
+		velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 10.0 * delta)
+		move_and_slide()
+		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var crouching := Input.is_action_pressed("crouch")
 	var sprinting := stamina.tick(delta, Input.is_action_pressed("sprint") and not crouching and input != Vector2.ZERO)
@@ -127,6 +143,7 @@ func _pick_up() -> void:
 
 
 func _update_hud() -> void:
-	var spear := "in hand" if loadout.spear_in_hand else "thrown"
-	_weapon_label.text = "%s Spear (%s)   %s Nets: %d" % [
-		">" if weapon == Weapon.SPEAR else " ", spear, ">" if weapon == Weapon.NET else " ", loadout.nets]
+	_slot_spear.text = "[1] Spear (%s)" % ("in hand" if loadout.spear_in_hand else "thrown")
+	_slot_net.text = "[2] Net x%d" % loadout.nets
+	_slot_spear.modulate = Color.YELLOW if weapon == Weapon.SPEAR else Color.WHITE
+	_slot_net.modulate = Color.YELLOW if weapon == Weapon.NET else Color.WHITE

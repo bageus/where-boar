@@ -32,7 +32,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P2-001 | 2 | First-person hunter movement and stamina on a grey test map (M001) | P1-002 | DONE |
 | P2-002 | 2 | Boar agent in scene with flee/panic steering (M002) | P2-001 | DONE |
 | P2-003 | 2 | Spear and net (M003, M004) | P2-002 | DONE |
-| P2-004 | 2 | Collision knockback (M005) | P2-002 | PLANNED |
+| P2-004 | 2 | Collision knockback (M005) | P2-002 | DONE |
 | P2-005 | 2 | Hunt flow: start button, goal, return, results (M007) | P2-003 | PLANNED |
 
 ## Icebox

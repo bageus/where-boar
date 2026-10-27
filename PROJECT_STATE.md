@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 2
 current_milestone: P2_PROTOTYPE
-active_task_id: P2-003
-last_completed_task_id: P2-003
+active_task_id: P2-004
+last_completed_task_id: P2-004
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,13 +27,14 @@ P2_PROTOTYPE — один полный цикл охоты (M001–M005, M007). 
 
 ## Active task
 
-None. P2-001..P2-003 done; next is P2-004 (collision knockback).
+None. P2-001..P2-004 done; next is P2-005.
 
 ## Last completed work
 
 - DISC-001: GAME_SPEC.md approved (READY).
 - P1-001, P1-002: boar and hunt domain, perception and escape rules.
 - P2-001..P2-003: `features.hunter`, boar agent scene, `presentation.hunt_map`, main scene runs the map.
+- P2-004: boar ram knockback + hunter stun; playtest fixes (hotbar HUD, central stamina bar, wall sliding).
 
 ## Build and validation
 
@@ -57,7 +58,7 @@ None. P2-001..P2-003 done; next is P2-004 (collision knockback).
 
 ## Next action
 
-Plan P2-004 (collision knockback, M005).
+Plan P2-005 (hunt flow).
 
 ## Handoff notes
 

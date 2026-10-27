@@ -47,3 +47,10 @@ static func flee_heading(boar_pos: Vector2, hunter_pos: Vector2, zones: Array[Ve
 	if to_zone.dot(away) < 0.0:
 		return away
 	return (away + to_zone).normalized()
+
+
+## Heading along a wall of normal `wall_normal` (XZ), on the side that points towards `toward`.
+## Keeps a boar sliding out of a corner instead of pushing into it.
+static func slide_heading(wall_normal: Vector2, toward: Vector2) -> Vector2:
+	var tangent := Vector2(-wall_normal.y, wall_normal.x)
+	return tangent if tangent.dot(toward) >= 0.0 else -tangent

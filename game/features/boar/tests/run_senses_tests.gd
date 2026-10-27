@@ -11,6 +11,8 @@ func _init() -> void:
 	failures += _check(_nearest_zone_choice(), "nearest escape zone is chosen")
 	failures += _check(_zone_escape_rules(), "only fleeing or panicking boars escape in a zone")
 	failures += _check(_flee_heading_bends_to_zone(), "flee heading bends toward a zone ahead, ignores a zone behind")
+	failures += _check(BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).is_equal_approx(Vector2.DOWN) or BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).is_equal_approx(Vector2.UP), "slide heading is along the wall")
+	failures += _check(BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).y > 0.0, "slide heading picks the side towards the target")
 	print("senses tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
