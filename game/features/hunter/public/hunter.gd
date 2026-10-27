@@ -36,6 +36,13 @@ const STRONG_THROW_SCALE := 1.4
 const STAB_DAMAGE := 1
 const CLUB_DAMAGE := 2
 const CLUB_KNOCK := 6.0
+## The club hits harder than the spear but reaches less far (owner, 2026-10-27).
+const CLUB_REACH := 1.8
+## Holding LMB charges these weapons (owner, 2026-10-27); a full charge doubles club and bow damage
+## and sends nets and sling stones CHARGED_RANGE_SCALE times faster (so further).
+const CHARGED_WEAPONS := [Loadout.Weapon.NET, Loadout.Weapon.CLUB, Loadout.Weapon.SLING, Loadout.Weapon.BOW]
+const CHARGED_DAMAGE_SCALE := 2.0
+const CHARGED_RANGE_SCALE := 1.6
 const SLING_SPEED := 24.0
 const ARROW_SPEED := 32.0
 const PICKUP_RADIUS := 2.5
@@ -77,8 +84,9 @@ var _shout_cooldown := 0.0
 ## River segments the hunter is standing in; rivers call wade().
 var _wading := 0
 var _base_fov := 80.0
-## Spear throw power 0..1, charged while aiming.
+## Attack power 0..1: charged while aiming the spear (RMB) or holding LMB with a charged weapon.
 var _aim_power := 0.0
+var _holding_attack := false
 ## From the settings screen (section 16).
 var mouse_sensitivity := 0.002
 ## Off reduces camera motion (knockback roll) for players who get motion sick.
@@ -122,8 +130,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		_camera.rotation.x = clampf(_camera.rotation.x - event.relative.y * mouse_sensitivity, -1.5, 1.5)
 	elif event.is_action_pressed("attack"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			_attack()
+			if weapon in CHARGED_WEAPONS and ride.allows(weapon, false):
+				_holding_attack = true
+			else:
+				_attack()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	elif event.is_action_released("attack") and _holding_attack:
+		_holding_attack = false
+		_attack()
 	elif event.is_action_pressed("interact"):
 		_pick_up()
 		$Rider.toggle()
@@ -245,9 +259,11 @@ func _physics_process(delta: float) -> void:
 	var speed := ride.speed(CROUCH_SPEED if crouching else (SPRINT_SPEED if sprinting else WALK_SPEED))
 	if _wading > 0:
 		speed *= WADE_SPEED_SCALE
-	var aiming := weapon == Weapon.SPEAR and loadout.spear_in_hand and Input.is_action_pressed("aim")
+	var aiming := (weapon == Weapon.SPEAR and loadout.spear_in_hand and Input.is_action_pressed("aim")) \
+			or (_holding_attack and weapon in CHARGED_WEAPONS)
 	_aim_power = minf(1.0, _aim_power + delta / AIM_CHARGE_SECONDS) if aiming else 0.0
-	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if aiming else 1.0), minf(1.0, 12.0 * delta))
+	var zoom := aiming and weapon != Weapon.CLUB
+	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if zoom else 1.0), minf(1.0, 12.0 * delta))
 	_hud.show_throw_power(aiming, _aim_power)
 	var armed: bool = {Weapon.SPEAR: loadout.spear_in_hand, Weapon.NET: loadout.nets > 0,
 			Weapon.SLING: loadout.stones > 0, Weapon.BOW: loadout.arrows > 0}.get(weapon, true)
@@ -277,16 +293,18 @@ func _jump_or_lunge(direction: Vector3) -> void:
 		velocity.y = JUMP_SPEED
 
 
-## LMB stabs with the spear, RMB+LMB throws it; with the net selected LMB throws a net (M003, M004).
+## LMB stabs with the spear, RMB+LMB throws it; club, net, sling and bow fire on LMB release,
+## stronger the longer LMB was held (M003, M004).
 func _attack() -> void:
+	var power := _aim_power
+	_aim_power = 0.0
 	if not ride.allows(weapon, Input.is_action_pressed("aim")):
 		return
 	match weapon:
 		Weapon.SPEAR:
 			if Input.is_action_pressed("aim"):
 				if loadout.throw_spear():
-					_throw(SpearScene, THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, _aim_power))
-					_aim_power = 0.0
+					_throw(SpearScene, THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power))
 			elif loadout.spear_in_hand:
 				$Camera/Hands.strike()
 				if _hits_boar(_reach.get_collider()):
@@ -294,21 +312,24 @@ func _attack() -> void:
 		Weapon.NET:
 			if loadout.throw_net():
 				$Camera/Hands.strike()
-				_throw(NetScene)
+				_throw(NetScene, THROW_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power))
 		Weapon.CLUB:
 			$Camera/Hands.strike()
 			var target := _reach.get_collider()
-			if _hits_boar(target):
-				target.spear_hit(CLUB_DAMAGE)
-				target.knock(-_camera.global_basis.z * CLUB_KNOCK)
+			var in_reach := target != null and _reach.get_collision_point().distance_to(_camera.global_position) <= CLUB_REACH
+			if in_reach and _hits_boar(target):
+				var scale := lerpf(1.0, CHARGED_DAMAGE_SCALE, power)
+				target.spear_hit(roundi(CLUB_DAMAGE * scale))
+				target.knock(-_camera.global_basis.z * CLUB_KNOCK * scale)
 		Weapon.SLING:
 			if loadout.sling_stone():
 				$Camera/Hands.strike()
-				_throw(StoneScene, SLING_SPEED)
+				_throw(StoneScene, SLING_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power))
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
-				_throw(ArrowScene, ARROW_SPEED)
+				var arrow := _throw(ArrowScene, ARROW_SPEED)
+				arrow.damage = roundi(arrow.damage * lerpf(1.0, CHARGED_DAMAGE_SCALE, power))
 
 
 ## A boar or its larger hitbox; wild birds and the hunter's mount do not take spear hits.
@@ -317,7 +338,7 @@ func _hits_boar(target: Object) -> bool:
 
 
 ## Launches an item from the eye; kept ones (spear, net, arrow) can be picked up again.
-func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -> void:
+func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -> RigidBody3D:
 	var item: RigidBody3D = scene.instantiate()
 	item.top_level = true
 	add_child(item)
@@ -326,6 +347,7 @@ func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -
 	item.add_collision_exception_with(self)
 	if keep:
 		_thrown.append(item)
+	return item
 
 
 func _pick_up() -> void:
