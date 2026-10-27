@@ -4,7 +4,7 @@ extends Control
 ## Boars appear only while a turkey scout has marked them (M017).
 
 ## Half the map's side in metres; the map is centred on the origin.
-const MAP_HALF_SIZE := 40.0
+const MAP_HALF_SIZE := 80.0
 const ZONE_RADIUS := 3.0
 
 var hunter: Node3D

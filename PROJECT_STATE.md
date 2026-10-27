@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-011
-last_completed_task_id: P3-011
+active_task_id: P3-013
+last_completed_task_id: P3-013
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-011 done; next P3-012.
+P3-013 done; next P3-014.
 
 ## Last completed work
 
@@ -47,6 +47,7 @@ P3-011 done; next P3-012.
 - P3-009: campfire meals raise max stamina for the next hunt; water bag sips restore stamina.
 - P3-010: wild roosters and turkeys caught for the pen; rooster drives a group at the hunter, turkey marks boars on the minimap.
 - P3-011: tavern helpers: porter carries extra nets and arrows, trap setter sets traps at escape zones.
+- P3-013: Green Valley grey-box map 160×160: river with fords, jungle, hills, narrow pass, 7 escape zones, 47 boars.
 
 ## Build and validation
 
@@ -70,7 +71,7 @@ P3-011 done; next P3-012.
 
 ## Next action
 
-Start P3-012.
+Start P3-014.
 
 ## Handoff notes
 

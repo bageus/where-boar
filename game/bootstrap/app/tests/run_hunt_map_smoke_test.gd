@@ -62,13 +62,13 @@ func _physics_process(_delta: float) -> bool:
 	var boars := _map.get_node("Boars").get_children()
 	match _frame:
 		2:
-			_check(boars.size() == 21, "a herd, three groups and two loners spawn")
+			_check(boars.size() == 47, "herds, groups and loners spawn")
 			# Put the hunter 5 m from the first boar, facing it; it must start fleeing.
 			hunter.global_position = boars[0].global_position + Vector3(0, -0.4, 5)
 			hunter.rotation = Vector3.ZERO
 		4:
 			_check(boars[0].state_name() == "FLEE", "boar near hunter flees")
-			_check(boars[9].state_name() != "WANDER", "fear spreads through the herd")
+			_check(boars[14].state_name() != "WANDER", "fear spreads through the herd")
 			hunter.shout()
 			_check(boars[0]._forced_left > 0.0, "a shout steers the fleeing boar")
 			hunter.equip({"item_carrot": 1})
@@ -78,7 +78,7 @@ func _physics_process(_delta: float) -> bool:
 			# Park every boar far away so none wanders into the throws below.
 			for i in boars.size():
 				boars[i].set_physics_process(false)
-				boars[i].global_position = Vector3(-30 + i * 3, 0, -32)
+				boars[i].global_position = Vector3(-40 + i * 2, 0, -60)
 			_freeze_and_aim(hunter, boars[1], Vector3(-3, 0, 20))
 			hunter.weapon = hunter.Weapon.NET
 			hunter._attack()

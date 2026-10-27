@@ -1,6 +1,6 @@
 extends Node3D
 
-## Grey-box hunt map: spawns boars at random markers, counts their outcomes and ends the hunt (M007).
+## Green Valley grey-box hunt map (section 11): spawns boars at random markers, counts their outcomes and ends the hunt (M007).
 
 const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
@@ -16,8 +16,8 @@ const WILD_SCENES := [
 ## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
 
-## ASSUMPTION (D013, section 11 scaled to the grey map): one herd, three groups, two loners.
-const GROUP_SIZES := [10, 3, 3, 3, 1, 1]
+## ASSUMPTION (D013, section 11): two herds, six groups and loners.
+const GROUP_SIZES := [15, 12, 4, 4, 3, 3, 3, 1, 1, 1]
 const RETURN_RADIUS := 3.0
 ## ASSUMPTION (D013): how far a shout carries, metres.
 const SHOUT_RADIUS := 15.0

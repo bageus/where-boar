@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="BoxShape3D" id="Shape_river"]
+size = Vector3(4, 2, 6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_water"]
+albedo_color = Color(0.2, 0.45, 0.75, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_water"]
+material = SubResource("Mat_water")
+size = Vector3(4, 0.1, 6)
+
+[node name="RiverSegment" type="StaticBody3D"]
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("Shape_river")
+
+[node name="Water" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("Mesh_water")

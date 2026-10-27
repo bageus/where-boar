@@ -46,7 +46,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-010 | 3 | Rooster driver and turkey scout (M016, M017) | P3-008 | DONE |
 | P3-011 | 3 | Helpers: porter and trap setter (M013) | P3-007 | DONE |
 | P3-012 | 3 | Mounts from caught boars (D021) | P3-004 | PLANNED |
-| P3-013 | 3 | Green Valley map: hills, river, bushes, 5–10 escape zones | P3-008 | PLANNED |
+| P3-013 | 3 | Green Valley map: hills, river, bushes, 5–10 escape zones | P3-008 | DONE |
 | P3-014 | 3 | Pause, settings (FOV, camera shake), first-hunt hints | P3-004 | PLANNED |
 | P3-015 | 3 | Sound and visual feedback: stomps, squeals, knockback camera roll | P3-001 | PLANNED |
 
