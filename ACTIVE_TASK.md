@@ -1,97 +1,70 @@
 ---
 task_version: 1
-task_id: P1-002
+task_id: P2-003
 status: DONE
-phase: 1
+phase: 2
 owner: AI
-updated: 2026-10-26
+updated: 2026-10-27
 ---
 
 # Active Task
 
-P1-001 — Boar and hunt domain model with headless tests.
+P2-001..P2-003 — первый играбельный прототип охоты: охотник от первого лица, серая карта, кабаны, копьё и сеть. Выполнены одним заходом по поручению координатора; последняя задача — P2-003.
 
 ## Goal
 
-Boar states and hunt goal rules exist as engine-light GDScript classes and are proven by headless tests that run in CI.
+Игрок ходит по серой карте от первого лица, кабаны пугаются и убегают к зонам побега, копьё ранит и убивает, сеть ловит; все решения принимают доменные правила P1-001/P1-002.
 
 ## Why this matters
 
-Phase 1 must prove the core rules (capture vs kill, escape, win/lose) before any scene work. Keeping rules out of scenes also prepares the host-authoritative coop planned after MVP.
+Это первый видимый цикл погони (M001–M004) и проверка, что доменные правила работают в сцене.
 
 ## In scope
 
-- `features.boar`: boar runtime state (WANDER, FLEE, PANIC, CHARGE, TRAPPED, CAPTURED, DEAD, ESCAPED), type data, health, transitions for hit, net capture, trap capture, death and escape (M002, M004, M006).
-- `features.hunt`: hunt results counter per type and outcome, tusk reward per result (M007). No defeat state.
-- Headless test runner script and a CI job that installs Godot 4.7.2 and runs the tests.
+- `features.hunter` (новый): выносливость и снаряжение в домене; сцена охотника с камерой, HUD (выносливость, оружие), удар, бросок копья, бросок сети, подбор.
+- `features.boar`: сцена агента кабана `public/boar_body.tscn`, руление по состояниям WANDER/FLEE/PANIC, `BoarSenses.flee_heading`.
+- `presentation.hunt_map` (новый): серая карта, все объекты — сцены (.tscn, D017): земля, стены, деревья, камни, зоны побега, точки спавна.
+- `bootstrap.app`: главная сцена запускает карту; Input Map в `project.godot`.
 
 ## Out of scope
 
-- Scenes, nodes, input, camera, assets, UI.
-- Perception radius, steering and escape-zone choice (P1-002).
-- Coop, saving, settlement upgrades.
-
-## Dependencies
-
-- DISC-001 (done).
-
-## Affected modules
-
-- `features.boar` (new)
-- `features.hunt` (new, depends on public API of `features.boar`)
-
-## Expected files
-
-- `game/features/boar/module.json`, `domain/`, `public/`, `tests/`
-- `game/features/hunt/module.json`, `domain/`, `tests/`
-- `.github/workflows/` — Godot headless test job
+- Отбрасывание при столкновении (P2-004), цикл охоты и итоги (P2-005), миникарта, шкала здоровья над кабаном (показан текст состояния), CHARGE.
 
 ## Acceptance criteria
 
-- [ ] Given a FLEE boar, When it is hit without dying, Then it becomes PANIC.
-- [ ] Given a FLEE boar, When a net hits it, Then it becomes CAPTURED and the hunt goal counter increases.
-- [ ] Given CAPTURED or DEAD boars, When escape is requested, Then nothing changes.
-- [ ] Given boars of several types are killed and captured, When the hunt ends, Then results list counts per type and tusks follow the reward table (captured worth more than killed).
-- [ ] Given a boar has health 0, When it dies, Then it counts as DEAD and fades out after a delay.
-- [ ] Given a boar in a trap that is not broken by hunt end, When the hunt ends, Then it counts as captured.
-- [ ] Given no boar was caught or killed, When the hunt ends, Then results show an empty hunt with no defeat state.
-- [ ] Given a FLEE or PANIC boar reaches an escape zone, Then it is ESCAPED immediately; a calm boar passing the zone is not.
-- [ ] Escape zones are shown on the minimap (UI part is phase 2; the domain only exposes zone count).
-- [ ] Tests pass in CI; `python tools/validate_project.py` passes.
-
-## Plan
-
-1. Create module manifests.
-2. Implement boar state and transitions.
-3. Implement hunt goal and outcome.
-4. Write headless tests and the CI job.
-5. Run validators and report.
+- [x] Given полная выносливость, When зажат sprint, Then скорость растёт, выносливость убывает (тест `run_hunter_tests.gd`).
+- [x] Given ходьба, Then выносливость растёт; при нуле спринт заблокирован до 20 (тест).
+- [x] Given кабан WANDER, When охотник в радиусе восприятия, Then FLEE (smoke-тест сцены).
+- [x] Given сеть брошена в кабана, Then CAPTURED (smoke-тест).
+- [x] Given копьё брошено в кабана, Then урон и PANIC, копьё остаётся на месте попадания и подбирается по E (smoke-тест на попадание).
+- [x] Все объекты карты — .tscn (D017).
 
 ## Progress
 
-- P1-001 and P1-002 implemented on one branch (PR #3); P1-002 adds `BoarSenses` (perception, shout ±30°, nearest escape zone, zone escape) and its tests.
-
-## Decisions made during this task
-
-- None.
+- Все три задачи реализованы и проверены; см. Validation evidence.
 
 ## Validation evidence
 
-- Not run.
+- `godot --headless --path . --editor --quit` (4.7.2): без ошибок.
+- Тесты boar, senses, hunt, hunter: 0 failures; `run_hunt_map_smoke_test.gd`: 0 failures в 12 прогонах подряд.
+- `python tools/validate_project.py`: passed.
+
+## Decisions made during this task
+
+- [ASSUMPTION] Числа: ходьба 4, спринт 7, красться 2 м/с; кабан бродит 1.5, бежит 8, паникует 10 м/с; радиус восприятия 12 м; здоровье кабана 3, удар 1, бросок 2; сетей 3; 4 кабана на карте.
+- Space с направлением — наскок, без направления или без выносливости — прыжок (как в карте управления).
+- Удар копьём — ЛКМ; бросок — ПКМ (прицел) + ЛКМ.
 
 ## Blockers
 
-- None. Note: Godot is not installed in the AI environment, so tests are verified in CI.
+- None.
 
 ## Next exact action
 
-Create `game/features/boar/module.json`.
+Plan P2-004 (collision knockback, M005) in BACKLOG.md and ACTIVE_TASK.md.
 
 ## Session handoff
 
-- Completed: task planned after spec approval.
-- Stopped at: before implementation.
-- Files changed: GAME_SPEC.md, PROJECT_STATE.md, BACKLOG.md, ACTIVE_TASK.md.
-- Checks: see commit.
-- Unresolved blocker: none.
-- Next action: create `game/features/boar/module.json`.
+- Completed: P2-001, P2-002, P2-003.
+- Files changed: `game/features/hunter/`, `game/features/boar/public/boar_body.*`, `game/features/boar/domain/boar_senses.gd`, `game/presentation/hunt_map/`, `game/bootstrap/app/`, `project.godot`, CI workflow, docs.
+- Next action: plan P2-004 (collision knockback).

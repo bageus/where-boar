@@ -1,7 +1,7 @@
 ---
 backlog_version: 1
 status: ACTIVE
-current_milestone: P1_LOGIC
+current_milestone: P2_PROTOTYPE
 updated: 2026-10-26
 ---
 
@@ -29,9 +29,9 @@ The backlog contains approved work that is not currently active. Only one item m
 
 | ID | Phase | Outcome | Dependencies | Status |
 |---|---:|---|---|---|
-| P2-001 | 2 | First-person hunter movement and stamina on a grey test map (M001) | P1-002 | PLANNED |
-| P2-002 | 2 | Boar agent in scene with flee/panic steering (M002) | P2-001 | PLANNED |
-| P2-003 | 2 | Spear and net (M003, M004) | P2-002 | PLANNED |
+| P2-001 | 2 | First-person hunter movement and stamina on a grey test map (M001) | P1-002 | DONE |
+| P2-002 | 2 | Boar agent in scene with flee/panic steering (M002) | P2-001 | DONE |
+| P2-003 | 2 | Spear and net (M003, M004) | P2-002 | DONE |
 | P2-004 | 2 | Collision knockback (M005) | P2-002 | PLANNED |
 | P2-005 | 2 | Hunt flow: start button, goal, return, results (M007) | P2-003 | PLANNED |
 
@@ -50,3 +50,4 @@ Unapproved ideas and possible future features belong here.
 |---|---|---|
 | SETUP-001 | Repository architecture and AI workflow created | Git history and CI |
 | DISC-001 | Game discovery completed and approved | GAME_SPEC.md READY, decision D009 |
+| P2-001..P2-003 | First-person hunt prototype: hunter, grey-box map, boars, spear, net | Hunter and smoke tests in CI |

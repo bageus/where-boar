@@ -1,12 +1,12 @@
 ---
 state_version: 1
 status: IMPLEMENTATION
-current_phase: 1
-current_milestone: P1_LOGIC
-active_task_id: P1-002
-last_completed_task_id: P1-002
-build_status: NOT_RUN
-updated: 2026-10-26
+current_phase: 2
+current_milestone: P2_PROTOTYPE
+active_task_id: P2-003
+last_completed_task_id: P2-003
+build_status: PASS
+updated: 2026-10-27
 ---
 
 # Project State
@@ -15,34 +15,35 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current outcome
 
-GAME_SPEC.md approved by the owner (READY). Phase 1 logic prototype has started.
+Первый играбельный прототип: охотник от первого лица на серой карте, кабаны убегают и паникуют по доменным правилам, копьё и сеть работают.
 
 ## Current phase
 
-Phase 1 — Logic prototype.
+Phase 2 — Playable prototype.
 
 ## Current milestone
 
-P1_LOGIC — boar and hunt rules (M002, M004, M006, M007) proven by headless tests. Prototype (phases 1–2) due 2026-11-02.
+P2_PROTOTYPE — один полный цикл охоты (M001–M005, M007). Прототип (фазы 1–2) до 2026-11-02.
 
 ## Active task
 
-None. P1-001 and P1-002 done (boar, hunt, perception, escape rules); next is P2-001.
+None. P2-001..P2-003 done; next is P2-004 (collision knockback).
 
 ## Last completed work
 
-- Repository workflow and architecture templates created.
-- DISC-001: GAME_SPEC.md drafted from TUSK_TRIBE_GDD v0.1, owner decisions recorded, approved as READY (2026-10-26).
+- DISC-001: GAME_SPEC.md approved (READY).
+- P1-001, P1-002: boar and hunt domain, perception and escape rules.
+- P2-001..P2-003: `features.hunter`, boar agent scene, `presentation.hunt_map`, main scene runs the map.
 
 ## Build and validation
 
 | Check | Last result | Date | Notes |
 |---|---|---|---|
-| Game specification structure | NOT_RUN | 2026-10-26 | Run `python tools/validate_game_spec.py`. |
-| Workflow state | NOT_RUN | 2026-10-26 | Run `python tools/validate_workflow_state.py`. |
-| Architecture | NOT_RUN | 2026-10-26 | Run `python tools/validate_architecture.py`. |
-| Godot headless import | NOT_RUN | 2026-10-26 | Requires Godot 4.x. |
-| Tests | NOT_RUN | 2026-10-26 | No gameplay tests yet. |
+| Game specification structure | PASS | 2026-10-27 | `python tools/validate_game_spec.py --ready` |
+| Workflow state | PASS | 2026-10-27 | `python tools/validate_workflow_state.py --ready` |
+| Architecture | PASS | 2026-10-27 | `python tools/validate_project.py` |
+| Godot headless import | PASS | 2026-10-27 | Godot 4.7.2 (session hook installs it) |
+| Tests | PASS | 2026-10-27 | boar, senses, hunt, hunter, hunt map smoke test |
 
 ## Known blockers
 
@@ -52,12 +53,12 @@ None. P1-001 and P1-002 done (boar, hunt, perception, escape rules); next is P2-
 
 - Fast boars may be hard to read in first person.
 - One-week prototype deadline for a solo developer.
-- Godot is not installed in the AI cloud environment; headless tests must run in CI.
+- All speeds and damage are AI assumptions (D013); not yet playtested by a human.
 
 ## Next action
 
-Plan P2-001 (first-person hunter movement).
+Plan P2-004 (collision knockback, M005).
 
 ## Handoff notes
 
-Spec is READY. Plan the next task from BACKLOG.md.
+Run the game from `game/bootstrap/app/main.tscn`. Controls are listed on the HUD.

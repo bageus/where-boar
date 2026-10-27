@@ -10,6 +10,7 @@ func _init() -> void:
 	failures += _check(_shout_deflects_without_panic(), "shout deflects 30 degrees and does not panic")
 	failures += _check(_nearest_zone_choice(), "nearest escape zone is chosen")
 	failures += _check(_zone_escape_rules(), "only fleeing or panicking boars escape in a zone")
+	failures += _check(_flee_heading_bends_to_zone(), "flee heading bends toward a zone ahead, ignores a zone behind")
 	print("senses tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -53,3 +54,12 @@ func _zone_escape_rules() -> bool:
 	outside.flee()
 	BoarSenses.enter_zone(outside, Vector2(9, 0), Vector2.ZERO, 3.0)
 	return calm.state == Boar.State.WANDER and panicked.state == Boar.State.ESCAPED and outside.state == Boar.State.FLEE
+
+
+func _flee_heading_bends_to_zone() -> bool:
+	var no_zone := BoarSenses.flee_heading(Vector2.ZERO, Vector2(-5, 0), [] as Array[Vector2])
+	var ahead := BoarSenses.flee_heading(Vector2.ZERO, Vector2(-5, 0), [Vector2(10, 10)] as Array[Vector2])
+	var behind := BoarSenses.flee_heading(Vector2.ZERO, Vector2(-5, 0), [Vector2(-10, 1)] as Array[Vector2])
+	return no_zone.is_equal_approx(Vector2.RIGHT) \
+		and ahead.is_equal_approx((Vector2.RIGHT + Vector2(1, 1).normalized()).normalized()) \
+		and behind.is_equal_approx(Vector2.RIGHT)

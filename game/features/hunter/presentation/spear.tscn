@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/features/hunter/presentation/spear.gd" id="1_spear"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_spear"]
+radius = 0.06
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.55, 0.4, 0.22, 1)
+
+[sub_resource type="CylinderMesh" id="Mesh_spear"]
+material = SubResource("Mat_wood")
+top_radius = 0.0
+bottom_radius = 0.04
+height = 1.8
+
+[node name="Spear" type="RigidBody3D"]
+mass = 1.5
+lock_rotation = true
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 1
+script = ExtResource("1_spear")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+shape = SubResource("Shape_spear")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0)
+mesh = SubResource("Mesh_spear")

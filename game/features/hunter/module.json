@@ -1,0 +1,16 @@
+{
+  "id": "features.hunter",
+  "layer": "features",
+  "purpose": "Own the hunter: first-person movement, stamina, spear and nets (M001, M003, M004).",
+  "state_owner": [
+    "Hunter stamina for one hunt",
+    "Hunter loadout: spear in hand and nets carried"
+  ],
+  "public_api": [
+    "public/hunter.tscn",
+    "public/hunter.gd"
+  ],
+  "dependencies": [
+    "features.boar"
+  ]
+}

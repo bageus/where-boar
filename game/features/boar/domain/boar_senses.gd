@@ -34,3 +34,16 @@ static func nearest_zone(boar_pos: Vector2, zones: Array[Vector2]) -> int:
 static func enter_zone(boar: Boar, boar_pos: Vector2, zone_pos: Vector2, zone_radius: float) -> void:
 	if boar_pos.distance_to(zone_pos) <= zone_radius:
 		boar.escape()
+
+
+## Fleeing boar runs away from the hunter, bending toward the nearest escape zone
+## unless that zone lies on the hunter's side (then it just keeps fleeing, M002).
+static func flee_heading(boar_pos: Vector2, hunter_pos: Vector2, zones: Array[Vector2]) -> Vector2:
+	var away := (boar_pos - hunter_pos).normalized()
+	var i := nearest_zone(boar_pos, zones)
+	if i == -1:
+		return away
+	var to_zone := (zones[i] - boar_pos).normalized()
+	if to_zone.dot(away) < 0.0:
+		return away
+	return (away + to_zone).normalized()

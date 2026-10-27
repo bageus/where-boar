@@ -1,12 +1,14 @@
 {
   "id": "features.boar",
   "layer": "features",
-  "purpose": "Own boar state: type, health, capture, death and escape (M002, M004, M006).",
+  "purpose": "Own boar state: type, health, capture, death and escape (M002, M004, M006), and the boar agent scene that steers by it.",
   "state_owner": [
     "Boar runtime state for one hunt"
   ],
   "public_api": [
-    "public/boar_outcome.gd"
+    "public/boar_outcome.gd",
+    "public/boar_body.tscn",
+    "public/boar_body.gd"
   ],
   "dependencies": []
 }

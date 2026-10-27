@@ -31,3 +31,9 @@ jobs:
           godot --headless --path . -s game/features/boar/tests/run_boar_tests.gd
           godot --headless --path . -s game/features/boar/tests/run_senses_tests.gd
           godot --headless --path . -s game/features/hunt/tests/run_hunt_tests.gd
+          godot --headless --path . -s game/features/hunter/tests/run_hunter_tests.gd
+
+      - name: Import project and run hunt map smoke test
+        run: |
+          godot --headless --path . --editor --quit
+          godot --headless --path . -s game/bootstrap/app/tests/run_hunt_map_smoke_test.gd

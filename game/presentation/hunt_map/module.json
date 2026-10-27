@@ -1,0 +1,13 @@
+{
+  "id": "presentation.hunt_map",
+  "layer": "presentation",
+  "purpose": "Grey-box hunt map scene: props, escape zones, boar spawn points and the hunter (D017).",
+  "state_owner": [],
+  "public_api": [
+    "public/hunt_map.tscn"
+  ],
+  "dependencies": [
+    "features.boar",
+    "features.hunter"
+  ]
+}
