@@ -256,7 +256,8 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
-		if Input.is_action_just_pressed("jump"):
+		# No jumps or lunges from the saddle, so riding never spends stamina (owner, 2026-10-27).
+		if Input.is_action_just_pressed("jump") and not ride.is_riding():
 			_jump_or_lunge(direction)
 	else:
 		velocity += get_gravity() * delta
