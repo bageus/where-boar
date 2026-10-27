@@ -4,6 +4,7 @@ extends CharacterBody3D
 
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
+const Health = preload("res://game/features/hunter/domain/health.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Spear = preload("res://game/features/hunter/presentation/spear.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
@@ -27,8 +28,11 @@ enum Weapon { SPEAR, NET }
 
 ## Fact: the hunter pressed interact (E); the map decides what it means, e.g. return to camp.
 signal interacted
+## Fact: health reached zero; the hunt ends and the hunter goes back to camp with the loot.
+signal downed
 
 var stamina := Stamina.new()
+var health := Health.new()
 var loadout := Loadout.new()
 var weapon := Weapon.SPEAR
 ## Spears and nets this hunter threw that are still in the world.
@@ -38,6 +42,7 @@ var _stun := 0.0
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
 @onready var _stamina_bar: ProgressBar = $Hud/Stamina
+@onready var _health_bar: ProgressBar = $Hud/Health
 @onready var _slot_spear: Label = $Hud/Hotbar/Spear
 @onready var _slot_net: Label = $Hud/Hotbar/Net
 
@@ -68,10 +73,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	_update_hud()
 
 
-## Rammed by a boar (M005): thrown back and out of control for a moment.
-func knock(impulse: Vector3) -> void:
+## Rammed by a boar (M005): thrown back, hurt by a charge, and out of control for a moment.
+func knock(impulse: Vector3, damage: int = 0) -> void:
 	velocity = impulse
 	_stun = STUN_SECONDS
+	if health.is_down():
+		return
+	health.take(damage)
+	_health_bar.value = health.value
+	if health.is_down():
+		downed.emit()
 
 
 func _physics_process(delta: float) -> void:

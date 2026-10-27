@@ -21,12 +21,21 @@ const RAM_MIN_SPEED := 6.0
 const RAM_IMPULSE := 14.0
 const RAM_COOLDOWN := 1.0
 const KNOCK_DECAY := 6.0
+# Charge after an attack (D018), ASSUMPTION numbers (D013).
+const PANIC_SECONDS := 2.5
+const CHARGE_SECONDS := 4.0
+const CHARGE_SPEED := 9.0
+## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
+const HP_PER_DAMAGE := 20
 
 ## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
 signal outcome_reached(type_id: String, kind: int)
 
 @export var type_id := "common_brown"
 @export var max_health := 3
+@export var damage := 1
+## Chance that a panicking boar turns and charges the hunter.
+@export_range(0.0, 1.0) var aggression := 0.35
 
 ## Injected by the scene that spawns the boar.
 var hunter: Node3D
@@ -42,6 +51,9 @@ var _ram_cooldown := 0.0
 ## Last wall (XZ normal) the boar slid on, used to steer out of corners.
 var _wall := Vector2.ZERO
 var _reported := false
+## Seconds in the current domain state.
+var _state_time := 0.0
+var _charge_rolled := false
 
 @onready var _label: Label3D = $Label
 @onready var _health_fill: MeshInstance3D = $HealthBar/Fill
@@ -52,9 +64,11 @@ func _ready() -> void:
 	_show_state()
 
 
-func spear_hit(damage: int) -> void:
-	boar.take_hit(damage)
+func spear_hit(amount: int) -> void:
+	boar.take_hit(amount)
 	_turn_left = 0.0
+	_state_time = 0.0
+	_charge_rolled = false
 	_after_change()
 
 
@@ -64,7 +78,7 @@ func net_hit() -> void:
 
 
 ## Knocked by a ram or another boar: pushed along `impulse` for a moment.
-func knock(impulse: Vector3) -> void:
+func knock(impulse: Vector3, _damage: int = 0) -> void:
 	_knock = impulse
 
 
@@ -95,12 +109,25 @@ func _physics_process(delta: float) -> void:
 		_report_outcome()
 		queue_free()
 		return
+	_state_time += delta
+	_maybe_charge()
 	if boar.state != before:
+		_state_time = 0.0
 		_show_state()
 	_steer(delta, pos, hunter_pos)
 	_apply_knock(delta)
 	move_and_slide()
 	_ram(delta)
+
+
+## A panicking boar rolls once whether to charge; a charge that hits nothing gives up.
+func _maybe_charge() -> void:
+	if boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled:
+		_charge_rolled = true
+		if randf() < aggression:
+			boar.charge()
+	elif boar.state == Boar.State.CHARGE and _state_time >= CHARGE_SECONDS:
+		boar.end_charge()
 
 
 func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
@@ -115,8 +142,10 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		Boar.State.FLEE:
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
 			speed = FLEE_SPEED
+		Boar.State.CHARGE:
+			_heading = (hunter_pos - pos).normalized()
+			speed = CHARGE_SPEED
 		_:
-			# PANIC; CHARGE has no rule yet and behaves the same.
 			if _turn_left <= 0.0:
 				_turn = randf_range(-PANIC_TURN_MAX, PANIC_TURN_MAX)
 				_turn_left = PANIC_TURN_SECONDS
@@ -147,8 +176,13 @@ func _ram(delta: float) -> void:
 		var other := hit.get_collider()
 		if other.has_method("knock") and _ram_cooldown <= 0.0 and Vector2(velocity.x, velocity.z).length() >= RAM_MIN_SPEED:
 			var push := Vector3(velocity.x, 0.0, velocity.z).normalized()
-			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0)
+			var charging := boar.state == Boar.State.CHARGE
+			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, damage * HP_PER_DAMAGE if charging else 0)
 			_ram_cooldown = RAM_COOLDOWN
+			if charging:
+				boar.end_charge()
+				_state_time = 0.0
+				_show_state()
 		elif absf(hit.get_normal().y) < 0.5:
 			_wall = Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
 

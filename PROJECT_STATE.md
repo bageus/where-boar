@@ -1,10 +1,10 @@
 ---
 state_version: 1
 status: IMPLEMENTATION
-current_phase: 2
-current_milestone: P2_PROTOTYPE
-active_task_id: P2-005
-last_completed_task_id: P2-005
+current_phase: 3
+current_milestone: P3_VERTICAL_SLICE
+active_task_id: P3-001
+last_completed_task_id: P3-001
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -19,15 +19,15 @@ This is the compact current truth about project progress. Update it after every 
 
 ## Current phase
 
-Phase 2 — Playable prototype.
+Phase 3 — Vertical slice (owner's instruction 2026-10-27; phase 2 cycle not yet playtested by a new player).
 
 ## Current milestone
 
-P2_PROTOTYPE — один полный цикл охоты (M001–M005, M007). Прототип (фазы 1–2) до 2026-11-02.
+P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC раздел 25, P3-001..P3-015).
 
 ## Active task
 
-None. Phase 2 tasks P2-001..P2-005 done.
+P3-001 done; next P3-002.
 
 ## Last completed work
 
@@ -35,6 +35,7 @@ None. Phase 2 tasks P2-001..P2-005 done.
 - P1-001, P1-002: boar and hunt domain, perception and escape rules.
 - P2-001..P2-003: `features.hunter`, boar agent scene, `presentation.hunt_map`, main scene runs the map.
 - P2-004: boar ram knockback + hunter stun; playtest fixes (hotbar HUD, central stamina bar, wall sliding).
+- P3-001: hunter health, boar CHARGE ram with damage, hunt ends at zero health.
 - P2-005: start screen, goal HUD, return to camp, results with tusks; boar health bar; minimap with escape zones.
 
 ## Build and validation
@@ -59,7 +60,7 @@ None. Phase 2 tasks P2-001..P2-005 done.
 
 ## Next action
 
-Plan phase 3 (vertical slice).
+Start P3-002 (boar types).
 
 ## Handoff notes
 

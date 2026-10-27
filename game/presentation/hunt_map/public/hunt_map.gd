@@ -6,7 +6,7 @@ const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
-## Fact: the hunter returned to camp or no free boars are left.
+## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
 
 ## ASSUMPTION: boars per prototype hunt.
@@ -34,6 +34,7 @@ func _ready() -> void:
 		boar.outcome_reached.connect(_on_outcome)
 		$Boars.add_child(boar)
 	_hunter.interacted.connect(_on_interacted)
+	_hunter.downed.connect(_on_downed)
 	var minimap := $Hud/Minimap
 	minimap.hunter = _hunter
 	minimap.escape_zones = zones
@@ -52,6 +53,14 @@ func _on_outcome(type_id: String, kind: int) -> void:
 
 func _on_interacted() -> void:
 	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
+		return
+	hunt.returned = true
+	hunt_ended.emit(hunt)
+
+
+## Zero health: back to camp with what was caught, no defeat screen (section 10).
+func _on_downed() -> void:
+	if hunt.is_over():
 		return
 	hunt.returned = true
 	hunt_ended.emit(hunt)

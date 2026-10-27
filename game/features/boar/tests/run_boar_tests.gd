@@ -12,6 +12,7 @@ func _init() -> void:
 	failures += _check(_zero_health_is_dead(), "zero health is dead")
 	failures += _check(_escape_only_when_fleeing(), "escape only when fleeing")
 	failures += _check(_trap_held_counts_as_captured(), "trap held to hunt end counts as captured")
+	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
 	print("boar tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -64,3 +65,16 @@ func _trap_held_counts_as_captured() -> bool:
 	var boar := Boar.new("armored", 9)
 	boar.trap()
 	return boar.state == Boar.State.TRAPPED and boar.outcome_kind() == BoarOutcome.Kind.CAPTURED
+
+
+func _only_panic_turns_to_charge() -> bool:
+	var calm := Boar.new("runner", 3)
+	calm.charge()
+	var boar := Boar.new("runner", 3)
+	boar.take_hit(1)
+	boar.charge()
+	var charging := boar.state == Boar.State.CHARGE and boar.is_free()
+	boar.escape()
+	var stays := boar.state == Boar.State.CHARGE
+	boar.end_charge()
+	return calm.state == Boar.State.WANDER and charging and stays and boar.state == Boar.State.FLEE

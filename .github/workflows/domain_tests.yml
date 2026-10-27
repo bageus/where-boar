@@ -26,14 +26,11 @@ jobs:
           unzip -q godot.zip
           sudo mv Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
 
-      - name: Run boar and hunt domain tests
+      - name: Run domain tests
         run: |
-          godot --headless --path . -s game/features/boar/tests/run_boar_tests.gd
-          godot --headless --path . -s game/features/boar/tests/run_senses_tests.gd
-          godot --headless --path . -s game/features/hunt/tests/run_hunt_tests.gd
-          godot --headless --path . -s game/features/hunter/tests/run_hunter_tests.gd
+          for t in game/*/*/tests/run_*_tests.gd; do timeout 120 godot --headless --path . -s "$t"; done
 
-      - name: Import project and run hunt map smoke test
+      - name: Import project and run smoke tests
         run: |
           godot --headless --path . --editor --quit
-          godot --headless --path . -s game/bootstrap/app/tests/run_hunt_map_smoke_test.gd
+          for t in game/*/*/tests/run_*_smoke_test.gd; do timeout 120 godot --headless --path . -s "$t"; done

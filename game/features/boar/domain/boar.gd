@@ -31,6 +31,18 @@ func take_hit(damage: int) -> void:
 	state = State.DEAD if health == 0 else State.PANIC
 
 
+## After an attack a panicking boar may turn and ram the hunter (D018).
+func charge() -> void:
+	if state == State.PANIC:
+		state = State.CHARGE
+
+
+## The charge is over (rammed or gave up): the boar runs off again.
+func end_charge() -> void:
+	if state == State.CHARGE:
+		state = State.FLEE
+
+
 func net_capture() -> void:
 	if is_free():
 		state = State.CAPTURED

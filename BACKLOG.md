@@ -1,8 +1,8 @@
 ---
 backlog_version: 1
 status: ACTIVE
-current_milestone: P2_PROTOTYPE
-updated: 2026-10-26
+current_milestone: P3_VERTICAL_SLICE
+updated: 2026-10-27
 ---
 
 # Backlog
@@ -34,6 +34,21 @@ The backlog contains approved work that is not currently active. Only one item m
 | P2-003 | 2 | Spear and net (M003, M004) | P2-002 | DONE |
 | P2-004 | 2 | Collision knockback (M005) | P2-002 | DONE |
 | P2-005 | 2 | Hunt flow: start button, goal, return, results (M007) | P2-003 | DONE |
+| P3-001 | 3 | Hunter health, boar attack and CHARGE ram, hunt ends at zero health (M002, M005) | P2-005 | DONE |
+| P3-002 | 3 | Five boar types as .tres data, spawn by rarity, rewards by type | P3-001 | PLANNED |
+| P3-003 | 3 | Save tusks and caught animals (versioned JSON in user://, backup) | P2-005 | PLANNED |
+| P3-004 | 3 | First-person camp hub: menu, camp, start hunt, results back to camp | P3-003 | PLANNED |
+| P3-005 | 3 | Weapon shop; club, sling, bow (M013, D022) | P3-004 | PLANNED |
+| P3-006 | 3 | Shout and bait (M014, M011) | P3-004 | PLANNED |
+| P3-007 | 3 | Traps: pit, snare, tripwire, cage, fence; hunting hut (M015) | P3-005 | PLANNED |
+| P3-008 | 3 | Herds and groups, fear spreads to neighbours (M009) | P3-002 | PLANNED |
+| P3-009 | 3 | Campfire food and water bag (M012) | P3-004 | PLANNED |
+| P3-010 | 3 | Rooster driver and turkey scout (M016, M017) | P3-008 | PLANNED |
+| P3-011 | 3 | Helpers: porter and trap setter (M013) | P3-007 | PLANNED |
+| P3-012 | 3 | Mounts from caught boars (D021) | P3-004 | PLANNED |
+| P3-013 | 3 | Green Valley map: hills, river, bushes, 5–10 escape zones | P3-008 | PLANNED |
+| P3-014 | 3 | Pause, settings (FOV, camera shake), first-hunt hints | P3-004 | PLANNED |
+| P3-015 | 3 | Sound and visual feedback: stomps, squeals, knockback camera roll | P3-001 | PLANNED |
 
 ## Icebox
 
@@ -42,7 +57,7 @@ Unapproved ideas and possible future features belong here.
 | ID | Idea | Why deferred | Reconsider when |
 |---|---|---|---|
 | ICE-001 | Coop for 2–4 players with DOWNED | Not in MVP (D005) | After MVP |
-| ICE-002 | Traps, extra weapons, mounts, roosters, turkeys, buffs, biomes | Post-MVP scope | After MVP |
+| ICE-002 | Spike and log traps, boar types Charger..Giant, biomes, settlement buildings | Post-MVP scope (section 21) | After MVP |
 
 ## Completed
 
@@ -51,3 +66,4 @@ Unapproved ideas and possible future features belong here.
 | SETUP-001 | Repository architecture and AI workflow created | Git history and CI |
 | DISC-001 | Game discovery completed and approved | GAME_SPEC.md READY, decision D009 |
 | P2-001..P2-003 | First-person hunt prototype: hunter, grey-box map, boars, spear, net | Hunter and smoke tests in CI |
+| P2-004..P2-005 | Knockback, hunt flow with results, health bar, minimap | Hunt and smoke tests in CI |

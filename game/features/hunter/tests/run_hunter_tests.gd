@@ -2,6 +2,7 @@ extends SceneTree
 
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
+const Health = preload("res://game/features/hunter/domain/health.gd")
 
 
 func _init() -> void:
@@ -12,6 +13,7 @@ func _init() -> void:
 	failures += _check(_lunge_costs_stamina(), "lunge costs 25 and fails without stamina")
 	failures += _check(_spear_throw_and_pick(), "spear is thrown once and picked up again")
 	failures += _check(_nets_run_out(), "nets run out and can be picked up")
+	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -65,3 +67,11 @@ func _nets_run_out() -> bool:
 	var empty := not loadout.throw_net()
 	loadout.pick_net()
 	return empty and loadout.nets == 1
+
+
+func _health_runs_down_to_zero() -> bool:
+	var health := Health.new()
+	health.take(30)
+	var hurt := health.value == 70 and not health.is_down()
+	health.take(500)
+	return hurt and health.value == 0 and health.is_down()
