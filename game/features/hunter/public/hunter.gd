@@ -201,6 +201,10 @@ func _place_bait() -> void:
 	bait_placed.emit(bait)
 
 
+## Group of every trap the hunter or the trap setter put down; the minimap shows them.
+const PLACED_TRAPS_GROUP := "placed_traps"
+
+
 ## Sets the selected trap on the ground 2 m ahead, facing the hunter's way (M015).
 func place_trap() -> void:
 	_set_trap(loadout.place_trap(), Transform3D(global_basis, global_position - global_basis.z * 2.0))
@@ -216,6 +220,7 @@ func _set_trap(item_id: String, where: Transform3D) -> bool:
 		return false
 	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
 	trap.top_level = true
+	trap.add_to_group(PLACED_TRAPS_GROUP)
 	add_child(trap)
 	trap.global_transform = where
 	_update_hud()

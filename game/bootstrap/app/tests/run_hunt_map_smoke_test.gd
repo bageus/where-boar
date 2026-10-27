@@ -147,7 +147,8 @@ func _check_trap_setter() -> void:
 	root.add_child(map)
 	var hunter: CharacterBody3D = map.get_node("Hunter")
 	var traps := hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)
-	_check(traps.size() == 2 and hunter.loadout.traps["item_snare"] == 1, "trap setter sets two traps")
+	_check(traps.size() == 2 and hunter.loadout.traps["item_snare"] == 1 \
+			and traps.all(func(n: Node) -> bool: return n.is_in_group("placed_traps") and n.has_node("Marker")), "trap setter sets two marked traps")
 	var mount: Node3D = hunter.get_node("Rider").mount
 	_check(mount != null and mount.boar_type.id == "runner_grey", "the saddled runner waits beside the hunter")
 	hunter.get_node("Rider").toggle()

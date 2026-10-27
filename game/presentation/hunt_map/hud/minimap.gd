@@ -1,11 +1,14 @@
 extends Control
 
 ## Top-down minimap (D011): escape zones, the return point and the hunter.
+## Placed traps show as blue squares (owner, 2026-10-27).
 ## Boars appear only while a turkey scout has marked them (M017).
 
 ## Half the map's side in metres; the map is centred on the origin.
 const MAP_HALF_SIZE := 80.0
 const ZONE_RADIUS := 3.0
+## Same name as the hunter's PLACED_TRAPS_GROUP; the map may not depend on the hunter's internals.
+const TRAPS_GROUP := "placed_traps"
 
 var hunter: Node3D
 var escape_zones: Array[Vector2] = []
@@ -26,6 +29,9 @@ func _draw() -> void:
 	for zone in escape_zones:
 		draw_circle(_to_px(zone), maxf(ZONE_RADIUS * scale_px, 4.0), Color(0.9, 0.2, 0.15))
 	draw_circle(_to_px(return_point), maxf(ZONE_RADIUS * scale_px, 4.0), Color(0.2, 0.8, 0.3))
+	for trap: Node3D in get_tree().get_nodes_in_group(TRAPS_GROUP):
+		var spot := _to_px(Vector2(trap.global_position.x, trap.global_position.z))
+		draw_rect(Rect2(spot - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.85, 1.0))
 	if boars and reveal_left > 0.0:
 		for boar: Node3D in boars.get_children():
 			draw_circle(_to_px(Vector2(boar.global_position.x, boar.global_position.z)), 3.0, Color(1, 0.85, 0.3))
