@@ -26,7 +26,7 @@ const SETTER_TRAPS := 2
 const SETTER_OFFSET := 5.0
 const TIP_SECONDS := 8.0
 const TIPS := [
-	"Boars flee when you get close. Crouch (C) to sneak up.",
+	"Boars flee when you get close. Caps Lock toggles sneaking.",
 	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
 	"Switch to the net (2) and throw it to catch a boar alive: caught boars pay more tusks.",
 	"Fleeing boars escape through the red zones shown on the minimap.",

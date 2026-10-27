@@ -70,6 +70,10 @@ var _shout_cooldown := 0.0
 var mouse_sensitivity := 0.002
 ## Off reduces camera motion (knockback roll) for players who get motion sick.
 var camera_motion := true
+## Caps Lock toggles sneaking (owner's choice, 2026-10-27).
+# shortcut: our own toggle, not the OS lock state (Godot does not expose it), so the
+# keyboard light can disagree if Caps Lock was on before the hunt; fine until playtest says otherwise.
+var crouching := false
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -108,6 +112,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_pick_up()
 		$Rider.toggle()
 		interacted.emit()
+	elif event.is_action_pressed("crouch"):
+		crouching = not crouching
 	elif event.is_action_pressed("shout"):
 		shout()
 	elif event.is_action_pressed("bait"):
@@ -204,7 +210,6 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var crouching := Input.is_action_pressed("crouch")
 	# On a mount the boar runs and the rider rests (D021).
 	var wants_sprint := Input.is_action_pressed("sprint") and not crouching and input != Vector2.ZERO and not ride.is_riding()
 	var sprinting := stamina.tick(delta, wants_sprint)
