@@ -106,7 +106,7 @@ func _physics_process(_delta: float) -> bool:
 			Input.action_release("aim")
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
-			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 2, "loadout spent")
+			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 3, "spear spent, net came back after the catch")
 			_check(_map.hunt.remaining() == _map.hunt.total - 2 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
 			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
 			_hunt = _map.hunt

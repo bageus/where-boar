@@ -114,3 +114,7 @@ aim={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[layer_names]
+
+3d_physics/layer_5="cover"

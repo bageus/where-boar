@@ -7,6 +7,7 @@ const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 func _init() -> void:
 	var failures := 0
 	failures += _check(_perceive_starts_flee_inside_radius(), "hunter inside radius starts flee, outside does not")
+	failures += _check(_sneaking_hunter_behind_or_in_cover_is_unseen(), "sneaking hunter is unseen behind the boar or in cover")
 	failures += _check(_shout_deflects_without_panic(), "shout deflects 30 degrees and does not panic")
 	failures += _check(_bait_pulls_within_radius(), "nearest bait in reach pulls the boar")
 	failures += _check(_fear_spreads_in_herd(), "a scared herd mate nearby makes a calm boar flee")
@@ -32,6 +33,19 @@ func _perceive_starts_flee_inside_radius() -> bool:
 	var far := Boar.new("runner", 5)
 	BoarSenses.perceive(far, Vector2.ZERO, Vector2(20, 0), 10.0)
 	return near.state == Boar.State.FLEE and far.state == Boar.State.WANDER
+
+
+func _sneaking_hunter_behind_or_in_cover_is_unseen() -> bool:
+	var behind := Boar.new("runner", 5)
+	BoarSenses.perceive(behind, Vector2.ZERO, Vector2(-5, 0), 10.0, Vector2.RIGHT, true)
+	var covered := Boar.new("runner", 5)
+	BoarSenses.perceive(covered, Vector2.ZERO, Vector2(5, 0), 10.0, Vector2.RIGHT, true, false)
+	var in_front := Boar.new("runner", 5)
+	BoarSenses.perceive(in_front, Vector2.ZERO, Vector2(5, 0), 10.0, Vector2.RIGHT, true)
+	var walking := Boar.new("runner", 5)
+	BoarSenses.perceive(walking, Vector2.ZERO, Vector2(-5, 0), 10.0, Vector2.RIGHT, false, false)
+	return behind.state == Boar.State.WANDER and covered.state == Boar.State.WANDER \
+			and in_front.state == Boar.State.FLEE and walking.state == Boar.State.FLEE
 
 
 func _shout_deflects_without_panic() -> bool:

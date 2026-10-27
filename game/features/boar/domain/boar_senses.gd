@@ -9,10 +9,26 @@ const SHOUT_ANGLE_DEG := 30.0
 const EAT_DISTANCE := 1.0
 
 
-## A calm boar that sees the hunter inside its perception radius starts to flee (M002).
-static func perceive(boar: Boar, boar_pos: Vector2, hunter_pos: Vector2, radius: float) -> void:
-	if boar_pos.distance_to(hunter_pos) <= radius:
+## Half-angle of a boar's sight; a sneaking hunter outside it (behind the boar) is not seen (ASSUMPTION).
+const VIEW_HALF_ANGLE_DEG := 120.0
+
+
+## A calm boar notices the hunter inside its perception radius and starts to flee (M002).
+## A walking hunter is heard anywhere in the radius; a sneaking one only when seen:
+## in front of the boar (facing) and not behind cover (sight_clear).
+static func perceive(boar: Boar, boar_pos: Vector2, hunter_pos: Vector2, radius: float,
+		facing := Vector2.ZERO, sneaking := false, sight_clear := true) -> void:
+	if boar_pos.distance_to(hunter_pos) > radius:
+		return
+	if not sneaking or (in_view(boar_pos, facing, hunter_pos) and sight_clear):
 		boar.flee()
+
+
+## True when target lies inside the boar's view cone; a boar with no facing sees all round.
+static func in_view(boar_pos: Vector2, facing: Vector2, target: Vector2) -> bool:
+	if facing == Vector2.ZERO:
+		return true
+	return facing.normalized().dot((target - boar_pos).normalized()) >= cos(deg_to_rad(VIEW_HALF_ANGLE_DEG))
 
 
 ## A shout scares a boar but never panics it; it runs away at +-30 degrees (D018).

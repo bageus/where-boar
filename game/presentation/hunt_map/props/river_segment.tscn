@@ -1,4 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/hunt_map/props/river.gd" id="1_river"]
 
 [sub_resource type="BoxShape3D" id="Shape_river"]
 size = Vector3(4, 2, 6)
@@ -10,7 +12,10 @@ albedo_color = Color(0.2, 0.45, 0.75, 1)
 material = SubResource("Mat_water")
 size = Vector3(4, 0.1, 6)
 
-[node name="RiverSegment" type="StaticBody3D"]
+[node name="RiverSegment" type="Area3D"]
+collision_layer = 0
+monitorable = false
+script = ExtResource("1_river")
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

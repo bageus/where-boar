@@ -29,6 +29,13 @@ const FENCE_TURN_SECONDS := 1.5
 # Herds (M009), ASSUMPTION numbers (D013).
 const HERD_ALARM_RADIUS := 8.0
 const HERD_SPREAD := 6.0
+## Physics layer 5: bushes and other cover that block a boar's sight but not movement.
+const COVER_LAYER := 1 << 4
+## Boar eye and hunter body heights for the line of sight, metres (ASSUMPTION).
+const EYE_RISE := 0.5
+const HUNTER_RISE := 0.8
+## Speed share left while wading through a river (ASSUMPTION).
+const WADE_SPEED_SCALE := 0.5
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
@@ -57,6 +64,8 @@ var _ram_cooldown := 0.0
 ## Last wall (XZ normal) the boar slid on, used to steer out of corners.
 var _wall := Vector2.ZERO
 var _reported := false
+## River segments the boar is standing in; rivers call wade().
+var _wading := 0
 ## Seconds in the current domain state.
 var _state_time := 0.0
 var _charge_rolled := false
@@ -185,7 +194,7 @@ func _physics_process(delta: float) -> void:
 	var pos := Vector2(global_position.x, global_position.z)
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
 	var before := boar.state
-	BoarSenses.perceive(boar, pos, hunter_pos, boar_type.perception_radius)
+	_perceive(pos, hunter_pos)
 	if boar.state == Boar.State.WANDER and not herd.is_empty():
 		BoarSenses.hear_herd(boar, pos, Surroundings.herd_positions(self, true), HERD_ALARM_RADIUS)
 	for zone in escape_zones:
@@ -203,6 +212,29 @@ func _physics_process(delta: float) -> void:
 	_apply_knock(delta)
 	move_and_slide()
 	_ram(delta)
+
+
+## A sneaking hunter is only noticed when in front of the boar and not hidden by cover (M002).
+func _perceive(pos: Vector2, hunter_pos: Vector2) -> void:
+	if boar.state != Boar.State.WANDER:
+		return
+	var facing := Vector2(-global_basis.z.x, -global_basis.z.z)
+	var sneaking: bool = hunter.get("crouching") == true
+	var clear := true
+	if sneaking and pos.distance_to(hunter_pos) <= boar_type.perception_radius and BoarSenses.in_view(pos, facing, hunter_pos):
+		clear = _sight_clear()
+	BoarSenses.perceive(boar, pos, hunter_pos, boar_type.perception_radius, facing, sneaking, clear)
+
+
+func _sight_clear() -> bool:
+	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * EYE_RISE,
+			hunter.global_position + Vector3.UP * HUNTER_RISE, collision_mask | COVER_LAYER, [get_rid(), hunter.get_rid()])
+	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+
+## A river calls this when the boar steps in (true) or out (false).
+func wade(entered: bool) -> void:
+	_wading += 1 if entered else -1
 
 
 ## A panicking boar rolls once whether to charge; a charge that hits nothing gives up.
@@ -253,6 +285,8 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		var zone := BoarSenses.nearest_zone(pos, escape_zones)
 		var toward := escape_zones[zone] - pos if zone != -1 else pos - hunter_pos
 		_heading = BoarSenses.slide_heading(_wall, toward)
+	if _wading > 0:
+		speed *= WADE_SPEED_SCALE
 	velocity.x = _heading.x * speed
 	velocity.z = _heading.y * speed
 	if _heading != Vector2.ZERO:

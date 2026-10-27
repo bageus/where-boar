@@ -43,6 +43,10 @@ const KNOCK_ROLL := 0.6
 const SADDLE_EYE_RISE := 0.6
 ## ASSUMPTION (D013): one shout every 2 s.
 const SHOUT_COOLDOWN := 2.0
+## Speed share left while wading through a river (ASSUMPTION).
+const WADE_SPEED_SCALE := 0.5
+## Field of view share while aiming the spear, so aim mode is visible (M003).
+const AIM_ZOOM := 0.75
 ## Stamina one sip of water gives back (M012, ASSUMPTION).
 const WATER_STAMINA := 40.0
 
@@ -66,6 +70,9 @@ var weapon: Loadout.Weapon = Weapon.SPEAR
 var _thrown: Array[RigidBody3D] = []
 var _stun := 0.0
 var _shout_cooldown := 0.0
+## River segments the hunter is standing in; rivers call wade().
+var _wading := 0
+var _base_fov := 80.0
 ## From the settings screen (section 16).
 var mouse_sensitivity := 0.002
 ## Off reduces camera motion (knockback roll) for players who get motion sick.
@@ -83,13 +90,15 @@ var crouching := false
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
+	_base_fov = _camera.fov
 	$Thud.stream = Synth.thud()
 	_update_hud()
 
 
 ## Applies player settings: {"fov", "mouse_sensitivity", "camera_motion"} (section 16).
 func apply_settings(settings: Dictionary) -> void:
-	_camera.fov = settings["fov"]
+	_base_fov = settings["fov"]
+	_camera.fov = _base_fov
 	mouse_sensitivity = settings["mouse_sensitivity"]
 	camera_motion = settings["camera_motion"]
 
@@ -148,6 +157,11 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 	_hud.show_health(health.value)
 	if health.is_down():
 		downed.emit()
+
+
+## A river calls this when the hunter steps in (true) or out (false).
+func wade(entered: bool) -> void:
+	_wading += 1 if entered else -1
 
 
 ## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012),
@@ -214,6 +228,10 @@ func _physics_process(delta: float) -> void:
 	var wants_sprint := Input.is_action_pressed("sprint") and not crouching and input != Vector2.ZERO and not ride.is_riding()
 	var sprinting := stamina.tick(delta, wants_sprint)
 	var speed := ride.speed(CROUCH_SPEED if crouching else (SPRINT_SPEED if sprinting else WALK_SPEED))
+	if _wading > 0:
+		speed *= WADE_SPEED_SCALE
+	var aiming := weapon == Weapon.SPEAR and loadout.spear_in_hand and Input.is_action_pressed("aim")
+	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if aiming else 1.0), minf(1.0, 12.0 * delta))
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
 		velocity.x = direction.x * speed
@@ -274,6 +292,10 @@ func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -
 	item.add_collision_exception_with(self)
 	if keep:
 		_thrown.append(item)
+	if item.has_signal("caught"):
+		item.caught.connect(func() -> void:
+			loadout.pick_net()
+			_update_hud())
 
 
 func _pick_up() -> void:
