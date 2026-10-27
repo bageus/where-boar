@@ -2,6 +2,7 @@ extends SceneTree
 
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
@@ -15,6 +16,8 @@ func _init() -> void:
 	failures += _check(_trap_held_counts_as_captured(), "trap held to hunt end counts as captured")
 	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
 	failures += _check(_hit_scares_attacker_but_not_rammer(), "hit scares an attacking boar off, a ramming one keeps charging")
+	failures += _check(_alert_rises_in_stages_and_fades(), "alert rises 1-2-3 while noticed, faster up close, and fades a level per cooldown")
+	failures += _check(_flight_calms_and_alarmed_boar_attacks(), "a fleeing boar calms down; an alarmed calm boar can attack")
 	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
 	failures += _check(_trapped_boar_stays_until_freed(), "trapped boar stays when hurt, can be netted or break free")
 	print("boar tests: %d failure(s)" % failures)
@@ -97,6 +100,30 @@ func _hit_scares_attacker_but_not_rammer() -> bool:
 	var whole := Boar.new("runner", 5)
 	return attacker.state == Boar.State.FLEE and rammer.state == Boar.State.CHARGE \
 			and rammer.is_wounded() and not whole.is_wounded()
+
+
+func _alert_rises_in_stages_and_fades() -> bool:
+	var alert := BoarAlert.new()
+	alert.tick(1.0, true, 1.0)
+	var heard := alert.level() == 1
+	alert.tick(1.0, true, 1.0)
+	var wary := alert.level() == 2 and not alert.alarmed()
+	alert.tick(2.9, false, 0.0)
+	var held := alert.level() == 2
+	alert.tick(0.2, false, 0.0)
+	var faded := alert.level() == 1
+	var close := BoarAlert.new()
+	close.tick(0.75, true, 4.0)
+	return heard and wary and held and faded and close.alarmed()
+
+
+func _flight_calms_and_alarmed_boar_attacks() -> bool:
+	var boar := Boar.new("runner", 5)
+	boar.flee()
+	boar.calm()
+	var calm := boar.state == Boar.State.WANDER
+	boar.attack()
+	return calm and boar.state == Boar.State.CHARGE
 
 
 func _types_pick_by_weight() -> bool:

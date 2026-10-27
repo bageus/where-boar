@@ -4,6 +4,7 @@ extends CharacterBody3D
 
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
+const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
@@ -44,6 +45,14 @@ const EYE_RISE := 0.5
 const HUNTER_RISE := 0.8
 ## Speed share left while wading through a river (ASSUMPTION).
 const WADE_SPEED_SCALE := 0.5
+# Alert and flight (playtest 2026-10-27), ASSUMPTION numbers (D013).
+## A flight lasts this long, then the boar calms down; twice as long after it saw a boar killed.
+const FLIGHT_SECONDS := 10.0
+const WITNESS_FLIGHT_SCALE := 2.0
+## Chance an alarmed calm boar attacks instead of fleeing, times its type's aggression.
+const ALERT_ATTACK_SHARE := 0.5
+const ALERT_MARKS := ["", "?", "!", "!!"]
+const ALERT_COLORS := [Color.WHITE, Color.YELLOW, Color.ORANGE, Color.RED]
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
@@ -64,6 +73,7 @@ var baits: Array[Node3D] = []
 var herd: Array[Node3D] = []
 
 var boar: Boar
+var alert := BoarAlert.new()
 var _heading := Vector2.ZERO
 ## Wander angle or panic deflection, re-rolled when _turn_left runs out.
 var _turn := 0.0
@@ -75,6 +85,10 @@ var _scatter := 0.0
 var _dash_heading := Vector2.ZERO
 var _dash_left := 0.0
 var _dash_hit := false
+var _calm_left := 0.0
+var _was_fleeing := false
+## Set when the boar saw another boar killed; makes the current flight longer.
+var _flight_scale := 1.0
 var _reported := false
 ## River segments the boar is standing in; rivers call wade().
 var _wading := 0
@@ -88,6 +102,7 @@ var _stun_left := 0.0
 var _snare_left := INF
 
 @onready var _label: Label3D = $Label
+@onready var _alert_mark: Label3D = $AlertMark
 @onready var _health_fill: MeshInstance3D = $HealthBar/Fill
 
 
@@ -108,6 +123,8 @@ func spear_hit(amount: int) -> void:
 		# Mid-ram: the hit hurts but does not stop it.
 		_after_change()
 		return
+	_calm_left = FLIGHT_SECONDS * _flight_scale
+	alert.alarm()
 	if was_charging and boar.state == Boar.State.FLEE:
 		# Scared off: runs any way that leads away from the hunter.
 		var away := Vector2(global_position.x - hunter.global_position.x, global_position.z - hunter.global_position.z).normalized()
@@ -191,6 +208,28 @@ func _after_change() -> void:
 	if boar.state == Boar.State.DEAD:
 		rotation.z = PI / 2.0
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(queue_free)
+		_warn_witnesses()
+
+
+## Boars that see this one die run in panic twice as long (playtest 2026-10-27).
+func _warn_witnesses() -> void:
+	var pos := Vector2(global_position.x, global_position.z)
+	for other in get_parent().get_children():
+		if other == self or not other.has_method("saw_kill"):
+			continue
+		var other_pos := Vector2(other.global_position.x, other.global_position.z)
+		var facing := Vector2(-other.global_basis.z.x, -other.global_basis.z.z)
+		if other_pos.distance_to(pos) <= other.boar_type.perception_radius and BoarSenses.in_view(other_pos, facing, pos):
+			other.saw_kill()
+
+
+func saw_kill() -> void:
+	if not boar.is_free():
+		return
+	boar.flee()
+	alert.alarm()
+	_flight_scale = WITNESS_FLIGHT_SCALE
+	_calm_left = FLIGHT_SECONDS * WITNESS_FLIGHT_SCALE
 
 
 func _physics_process(delta: float) -> void:
@@ -216,7 +255,7 @@ func _physics_process(delta: float) -> void:
 	var pos := Vector2(global_position.x, global_position.z)
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
 	var before := boar.state
-	_perceive(pos, hunter_pos)
+	_perceive(delta, pos, hunter_pos)
 	if boar.state == Boar.State.WANDER and not herd.is_empty():
 		BoarSenses.hear_herd(boar, pos, Surroundings.herd_positions(self, true), HERD_ALARM_RADIUS)
 	for zone in escape_zones:
@@ -227,6 +266,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_state_time += delta
 	_maybe_charge()
+	_track_flight(delta)
 	if boar.state != before:
 		_state_time = 0.0
 		if before == Boar.State.WANDER:
@@ -239,16 +279,54 @@ func _physics_process(delta: float) -> void:
 	_ram(delta)
 
 
-## A sneaking hunter is only noticed when in front of the boar and not hidden by cover (M002).
-func _perceive(pos: Vector2, hunter_pos: Vector2) -> void:
+## A calm boar that keeps noticing the hunter grows alarmed in three stages, then flees or attacks;
+## a sneaking hunter is only noticed in front of the boar and not behind cover (M002).
+func _perceive(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	if boar.state != Boar.State.WANDER:
+		_show_alert()
 		return
 	var facing := Vector2(-global_basis.z.x, -global_basis.z.z)
 	var sneaking: bool = hunter.get("crouching") == true
+	var radius := boar_type.perception_radius
+	var distance := pos.distance_to(hunter_pos)
 	var clear := true
-	if sneaking and pos.distance_to(hunter_pos) <= boar_type.perception_radius and BoarSenses.in_view(pos, facing, hunter_pos):
+	if sneaking and distance <= radius and BoarSenses.in_view(pos, facing, hunter_pos):
 		clear = _sight_clear()
-	BoarSenses.perceive(boar, pos, hunter_pos, boar_type.perception_radius, facing, sneaking, clear)
+	var noticed := BoarSenses.notices(pos, hunter_pos, radius, facing, sneaking, clear)
+	alert.tick(delta, noticed, radius / maxf(distance, 0.1))
+	if alert.alarmed():
+		if randf() < boar_type.aggression * ALERT_ATTACK_SHARE:
+			boar.attack()
+			_charge_rolled = true
+		else:
+			boar.flee()
+	_show_alert()
+
+
+## Flights end after a while (playtest 2026-10-27): the boar calms down but stays wary.
+func _track_flight(delta: float) -> void:
+	var fleeing := boar.state in [Boar.State.FLEE, Boar.State.PANIC]
+	if fleeing and not _was_fleeing:
+		_calm_left = FLIGHT_SECONDS * _flight_scale
+		alert.alarm()
+	_was_fleeing = fleeing
+	if not fleeing:
+		return
+	_calm_left -= delta
+	if _calm_left <= 0.0:
+		boar.calm()
+		alert.settle()
+		_flight_scale = 1.0
+		_charge_rolled = false
+		_was_fleeing = false
+
+
+## Alert mark over the boar: ? heard something, ! wary, !! alarmed or running.
+func _show_alert() -> void:
+	var level := alert.level() if boar.state == Boar.State.WANDER else (BoarAlert.MAX_LEVEL if boar.is_free() else 0)
+	if _alert_mark.text != ALERT_MARKS[level]:
+		_alert_mark.text = ALERT_MARKS[level]
+		_alert_mark.modulate = ALERT_COLORS[level]
 
 
 func _sight_clear() -> bool:

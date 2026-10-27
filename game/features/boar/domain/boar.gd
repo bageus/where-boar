@@ -79,6 +79,18 @@ func break_free() -> void:
 		state = State.PANIC
 
 
+## An alarmed calm boar goes straight for the hunter (aggressive types, playtest 2026-10-27).
+func attack() -> void:
+	if state in [State.WANDER, State.FLEE]:
+		state = State.CHARGE
+
+
+## The flight is over: a fleeing or panicking boar calms down and roams again.
+func calm() -> void:
+	if state in [State.FLEE, State.PANIC]:
+		state = State.WANDER
+
+
 func escape() -> void:
 	if state in [State.FLEE, State.PANIC]:
 		state = State.ESCAPED

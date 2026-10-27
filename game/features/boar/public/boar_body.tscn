@@ -71,6 +71,15 @@ billboard = 1
 font_size = 32
 text = "WANDER"
 
+[node name="AlertMark" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
+billboard = 1
+no_depth_test = true
+pixel_size = 0.01
+font_size = 64
+outline_size = 12
+text = ""
+
 [node name="Sounds" type="Node3D" parent="."]
 script = ExtResource("2_sounds")
 

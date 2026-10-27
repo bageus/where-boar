@@ -13,15 +13,14 @@ const EAT_DISTANCE := 1.0
 const VIEW_HALF_ANGLE_DEG := 120.0
 
 
-## A calm boar notices the hunter inside its perception radius and starts to flee (M002).
+## Whether a boar notices the hunter inside its perception radius (M002); BoarAlert turns that into flight.
 ## A walking hunter is heard anywhere in the radius; a sneaking one only when seen:
 ## in front of the boar (facing) and not behind cover (sight_clear).
-static func perceive(boar: Boar, boar_pos: Vector2, hunter_pos: Vector2, radius: float,
-		facing := Vector2.ZERO, sneaking := false, sight_clear := true) -> void:
+static func notices(boar_pos: Vector2, hunter_pos: Vector2, radius: float,
+		facing := Vector2.ZERO, sneaking := false, sight_clear := true) -> bool:
 	if boar_pos.distance_to(hunter_pos) > radius:
-		return
-	if not sneaking or (in_view(boar_pos, facing, hunter_pos) and sight_clear):
-		boar.flee()
+		return false
+	return not sneaking or (in_view(boar_pos, facing, hunter_pos) and sight_clear)
 
 
 ## True when target lies inside the boar's view cone; a boar with no facing sees all round.

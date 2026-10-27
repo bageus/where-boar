@@ -10,7 +10,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 31
+const EXPECTED_CHECKS := 32
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -68,8 +68,12 @@ func _physics_process(_delta: float) -> bool:
 			# Put the hunter 5 m from the first boar, facing it; it must start fleeing.
 			hunter.global_position = boars[0].global_position + Vector3(0, -0.4, 5)
 			hunter.rotation = Vector3.ZERO
+		3:
+			# Alert builds up over time (playtest 2026-10-27); a witnessed kill makes it run at once.
+			_check(boars[0].alert.progress > 0.0 and boars[0].state_name() == "WANDER", "boar near hunter grows alert before it runs")
+			boars[0].saw_kill()
 		4:
-			_check(boars[0].state_name() == "FLEE", "boar near hunter flees")
+			_check(boars[0].state_name() == "FLEE" and boars[0]._calm_left > 10.0, "a boar that saw a kill flees, for twice as long")
 			_check(boars[14].state_name() != "WANDER", "fear spreads through the herd")
 			hunter.shout()
 			_check(boars[0]._forced_left > 0.0, "a shout steers the fleeing boar")

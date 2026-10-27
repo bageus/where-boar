@@ -6,7 +6,7 @@ const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 
 
-## XZ positions of the boar's living herd mates; only fleeing or panicking ones when scared_only,
+## XZ positions of the boar's living herd mates; only fleeing, panicking or charging ones when scared_only,
 ## only those within within metres when given.
 static func herd_positions(body: Node3D, scared_only: bool, within := INF) -> Array[Vector2]:
 	var spots: Array[Vector2] = []
@@ -15,7 +15,7 @@ static func herd_positions(body: Node3D, scared_only: bool, within := INF) -> Ar
 			continue
 		if body.global_position.distance_to(mate.global_position) > within:
 			continue
-		if scared_only and mate.boar.state not in [Boar.State.FLEE, Boar.State.PANIC]:
+		if scared_only and mate.boar.state not in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE]:
 			continue
 		spots.append(Vector2(mate.global_position.x, mate.global_position.z))
 	return spots
