@@ -314,7 +314,8 @@ func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -
 
 
 func _pick_up() -> void:
-	_thrown = _thrown.filter(func(item: RigidBody3D) -> bool: return is_instance_valid(item))
+	# Untyped: a typed lambda cannot take a freed item, and nets that caught something are freed.
+	_thrown = _thrown.filter(func(item) -> bool: return is_instance_valid(item))
 	for item in _thrown.duplicate():
 		if item.global_position.distance_to(global_position) > PICKUP_RADIUS:
 			continue
