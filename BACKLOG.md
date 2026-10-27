@@ -58,6 +58,7 @@ Unapproved ideas and possible future features belong here.
 |---|---|---|---|
 | ICE-001 | Coop for 2–4 players with DOWNED | Not in MVP (D005) | After MVP |
 | ICE-002 | Spike and log traps, boar types Charger..Giant, biomes, settlement buildings | Post-MVP scope (section 21) | After MVP |
+| ICE-003 | Обучение через опыт без текста: сцены на карте (кабаны у приманки, кабан в ловушке), пробник на старте (2 приманки, 1 силок), в итогах бивни за живого и убитого; убрать советы первой охоты | Владелец одобрил идею, но отложил (2026-10-27) | Когда владелец скажет |
 
 ## Completed
 
