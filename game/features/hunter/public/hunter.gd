@@ -6,6 +6,7 @@ const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
 const Synth = preload("res://game/core/synth/public/synth.gd")
+const Ride = preload("res://game/features/hunter/domain/ride.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Spear = preload("res://game/features/hunter/presentation/spear.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
@@ -39,6 +40,7 @@ const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
 ## Camera roll when knocked down (M005), kept small against motion sickness.
 const KNOCK_ROLL := 0.6
+const SADDLE_EYE_RISE := 0.6
 ## ASSUMPTION (D013): one shout every 2 s.
 const SHOUT_COOLDOWN := 2.0
 ## Stamina one sip of water gives back (M012, ASSUMPTION).
@@ -56,6 +58,7 @@ signal shouted(at: Vector3)
 signal bait_placed(bait: Node3D)
 
 var stamina := Stamina.new()
+var ride := Ride.new()
 var health := Health.new()
 var loadout := Loadout.new()
 var weapon: Loadout.Weapon = Weapon.SPEAR
@@ -103,6 +106,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event.is_action_pressed("interact"):
 		_pick_up()
+		$Rider.toggle()
 		interacted.emit()
 	elif event.is_action_pressed("shout"):
 		shout()
@@ -124,10 +128,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Rammed by a boar (M005): thrown back, hurt by a charge, and out of control for a moment.
 func knock(impulse: Vector3, damage: int = 0) -> void:
-	velocity = impulse
-	_stun = STUN_SECONDS
 	$Thud.play()
-	if camera_motion:
+	if not ride.shrugs_off_knock():
+		velocity = impulse
+		_stun = STUN_SECONDS
+	if camera_motion and _stun > 0.0:
 		var roll := create_tween()
 		roll.tween_property(_camera, "rotation:z", KNOCK_ROLL * (1 if randf() < 0.5 else -1), 0.15)
 		roll.tween_property(_camera, "rotation:z", 0.0, STUN_SECONDS - 0.15)
@@ -139,8 +144,11 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 		downed.emit()
 
 
-## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012).
+## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012),
+## and the first saddled boar waits beside the hunter.
 func start_hunt() -> void:
+	if not loadout.saddled.is_empty():
+		$Rider.bring_mount(loadout.saddled[0])
 	stamina.eat(loadout.eat_best_meal())
 	_hud.show_stamina(stamina.value, stamina.max_value)
 
@@ -197,8 +205,10 @@ func _physics_process(delta: float) -> void:
 		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var crouching := Input.is_action_pressed("crouch")
-	var sprinting := stamina.tick(delta, Input.is_action_pressed("sprint") and not crouching and input != Vector2.ZERO)
-	var speed := CROUCH_SPEED if crouching else (SPRINT_SPEED if sprinting else WALK_SPEED)
+	# On a mount the boar runs and the rider rests (D021).
+	var wants_sprint := Input.is_action_pressed("sprint") and not crouching and input != Vector2.ZERO and not ride.is_riding()
+	var sprinting := stamina.tick(delta, wants_sprint)
+	var speed := ride.speed(CROUCH_SPEED if crouching else (SPRINT_SPEED if sprinting else WALK_SPEED))
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
 		velocity.x = direction.x * speed
@@ -207,8 +217,9 @@ func _physics_process(delta: float) -> void:
 			_jump_or_lunge(direction)
 	else:
 		velocity += get_gravity() * delta
-	_camera.position.y = CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT
+	_camera.position.y = (CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT) + (SADDLE_EYE_RISE if ride.is_riding() else 0.0)
 	move_and_slide()
+	$Rider.ram(delta)
 	_hud.show_stamina(stamina.value, stamina.max_value)
 
 
@@ -224,6 +235,8 @@ func _jump_or_lunge(direction: Vector3) -> void:
 
 ## LMB stabs with the spear, RMB+LMB throws it; with the net selected LMB throws a net (M003, M004).
 func _attack() -> void:
+	if not ride.allows(weapon, Input.is_action_pressed("aim")):
+		return
 	match weapon:
 		Weapon.SPEAR:
 			if Input.is_action_pressed("aim"):

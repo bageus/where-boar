@@ -3,6 +3,8 @@ extends SceneTree
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
+const Ride = preload("res://game/features/hunter/domain/ride.gd")
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
 func _init() -> void:
@@ -19,6 +21,8 @@ func _init() -> void:
 	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
 	failures += _check(_meal_and_water(), "best meal raises max stamina; water sips restore it")
 	failures += _check(_porter_and_any_trap(), "porter adds nets and arrows; any trap in stock can be set")
+	failures += _check(_ride_by_mount_type(), "mount type sets speed and perk; only the stab works when riding")
+	failures += _check(_saddles_from_items(), "saddled mount types come from camp items")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -129,3 +133,22 @@ func _porter_and_any_trap() -> bool:
 	loadout.equip({"item_porter": 1, "item_cage": 1})
 	return loadout.nets == Loadout.START_NETS + 2 and loadout.arrows == Loadout.START_ARROWS + 6 \
 		and loadout.place_any_trap() == "item_cage" and loadout.place_any_trap() == ""
+
+
+func _ride_by_mount_type() -> bool:
+	var ride := Ride.new()
+	var on_foot := ride.speed(4.0) == 4.0 and ride.allows(Loadout.Weapon.NET, false)
+	ride.mount(BoarTypes.find("armored_black"))
+	var armored := ride.shrugs_off_knock() and not ride.rams() and ride.speed(4.0) == 6.5
+	ride.mount(BoarTypes.find("aggressive_red"))
+	var angry := ride.rams() and not ride.shrugs_off_knock()
+	var stab_only := ride.allows(Loadout.Weapon.SPEAR, false) and not ride.allows(Loadout.Weapon.SPEAR, true) \
+		and not ride.allows(Loadout.Weapon.BOW, false)
+	ride.dismount()
+	return on_foot and armored and angry and stab_only and not ride.is_riding()
+
+
+func _saddles_from_items() -> bool:
+	var loadout := Loadout.new()
+	loadout.equip({"item_saddle_aggressive_red": 1, "item_saddle_runner_grey": 0})
+	return loadout.saddled == ["aggressive_red"]

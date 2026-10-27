@@ -30,6 +30,8 @@ const WATER_SIPS := 3
 const PORTER_ID := "item_porter"
 const PORTER_NETS := 2
 const PORTER_ARROWS := 6
+## Camp item "item_saddle_<boar type id>" puts a saddle on a caught boar of that type.
+const SADDLE_PREFIX := "item_saddle_"
 
 var spear_in_hand := true
 var nets := START_NETS
@@ -44,6 +46,8 @@ var traps: Dictionary = {}
 var trap_index := 0
 var water_sips := 0
 var _meals: Dictionary = {}
+## Boar type ids with a saddle bought in camp (D021).
+var saddled: Array[String] = []
 var _bought: Array[Weapon] = []
 
 
@@ -63,6 +67,10 @@ func equip(items: Dictionary) -> void:
 	for item_id in MEALS:
 		_meals[item_id] = items.get(item_id, 0)
 	water_sips = WATER_SIPS if items.get(WATER_BAG_ID, 0) > 0 else 0
+	saddled.clear()
+	for item_id in items:
+		if item_id.begins_with(SADDLE_PREFIX) and items[item_id] > 0:
+			saddled.append(item_id.trim_prefix(SADDLE_PREFIX))
 	var porter: bool = items.get(PORTER_ID, 0) > 0
 	nets = START_NETS + (PORTER_NETS if porter else 0)
 	arrows = START_ARROWS + (PORTER_ARROWS if porter else 0)

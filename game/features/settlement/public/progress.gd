@@ -40,13 +40,19 @@ func spend(cost: int) -> bool:
 	return true
 
 
-## Buys one catalog item; false when unknown, already owned (unique) or too expensive.
+## Buys one catalog item; false when unknown, already owned (unique), locked or too expensive.
 func buy(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
-	if item.is_empty() or (item["unique"] and owns(item_id)) or not spend(item["price"]):
+	if item.is_empty() or (item["unique"] and owns(item_id)) or not unlocked(item_id) or not spend(item["price"]):
 		return false
 	items[item_id] = items.get(item_id, 0) + 1
 	return true
+
+
+## A saddle needs a caught boar of its type in the pens (D021).
+func unlocked(item_id: String) -> bool:
+	var needs: String = ShopCatalog.ITEMS.get(item_id, {}).get("requires_caught", "")
+	return needs == "" or caught.get(needs, 0) > 0
 
 
 func owns(item_id: String) -> bool:

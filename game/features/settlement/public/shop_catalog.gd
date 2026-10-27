@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## What camp shops sell and for how many tusks (section 13; ASSUMPTION prices, D013).
-## unique items (weapons) are bought once; others stack.
+## unique items (weapons) are bought once; others stack. requires_caught names a boar type that must be in the pens.
 
 const ITEMS := {
 	"item_club": {"name": "Club", "shop": "weapon_shop", "price": 30, "unique": true},
@@ -21,6 +21,9 @@ const ITEMS := {
 	"item_feast": {"name": "Feast (+50 stamina)", "shop": "campfire", "price": 25, "unique": false},
 	"item_porter": {"name": "Porter (+2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
 	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true},
+	"item_saddle_runner_grey": {"name": "Saddle a Runner (fast)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "runner_grey"},
+	"item_saddle_aggressive_red": {"name": "Saddle an Angry boar (rams)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "aggressive_red"},
+	"item_saddle_armored_black": {"name": "Saddle an Armored boar (steady)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "armored_black"},
 }
 
 

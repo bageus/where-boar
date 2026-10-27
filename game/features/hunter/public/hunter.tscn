@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/public/hunter.gd" id="1_hunter"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hunter_hud.gd" id="2_hud"]
+[ext_resource type="Script" path="res://game/features/hunter/presentation/rider.gd" id="3_rider"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_hunter"]
 radius = 0.4
@@ -99,3 +100,6 @@ autowrap_mode = 3
 text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, F bait, R shout, G/T trap, Q drink, E pick up or end hunt at camp, Esc pause"
 
 [node name="Thud" type="AudioStreamPlayer" parent="."]
+
+[node name="Rider" type="Node" parent="."]
+script = ExtResource("3_rider")

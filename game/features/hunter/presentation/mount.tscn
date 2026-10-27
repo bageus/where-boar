@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/features/hunter/presentation/mount.gd" id="1_mount"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.45
+height = 1.6
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+radius = 0.45
+height = 1.6
+
+[sub_resource type="BoxMesh" id="Mesh_saddle"]
+size = Vector3(0.7, 0.15, 0.6)
+
+[node name="Mount" type="StaticBody3D"]
+script = ExtResource("1_mount")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.5, 0)
+shape = SubResource("Shape_body")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.5, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="Saddle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0)
+mesh = SubResource("Mesh_saddle")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+billboard = 1
+font_size = 32

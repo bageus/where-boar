@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-015
-last_completed_task_id: P3-015
+active_task_id: P3-012
+last_completed_task_id: P3-012
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-015 done; next P3-012.
+None. P3-001..P3-015 done; riding waits for the owner's confirmation.
 
 ## Last completed work
 
@@ -50,6 +50,7 @@ P3-015 done; next P3-012.
 - P3-013: Green Valley grey-box map 160×160: river with fords, jungle, hills, narrow pass, 7 escape zones, 47 boars.
 - P3-014: pause menu with FOV, mouse sensitivity and camera-motion settings saved apart from progress; first-hunt tips.
 - P3-015: synthesized squeal, stomps and thud; knockback camera roll; outcome messages in the HUD.
+- P3-012: saddled mounts from caught boars: ride with E; runner is fast, angry boar rams, armored boar is steady.
 
 ## Build and validation
 
@@ -73,7 +74,7 @@ P3-015 done; next P3-012.
 
 ## Next action
 
-Start P3-012.
+Owner playtest of the vertical slice; answer on riding (P3-012).
 
 ## Handoff notes
 

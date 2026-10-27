@@ -12,6 +12,7 @@ func _init() -> void:
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
+	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -64,3 +65,11 @@ func _buy_weapon_once() -> bool:
 	var too_expensive := progress.buy("item_bow")
 	return bought and not twice and not too_expensive and progress.tusks == 35 \
 		and progress.owns("item_sling") and not progress.buy("item_unknown")
+
+
+func _saddle_needs_caught_boar() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 100
+	var locked := not progress.buy("item_saddle_runner_grey")
+	progress.caught = {"runner_grey": 1}
+	return locked and progress.tusks == 100 and progress.buy("item_saddle_runner_grey") and progress.tusks == 50

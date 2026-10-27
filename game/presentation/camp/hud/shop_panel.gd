@@ -38,8 +38,9 @@ func _refresh() -> void:
 		var button := Button.new()
 		var owned: bool = item["unique"] and progress.owns(item_id)
 		var count: String = "" if item["unique"] else "  (have %d)" % progress.items.get(item_id, 0)
-		button.text = "%s — %s%s" % [item["name"], "owned" if owned else "%d tusks" % item["price"], count]
-		button.disabled = owned or progress.tusks < item["price"]
+		var locked := "" if progress.unlocked(item_id) else "  (catch one first)"
+		button.text = "%s — %s%s%s" % [item["name"], "owned" if owned else "%d tusks" % item["price"], count, locked]
+		button.disabled = owned or progress.tusks < item["price"] or locked != ""
 		button.pressed.connect(_buy.bind(item_id))
 		%Items.add_child(button)
 	%Tusks.text = "Tusks: %d" % progress.tusks

@@ -10,7 +10,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 28
+const EXPECTED_CHECKS := 30
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -129,13 +129,18 @@ func _check_pause_and_settings(camp: Node3D) -> void:
 	_check(not paused, "Continue unpauses")
 
 
-## A hired trap setter puts two traps from stock at escape zones when a hunt starts.
+## A hired trap setter puts two traps at escape zones; a saddled boar waits and can be ridden.
 func _check_trap_setter() -> void:
 	var map: Node3D = MapScene.instantiate()
-	map.items = {"item_trap_setter": 1, "item_snare": 3}
+	map.items = {"item_trap_setter": 1, "item_snare": 3, "item_saddle_runner_grey": 1}
 	root.add_child(map)
-	var traps := map.get_node("Hunter").get_children().filter(func(n: Node) -> bool: return n is Area3D)
-	_check(traps.size() == 2 and map.get_node("Hunter").loadout.traps["item_snare"] == 1, "trap setter sets two traps")
+	var hunter: CharacterBody3D = map.get_node("Hunter")
+	var traps := hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)
+	_check(traps.size() == 2 and hunter.loadout.traps["item_snare"] == 1, "trap setter sets two traps")
+	var mount: Node3D = hunter.get_node("Rider").mount
+	_check(mount != null and mount.boar_type.id == "runner_grey", "the saddled runner waits beside the hunter")
+	hunter.get_node("Rider").toggle()
+	_check(hunter.ride.is_riding() and not mount.visible and hunter.ride.speed(4.0) == 10.0, "E mounts the runner")
 	map.free()
 
 
