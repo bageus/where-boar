@@ -14,6 +14,7 @@ func _init() -> void:
 	failures += _check(_spear_throw_and_pick(), "spear is thrown once and picked up again")
 	failures += _check(_nets_run_out(), "nets run out and can be picked up")
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
+	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -75,3 +76,13 @@ func _health_runs_down_to_zero() -> bool:
 	var hurt := health.value == 70 and not health.is_down()
 	health.take(500)
 	return hurt and health.value == 0 and health.is_down()
+
+
+func _bought_weapons_unlock() -> bool:
+	var loadout := Loadout.new()
+	var locked := not loadout.has(Loadout.Weapon.BOW) and not loadout.shoot_arrow()
+	loadout.equip({"item_bow": 1, "item_club": 0})
+	for i in Loadout.START_ARROWS:
+		loadout.shoot_arrow()
+	return locked and loadout.has(Loadout.Weapon.BOW) and not loadout.has(Loadout.Weapon.CLUB) \
+		and loadout.has(Loadout.Weapon.SPEAR) and not loadout.shoot_arrow()

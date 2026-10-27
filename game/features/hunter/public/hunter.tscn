@@ -67,25 +67,19 @@ value = 100.0
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -200.0
+offset_left = -400.0
 offset_top = 16.0
-offset_right = 200.0
+offset_right = 400.0
 offset_bottom = 48.0
 grow_horizontal = 2
-theme_override_constants/separation = 40
+theme_override_constants/separation = 30
 alignment = 1
 
-[node name="Spear" type="Label" parent="Hud/Hotbar"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
 
-[node name="Net" type="Label" parent="Hud/Hotbar"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
 
 [node name="Help" type="Label" parent="Hud"]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 900.0
 offset_bottom = 44.0
-text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB stab/throw, RMB aim spear, 1/2 weapon, E pick up or end hunt at camp, Esc free mouse"
+text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, E pick up or end hunt at camp, Esc free mouse"

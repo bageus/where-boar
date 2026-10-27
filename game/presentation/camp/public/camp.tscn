@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/tent.tscn" id="4_tent"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/station.tscn" id="5_station"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/public/hunter.tscn" id="6_hunter"]
+[ext_resource type="PackedScene" path="res://game/presentation/camp/hud/shop_panel.tscn" id="7_shop"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 
@@ -54,6 +55,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
 station_id = "start_hunt"
 title = "Start hunt"
 
+[node name="WeaponShop" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -14, 0, 0)
+station_id = "weapon_shop"
+title = "Armory"
+
 [node name="Hunter" parent="." instance=ExtResource("6_hunter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
 
@@ -70,3 +76,5 @@ offset_bottom = 200.0
 grow_horizontal = 0
 horizontal_alignment = 2
 theme_override_font_sizes/font_size = 22
+
+[node name="ShopPanel" parent="Hud" instance=ExtResource("7_shop")]

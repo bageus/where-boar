@@ -6,7 +6,8 @@
     "Tusks, caught animals and owned gear"
   ],
   "public_api": [
-    "public/progress.gd"
+    "public/progress.gd",
+    "public/shop_catalog.gd"
   ],
   "dependencies": [
     "features.boar",

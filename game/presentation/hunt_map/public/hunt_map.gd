@@ -15,6 +15,8 @@ const BOAR_COUNT := 6
 const RETURN_RADIUS := 3.0
 
 var hunt: Hunt
+## Camp gear (item_id -> count), injected before the map enters the tree.
+var items: Dictionary = {}
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _goal: Label = $Hud/Goal
@@ -35,6 +37,7 @@ func _ready() -> void:
 		boar.position = spawns[i].position
 		boar.outcome_reached.connect(_on_outcome)
 		$Boars.add_child(boar)
+	_hunter.equip(items)
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
 	var minimap := $Hud/Minimap

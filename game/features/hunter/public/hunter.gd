@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-## First-person hunter: movement, stamina, spear and net (M001, M003, M004).
+## First-person hunter: movement, stamina, health and weapons (M001, M003, M004, D022).
 
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
@@ -9,6 +9,8 @@ const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Spear = preload("res://game/features/hunter/presentation/spear.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
 const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
+const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
+const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
 
 # ASSUMPTION numbers (D013), tuned in phase 2.
 const WALK_SPEED := 4.0
@@ -18,13 +20,18 @@ const JUMP_SPEED := 4.5
 const LUNGE_SPEED := 10.0
 const THROW_SPEED := 18.0
 const STAB_DAMAGE := 1
+const CLUB_DAMAGE := 2
+const CLUB_KNOCK := 6.0
+const SLING_SPEED := 24.0
+const ARROW_SPEED := 32.0
 const PICKUP_RADIUS := 2.5
 const MOUSE_SENSITIVITY := 0.002
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
 
-enum Weapon { SPEAR, NET }
+const Weapon = Loadout.Weapon
+const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
 
 ## Fact: the hunter pressed interact (E); the map decides what it means, e.g. return to camp.
 signal interacted
@@ -34,7 +41,7 @@ signal downed
 var stamina := Stamina.new()
 var health := Health.new()
 var loadout := Loadout.new()
-var weapon := Weapon.SPEAR
+var weapon: Loadout.Weapon = Weapon.SPEAR
 ## Spears and nets this hunter threw that are still in the world.
 var _thrown: Array[RigidBody3D] = []
 var _stun := 0.0
@@ -43,13 +50,22 @@ var _stun := 0.0
 @onready var _reach: RayCast3D = $Camera/Reach
 @onready var _stamina_bar: ProgressBar = $Hud/Stamina
 @onready var _health_bar: ProgressBar = $Hud/Health
-@onready var _slot_spear: Label = $Hud/Hotbar/Spear
-@onready var _slot_net: Label = $Hud/Hotbar/Net
+@onready var _hotbar: HBoxContainer = $Hud/Hotbar
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
+	for weapon_name in WEAPON_NAMES:
+		var slot := Label.new()
+		slot.add_theme_font_size_override("font_size", 22)
+		_hotbar.add_child(slot)
+	_update_hud()
+
+
+## Gives the hunter the weapons bought in camp (item_id -> count).
+func equip(items: Dictionary) -> void:
+	loadout.equip(items)
 	_update_hud()
 
 
@@ -63,13 +79,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			_attack()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event.is_action_pressed("weapon_1"):
-		weapon = Weapon.SPEAR
-	elif event.is_action_pressed("weapon_2"):
-		weapon = Weapon.NET
 	elif event.is_action_pressed("interact"):
 		_pick_up()
 		interacted.emit()
+	else:
+		for i in WEAPON_NAMES.size():
+			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
+				weapon = i
 	_update_hud()
 
 
@@ -132,16 +148,28 @@ func _attack() -> void:
 		Weapon.NET:
 			if loadout.throw_net():
 				_throw(NetScene)
+		Weapon.CLUB:
+			var target := _reach.get_collider()
+			if target is BoarBody:
+				target.spear_hit(CLUB_DAMAGE)
+				target.knock(-_camera.global_basis.z * CLUB_KNOCK)
+		Weapon.SLING:
+			_throw(StoneScene, SLING_SPEED, false)
+		Weapon.BOW:
+			if loadout.shoot_arrow():
+				_throw(ArrowScene, ARROW_SPEED, false)
 
 
-func _throw(scene: PackedScene) -> void:
+## Launches an item from the eye; kept ones (spear, net) can be picked up again.
+func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -> void:
 	var item: RigidBody3D = scene.instantiate()
 	item.top_level = true
 	add_child(item)
 	item.global_transform = _camera.global_transform.translated_local(Vector3(0.0, 0.0, -0.8))
-	item.linear_velocity = -_camera.global_basis.z * THROW_SPEED
+	item.linear_velocity = -_camera.global_basis.z * speed
 	item.add_collision_exception_with(self)
-	_thrown.append(item)
+	if keep:
+		_thrown.append(item)
 
 
 func _pick_up() -> void:
@@ -158,7 +186,15 @@ func _pick_up() -> void:
 
 
 func _update_hud() -> void:
-	_slot_spear.text = "[1] Spear (%s)" % ("in hand" if loadout.spear_in_hand else "thrown")
-	_slot_net.text = "[2] Net x%d" % loadout.nets
-	_slot_spear.modulate = Color.YELLOW if weapon == Weapon.SPEAR else Color.WHITE
-	_slot_net.modulate = Color.YELLOW if weapon == Weapon.NET else Color.WHITE
+	var extras := [
+		" (in hand)" if loadout.spear_in_hand else " (thrown)",
+		" x%d" % loadout.nets,
+		"",
+		"",
+		" x%d" % loadout.arrows,
+	]
+	for i in WEAPON_NAMES.size():
+		var slot: Label = _hotbar.get_child(i)
+		slot.visible = loadout.has(i)
+		slot.text = "[%d] %s%s" % [i + 1, WEAPON_NAMES[i], extras[i]]
+		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE

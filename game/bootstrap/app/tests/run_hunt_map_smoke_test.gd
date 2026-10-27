@@ -38,9 +38,15 @@ func _physics_process(_delta: float) -> bool:
 		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
+		_buy_club(_main.current)
 		print("hunt map smoke test: %d failure(s)" % _failures)
 		quit(1 if _failures else 0)
 	if _frame > 120:
+		return false
+	if _failures > 0:
+		# Later frames depend on earlier steps; stop at the first failure.
+		print("hunt map smoke test: %d failure(s)" % _failures)
+		quit(1)
 		return false
 	var hunter: CharacterBody3D = _map.get_node("Hunter")
 	var boars := _map.get_node("Boars").get_children()
@@ -75,6 +81,19 @@ func _physics_process(_delta: float) -> bool:
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()
 	return false
+
+
+## Uses the armory with enough tusks and buys the first item, the club.
+func _buy_club(camp: Node3D) -> void:
+	_main.progress.tusks = 100
+	camp.hunter.global_position = camp.get_node("Stations/WeaponShop").global_position + Vector3(1.5, 0, 0)
+	camp.hunter.interacted.emit()
+	var shop: Control = camp.get_node("Hud/ShopPanel")
+	_check(shop.visible, "armory opens the shop")
+	shop.get_node("%Items").get_child(0).pressed.emit()
+	_check(_main.progress.owns("item_club") and _main.progress.tusks == 70, "club bought for 30 tusks")
+	_check(camp.hunter.loadout.has(camp.hunter.Weapon.CLUB), "bought club is in the hotbar")
+	_check("item_club" in FileAccess.get_file_as_string(_main.save_store.path), "purchase is saved")
 
 
 ## Moves the target to open ground at spot and puts the hunter 6 m south of it, aiming at its body.

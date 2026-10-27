@@ -29,18 +29,19 @@ func show_start() -> void:
 
 func show_camp() -> void:
 	var camp := CampScene.instantiate()
+	camp.progress = progress
 	_swap(camp)
-	camp.show_progress(progress.tusks, progress.caught)
-	camp.station_used.connect(_on_station_used)
+	camp.purchased.connect(_save)
+	camp.hunt_requested.connect(start_hunt)
 
 
-func _on_station_used(station_id: String) -> void:
-	if station_id == "start_hunt":
-		start_hunt()
+func _save() -> void:
+	save_store.save_data(progress.to_dict())
 
 
 func start_hunt() -> void:
 	var map := MapScene.instantiate()
+	map.items = progress.items
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 
@@ -48,7 +49,7 @@ func start_hunt() -> void:
 func _show_results(hunt: RefCounted) -> void:
 	# Save point: hunt results (section 18).
 	progress.add_hunt(hunt)
-	save_store.save_data(progress.to_dict())
+	_save()
 	var results := ResultsScene.instantiate()
 	_swap(results)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

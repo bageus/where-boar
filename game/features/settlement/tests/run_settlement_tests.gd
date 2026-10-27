@@ -11,6 +11,7 @@ func _init() -> void:
 	failures += _check(_spend_needs_enough_tusks(), "spending needs enough tusks")
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
+	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -41,10 +42,21 @@ func _round_trip() -> bool:
 	var progress := Progress.new()
 	progress.tusks = 7
 	progress.caught = {"common_brown": 2}
+	progress.items = {"item_bow": 1}
 	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
-	return back.tusks == 7 and back.caught == {"common_brown": 2}
+	return back.tusks == 7 and back.caught == {"common_brown": 2} and back.owns("item_bow")
 
 
 func _bad_data_falls_back() -> bool:
 	var back := Progress.from_dict({"tusks": -5, "caught": "oops"})
 	return back.tusks == 0 and back.caught.is_empty()
+
+
+func _buy_weapon_once() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 60
+	var bought := progress.buy("item_sling")
+	var twice := progress.buy("item_sling")
+	var too_expensive := progress.buy("item_bow")
+	return bought and not twice and not too_expensive and progress.tusks == 35 \
+		and progress.owns("item_sling") and not progress.buy("item_unknown")
