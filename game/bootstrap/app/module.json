@@ -8,6 +8,7 @@
   ],
   "public_api": [],
   "dependencies": [
+    "features.boar",
     "presentation.hunt_map",
     "presentation.menus"
   ]
