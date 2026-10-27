@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-001
-last_completed_task_id: P3-001
+active_task_id: P3-002
+last_completed_task_id: P3-002
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-001 done; next P3-002.
+P3-002 done; next P3-003.
 
 ## Last completed work
 
@@ -35,8 +35,9 @@ P3-001 done; next P3-002.
 - P1-001, P1-002: boar and hunt domain, perception and escape rules.
 - P2-001..P2-003: `features.hunter`, boar agent scene, `presentation.hunt_map`, main scene runs the map.
 - P2-004: boar ram knockback + hunter stun; playtest fixes (hotbar HUD, central stamina bar, wall sliding).
-- P3-001: hunter health, boar CHARGE ram with damage, hunt ends at zero health.
 - P2-005: start screen, goal HUD, return to camp, results with tusks; boar health bar; minimap with escape zones.
+- P3-001: hunter health, boar CHARGE ram with damage, hunt ends at zero health.
+- P3-002: five boar types as .tres (colour, speed, senses, aggression, armour, rewards), rarity-weighted spawn, 6 boars per hunt.
 
 ## Build and validation
 
@@ -60,7 +61,7 @@ P3-001 done; next P3-002.
 
 ## Next action
 
-Start P3-002 (boar types).
+Start P3-003.
 
 ## Handoff notes
 

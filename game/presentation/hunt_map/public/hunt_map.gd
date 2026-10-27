@@ -5,12 +5,13 @@ extends Node3D
 const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 ## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
 
 ## ASSUMPTION: boars per prototype hunt.
-const BOAR_COUNT := 4
+const BOAR_COUNT := 6
 const RETURN_RADIUS := 3.0
 
 var hunt: Hunt
@@ -28,6 +29,7 @@ func _ready() -> void:
 	hunt = Hunt.new(mini(BOAR_COUNT, spawns.size()))
 	for i in hunt.total:
 		var boar := BoarScene.instantiate()
+		boar.boar_type = BoarTypes.pick(randf())
 		boar.hunter = _hunter
 		boar.escape_zones = zones
 		boar.position = spawns[i].position

@@ -4,13 +4,15 @@ extends CenterContainer
 
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
 func show_results(hunt: Hunt) -> void:
 	var lines: PackedStringArray = []
 	for type_id in hunt.type_ids():
+		var type := BoarTypes.find(type_id)
 		lines.append("%s: killed %d, caught %d, escaped %d" % [
-			type_id,
+			type.display_name if type else type_id,
 			hunt.count(type_id, BoarOutcome.Kind.DEAD),
 			hunt.count(type_id, BoarOutcome.Kind.CAPTURED),
 			hunt.count(type_id, BoarOutcome.Kind.ESCAPED),

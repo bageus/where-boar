@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+
+[resource]
+script = ExtResource("1_type")
+id = "armored_black"
+display_name = "Armored boar"
+color = Color(0.12, 0.12, 0.14, 1)
+spawn_weight = 8.0
+max_health = 8
+damage = 2
+flee_speed = 6.5
+panic_speed = 8.0
+perception_radius = 10.0
+aggression = 0.5
+knock_scale = 0.2
+reward_dead = 8
+reward_captured = 14

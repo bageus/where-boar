@@ -2,6 +2,7 @@ extends SceneTree
 
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
 func _init() -> void:
@@ -13,6 +14,7 @@ func _init() -> void:
 	failures += _check(_escape_only_when_fleeing(), "escape only when fleeing")
 	failures += _check(_trap_held_counts_as_captured(), "trap held to hunt end counts as captured")
 	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
+	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
 	print("boar tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -78,3 +80,11 @@ func _only_panic_turns_to_charge() -> bool:
 	var stays := boar.state == Boar.State.CHARGE
 	boar.end_charge()
 	return calm.state == Boar.State.WANDER and charging and stays and boar.state == Boar.State.FLEE
+
+
+func _types_pick_by_weight() -> bool:
+	var ids := BoarTypes.ALL.map(func(type: Resource) -> String: return type.id)
+	return ids == ["common_brown", "runner_grey", "aggressive_red", "armored_black", "golden_tusk"] \
+		and BoarTypes.pick(0.0).id == "common_brown" \
+		and BoarTypes.pick(0.999).id == "golden_tusk" \
+		and BoarTypes.rewards()["golden_tusk"] == {"dead": 10, "captured": 20}

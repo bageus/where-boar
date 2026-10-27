@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+
+[resource]
+script = ExtResource("1_type")
+id = "aggressive_red"
+display_name = "Angry boar"
+color = Color(0.75, 0.2, 0.15, 1)
+spawn_weight = 20.0
+max_health = 4
+damage = 2
+flee_speed = 8.0
+panic_speed = 10.0
+perception_radius = 12.0
+aggression = 1.0
+knock_scale = 1.0
+reward_dead = 6
+reward_captured = 10

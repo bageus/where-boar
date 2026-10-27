@@ -34,7 +34,7 @@ func _physics_process(_delta: float) -> bool:
 	var boars := _map.get_node("Boars").get_children()
 	match _frame:
 		2:
-			_check(boars.size() == 4, "four boars spawn")
+			_check(boars.size() == 6, "six boars spawn")
 			# Put the hunter 5 m from the first boar, facing it; it must start fleeing.
 			hunter.global_position = boars[0].global_position + Vector3(0, -0.4, 5)
 			hunter.rotation = Vector3.ZERO
@@ -58,7 +58,7 @@ func _physics_process(_delta: float) -> bool:
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
 			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 2, "loadout spent")
-			_check(_map.hunt.remaining() == 3 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
+			_check(_map.hunt.remaining() == 5 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()

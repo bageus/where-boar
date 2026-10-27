@@ -5,12 +5,10 @@ extends CharacterBody3D
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 
-# ASSUMPTION numbers (D013), tuned in phase 2. Flee and panic outrun a sprinting hunter (7 m/s).
+# ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
 const WANDER_SPEED := 1.5
-const FLEE_SPEED := 8.0
-const PANIC_SPEED := 10.0
-const PERCEPTION_RADIUS := 12.0
 const ESCAPE_RADIUS := 3.0
 const WANDER_TURN_SECONDS := 2.0
 const PANIC_TURN_SECONDS := 0.6
@@ -24,18 +22,13 @@ const KNOCK_DECAY := 6.0
 # Charge after an attack (D018), ASSUMPTION numbers (D013).
 const PANIC_SECONDS := 2.5
 const CHARGE_SECONDS := 4.0
-const CHARGE_SPEED := 9.0
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
 ## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
 signal outcome_reached(type_id: String, kind: int)
 
-@export var type_id := "common_brown"
-@export var max_health := 3
-@export var damage := 1
-## Chance that a panicking boar turns and charges the hunter.
-@export_range(0.0, 1.0) var aggression := 0.35
+@export var boar_type: BoarType = preload("res://game/features/boar/content/boar_common_brown.tres")
 
 ## Injected by the scene that spawns the boar.
 var hunter: Node3D
@@ -60,7 +53,11 @@ var _charge_rolled := false
 
 
 func _ready() -> void:
-	boar = Boar.new(type_id, max_health)
+	boar = Boar.new(boar_type.id, boar_type.max_health)
+	var hide := StandardMaterial3D.new()
+	hide.albedo_color = boar_type.color
+	$Body.material_override = hide
+	$Snout.material_override = hide
 	_show_state()
 
 
@@ -79,7 +76,7 @@ func net_hit() -> void:
 
 ## Knocked by a ram or another boar: pushed along `impulse` for a moment.
 func knock(impulse: Vector3, _damage: int = 0) -> void:
-	_knock = impulse
+	_knock = impulse * boar_type.knock_scale
 
 
 func _after_change() -> void:
@@ -102,7 +99,7 @@ func _physics_process(delta: float) -> void:
 	var pos := Vector2(global_position.x, global_position.z)
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
 	var before := boar.state
-	BoarSenses.perceive(boar, pos, hunter_pos, PERCEPTION_RADIUS)
+	BoarSenses.perceive(boar, pos, hunter_pos, boar_type.perception_radius)
 	for zone in escape_zones:
 		BoarSenses.enter_zone(boar, pos, zone, ESCAPE_RADIUS)
 	if boar.state == Boar.State.ESCAPED:
@@ -124,7 +121,7 @@ func _physics_process(delta: float) -> void:
 func _maybe_charge() -> void:
 	if boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled:
 		_charge_rolled = true
-		if randf() < aggression:
+		if randf() < boar_type.aggression:
 			boar.charge()
 	elif boar.state == Boar.State.CHARGE and _state_time >= CHARGE_SECONDS:
 		boar.end_charge()
@@ -141,16 +138,16 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 			_heading = Vector2.from_angle(_turn)
 		Boar.State.FLEE:
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
-			speed = FLEE_SPEED
+			speed = boar_type.flee_speed
 		Boar.State.CHARGE:
 			_heading = (hunter_pos - pos).normalized()
-			speed = CHARGE_SPEED
+			speed = boar_type.flee_speed
 		_:
 			if _turn_left <= 0.0:
 				_turn = randf_range(-PANIC_TURN_MAX, PANIC_TURN_MAX)
 				_turn_left = PANIC_TURN_SECONDS
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn)
-			speed = PANIC_SPEED
+			speed = boar_type.panic_speed
 	if _wall != Vector2.ZERO and _heading.dot(_wall) < 0.0 and boar.state != Boar.State.WANDER:
 		var zone := BoarSenses.nearest_zone(pos, escape_zones)
 		var toward := escape_zones[zone] - pos if zone != -1 else pos - hunter_pos
@@ -177,7 +174,7 @@ func _ram(delta: float) -> void:
 		if other.has_method("knock") and _ram_cooldown <= 0.0 and Vector2(velocity.x, velocity.z).length() >= RAM_MIN_SPEED:
 			var push := Vector3(velocity.x, 0.0, velocity.z).normalized()
 			var charging := boar.state == Boar.State.CHARGE
-			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, damage * HP_PER_DAMAGE if charging else 0)
+			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE if charging else 0)
 			_ram_cooldown = RAM_COOLDOWN
 			if charging:
 				boar.end_charge()
@@ -196,12 +193,12 @@ func _report_outcome() -> void:
 	var kind := boar.outcome_kind()
 	if kind != BoarOutcome.Kind.NONE and not _reported:
 		_reported = true
-		outcome_reached.emit(type_id, kind)
+		outcome_reached.emit(boar_type.id, kind)
 
 
 func _show_state() -> void:
 	_label.text = state_name()
 	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
-	var ratio := float(boar.health) / max_health
+	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)
 	(_health_fill.material_override as StandardMaterial3D).albedo_color = Color.RED.lerp(Color.GREEN, ratio)

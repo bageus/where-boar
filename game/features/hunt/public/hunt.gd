@@ -4,15 +4,7 @@ extends RefCounted
 ## Results of one hunt (M007): outcome counts per boar type and when the hunt is over.
 
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
-
-## Tusks per boar type, GAME_SPEC section 15 (ASSUMPTION numbers, D013).
-const REWARDS := {
-	"common_brown": {"dead": 2, "captured": 4},
-	"runner_grey": {"dead": 4, "captured": 7},
-	"aggressive_red": {"dead": 6, "captured": 10},
-	"armored_black": {"dead": 8, "captured": 14},
-	"golden_tusk": {"dead": 10, "captured": 20},
-}
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 ## Boars on the map when the hunt started.
 var total := 0
@@ -63,7 +55,8 @@ func is_over() -> bool:
 
 
 ## rewards: type_id -> {"dead": int, "captured": int}. Missing types pay nothing.
-func tusks(rewards: Dictionary = REWARDS) -> int:
+## Defaults to the authored boar types' rewards (section 15).
+func tusks(rewards: Dictionary = BoarTypes.rewards()) -> int:
 	var total_tusks := 0
 	for type_id in _counts:
 		var reward: Dictionary = rewards.get(type_id, {})
