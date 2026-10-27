@@ -19,7 +19,7 @@ func _init() -> void:
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
 	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
-	failures += _check(_meal_and_water(), "best meal raises max stamina; water sips restore it")
+	failures += _check(_meal_and_water(), "carried meals stack on max stamina; water sips restore it")
 	failures += _check(_porter_and_any_trap(), "porter adds nets and arrows; any trap in stock can be set")
 	failures += _check(_ride_by_mount_type(), "mount type sets speed and perk; only the stab works when riding")
 	failures += _check(_saddles_from_items(), "saddled mount types come from camp items")
@@ -125,14 +125,14 @@ func _meal_and_water() -> bool:
 	var loadout := Loadout.new()
 	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1})
 	var stamina := Stamina.new()
-	stamina.eat(loadout.eat_best_meal())
-	var fed := is_equal_approx(stamina.max_value, 150.0) and is_equal_approx(stamina.value, 150.0)
+	stamina.eat(loadout.eat_meals())
+	var fed := is_equal_approx(stamina.max_value, 190.0) and is_equal_approx(stamina.value, 190.0)
 	stamina.value = 0.0
 	stamina.drink(40.0)
 	for i in Loadout.WATER_SIPS:
 		loadout.drink()
 	return fed and is_equal_approx(stamina.value, 40.0) and not loadout.drink() \
-		and loadout.used == {"item_feast": 1}
+		and loadout.used == {"item_feast": 1, "item_stew": 2} and is_zero_approx(loadout.eat_meals())
 
 
 func _porter_and_any_trap() -> bool:

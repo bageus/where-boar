@@ -5,6 +5,7 @@ extends SceneTree
 
 const MainScene = preload("res://game/bootstrap/app/main.tscn")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
 
 var _frame := 0
@@ -18,6 +19,7 @@ var _hunt: RefCounted
 
 
 func _initialize() -> void:
+	ShopCatalog.free_for_testing = false
 	_main = MainScene.instantiate()
 	# Keep the player's real save out of the test.
 	_main.save_store.path = "user://smoke_save.json"

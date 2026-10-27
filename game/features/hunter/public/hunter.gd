@@ -171,12 +171,12 @@ func wade(entered: bool) -> void:
 	_wading += 1 if entered else -1
 
 
-## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012),
+## Called when a hunt starts: camp meals are eaten and raise max stamina for the hunt (M012),
 ## and the first saddled boar waits beside the hunter.
 func start_hunt() -> void:
 	if not loadout.saddled.is_empty():
 		$Rider.bring_mount(loadout.saddled[0])
-	stamina.eat(loadout.eat_best_meal())
+	stamina.eat(loadout.eat_meals())
 	_hud.show_stamina(stamina.value, stamina.max_value)
 
 

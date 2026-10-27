@@ -39,8 +39,8 @@ func _refresh() -> void:
 		var owned: bool = progress.sold_out(item_id)
 		var count: String = "" if item["unique"] else "  (have %d)" % progress.items.get(item_id, 0)
 		var locked := "" if progress.unlocked(item_id) else "  (catch one first)"
-		button.text = "%s — %s%s%s" % [item["name"], ("owned" if item["unique"] else "max") if owned else "%d tusks" % item["price"], count, locked]
-		button.disabled = owned or progress.tusks < item["price"] or locked != ""
+		button.text = "%s — %s%s%s" % [item["name"], ("owned" if item["unique"] else "max") if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id)), count, locked]
+		button.disabled = owned or progress.tusks < ShopCatalog.price(item_id) or locked != ""
 		button.pressed.connect(_buy.bind(item_id))
 		%Items.add_child(button)
 	%Tusks.text = "Tusks: %d" % progress.tusks

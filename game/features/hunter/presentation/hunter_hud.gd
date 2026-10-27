@@ -25,8 +25,10 @@ func show_throw_power(aiming: bool, power: float) -> void:
 
 
 func show_stamina(value: float, max_value: float) -> void:
+	# Meals raise the maximum above 100 (e.g. 120%); the label shows the real value.
 	$Stamina.max_value = max_value
 	$Stamina.value = value
+	$Stamina/Value.text = "Stamina %d%%" % roundi(value)
 
 
 func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:

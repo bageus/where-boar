@@ -3,10 +3,13 @@ extends SceneTree
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 
 
 func _init() -> void:
+	ShopCatalog.free_for_testing = false
 	var failures := 0
+	failures += _check(_free_for_testing_costs_nothing(), "while testing, items are free and saddles unlocked")
 	failures += _check(_hunt_adds_tusks_and_catches(), "a hunt adds tusks and live catches and spends bait")
 	failures += _check(_spend_needs_enough_tusks(), "spending needs enough tusks")
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
@@ -56,6 +59,14 @@ func _round_trip() -> bool:
 func _bad_data_falls_back() -> bool:
 	var back := Progress.from_dict({"tusks": -5, "caught": "oops"})
 	return back.tusks == 0 and back.caught.is_empty()
+
+
+func _free_for_testing_costs_nothing() -> bool:
+	ShopCatalog.free_for_testing = true
+	var progress := Progress.new()
+	var ok := progress.buy("item_bow") and progress.buy("item_saddle_runner_grey") and progress.tusks == 0
+	ShopCatalog.free_for_testing = false
+	return ok
 
 
 func _buy_weapon_once() -> bool:

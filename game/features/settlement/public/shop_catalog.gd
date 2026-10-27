@@ -4,6 +4,10 @@ extends RefCounted
 ## unique items (weapons) are bought once; others stack, up to max when given.
 ## requires_caught names a boar type that must be in the pens.
 
+## shortcut: everything in camp is free and unlocked while the owner tests the slice (2026-10-27);
+## set to false (or delete) before balancing prices.
+static var free_for_testing := true
+
 const ITEMS := {
 	"item_club": {"name": "Club", "shop": "weapon_shop", "price": 30, "unique": true},
 	"item_sling": {"name": "Sling", "shop": "weapon_shop", "price": 25, "unique": true},
@@ -28,6 +32,11 @@ const ITEMS := {
 	"item_saddle_aggressive_red": {"name": "Saddle an Angry boar (rams)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "aggressive_red"},
 	"item_saddle_armored_black": {"name": "Saddle an Armored boar (steady)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "armored_black"},
 }
+
+
+## What item_id costs right now.
+static func price(item_id: String) -> int:
+	return 0 if free_for_testing else ITEMS[item_id]["price"]
 
 
 ## Item ids sold at shop_id, in catalog order.
