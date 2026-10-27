@@ -6,6 +6,12 @@ const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
+const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
+const WILD_SCENES := [
+	preload("res://game/features/companions/public/wild_rooster.tscn"),
+	preload("res://game/features/companions/public/wild_turkey.tscn"),
+]
 
 ## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
@@ -19,6 +25,9 @@ const SHOUT_RADIUS := 15.0
 var hunt: Hunt
 ## Camp gear (item_id -> count), injected before the map enters the tree.
 var items: Dictionary = {}
+## Helper animals in the camp pen (animal_id -> count), injected like items. Each kind helps once per hunt.
+var helpers: Dictionary = {}
+var _helpers_used: Array[String] = []
 ## Bait on the ground; the same array is shared with every boar.
 var _baits: Array[Node3D] = []
 
@@ -39,6 +48,13 @@ func _ready() -> void:
 	hunt = Hunt.new(total)
 	for g in groups:
 		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones)
+	# Spare spawn points get one wild rooster and one wild turkey to catch (D024).
+	for w in mini(WILD_SCENES.size(), spawns.size() - groups):
+		var animal: CharacterBody3D = WILD_SCENES[w].instantiate()
+		animal.hunter = _hunter
+		animal.position = spawns[groups + w].position
+		animal.caught.connect(_on_helper_caught)
+		$Wild.add_child(animal)
 	_hunter.equip(items)
 	_hunter.start_hunt()
 	_hunter.interacted.connect(_on_interacted)
@@ -49,6 +65,7 @@ func _ready() -> void:
 	minimap.hunter = _hunter
 	minimap.escape_zones = zones
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
+	minimap.boars = $Boars
 	_show_goal()
 
 
@@ -69,6 +86,41 @@ func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
 		boar.outcome_reached.connect(_on_outcome)
 		boar.held_changed.connect(_on_held_changed)
 		$Boars.add_child(boar)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("summon_rooster"):
+		summon(CompanionRules.ROOSTER)
+	elif event.is_action_pressed("summon_turkey"):
+		summon(CompanionRules.TURKEY)
+
+
+## Calls a helper from the camp pen (M016, M017): the rooster drives the nearest group at the hunter,
+## the turkey marks every boar on the minimap.
+func summon(animal_id: String) -> void:
+	if helpers.get(animal_id, 0) == 0 or animal_id in _helpers_used or hunt.is_over():
+		return
+	_helpers_used.append(animal_id)
+	if animal_id == CompanionRules.TURKEY:
+		$Hud/Minimap.reveal_left = CompanionRules.SCOUT_SECONDS
+	else:
+		var hunter_pos := Vector2(_hunter.global_position.x, _hunter.global_position.z)
+		var spots: Array[Vector2] = []
+		for boar in $Boars.get_children():
+			spots.append(Vector2(boar.global_position.x, boar.global_position.z))
+		var centre := CompanionRules.target_group_centre(spots, hunter_pos, 10.0)
+		var land := CompanionRules.drive_point(centre, hunter_pos)
+		var rooster: Node3D = RoosterScene.instantiate()
+		rooster.target = Vector3(land.x, 0.5, land.y)
+		rooster.boars = $Boars.get_children()
+		rooster.position = _hunter.position + Vector3.UP * 3.0
+		add_child(rooster)
+	_show_goal()
+
+
+func _on_helper_caught(animal_id: String) -> void:
+	hunt.helpers_caught[animal_id] = hunt.helpers_caught.get(animal_id, 0) + 1
+	_show_goal()
 
 
 func _on_outcome(type_id: String, kind: int) -> void:
@@ -127,10 +179,15 @@ func _on_bait_placed(bait: Node3D) -> void:
 
 
 func _show_goal() -> void:
-	_goal.text = "Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d" % [
+	var pen := PackedStringArray()
+	for animal_id in [CompanionRules.ROOSTER, CompanionRules.TURKEY]:
+		if helpers.get(animal_id, 0) > 0 and animal_id not in _helpers_used:
+			pen.append("[%s] %s" % ["Z" if animal_id == CompanionRules.ROOSTER else "X", animal_id])
+	_goal.text = "Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d\nHelpers: %s" % [
 		hunt.remaining(),
 		hunt.held,
 		hunt.count_all(BoarOutcome.Kind.DEAD),
 		hunt.count_all(BoarOutcome.Kind.CAPTURED),
 		hunt.count_all(BoarOutcome.Kind.ESCAPED),
+		", ".join(pen) if not pen.is_empty() else "none",
 	]

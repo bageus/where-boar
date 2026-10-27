@@ -42,6 +42,7 @@ func _save() -> void:
 func start_hunt() -> void:
 	var map := MapScene.instantiate()
 	map.items = progress.items
+	map.helpers = progress.helpers
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 

@@ -28,10 +28,12 @@ func _hunt_adds_tusks_and_catches() -> bool:
 	hunt.record("golden_tusk", BoarOutcome.Kind.CAPTURED)
 	hunt.record("runner_grey", BoarOutcome.Kind.ESCAPED)
 	hunt.used_items = {"item_acorns": 1}
+	hunt.helpers_caught = {"rooster": 1}
 	var progress := Progress.new()
 	progress.items = {"item_acorns": 3}
 	progress.add_hunt(hunt)
-	return progress.tusks == 22 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2
+	return progress.tusks == 22 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2 \
+		and progress.helpers == {"rooster": 1}
 
 
 func _spend_needs_enough_tusks() -> bool:

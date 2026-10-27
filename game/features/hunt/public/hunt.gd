@@ -13,6 +13,8 @@ var returned := false
 var used_items: Dictionary = {}
 ## Boars held in traps right now; not free, counted as caught when the hunt ends (M007).
 var held := 0
+## animal_id -> wild helper animals (rooster, turkey) caught for the camp pen.
+var helpers_caught: Dictionary = {}
 ## type_id -> BoarOutcome.Kind -> count
 var _counts: Dictionary = {}
 var _resolved := 0

@@ -43,7 +43,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-007 | 3 | Traps: pit, snare, tripwire, cage, fence; hunting hut (M015) | P3-005 | DONE |
 | P3-008 | 3 | Herds and groups, fear spreads to neighbours (M009) | P3-002 | DONE |
 | P3-009 | 3 | Campfire food and water bag (M012) | P3-004 | DONE |
-| P3-010 | 3 | Rooster driver and turkey scout (M016, M017) | P3-008 | PLANNED |
+| P3-010 | 3 | Rooster driver and turkey scout (M016, M017) | P3-008 | DONE |
 | P3-011 | 3 | Helpers: porter and trap setter (M013) | P3-007 | PLANNED |
 | P3-012 | 3 | Mounts from caught boars (D021) | P3-004 | PLANNED |
 | P3-013 | 3 | Green Valley map: hills, river, bushes, 5–10 escape zones | P3-008 | PLANNED |

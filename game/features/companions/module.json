@@ -1,0 +1,17 @@
+{
+  "id": "features.companions",
+  "layer": "features",
+  "purpose": "Own the helper animals: wild roosters and turkeys to catch on the map, and the rooster driver summoned from the camp pen (M016, M017, D024).",
+  "state_owner": [
+    "Wild helper animals and summoned helpers during one hunt"
+  ],
+  "public_api": [
+    "public/wild_animal.gd",
+    "public/wild_rooster.tscn",
+    "public/wild_turkey.tscn",
+    "public/rooster_driver.tscn",
+    "public/rooster_driver.gd",
+    "public/companion_rules.gd"
+  ],
+  "dependencies": []
+}

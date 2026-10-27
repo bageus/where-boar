@@ -8,6 +8,9 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 var _frame := 0
 var _failures := 0
+## A script error skips the rest of a frame silently; counting checks catches that.
+const EXPECTED_CHECKS := 24
+var _checks := 0
 var _main: Node
 var _map: Node3D
 var _hunt: RefCounted
@@ -41,6 +44,9 @@ func _physics_process(_delta: float) -> bool:
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
 		_buy_club(_main.current)
+		if _checks != EXPECTED_CHECKS:
+			_failures += 1
+			push_error("FAIL: ran %d of %d checks" % [_checks, EXPECTED_CHECKS])
 		print("hunt map smoke test: %d failure(s)" % _failures)
 		quit(1 if _failures else 0)
 	if _frame > 120:
@@ -62,7 +68,7 @@ func _physics_process(_delta: float) -> bool:
 			_check(boars[0].state_name() == "FLEE", "boar near hunter flees")
 			_check(boars[9].state_name() != "WANDER", "fear spreads through the herd")
 			hunter.shout()
-			_check(boars[0]._shout_left > 0.0, "a shout steers the fleeing boar")
+			_check(boars[0]._forced_left > 0.0, "a shout steers the fleeing boar")
 			hunter.equip({"item_carrot": 1})
 			hunter._place_bait()
 			_check(boars[3].baits.size() == 1 and hunter.loadout.used == {"item_carrot": 1}, "placed bait is shown to boars")
@@ -81,6 +87,14 @@ func _physics_process(_delta: float) -> bool:
 			_map.add_child(pit)
 			pit.global_position = boars[3].global_position
 			boars[3].set_physics_process(true)
+			# Helpers: a netted wild rooster goes to the pen; pen animals can be summoned once.
+			_map.get_node("Wild").get_child(0).net_hit()
+			_check(_map.hunt.helpers_caught == {"rooster": 1}, "a netted wild rooster is caught")
+			_map.helpers = {"rooster": 1, "turkey": 1}
+			_map.summon("turkey")
+			_map.summon("rooster")
+			_check(_map.get_node("Hud/Minimap").reveal_left > 0.0, "turkey marks boars on the minimap")
+			_check(_map.get_node_or_null("RoosterDriver") != null, "rooster flies out to drive a group")
 			_freeze_and_aim(hunter, boars[2], Vector3(3, 0, 20))
 			hunter.weapon = hunter.Weapon.SPEAR
 			Input.action_press("aim")
@@ -121,6 +135,7 @@ func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vecto
 
 
 func _check(ok: bool, name: String) -> void:
+	_checks += 1
 	if not ok:
 		_failures += 1
 		push_error("FAIL: " + name)

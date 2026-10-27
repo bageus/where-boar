@@ -1,8 +1,6 @@
 extends RigidBody3D
 
-## Thrown net: captures the first boar it touches, otherwise lies on the ground (M004).
-
-const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
+## Thrown net: captures the first boar or wild helper animal it touches, otherwise lies on the ground (M004).
 
 var _landed := false
 
@@ -15,7 +13,8 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
-	if body is BoarBody:
+	# Boars and wild roosters/turkeys both answer net_hit; the hunter does not know helper animals.
+	if body.has_method("net_hit"):
 		body.net_hit()
 		queue_free()
 		return

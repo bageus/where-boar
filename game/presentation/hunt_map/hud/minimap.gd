@@ -1,6 +1,7 @@
 extends Control
 
-## Top-down minimap (D011): escape zones, the return point and the hunter. Boars are not shown.
+## Top-down minimap (D011): escape zones, the return point and the hunter.
+## Boars appear only while a turkey scout has marked them (M017).
 
 ## Half the map's side in metres; the map is centred on the origin.
 const MAP_HALF_SIZE := 40.0
@@ -9,9 +10,13 @@ const ZONE_RADIUS := 3.0
 var hunter: Node3D
 var escape_zones: Array[Vector2] = []
 var return_point := Vector2.ZERO
+## Parent of the boar nodes, and seconds the turkey's marks still show.
+var boars: Node
+var reveal_left := 0.0
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	reveal_left -= delta
 	queue_redraw()
 
 
@@ -21,6 +26,9 @@ func _draw() -> void:
 	for zone in escape_zones:
 		draw_circle(_to_px(zone), maxf(ZONE_RADIUS * scale_px, 4.0), Color(0.9, 0.2, 0.15))
 	draw_circle(_to_px(return_point), maxf(ZONE_RADIUS * scale_px, 4.0), Color(0.2, 0.8, 0.3))
+	if boars and reveal_left > 0.0:
+		for boar: Node3D in boars.get_children():
+			draw_circle(_to_px(Vector2(boar.global_position.x, boar.global_position.z)), 3.0, Color(1, 0.85, 0.3))
 	if hunter:
 		var at := _to_px(Vector2(hunter.global_position.x, hunter.global_position.z))
 		var forward := Vector2(-hunter.global_basis.z.x, -hunter.global_basis.z.z).normalized()

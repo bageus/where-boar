@@ -98,6 +98,16 @@ func hear_shout(shout_pos: Vector3) -> void:
 	_show_state()
 
 
+## A rooster crowed at pos (M016): a calm or fleeing boar runs straight away from it.
+func driven_from(pos: Vector3) -> void:
+	if boar.state not in [Boar.State.WANDER, Boar.State.FLEE]:
+		return
+	boar.flee()
+	_forced_heading = Vector2(global_position.x - pos.x, global_position.z - pos.z).normalized()
+	_forced_left = SHOUT_SECONDS
+	_show_state()
+
+
 func net_hit() -> void:
 	var was_held := boar.state == Boar.State.TRAPPED
 	boar.net_capture()

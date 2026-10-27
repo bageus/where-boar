@@ -35,6 +35,8 @@ func _show_progress() -> void:
 	for type_id in caught:
 		var type := BoarTypes.find(type_id)
 		lines.append("%s: %d in pens" % [type.display_name if type else type_id, caught[type_id]])
+	for animal_id in progress.helpers:
+		lines.append("%s: %d in pens" % [animal_id, progress.helpers[animal_id]])
 	$Hud/Progress.text = "\n".join(lines)
 
 
