@@ -188,6 +188,10 @@ func _on_held_changed(held: bool) -> void:
 
 
 func _on_interacted() -> void:
+	# A wild rooster or turkey within reach is grabbed by hand (playtest 2026-10-27).
+	for animal in $Wild.get_children():
+		if animal.try_grab(_hunter.global_position):
+			return
 	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
 		return
 	hunt.returned = true

@@ -29,6 +29,10 @@ const CROUCH_SPEED := 2.0
 const JUMP_SPEED := 4.5
 const LUNGE_SPEED := 10.0
 const THROW_SPEED := 18.0
+## Holding the aim charges the throw over AIM_CHARGE_SECONDS; power scales the spear's speed and range.
+const AIM_CHARGE_SECONDS := 1.0
+const WEAK_THROW_SCALE := 0.5
+const STRONG_THROW_SCALE := 1.4
 const STAB_DAMAGE := 1
 const CLUB_DAMAGE := 2
 const CLUB_KNOCK := 6.0
@@ -73,6 +77,8 @@ var _shout_cooldown := 0.0
 ## River segments the hunter is standing in; rivers call wade().
 var _wading := 0
 var _base_fov := 80.0
+## Spear throw power 0..1, charged while aiming.
+var _aim_power := 0.0
 ## From the settings screen (section 16).
 var mouse_sensitivity := 0.002
 ## Off reduces camera motion (knockback roll) for players who get motion sick.
@@ -92,6 +98,7 @@ func _ready() -> void:
 	_reach.add_exception(self)
 	_base_fov = _camera.fov
 	$Thud.stream = Synth.thud()
+	$Voice.stream = Synth.shout()
 	_update_hud()
 
 
@@ -178,6 +185,7 @@ func shout() -> void:
 	if _shout_cooldown > 0.0:
 		return
 	_shout_cooldown = SHOUT_COOLDOWN
+	$Voice.play()
 	shouted.emit(global_position)
 
 
@@ -231,7 +239,10 @@ func _physics_process(delta: float) -> void:
 	if _wading > 0:
 		speed *= WADE_SPEED_SCALE
 	var aiming := weapon == Weapon.SPEAR and loadout.spear_in_hand and Input.is_action_pressed("aim")
+	_aim_power = minf(1.0, _aim_power + delta / AIM_CHARGE_SECONDS) if aiming else 0.0
 	_camera.fov = lerpf(_camera.fov, _base_fov * (AIM_ZOOM if aiming else 1.0), minf(1.0, 12.0 * delta))
+	_hud.show_throw_power(aiming, _aim_power)
+	$Camera/Hands.pose(weapon == Weapon.SPEAR and loadout.spear_in_hand, weapon == Weapon.NET and loadout.nets > 0, aiming, _aim_power, delta)
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
 		velocity.x = direction.x * speed
@@ -264,11 +275,15 @@ func _attack() -> void:
 		Weapon.SPEAR:
 			if Input.is_action_pressed("aim"):
 				if loadout.throw_spear():
-					_throw(SpearScene)
-			elif loadout.spear_in_hand and _reach.get_collider() is BoarBody:
-				_reach.get_collider().spear_hit(STAB_DAMAGE)
+					_throw(SpearScene, THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, _aim_power))
+					_aim_power = 0.0
+			elif loadout.spear_in_hand:
+				$Camera/Hands.strike()
+				if _reach.get_collider() is BoarBody:
+					_reach.get_collider().spear_hit(STAB_DAMAGE)
 		Weapon.NET:
 			if loadout.throw_net():
+				$Camera/Hands.strike()
 				_throw(NetScene)
 		Weapon.CLUB:
 			var target := _reach.get_collider()

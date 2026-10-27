@@ -10,7 +10,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 30
+const EXPECTED_CHECKS := 31
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -94,6 +94,10 @@ func _physics_process(_delta: float) -> bool:
 			# Helpers: a netted wild rooster goes to the pen; pen animals can be summoned once.
 			_map.get_node("Wild").get_child(0).net_hit()
 			_check(_map.hunt.helpers_caught == {"rooster": 1}, "a netted wild rooster is caught")
+			var turkey: Node3D = _map.get_node("Wild").get_child(1)
+			hunter.global_position = turkey.global_position + Vector3(1.0, 0.0, 0.0)
+			_map._on_interacted()
+			_check(_map.hunt.helpers_caught == {"rooster": 1, "turkey": 1}, "a wild turkey within reach is grabbed with E")
 			_map.helpers = {"rooster": 1, "turkey": 1}
 			_map.summon("turkey")
 			_map.summon("rooster")
@@ -102,6 +106,7 @@ func _physics_process(_delta: float) -> bool:
 			_freeze_and_aim(hunter, boars[2], Vector3(3, 0, 20))
 			hunter.weapon = hunter.Weapon.SPEAR
 			Input.action_press("aim")
+			hunter._aim_power = 1.0  # a fully charged throw
 			hunter._attack()
 			Input.action_release("aim")
 		120:

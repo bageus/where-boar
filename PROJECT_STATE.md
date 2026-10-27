@@ -74,7 +74,7 @@ None. P3-001..P3-015 done; riding confirmed as saddled (D026).
 
 ## Next action
 
-Owner playtest of the vertical slice (playtest fixes of 2026-10-27 included).
+Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in, D027).
 
 ## Handoff notes
 

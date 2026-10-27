@@ -18,6 +18,12 @@ func show_health(value: int) -> void:
 	$Health.value = value
 
 
+## Throw power bar under the crosshair, shown only while aiming (playtest 2026-10-27).
+func show_throw_power(aiming: bool, power: float) -> void:
+	$ThrowPower.visible = aiming
+	$ThrowPower.value = power * 100.0
+
+
 func show_stamina(value: float, max_value: float) -> void:
 	$Stamina.max_value = max_value
 	$Stamina.value = value

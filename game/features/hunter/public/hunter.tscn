@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/public/hunter.gd" id="1_hunter"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hunter_hud.gd" id="2_hud"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/rider.gd" id="3_rider"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/presentation/hands.tscn" id="4_hands"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_hunter"]
 radius = 0.4
@@ -21,6 +22,8 @@ fov = 80.0
 
 [node name="Reach" type="RayCast3D" parent="Camera"]
 target_position = Vector3(0, 0, -2.5)
+
+[node name="Hands" parent="Camera" instance=ExtResource("4_hands")]
 
 [node name="Hud" type="CanvasLayer" parent="."]
 script = ExtResource("2_hud")
@@ -50,6 +53,22 @@ offset_bottom = -60.0
 grow_horizontal = 2
 grow_vertical = 0
 value = 100.0
+
+[node name="ThrowPower" type="ProgressBar" parent="Hud"]
+visible = false
+modulate = Color(1, 0.85, 0.3, 1)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = 30.0
+offset_right = 80.0
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 2
+show_percentage = false
 
 [node name="Health" type="ProgressBar" parent="Hud"]
 modulate = Color(1, 0.35, 0.35, 1)
@@ -98,6 +117,9 @@ offset_bottom = 120.0
 theme_override_font_sizes/font_size = 14
 autowrap_mode = 3
 text = "WASD move, Shift sprint, Caps Lock sneak on/off, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, F bait, R shout, G/T trap, Q drink, E pick up or end hunt at camp, Esc pause"
+
+[node name="Voice" type="AudioStreamPlayer" parent="."]
+volume_db = -4.0
 
 [node name="Thud" type="AudioStreamPlayer" parent="."]
 

@@ -13,5 +13,7 @@
     "public/rooster_driver.gd",
     "public/companion_rules.gd"
   ],
-  "dependencies": []
+  "dependencies": [
+    "core.synth"
+  ]
 }
