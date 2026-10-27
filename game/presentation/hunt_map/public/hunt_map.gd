@@ -13,10 +13,14 @@ signal hunt_ended(hunt: Hunt)
 ## ASSUMPTION: boars per prototype hunt.
 const BOAR_COUNT := 6
 const RETURN_RADIUS := 3.0
+## ASSUMPTION (D013): how far a shout carries, metres.
+const SHOUT_RADIUS := 15.0
 
 var hunt: Hunt
 ## Camp gear (item_id -> count), injected before the map enters the tree.
 var items: Dictionary = {}
+## Bait on the ground; the same array is shared with every boar.
+var _baits: Array[Node3D] = []
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _goal: Label = $Hud/Goal
@@ -34,12 +38,15 @@ func _ready() -> void:
 		boar.boar_type = BoarTypes.pick(randf())
 		boar.hunter = _hunter
 		boar.escape_zones = zones
+		boar.baits = _baits
 		boar.position = spawns[i].position
 		boar.outcome_reached.connect(_on_outcome)
 		$Boars.add_child(boar)
 	_hunter.equip(items)
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
+	_hunter.shouted.connect(_on_shouted)
+	_hunter.bait_placed.connect(_on_bait_placed)
 	var minimap := $Hud/Minimap
 	minimap.hunter = _hunter
 	minimap.escape_zones = zones
@@ -53,14 +60,14 @@ func _on_outcome(type_id: String, kind: int) -> void:
 	hunt.record(type_id, kind)
 	_show_goal()
 	if hunt.is_over():
-		hunt_ended.emit(hunt)
+		_end()
 
 
 func _on_interacted() -> void:
 	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
 		return
 	hunt.returned = true
-	hunt_ended.emit(hunt)
+	_end()
 
 
 ## Zero health: back to camp with what was caught, no defeat screen (section 10).
@@ -68,7 +75,24 @@ func _on_downed() -> void:
 	if hunt.is_over():
 		return
 	hunt.returned = true
+	_end()
+
+
+func _end() -> void:
+	hunt.used_items = _hunter.loadout.used.duplicate()
 	hunt_ended.emit(hunt)
+
+
+func _on_shouted(at: Vector3) -> void:
+	for boar in $Boars.get_children():
+		if boar.global_position.distance_to(at) <= SHOUT_RADIUS:
+			boar.hear_shout(at)
+
+
+func _on_bait_placed(bait: Node3D) -> void:
+	# Drop eaten bait; boars skip freed entries in between.
+	_baits.assign(_baits.filter(is_instance_valid))
+	_baits.append(bait)
 
 
 func _show_goal() -> void:

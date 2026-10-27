@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-005
-last_completed_task_id: P3-005
+active_task_id: P3-006
+last_completed_task_id: P3-006
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-005 done; next P3-006.
+P3-006 done; next P3-007.
 
 ## Last completed work
 
@@ -41,6 +41,7 @@ P3-005 done; next P3-006.
 - P3-003: versioned JSON save of tusks and caught animals with backup (features.settlement, infrastructure.save).
 - P3-004: first-person camp hub with stations; menu → camp → hunt → results → camp.
 - P3-005: armory shop in camp; club, sling and bow bought with tusks and saved.
+- P3-006: shout scares boars sideways; bait bought in the hunting hut pulls calm boars.
 
 ## Build and validation
 
@@ -64,7 +65,7 @@ P3-005 done; next P3-006.
 
 ## Next action
 
-Start P3-006.
+Start P3-007.
 
 ## Handoff notes
 

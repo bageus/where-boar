@@ -15,9 +15,16 @@ const ITEM_IDS := {
 	Weapon.BOW: "item_bow",
 }
 
+## Bait item ids, the strongest first: place_bait uses the first one left (ASSUMPTION).
+const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
+
 var spear_in_hand := true
 var nets := START_NETS
 var arrows := START_ARROWS
+## item_id -> bait carried this hunt.
+var baits: Dictionary = {}
+## item_id -> consumables spent this hunt; camp takes them out of stock afterwards.
+var used: Dictionary = {}
 var _bought: Array[Weapon] = []
 
 
@@ -27,6 +34,9 @@ func equip(items: Dictionary) -> void:
 	for weapon in ITEM_IDS:
 		if items.get(ITEM_IDS[weapon], 0) > 0:
 			_bought.append(weapon)
+	baits.clear()
+	for item_id in BAIT_IDS:
+		baits[item_id] = items.get(item_id, 0)
 
 
 func has(weapon: Weapon) -> bool:
@@ -62,3 +72,13 @@ func shoot_arrow() -> bool:
 		return false
 	arrows -= 1
 	return true
+
+
+## Spends the strongest bait left; returns its item id, or "" when out of bait.
+func place_bait() -> String:
+	for item_id in BAIT_IDS:
+		if baits.get(item_id, 0) > 0:
+			baits[item_id] -= 1
+			used[item_id] = used.get(item_id, 0) + 1
+			return item_id
+	return ""

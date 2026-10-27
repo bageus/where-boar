@@ -22,6 +22,8 @@ const KNOCK_DECAY := 6.0
 # Charge after an attack (D018), ASSUMPTION numbers (D013).
 const PANIC_SECONDS := 2.5
 const CHARGE_SECONDS := 4.0
+## How long a shout steers a boar before it flees normally again.
+const SHOUT_SECONDS := 2.0
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
@@ -33,6 +35,8 @@ signal outcome_reached(type_id: String, kind: int)
 ## Injected by the scene that spawns the boar.
 var hunter: Node3D
 var escape_zones: Array[Vector2] = []
+## Bait nodes on the map (shared array owned by the map); each has attract_radius.
+var baits: Array[Node3D] = []
 
 var boar: Boar
 var _heading := Vector2.ZERO
@@ -47,6 +51,8 @@ var _reported := false
 ## Seconds in the current domain state.
 var _state_time := 0.0
 var _charge_rolled := false
+var _shout_heading := Vector2.ZERO
+var _shout_left := 0.0
 
 @onready var _label: Label3D = $Label
 @onready var _health_fill: MeshInstance3D = $HealthBar/Fill
@@ -67,6 +73,17 @@ func spear_hit(amount: int) -> void:
 	_state_time = 0.0
 	_charge_rolled = false
 	_after_change()
+
+
+## A hunter shouted at shout_pos (M014): a free boar runs off at an angle, never panics.
+func hear_shout(shout_pos: Vector3) -> void:
+	if boar.state not in [Boar.State.WANDER, Boar.State.FLEE]:
+		return
+	var pos := Vector2(global_position.x, global_position.z)
+	var side := 1 if randf() < 0.5 else -1
+	_shout_heading = BoarSenses.shout_heading(boar, pos, Vector2(shout_pos.x, shout_pos.z), side)
+	_shout_left = SHOUT_SECONDS
+	_show_state()
 
 
 func net_hit() -> void:
@@ -129,15 +146,23 @@ func _maybe_charge() -> void:
 
 func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	_turn_left -= delta
+	_shout_left -= delta
 	var speed := WANDER_SPEED
 	match boar.state:
 		Boar.State.WANDER:
-			if _turn_left <= 0.0:
-				_turn = randf() * TAU
-				_turn_left = WANDER_TURN_SECONDS
-			_heading = Vector2.from_angle(_turn)
+			var spots := _bait_spots()
+			var bait := BoarSenses.bait_target(pos, spots)
+			if bait != -1:
+				# Walk up to the bait, then stand and eat.
+				var to_bait := Vector2(spots[bait].x, spots[bait].y) - pos
+				_heading = to_bait.normalized() if to_bait.length() > BoarSenses.EAT_DISTANCE else Vector2.ZERO
+			else:
+				if _turn_left <= 0.0:
+					_turn = randf() * TAU
+					_turn_left = WANDER_TURN_SECONDS
+				_heading = Vector2.from_angle(_turn)
 		Boar.State.FLEE:
-			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
+			_heading = _shout_heading if _shout_left > 0.0 else BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
 			speed = boar_type.flee_speed
 		Boar.State.CHARGE:
 			_heading = (hunter_pos - pos).normalized()
@@ -156,6 +181,14 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	velocity.z = _heading.y * speed
 	if _heading != Vector2.ZERO:
 		rotation.y = atan2(-_heading.x, -_heading.y)
+
+
+func _bait_spots() -> Array[Vector3]:
+	var spots: Array[Vector3] = []
+	for bait in baits:
+		if is_instance_valid(bait):
+			spots.append(Vector3(bait.global_position.x, bait.global_position.z, bait.attract_radius))
+	return spots
 
 
 func _apply_knock(delta: float) -> void:

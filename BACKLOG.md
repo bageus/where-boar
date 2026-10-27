@@ -39,7 +39,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-003 | 3 | Save tusks and caught animals (versioned JSON in user://, backup) | P2-005 | DONE |
 | P3-004 | 3 | First-person camp hub: menu, camp, start hunt, results back to camp | P3-003 | DONE |
 | P3-005 | 3 | Weapon shop; club, sling, bow (M013, D022) | P3-004 | DONE |
-| P3-006 | 3 | Shout and bait (M014, M011) | P3-004 | PLANNED |
+| P3-006 | 3 | Shout and bait (M014, M011) | P3-004 | DONE |
 | P3-007 | 3 | Traps: pit, snare, tripwire, cage, fence; hunting hut (M015) | P3-005 | PLANNED |
 | P3-008 | 3 | Herds and groups, fear spreads to neighbours (M009) | P3-002 | PLANNED |
 | P3-009 | 3 | Campfire food and water bag (M012) | P3-004 | PLANNED |

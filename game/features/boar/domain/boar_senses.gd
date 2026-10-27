@@ -5,6 +5,8 @@ const Boar = preload("res://game/features/boar/domain/boar.gd")
 
 ## Shout deflection from the straight-away direction, degrees (D018, ASSUMPTION, tune in phase 1).
 const SHOUT_ANGLE_DEG := 30.0
+## How close a boar comes to bait before it stops to eat, metres.
+const EAT_DISTANCE := 1.0
 
 
 ## A calm boar that sees the hunter inside its perception radius starts to flee (M002).
@@ -54,3 +56,16 @@ static func flee_heading(boar_pos: Vector2, hunter_pos: Vector2, zones: Array[Ve
 static func slide_heading(wall_normal: Vector2, toward: Vector2) -> Vector2:
 	var tangent := Vector2(-wall_normal.y, wall_normal.x)
 	return tangent if tangent.dot(toward) >= 0.0 else -tangent
+
+
+## Index of the nearest bait whose pull radius reaches the boar, or -1 (M011).
+## baits hold Vector3(x, z, pull_radius).
+static func bait_target(boar_pos: Vector2, baits: Array[Vector3]) -> int:
+	var best := -1
+	var best_distance := INF
+	for i in baits.size():
+		var distance := boar_pos.distance_to(Vector2(baits[i].x, baits[i].y))
+		if distance <= baits[i].z and distance < best_distance:
+			best = i
+			best_distance = distance
+	return best

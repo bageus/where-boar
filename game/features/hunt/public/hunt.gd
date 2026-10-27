@@ -9,6 +9,8 @@ const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 ## Boars on the map when the hunt started.
 var total := 0
 var returned := false
+## item_id -> consumables (bait, traps) spent during the hunt.
+var used_items: Dictionary = {}
 ## type_id -> BoarOutcome.Kind -> count
 var _counts: Dictionary = {}
 var _resolved := 0

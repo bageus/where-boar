@@ -7,6 +7,9 @@ const ITEMS := {
 	"item_club": {"name": "Club", "shop": "weapon_shop", "price": 30, "unique": true},
 	"item_sling": {"name": "Sling", "shop": "weapon_shop", "price": 25, "unique": true},
 	"item_bow": {"name": "Bow", "shop": "weapon_shop", "price": 50, "unique": true},
+	"item_acorns": {"name": "Acorns (bait)", "shop": "hunting_hut", "price": 5, "unique": false},
+	"item_carrot": {"name": "Carrot (bait)", "shop": "hunting_hut", "price": 8, "unique": false},
+	"item_apple": {"name": "Apple (bait)", "shop": "hunting_hut", "price": 8, "unique": false},
 }
 
 

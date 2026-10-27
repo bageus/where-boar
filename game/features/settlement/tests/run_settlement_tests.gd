@@ -7,7 +7,7 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 func _init() -> void:
 	var failures := 0
-	failures += _check(_hunt_adds_tusks_and_catches(), "a hunt adds tusks and live catches")
+	failures += _check(_hunt_adds_tusks_and_catches(), "a hunt adds tusks and live catches and spends bait")
 	failures += _check(_spend_needs_enough_tusks(), "spending needs enough tusks")
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
@@ -27,9 +27,11 @@ func _hunt_adds_tusks_and_catches() -> bool:
 	hunt.record("common_brown", BoarOutcome.Kind.DEAD)
 	hunt.record("golden_tusk", BoarOutcome.Kind.CAPTURED)
 	hunt.record("runner_grey", BoarOutcome.Kind.ESCAPED)
+	hunt.used_items = {"item_acorns": 1}
 	var progress := Progress.new()
+	progress.items = {"item_acorns": 3}
 	progress.add_hunt(hunt)
-	return progress.tusks == 22 and progress.caught == {"golden_tusk": 1}
+	return progress.tusks == 22 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2
 
 
 func _spend_needs_enough_tusks() -> bool:

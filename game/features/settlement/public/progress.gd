@@ -14,9 +14,11 @@ var caught: Dictionary = {}
 var items: Dictionary = {}
 
 
-## Adds a finished hunt's tusks and live catches.
+## Adds a finished hunt's tusks and live catches and takes spent consumables out of stock.
 func add_hunt(hunt: Hunt) -> void:
 	tusks += hunt.tusks()
+	for item_id in hunt.used_items:
+		items[item_id] = maxi(0, items.get(item_id, 0) - hunt.used_items[item_id])
 	for type_id in hunt.type_ids():
 		var alive := hunt.count(type_id, BoarOutcome.Kind.CAPTURED)
 		if alive > 0:

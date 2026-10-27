@@ -58,6 +58,11 @@ func _physics_process(_delta: float) -> bool:
 			hunter.rotation = Vector3.ZERO
 		4:
 			_check(boars[0].state_name() == "FLEE", "boar near hunter flees")
+			hunter.shout()
+			_check(boars[0]._shout_left > 0.0, "a shout steers the fleeing boar")
+			hunter.equip({"item_carrot": 1})
+			hunter._place_bait()
+			_check(boars[3].baits.size() == 1 and hunter.loadout.used == {"item_carrot": 1}, "placed bait is shown to boars")
 		5:
 			# Park every boar far away so none wanders into the throws below.
 			for i in boars.size():

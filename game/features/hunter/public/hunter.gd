@@ -11,6 +11,7 @@ const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
 const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
 const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
 const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
+const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
 
 # ASSUMPTION numbers (D013), tuned in phase 2.
 const WALK_SPEED := 4.0
@@ -29,6 +30,8 @@ const MOUSE_SENSITIVITY := 0.002
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
+## ASSUMPTION (D013): one shout every 2 s.
+const SHOUT_COOLDOWN := 2.0
 
 const Weapon = Loadout.Weapon
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
@@ -37,6 +40,10 @@ const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
 signal interacted
 ## Fact: health reached zero; the hunt ends and the hunter goes back to camp with the loot.
 signal downed
+## Fact: the hunter shouted (M014); the map scares boars in earshot.
+signal shouted(at: Vector3)
+## Fact: bait was put on the ground (M011); the map shows it to boars.
+signal bait_placed(bait: Node3D)
 
 var stamina := Stamina.new()
 var health := Health.new()
@@ -45,12 +52,14 @@ var weapon: Loadout.Weapon = Weapon.SPEAR
 ## Spears and nets this hunter threw that are still in the world.
 var _thrown: Array[RigidBody3D] = []
 var _stun := 0.0
+var _shout_cooldown := 0.0
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
 @onready var _stamina_bar: ProgressBar = $Hud/Stamina
 @onready var _health_bar: ProgressBar = $Hud/Health
 @onready var _hotbar: HBoxContainer = $Hud/Hotbar
+@onready var _bait_label: Label = $Hud/Bait
 
 
 func _ready() -> void:
@@ -82,6 +91,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("interact"):
 		_pick_up()
 		interacted.emit()
+	elif event.is_action_pressed("shout"):
+		shout()
+	elif event.is_action_pressed("bait"):
+		_place_bait()
 	else:
 		for i in WEAPON_NAMES.size():
 			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
@@ -101,7 +114,28 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 		downed.emit()
 
 
+## Scares boars in earshot sideways (M014); limited by a short cooldown.
+func shout() -> void:
+	if _shout_cooldown > 0.0:
+		return
+	_shout_cooldown = SHOUT_COOLDOWN
+	shouted.emit(global_position)
+
+
+func _place_bait() -> void:
+	var item_id := loadout.place_bait()
+	if item_id == "":
+		return
+	var bait: Node3D = BaitScene.instantiate()
+	bait.item_id = item_id
+	bait.top_level = true
+	add_child(bait)
+	bait.global_position = global_position - global_basis.z * 1.0
+	bait_placed.emit(bait)
+
+
 func _physics_process(delta: float) -> void:
+	_shout_cooldown -= delta
 	if _stun > 0.0:
 		_stun -= delta
 		velocity += get_gravity() * delta
@@ -198,3 +232,7 @@ func _update_hud() -> void:
 		slot.visible = loadout.has(i)
 		slot.text = "[%d] %s%s" % [i + 1, WEAPON_NAMES[i], extras[i]]
 		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE
+	var bait_counts := PackedStringArray()
+	for item_id in Loadout.BAIT_IDS:
+		bait_counts.append("%s %d" % [item_id.trim_prefix("item_"), loadout.baits.get(item_id, 0)])
+	_bait_label.text = "[F] Bait: %s    [R] Shout" % ", ".join(bait_counts)
