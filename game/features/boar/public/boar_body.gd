@@ -207,8 +207,14 @@ func _after_change() -> void:
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
 		rotation.z = PI / 2.0
-		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(queue_free)
+		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
 		_warn_witnesses()
+
+
+## A corpse with spears, arrows or nets stuck in it stays until the hunt ends, so they can be taken back.
+func _remove_corpse() -> void:
+	if not get_children().any(func(child: Node) -> bool: return child is RigidBody3D):
+		queue_free()
 
 
 ## Boars that see this one die run in panic twice as long (playtest 2026-10-27).

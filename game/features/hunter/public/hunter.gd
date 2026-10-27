@@ -8,11 +8,11 @@ const Health = preload("res://game/features/hunter/domain/health.gd")
 const Synth = preload("res://game/core/synth/public/synth.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
-const Spear = preload("res://game/features/hunter/presentation/spear.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
 const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
 const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
 const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
+const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
 const TRAP_SCENES := {
 	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
@@ -303,7 +303,7 @@ func _attack() -> void:
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
-				_throw(ArrowScene, ARROW_SPEED, false)
+				_throw(ArrowScene, ARROW_SPEED)
 
 
 ## A boar or its larger hitbox; wild birds and the hunter's mount do not take spear hits.
@@ -311,7 +311,7 @@ func _hits_boar(target: Object) -> bool:
 	return target is BoarBody or (target != null and target.has_method("spear_hit"))
 
 
-## Launches an item from the eye; kept ones (spear, net) can be picked up again.
+## Launches an item from the eye; kept ones (spear, net, arrow) can be picked up again.
 func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -> void:
 	var item: RigidBody3D = scene.instantiate()
 	item.top_level = true
@@ -321,22 +321,21 @@ func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -
 	item.add_collision_exception_with(self)
 	if keep:
 		_thrown.append(item)
-	if item.has_signal("caught"):
-		item.caught.connect(func() -> void:
-			loadout.pick_net()
-			_update_hud())
 
 
 func _pick_up() -> void:
-	# Untyped: a typed lambda cannot take a freed item, and nets that caught something are freed.
+	# Untyped: a typed lambda cannot take a freed item (one that left with an escaped boar).
 	_thrown = _thrown.filter(func(item) -> bool: return is_instance_valid(item))
 	for item in _thrown.duplicate():
-		if item.global_position.distance_to(global_position) > PICKUP_RADIUS:
+		if item.global_position.distance_to(global_position) > PICKUP_RADIUS or not Landing.can_pick(item):
 			continue
-		if item is Spear:
-			loadout.pick_spear()
-		else:
-			loadout.pick_net()
+		match item.pickup_kind:
+			"spear":
+				loadout.pick_spear()
+			"net":
+				loadout.pick_net()
+			"arrow":
+				loadout.pick_arrow()
 		_thrown.erase(item)
 		item.queue_free()
 

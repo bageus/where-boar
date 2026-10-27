@@ -1,11 +1,14 @@
 extends RigidBody3D
 
-## Thrown net: captures the first boar or wild helper animal it touches and comes back to the hunter;
-## a miss lies on the ground to be picked up (M004).
+## Thrown net: captures the first boar or wild helper animal it touches (M004). A miss lies on the
+## ground; a net on a caught boar is taken back by walking up to it (owner, 2026-10-27).
 
-## Fact: the net caught an animal; the hunter takes it back (it never ends up lost).
-signal caught
+const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 
+var pickup_kind := "net"
+
+## The boar this net is stuck on, if any.
+var holder: Node3D
 var _landed := false
 
 
@@ -20,9 +23,4 @@ func _on_body_entered(body: Node) -> void:
 	# Boars and wild roosters/turkeys both answer net_hit; the hunter does not know helper animals.
 	if body.has_method("net_hit"):
 		body.net_hit()
-		caught.emit()
-		queue_free()
-		return
-	set_deferred("freeze", true)
-	set_deferred("collision_layer", 0)
-	set_deferred("collision_mask", 0)
+	Landing.land(self, body)

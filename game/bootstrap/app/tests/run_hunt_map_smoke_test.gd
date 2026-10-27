@@ -117,7 +117,7 @@ func _physics_process(_delta: float) -> bool:
 			Input.action_release("aim")
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
-			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 3, "spear spent, net came back after the catch")
+			_check_stuck_items(hunter, boars[2], boars[1])
 			_check(_map.hunt.remaining() == _map.hunt.total - 2 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
 			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
 			_hunt = _map.hunt
@@ -125,6 +125,18 @@ func _physics_process(_delta: float) -> bool:
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()
 	return false
+
+
+## Hits stay in the boar (owner, 2026-10-27): the net comes back from the caught boar only up close,
+## the spear not at all while its boar still runs.
+func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D) -> void:
+	var nets_before: int = hunter.loadout.nets
+	hunter.global_position = running.global_position + Vector3(1.0, 0.0, 0.0)
+	hunter._pick_up()
+	var spear_stays: bool = not hunter.loadout.spear_in_hand
+	hunter.global_position = caught.global_position + Vector3(1.0, 0.0, 0.0)
+	hunter._pick_up()
+	_check(nets_before == 2 and spear_stays and hunter.loadout.nets == 3, "stuck spear stays in a running boar; net taken back from the caught one")
 
 
 ## Esc pauses the camp; changing FOV applies to the hunter and is saved; Continue unpauses.

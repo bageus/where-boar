@@ -1,10 +1,17 @@
 extends RigidBody3D
 
-## Sling stone or arrow: hurts the first boar it touches, then disappears (D022).
+## Sling stone or arrow: hurts the first boar it touches (D022). A stone then disappears; an arrow
+## (PICKUP_KIND "arrow") sticks in the boar or lies where it landed, to be taken back (owner, 2026-10-27).
 
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
+const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 
 @export var damage := 1
+## "" for stones that are never recovered.
+@export var pickup_kind := ""
+
+## The boar this arrow is stuck in, if any.
+var holder: Node3D
 
 var _landed := false
 
@@ -19,4 +26,7 @@ func _on_body_entered(body: Node) -> void:
 	_landed = true
 	if body is BoarBody or body.has_method("spear_hit"):
 		body.spear_hit(damage)
-	queue_free()
+	if pickup_kind == "":
+		queue_free()
+	else:
+		Landing.land(self, body)

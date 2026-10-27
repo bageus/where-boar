@@ -113,7 +113,12 @@ func pick_net() -> void:
 	nets += 1
 
 
-## Arrows are spent on release and not picked up (ASSUMPTION); sling stones never run out.
+## An arrow that missed, or was taken out of a dead or caught boar.
+func pick_arrow() -> void:
+	arrows += 1
+
+
+## Arrows are spent on release and picked up again like spears; sling stones never run out.
 func shoot_arrow() -> bool:
 	if not has(Weapon.BOW) or arrows == 0:
 		return false
