@@ -32,12 +32,13 @@ func show_stamina(value: float, max_value: float) -> void:
 
 
 func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
+	# Ammo shows what is carried now / the carry cap (owner, 2026-10-27).
 	var extras := [
-		" x%d" % loadout.spears if loadout.max_spears > 1 else (" (in hand)" if loadout.spear_in_hand else " (thrown)"),
-		" x%d" % loadout.nets,
+		" %d/%d" % [loadout.spears, loadout.max_spears],
+		" %d/%d" % [loadout.nets, loadout.net_cap],
 		"",
-		" x%d" % loadout.stones,
-		" x%d" % loadout.arrows,
+		" %d/%d" % [loadout.stones, loadout.stone_cap],
+		" %d/%d" % [loadout.arrows, loadout.arrow_cap],
 		"",
 	]
 	for i in WEAPON_NAMES.size():
@@ -49,5 +50,5 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 	for item_id in Loadout.BAIT_IDS:
 		bait_counts.append("%s %d" % [item_id.trim_prefix("item_"), loadout.baits.get(item_id, 0)])
 	var trap_id := loadout.selected_trap()
-	$Bait.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d    [Q] Water x%d" % [
-		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0), loadout.water_sips]
+	$Bait.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d    [Q] Water %d/%d" % [
+		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0), loadout.water_sips, Loadout.WATER_SIPS]

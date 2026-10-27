@@ -70,20 +70,24 @@ func _spear_throw_and_pick() -> bool:
 	var single := thrown and not again and loadout.spear_in_hand
 	var armed := Loadout.new()
 	armed.equip({"item_spear": 5})
+	var lost_none := armed.used.is_empty()
 	var three := armed.spears == 3 and armed.throw_spear() and armed.throw_spear() and armed.throw_spear()
 	var empty := not armed.throw_spear()
 	for i in 4:
 		armed.pick_spear()
-	return single and three and empty and armed.spears == 3
+	return single and three and empty and armed.spears == 3 and lost_none and armed.used.is_empty()
 
 
 func _nets_run_out() -> bool:
 	var loadout := Loadout.new()
-	for i in Loadout.START_NETS:
+	loadout.equip({"item_net": 9})
+	var capped := loadout.nets == Loadout.NET_CAP
+	for i in Loadout.NET_CAP:
 		loadout.throw_net()
 	var empty := not loadout.throw_net()
 	loadout.pick_net()
-	return empty and loadout.nets == 1
+	# Two nets left on the map are lost from camp stock (owner, 2026-10-27).
+	return capped and empty and loadout.nets == 1 and loadout.used == {"item_net": 2}
 
 
 func _health_runs_down_to_zero() -> bool:
@@ -97,11 +101,12 @@ func _health_runs_down_to_zero() -> bool:
 func _bought_weapons_unlock() -> bool:
 	var loadout := Loadout.new()
 	var locked := not loadout.has(Loadout.Weapon.BOW) and not loadout.shoot_arrow()
-	loadout.equip({"item_bow": 1, "item_club": 0})
-	for i in Loadout.START_ARROWS:
+	loadout.equip({"item_bow": 1, "item_club": 0, "item_arrow": 5})
+	for i in 5:
 		loadout.shoot_arrow()
 	return locked and loadout.has(Loadout.Weapon.BOW) and not loadout.has(Loadout.Weapon.CLUB) \
-		and loadout.has(Loadout.Weapon.SPEAR) and not loadout.shoot_arrow()
+		and loadout.has(Loadout.Weapon.SPEAR) and loadout.has(Loadout.Weapon.KNIFE) and not loadout.shoot_arrow() \
+		and loadout.used == {"item_arrow": 5}
 
 
 func _bait_strongest_first() -> bool:
@@ -124,34 +129,33 @@ func _traps_cycle_and_run_out() -> bool:
 
 func _sling_stones_run_out_and_refill() -> bool:
 	var loadout := Loadout.new()
-	loadout.equip({"item_sling": 1})
-	for i in Loadout.START_STONES:
-		loadout.sling_stone()
+	loadout.equip({"item_sling": 1, "item_stone": 2})
+	loadout.sling_stone()
+	loadout.sling_stone()
 	var empty := not loadout.sling_stone()
-	loadout.pick_stones(3)
-	var refilled := loadout.stones == 3
-	loadout.equip({"item_sling": 1})
-	return empty and refilled and loadout.stones == Loadout.START_STONES
+	loadout.pick_stones(Loadout.STONE_CAP + 5)
+	# Found stones beyond the two spent go into camp stock (used below zero), up to the pouch cap.
+	return empty and loadout.stones == Loadout.STONE_CAP and loadout.used == {"item_stone": 2 - Loadout.STONE_CAP}
 
 
 func _meal_and_water() -> bool:
 	var loadout := Loadout.new()
-	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1})
+	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1, "item_water": 2})
 	var stamina := Stamina.new()
 	stamina.eat(loadout.eat_meals())
 	var fed := is_equal_approx(stamina.max_value, 190.0) and is_equal_approx(stamina.value, 190.0)
 	stamina.value = 0.0
 	stamina.drink(40.0)
-	for i in Loadout.WATER_SIPS:
+	for i in 2:
 		loadout.drink()
 	return fed and is_equal_approx(stamina.value, 40.0) and not loadout.drink() \
-		and loadout.used == {"item_feast": 1, "item_stew": 2} and is_zero_approx(loadout.eat_meals())
+		and loadout.used == {"item_feast": 1, "item_stew": 2, "item_water": 2} and is_zero_approx(loadout.eat_meals())
 
 
 func _porter_and_any_trap() -> bool:
 	var loadout := Loadout.new()
-	loadout.equip({"item_porter": 1, "item_cage": 1})
-	return loadout.nets == Loadout.START_NETS + 2 and loadout.arrows == Loadout.START_ARROWS + 6 \
+	loadout.equip({"item_porter": 1, "item_cage": 1, "item_net": 9, "item_arrow": 30})
+	return loadout.nets == Loadout.NET_CAP + 2 and loadout.arrows == Loadout.ARROW_CAP + 6 \
 		and loadout.place_any_trap() == "item_cage" and loadout.place_any_trap() == ""
 
 

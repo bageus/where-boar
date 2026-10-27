@@ -15,7 +15,7 @@ func _init() -> void:
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
-	failures += _check(_extra_spears_stop_at_two(), "extra spears stack up to two")
+	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
@@ -82,8 +82,13 @@ func _buy_weapon_once() -> bool:
 func _extra_spears_stop_at_two() -> bool:
 	var progress := Progress.new()
 	progress.tusks = 100
-	var two := progress.buy("item_spear") and progress.buy("item_spear")
-	return two and not progress.buy("item_spear") and progress.items["item_spear"] == 2 and progress.sold_out("item_spear")
+	var three := progress.buy("item_spear") and progress.buy("item_spear") and progress.buy("item_spear")
+	var spears: bool = three and not progress.buy("item_spear") and progress.items["item_spear"] == 3 and progress.sold_out("item_spear")
+	var arrows: bool = progress.buy("item_arrow") and progress.items["item_arrow"] == 6
+	var kit: Dictionary = Progress.from_dict({}).items
+	var old_save_kit: Dictionary = Progress.from_dict({"items": {"item_net": 1}}).items
+	var kept: Dictionary = Progress.from_dict({"items": {"item_net": 1}, "kit": true}).items
+	return spears and arrows and kit == ShopCatalog.STARTER_KIT and old_save_kit["item_net"] == 3 and kept == {"item_net": 1}
 
 
 func _saddle_needs_caught_boar() -> bool:

@@ -45,7 +45,7 @@ func buy(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
 	if item.is_empty() or sold_out(item_id) or not unlocked(item_id) or not spend(ShopCatalog.price(item_id)):
 		return false
-	items[item_id] = items.get(item_id, 0) + 1
+	items[item_id] = mini(items.get(item_id, 0) + item.get("pack", 1), item.get("max", 1 << 30))
 	return true
 
 
@@ -67,7 +67,8 @@ func owns(item_id: String) -> bool:
 
 
 func to_dict() -> Dictionary:
-	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(), "hunts": hunts}
+	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(),
+		"hunts": hunts, "kit": true}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
@@ -78,6 +79,10 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.caught = _counts(data.get("caught", {}))
 	progress.items = _counts(data.get("items", {}))
 	progress.helpers = _counts(data.get("helpers", {}))
+	# New games, and saves from before ammo became stock, get the starter kit once.
+	if not data.get("kit", false):
+		for item_id in ShopCatalog.STARTER_KIT:
+			progress.items[item_id] = maxi(progress.items.get(item_id, 0), ShopCatalog.STARTER_KIT[item_id])
 	return progress
 
 

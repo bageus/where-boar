@@ -1,17 +1,20 @@
 extends RefCounted
 
-## What the hunter carries: spear and nets always, plus weapons bought in camp (M003, M004, D022).
+## What the hunter carries: the knife always, plus weapons and ammo from camp stock (M003, M004, D022).
 
 enum Weapon { SPEAR, NET, CLUB, SLING, BOW, KNIFE }
 
-## ASSUMPTION: per hunt, balanced later (D013).
-const START_NETS := 3
-const START_ARROWS := 12
-## Sling stones in the pouch at hunt start; more lie around the map (owner, 2026-10-27, ASSUMPTION count).
-const START_STONES := 5
-## Every hunter carries one spear; extra spears bought in the armory raise it to 3 at most (owner, 2026-10-27).
+# Ammo is camp stock (owner, 2026-10-27): the hunter takes up to the carry cap, and whatever is
+# left on the map is gone; camp buys more. Caps are ASSUMPTION (D013).
 const SPEAR_ID := "item_spear"
+const NET_ID := "item_net"
+const ARROW_ID := "item_arrow"
+const STONE_ID := "item_stone"
+const WATER_ID := "item_water"
 const MAX_SPEARS := 3
+const NET_CAP := 3
+const ARROW_CAP := 12
+const STONE_CAP := 10
 
 ## Camp item id that unlocks each bought weapon.
 const ITEM_IDS := {
@@ -29,9 +32,9 @@ const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item
 ## Camp meals and their stamina bonus; all carried meals are eaten at hunt start (M012, ASSUMPTION).
 const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
 const WATER_BAG_ID := "item_water_bag"
-## Sips per hunt; the bag is refilled free in camp (ASSUMPTION).
+## Sips the bag holds; unused water stays in camp stock (owner, 2026-10-27).
 const WATER_SIPS := 3
-## A hired porter carries extra nets and arrows (M013, ASSUMPTION).
+## A hired porter carries more nets and arrows (M013, ASSUMPTION).
 const PORTER_ID := "item_porter"
 const PORTER_NETS := 2
 const PORTER_ARROWS := 6
@@ -40,13 +43,17 @@ const SADDLE_PREFIX := "item_saddle_"
 
 ## Spears carried right now; thrown ones are picked up again.
 var spears := 1
-var max_spears := 1
+var max_spears := MAX_SPEARS
 var spear_in_hand: bool:
 	get:
 		return spears > 0
-var nets := START_NETS
-var arrows := START_ARROWS
-var stones := START_STONES
+var nets := 0
+var arrows := 0
+var stones := 0
+## Carry caps this hunt (the porter raises nets and arrows).
+var net_cap := NET_CAP
+var arrow_cap := ARROW_CAP
+var stone_cap := STONE_CAP
 ## item_id -> bait carried this hunt.
 var baits: Dictionary = {}
 ## item_id -> consumables spent this hunt; camp takes them out of stock afterwards.
@@ -77,18 +84,18 @@ func equip(items: Dictionary) -> void:
 	_meals.clear()
 	for item_id in MEALS:
 		_meals[item_id] = items.get(item_id, 0)
-	water_sips = WATER_SIPS if items.get(WATER_BAG_ID, 0) > 0 else 0
+	water_sips = mini(items.get(WATER_ID, 0), WATER_SIPS) if items.get(WATER_BAG_ID, 0) > 0 else 0
 	saddled.clear()
 	for item_id in items:
 		if item_id.begins_with(SADDLE_PREFIX) and items[item_id] > 0:
 			saddled.append(item_id.trim_prefix(SADDLE_PREFIX))
-	max_spears = mini(1 + items.get(SPEAR_ID, 0), MAX_SPEARS)
-	spears = max_spears
 	var porter: bool = items.get(PORTER_ID, 0) > 0
-	nets = START_NETS + (PORTER_NETS if porter else 0)
-	# Every hunt starts fully armed again: whatever was thrown and left behind comes back in camp.
-	arrows = START_ARROWS + (PORTER_ARROWS if porter else 0)
-	stones = START_STONES
+	net_cap = NET_CAP + (PORTER_NETS if porter else 0)
+	arrow_cap = ARROW_CAP + (PORTER_ARROWS if porter else 0)
+	spears = mini(items.get(SPEAR_ID, 0), MAX_SPEARS)
+	nets = mini(items.get(NET_ID, 0), net_cap)
+	arrows = mini(items.get(ARROW_ID, 0), arrow_cap)
+	stones = mini(items.get(STONE_ID, 0), stone_cap)
 
 
 func has(weapon: Weapon) -> bool:
@@ -100,39 +107,58 @@ func throw_spear() -> bool:
 	if spears == 0:
 		return false
 	spears -= 1
+	_count(SPEAR_ID, 1)
 	return true
 
 
 func pick_spear() -> void:
-	spears = mini(spears + 1, max_spears)
+	var gain := mini(1, MAX_SPEARS - spears)
+	spears += gain
+	_count(SPEAR_ID, -gain)
 
 
 func throw_net() -> bool:
 	if nets == 0:
 		return false
 	nets -= 1
+	_count(NET_ID, 1)
 	return true
 
 
-## A net that missed can be picked up again (M004, ASSUMPTION).
+## A net that missed, or was taken off a caught boar (M004).
 func pick_net() -> void:
-	nets += 1
+	var gain := mini(1, net_cap - nets)
+	nets += gain
+	_count(NET_ID, -gain)
 
 
 ## An arrow that missed, or was taken out of a dead or caught boar.
 func pick_arrow() -> void:
-	arrows += 1
+	var gain := mini(1, arrow_cap - arrows)
+	arrows += gain
+	_count(ARROW_ID, -gain)
 
 
+## Stones picked up; found ones add to camp stock after the hunt, up to the pouch cap.
 func pick_stones(count: int) -> void:
-	stones += count
+	var gain := mini(count, stone_cap - stones)
+	stones += gain
+	_count(STONE_ID, -gain)
 
 
 func sling_stone() -> bool:
 	if not has(Weapon.SLING) or stones == 0:
 		return false
 	stones -= 1
+	_count(STONE_ID, 1)
 	return true
+
+
+## Net change of camp stock: spent counts up, recovered or found counts down (below 0 adds to stock).
+func _count(item_id: String, spent: int) -> void:
+	used[item_id] = used.get(item_id, 0) + spent
+	if used[item_id] == 0:
+		used.erase(item_id)
 
 
 ## Arrows are spent on release and picked up again like spears.
@@ -140,6 +166,7 @@ func shoot_arrow() -> bool:
 	if not has(Weapon.BOW) or arrows == 0:
 		return false
 	arrows -= 1
+	_count(ARROW_ID, 1)
 	return true
 
 
@@ -199,4 +226,5 @@ func drink() -> bool:
 	if water_sips == 0:
 		return false
 	water_sips -= 1
+	_count(WATER_ID, 1)
 	return true
