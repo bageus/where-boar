@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Mat_clearing"]
+albedo_color = Color(0.52, 0.6, 0.34, 1)
+
+[sub_resource type="CylinderMesh" id="Mesh_clearing"]
+material = SubResource("Mat_clearing")
+top_radius = 8.0
+bottom_radius = 8.0
+height = 0.02
+radial_segments = 24
+
+[node name="Clearing" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+cast_shadow = 0
+mesh = SubResource("Mesh_clearing")

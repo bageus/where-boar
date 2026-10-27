@@ -26,7 +26,7 @@ func bring_mount(type_id: String) -> void:
 	mount.boar_type = BoarTypes.find(type_id)
 	mount.top_level = true
 	add_child(mount)
-	mount.global_position = _hunter.global_position + _hunter.global_basis.x * 1.5
+	mount.global_position = _hunter.ground_at(_hunter.global_position + _hunter.global_basis.x * 1.5)
 
 
 ## Mounts the saddled boar when it is in reach, or gets off it.
@@ -34,7 +34,7 @@ func toggle() -> void:
 	var ride = _hunter.ride
 	if ride.is_riding():
 		ride.dismount()
-		mount.global_position = _hunter.global_position + _hunter.global_basis.x * 1.5
+		mount.global_position = _hunter.ground_at(_hunter.global_position + _hunter.global_basis.x * 1.5)
 		mount.set_ridden(false)
 	elif mount and mount.global_position.distance_to(_hunter.global_position) <= MOUNT_REACH:
 		ride.mount(mount.boar_type)

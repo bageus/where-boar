@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 32
+const EXPECTED_CHECKS := 34
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -122,6 +122,7 @@ func _physics_process(_delta: float) -> bool:
 			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
 			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
+			_check_relief(hunter, boars[4])
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()
 	return false
@@ -142,6 +143,17 @@ func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D
 	hunter.global_position = pile.global_position
 	hunter._pick_up()
 	_check(hunter.loadout.stones == stones + 3 and pile.is_queued_for_deletion(), "a stone pile on the map refills the sling pouch")
+
+
+## Relief (owner, 2026-10-27): the lookout's cliff hides a hunter on top from a boar below;
+## a trap set on the ramp lies on its slope (3 m up halfway).
+func _check_relief(hunter: CharacterBody3D, boar: CharacterBody3D) -> void:
+	var lookout: Node3D = _map.get_node("Props/Lookout")
+	boar.global_position = lookout.global_position + Vector3(0, 0, -10)
+	hunter.global_position = lookout.global_position + Vector3(0, 6, 0)
+	_check(not boar._sight_clear(), "a hunter on the lookout is out of sight of a boar under the cliff")
+	var on_ramp: Vector3 = hunter.ground_at(lookout.global_position + Vector3(14, 2.1, 0))
+	_check(is_equal_approx(on_ramp.y, 3.0), "things set on the ramp lie on its slope")
 
 
 ## Esc pauses the camp; changing FOV applies to the hunter and is saved; Continue unpauses.

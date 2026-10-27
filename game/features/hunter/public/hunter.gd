@@ -85,6 +85,7 @@ var weapon: Loadout.Weapon = Weapon.SPEAR
 ## Spears and nets this hunter threw that are still in the world.
 var _thrown: Array[RigidBody3D] = []
 var _stun := 0.0
+var _steer_in_air := false
 var _shout_cooldown := 0.0
 ## River segments the hunter is standing in; rivers call wade().
 var _wading := 0
@@ -221,7 +222,7 @@ func _place_bait() -> void:
 	bait.item_id = item_id
 	bait.top_level = true
 	add_child(bait)
-	bait.global_position = global_position - global_basis.z * 1.0
+	bait.global_position = ground_at(global_position - global_basis.z * 1.0)
 	bait_placed.emit(bait)
 
 
@@ -248,9 +249,17 @@ func _set_trap(item_id: String, where: Transform3D) -> bool:
 	trap.top_level = true
 	trap.add_to_group(PLACED_TRAPS_GROUP)
 	add_child(trap)
-	trap.global_transform = where
+	trap.global_transform = Transform3D(where.basis, ground_at(where.origin))
 	_update_hud()
 	return true
+
+
+## The ground under point on the hilly map (owner, 2026-10-27), searched from 2 m above it to 4 m below;
+## point itself when nothing is there.
+func ground_at(point: Vector3) -> Vector3:
+	var query := PhysicsRayQueryParameters3D.create(point + Vector3.UP * 2.0, point + Vector3.DOWN * 4.0, 1, [get_rid()])
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	return hit.position if hit else point
 
 
 func _physics_process(delta: float) -> void:
@@ -280,6 +289,7 @@ func _physics_process(delta: float) -> void:
 	$Camera/Hands.pose(weapon, armed, aiming, _aim_power, delta)
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
+		_steer_in_air = false
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
 		# No jumps or lunges from the saddle, so riding never spends stamina (owner, 2026-10-27).
@@ -287,20 +297,25 @@ func _physics_process(delta: float) -> void:
 			_jump_or_lunge(direction)
 	else:
 		velocity += get_gravity() * delta
+		if _steer_in_air:
+			velocity.x = direction.x * speed
+			velocity.z = direction.z * speed
 	_camera.position.y = (CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT) + (SADDLE_EYE_RISE if ride.is_riding() else 0.0)
 	move_and_slide()
 	$Rider.ram(delta)
 	_hud.show_stamina(stamina.value, stamina.max_value)
 
 
-## Space with a direction is a lunge (M001); without one, or without stamina, a plain jump.
+## Space with a direction is a lunge (M001); without one, without stamina or against a ledge, a plain jump
+## that can be steered in the air, so the hunter climbs ledges up to about 1 m (owner, 2026-10-27).
 func _jump_or_lunge(direction: Vector3) -> void:
-	if direction != Vector3.ZERO and stamina.try_lunge():
+	if direction != Vector3.ZERO and not is_on_wall() and stamina.try_lunge():
 		velocity.x = direction.x * LUNGE_SPEED
 		velocity.z = direction.z * LUNGE_SPEED
 		velocity.y = JUMP_SPEED * 0.5
 	else:
 		velocity.y = JUMP_SPEED
+		_steer_in_air = true
 
 
 ## LMB stabs with the spear, RMB+LMB throws it; club, net, sling and bow fire on LMB release,

@@ -49,6 +49,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-013 | 3 | Green Valley map: hills, river, bushes, 5–10 escape zones | P3-008 | DONE |
 | P3-014 | 3 | Pause, settings (FOV, camera shake), first-hunt hints | P3-004 | DONE |
 | P3-015 | 3 | Sound and visual feedback: stomps, squeals, knockback camera roll | P3-001 | DONE |
+| P3-016 | 3 | Hunt map relief: hills, ledges, cliffs, clearings; climb up to spot boars (D039) | P3-013 | DONE |
 
 ## Icebox
 
