@@ -9,6 +9,8 @@ func _init() -> void:
 	failures += _check(_perceive_starts_flee_inside_radius(), "hunter inside radius starts flee, outside does not")
 	failures += _check(_shout_deflects_without_panic(), "shout deflects 30 degrees and does not panic")
 	failures += _check(_bait_pulls_within_radius(), "nearest bait in reach pulls the boar")
+	failures += _check(_fear_spreads_in_herd(), "a scared herd mate nearby makes a calm boar flee")
+	failures += _check(_strays_walk_back(), "a stray herd boar walks back to the centre")
 	failures += _check(_nearest_zone_choice(), "nearest escape zone is chosen")
 	failures += _check(_zone_escape_rules(), "only fleeing or panicking boars escape in a zone")
 	failures += _check(_flee_heading_bends_to_zone(), "flee heading bends toward a zone ahead, ignores a zone behind")
@@ -72,3 +74,17 @@ func _bait_pulls_within_radius() -> bool:
 	var baits: Array[Vector3] = [Vector3(10, 0, 5), Vector3(-6, 0, 20), Vector3(-8, 0, 20)]
 	return BoarSenses.bait_target(Vector2.ZERO, baits) == 1 \
 		and BoarSenses.bait_target(Vector2(30, 0), baits) == -1
+
+
+func _fear_spreads_in_herd() -> bool:
+	var near := Boar.new("runner", 3)
+	var far := Boar.new("runner", 3)
+	var scared: Array[Vector2] = [Vector2(3, 0)]
+	BoarSenses.hear_herd(near, Vector2.ZERO, scared, 8.0)
+	BoarSenses.hear_herd(far, Vector2(20, 0), scared, 8.0)
+	return near.state == Boar.State.FLEE and far.state == Boar.State.WANDER
+
+
+func _strays_walk_back() -> bool:
+	return BoarSenses.cohesion_heading(Vector2(10, 0), Vector2.ZERO, 6.0).is_equal_approx(Vector2.LEFT) \
+		and BoarSenses.cohesion_heading(Vector2(2, 0), Vector2.ZERO, 6.0) == Vector2.ZERO

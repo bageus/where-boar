@@ -6,6 +6,7 @@ const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
+const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 
 # ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
 const WANDER_SPEED := 1.5
@@ -25,6 +26,9 @@ const CHARGE_SECONDS := 4.0
 ## How long a shout or a fence steers a boar before it runs normally again.
 const SHOUT_SECONDS := 2.0
 const FENCE_TURN_SECONDS := 1.5
+# Herds (M009), ASSUMPTION numbers (D013).
+const HERD_ALARM_RADIUS := 8.0
+const HERD_SPREAD := 6.0
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
@@ -40,6 +44,8 @@ var hunter: Node3D
 var escape_zones: Array[Vector2] = []
 ## Bait nodes on the map (shared array owned by the map); each has attract_radius.
 var baits: Array[Node3D] = []
+## Herd mates including this boar (shared array); empty for a loner.
+var herd: Array[Node3D] = []
 
 var boar: Boar
 var _heading := Vector2.ZERO
@@ -169,6 +175,8 @@ func _physics_process(delta: float) -> void:
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
 	var before := boar.state
 	BoarSenses.perceive(boar, pos, hunter_pos, boar_type.perception_radius)
+	if boar.state == Boar.State.WANDER and not herd.is_empty():
+		BoarSenses.hear_herd(boar, pos, Surroundings.herd_positions(self, true), HERD_ALARM_RADIUS)
 	for zone in escape_zones:
 		BoarSenses.enter_zone(boar, pos, zone, ESCAPE_RADIUS)
 	if boar.state == Boar.State.ESCAPED:
@@ -202,7 +210,7 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	var speed := WANDER_SPEED
 	match boar.state:
 		Boar.State.WANDER:
-			var spots := _bait_spots()
+			var spots := Surroundings.bait_spots(baits)
 			var bait := BoarSenses.bait_target(pos, spots)
 			if bait != -1:
 				# Walk up to the bait, then stand and eat.
@@ -213,6 +221,9 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 					_turn = randf() * TAU
 					_turn_left = WANDER_TURN_SECONDS
 				_heading = Vector2.from_angle(_turn)
+				var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD)
+				if back != Vector2.ZERO:
+					_heading = back
 		Boar.State.FLEE:
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
 			speed = boar_type.flee_speed
@@ -235,14 +246,6 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	velocity.z = _heading.y * speed
 	if _heading != Vector2.ZERO:
 		rotation.y = atan2(-_heading.x, -_heading.y)
-
-
-func _bait_spots() -> Array[Vector3]:
-	var spots: Array[Vector3] = []
-	for bait in baits:
-		if is_instance_valid(bait):
-			spots.append(Vector3(bait.global_position.x, bait.global_position.z, bait.attract_radius))
-	return spots
 
 
 func _apply_knock(delta: float) -> void:

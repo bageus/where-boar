@@ -41,7 +41,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-005 | 3 | Weapon shop; club, sling, bow (M013, D022) | P3-004 | DONE |
 | P3-006 | 3 | Shout and bait (M014, M011) | P3-004 | DONE |
 | P3-007 | 3 | Traps: pit, snare, tripwire, cage, fence; hunting hut (M015) | P3-005 | DONE |
-| P3-008 | 3 | Herds and groups, fear spreads to neighbours (M009) | P3-002 | PLANNED |
+| P3-008 | 3 | Herds and groups, fear spreads to neighbours (M009) | P3-002 | DONE |
 | P3-009 | 3 | Campfire food and water bag (M012) | P3-004 | PLANNED |
 | P3-010 | 3 | Rooster driver and turkey scout (M016, M017) | P3-008 | PLANNED |
 | P3-011 | 3 | Helpers: porter and trap setter (M013) | P3-007 | PLANNED |

@@ -69,3 +69,18 @@ static func bait_target(boar_pos: Vector2, baits: Array[Vector3]) -> int:
 			best = i
 			best_distance = distance
 	return best
+
+
+## Fear spreads through a herd (M009): a calm boar near a fleeing or panicking herd mate flees too.
+static func hear_herd(boar: Boar, boar_pos: Vector2, scared_mates: Array[Vector2], radius: float) -> void:
+	for mate in scared_mates:
+		if boar_pos.distance_to(mate) <= radius:
+			boar.flee()
+			return
+
+
+## A calm herd boar that strays more than spread metres from the herd centre walks back; ZERO otherwise.
+static func cohesion_heading(boar_pos: Vector2, centre: Vector2, spread: float) -> Vector2:
+	if boar_pos.distance_to(centre) <= spread:
+		return Vector2.ZERO
+	return (centre - boar_pos).normalized()

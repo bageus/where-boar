@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-007
-last_completed_task_id: P3-007
+active_task_id: P3-008
+last_completed_task_id: P3-008
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-007 done; next P3-008.
+P3-008 done; next P3-009.
 
 ## Last completed work
 
@@ -43,6 +43,7 @@ P3-007 done; next P3-008.
 - P3-005: armory shop in camp; club, sling and bow bought with tusks and saved.
 - P3-006: shout scares boars sideways; bait bought in the hunting hut pulls calm boars.
 - P3-007: traps (pit, snare, tripwire, cage, fence) bought in the hunting hut and placed with G/T; trapped boars count as caught.
+- P3-008: herds and groups; fear spreads to herd mates; strays rejoin the herd.
 
 ## Build and validation
 
@@ -66,7 +67,7 @@ P3-007 done; next P3-008.
 
 ## Next action
 
-Start P3-008.
+Start P3-009.
 
 ## Handoff notes
 

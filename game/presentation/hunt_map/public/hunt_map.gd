@@ -10,8 +10,8 @@ const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 ## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
 
-## ASSUMPTION: boars per prototype hunt.
-const BOAR_COUNT := 6
+## ASSUMPTION (D013, section 11 scaled to the grey map): one herd, three groups, two loners.
+const GROUP_SIZES := [10, 3, 3, 3, 1, 1]
 const RETURN_RADIUS := 3.0
 ## ASSUMPTION (D013): how far a shout carries, metres.
 const SHOUT_RADIUS := 15.0
@@ -32,17 +32,13 @@ func _ready() -> void:
 		zones.append(Vector2(zone.position.x, zone.position.z))
 	var spawns := $BoarSpawns.get_children()
 	spawns.shuffle()
-	hunt = Hunt.new(mini(BOAR_COUNT, spawns.size()))
-	for i in hunt.total:
-		var boar := BoarScene.instantiate()
-		boar.boar_type = BoarTypes.pick(randf())
-		boar.hunter = _hunter
-		boar.escape_zones = zones
-		boar.baits = _baits
-		boar.position = spawns[i].position
-		boar.outcome_reached.connect(_on_outcome)
-		boar.held_changed.connect(_on_held_changed)
-		$Boars.add_child(boar)
+	var groups := mini(GROUP_SIZES.size(), spawns.size())
+	var total := 0
+	for g in groups:
+		total += GROUP_SIZES[g]
+	hunt = Hunt.new(total)
+	for g in groups:
+		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones)
 	_hunter.equip(items)
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
@@ -53,6 +49,25 @@ func _ready() -> void:
 	minimap.escape_zones = zones
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
+
+
+## Spawns size boars in a ring around centre; a group of two or more shares one herd array.
+func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
+	var herd: Array[Node3D] = []
+	for i in size:
+		var boar := BoarScene.instantiate()
+		boar.boar_type = BoarTypes.pick(randf())
+		boar.hunter = _hunter
+		boar.escape_zones = zones
+		boar.baits = _baits
+		if size > 1:
+			boar.herd = herd
+			herd.append(boar)
+		var ring := 1.2 * sqrt(size)
+		boar.position = centre + Vector3(cos(TAU * i / size) * ring, 0.0, sin(TAU * i / size) * ring)
+		boar.outcome_reached.connect(_on_outcome)
+		boar.held_changed.connect(_on_held_changed)
+		$Boars.add_child(boar)
 
 
 func _on_outcome(type_id: String, kind: int) -> void:

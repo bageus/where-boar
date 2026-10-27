@@ -54,12 +54,13 @@ func _physics_process(_delta: float) -> bool:
 	var boars := _map.get_node("Boars").get_children()
 	match _frame:
 		2:
-			_check(boars.size() == 6, "six boars spawn")
+			_check(boars.size() == 21, "a herd, three groups and two loners spawn")
 			# Put the hunter 5 m from the first boar, facing it; it must start fleeing.
 			hunter.global_position = boars[0].global_position + Vector3(0, -0.4, 5)
 			hunter.rotation = Vector3.ZERO
 		4:
 			_check(boars[0].state_name() == "FLEE", "boar near hunter flees")
+			_check(boars[9].state_name() != "WANDER", "fear spreads through the herd")
 			hunter.shout()
 			_check(boars[0]._shout_left > 0.0, "a shout steers the fleeing boar")
 			hunter.equip({"item_carrot": 1})
@@ -88,7 +89,7 @@ func _physics_process(_delta: float) -> bool:
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
 			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 2, "loadout spent")
-			_check(_map.hunt.remaining() == 4 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
+			_check(_map.hunt.remaining() == _map.hunt.total - 2 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
 			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
 			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
