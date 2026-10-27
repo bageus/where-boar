@@ -9,6 +9,8 @@
   "public_api": [],
   "dependencies": [
     "features.boar",
+    "features.settlement",
+    "infrastructure.save",
     "presentation.hunt_map",
     "presentation.menus"
   ]

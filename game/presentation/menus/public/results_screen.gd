@@ -7,7 +7,7 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
-func show_results(hunt: Hunt) -> void:
+func show_results(hunt: Hunt, total_tusks: int) -> void:
 	var lines: PackedStringArray = []
 	for type_id in hunt.type_ids():
 		var type := BoarTypes.find(type_id)
@@ -20,5 +20,5 @@ func show_results(hunt: Hunt) -> void:
 	if lines.is_empty():
 		lines.append("No boars this time.")
 	lines.append("")
-	lines.append("Tusks earned: %d" % hunt.tusks())
+	lines.append("Tusks earned: %d   (tribe total: %d)" % [hunt.tusks(), total_tusks])
 	%Summary.text = "\n".join(lines)

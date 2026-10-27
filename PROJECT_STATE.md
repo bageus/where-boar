@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-002
-last_completed_task_id: P3-002
+active_task_id: P3-003
+last_completed_task_id: P3-003
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-002 done; next P3-003.
+P3-003 done; next P3-004.
 
 ## Last completed work
 
@@ -38,6 +38,7 @@ P3-002 done; next P3-003.
 - P2-005: start screen, goal HUD, return to camp, results with tusks; boar health bar; minimap with escape zones.
 - P3-001: hunter health, boar CHARGE ram with damage, hunt ends at zero health.
 - P3-002: five boar types as .tres (colour, speed, senses, aggression, armour, rewards), rarity-weighted spawn, 6 boars per hunt.
+- P3-003: versioned JSON save of tusks and caught animals with backup (features.settlement, infrastructure.save).
 
 ## Build and validation
 
@@ -61,7 +62,7 @@ P3-002 done; next P3-003.
 
 ## Next action
 
-Start P3-003.
+Start P3-004.
 
 ## Handoff notes
 

@@ -14,6 +14,11 @@ var _map: Node3D
 
 func _initialize() -> void:
 	_main = MainScene.instantiate()
+	# Keep the player's real save out of the test.
+	_main.save_store.path = "user://smoke_save.json"
+	for file_path in [_main.save_store.path, _main.save_store.backup_path()]:
+		if FileAccess.file_exists(file_path):
+			DirAccess.remove_absolute(file_path)
 	root.add_child(_main)
 
 
@@ -26,6 +31,7 @@ func _physics_process(_delta: float) -> bool:
 	if _frame == 122:
 		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
 		_check("caught 1" in _main.current.get_node("%Summary").text, "results list the caught boar")
+		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
 		print("hunt map smoke test: %d failure(s)" % _failures)
 		quit(1 if _failures else 0)
 	if _frame > 120:

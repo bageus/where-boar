@@ -1,0 +1,12 @@
+{
+  "id": "infrastructure.save",
+  "layer": "infrastructure",
+  "purpose": "Read and write the single save slot as versioned JSON in user:// with a backup copy (section 18).",
+  "state_owner": [
+    "Save file on disk"
+  ],
+  "public_api": [
+    "public/save_store.gd"
+  ],
+  "dependencies": []
+}

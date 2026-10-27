@@ -1,0 +1,15 @@
+{
+  "id": "features.settlement",
+  "layer": "features",
+  "purpose": "Own the tribe's lasting progress between hunts: tusks, caught animals and owned gear (M008, M013).",
+  "state_owner": [
+    "Tusks, caught animals and owned gear"
+  ],
+  "public_api": [
+    "public/progress.gd"
+  ],
+  "dependencies": [
+    "features.boar",
+    "features.hunt"
+  ]
+}
