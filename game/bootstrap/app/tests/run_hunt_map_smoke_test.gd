@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 33
+const EXPECTED_CHECKS := 32
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -107,8 +107,8 @@ func _physics_process(_delta: float) -> bool:
 			_map.helpers = {"rooster": 1, "turkey": 1}
 			_map.summon("turkey")
 			_map.summon("rooster")
-			_check(_map.get_node("Hud/Minimap").reveal_left > 0.0, "turkey marks boars on the minimap")
-			_check(_map.get_node_or_null("RoosterDriver") != null, "rooster flies out to drive a group")
+			_check(not _map.get_node("Hud/Minimap").marked.is_empty() and _map.get_node_or_null("RoosterDriver") == null,
+					"turkey marks a group on the minimap; only one helper per hunt")
 			_freeze_and_aim(hunter, boars[2], Vector3(3, 0, 20))
 			hunter.weapon = hunter.Weapon.SPEAR
 			Input.action_press("aim")

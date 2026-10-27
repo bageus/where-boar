@@ -2,7 +2,7 @@ extends Control
 
 ## Top-down minimap (D011): escape zones, the return point and the hunter.
 ## Placed traps show as blue squares (owner, 2026-10-27).
-## Boars appear only while a turkey scout has marked them (M017).
+## Boars appear only while a turkey scout has marked their group (M017).
 
 ## Half the map's side in metres; the map is centred on the origin.
 const MAP_HALF_SIZE := 80.0
@@ -13,13 +13,11 @@ const TRAPS_GROUP := "placed_traps"
 var hunter: Node3D
 var escape_zones: Array[Vector2] = []
 var return_point := Vector2.ZERO
-## Parent of the boar nodes, and seconds the turkey's marks still show.
-var boars: Node
-var reveal_left := 0.0
+## Boars the turkey marked (one herd, group or loner), set by the map.
+var marked: Array[Node3D] = []
 
 
-func _process(delta: float) -> void:
-	reveal_left -= delta
+func _process(_delta: float) -> void:
 	queue_redraw()
 
 
@@ -32,8 +30,8 @@ func _draw() -> void:
 	for trap: Node3D in get_tree().get_nodes_in_group(TRAPS_GROUP):
 		var spot := _to_px(Vector2(trap.global_position.x, trap.global_position.z))
 		draw_rect(Rect2(spot - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.85, 1.0))
-	if boars and reveal_left > 0.0:
-		for boar: Node3D in boars.get_children():
+	for boar in marked:
+		if is_instance_valid(boar):
 			draw_circle(_to_px(Vector2(boar.global_position.x, boar.global_position.z)), 3.0, Color(1, 0.85, 0.3))
 	if hunter:
 		var at := _to_px(Vector2(hunter.global_position.x, hunter.global_position.z))

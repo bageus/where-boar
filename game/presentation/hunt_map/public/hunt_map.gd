@@ -25,6 +25,7 @@ const SHOUT_RADIUS := 15.0
 const SETTER_TRAPS := 2
 const SETTER_OFFSET := 5.0
 const TIP_SECONDS := 8.0
+const SCOUT_CHECK_SECONDS := 0.5
 const TIPS := [
 	"Boars flee when you get close. Caps Lock toggles sneaking.",
 	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
@@ -40,6 +41,11 @@ var items: Dictionary = {}
 ## Helper animals in the camp pen (animal_id -> count), injected like items. Each kind helps once per hunt.
 var helpers: Dictionary = {}
 var _helpers_used: Array[String] = []
+## The one helper animal taken on this hunt (owner, 2026-10-27); "" means the first one in the pen.
+var companion := ""
+## The turkey keeps a group marked and looks for another when it scatters or is gone.
+var _scouting := false
+var _scout_left := 0.0
 ## Injected: the player's first hunt shows tips (section 16).
 var first_hunt := false
 var _tip := 0
@@ -84,13 +90,16 @@ func _ready() -> void:
 	minimap.hunter = _hunter
 	minimap.escape_zones = zones
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
-	minimap.boars = $Boars
 	_show_goal()
 	$Hud/Tip.visible = first_hunt
 
 
-## First-hunt tips, one every TIP_SECONDS.
+## First-hunt tips, one every TIP_SECONDS; the turkey re-checks its marks.
 func _process(delta: float) -> void:
+	_scout_left -= delta
+	if _scouting and _scout_left <= 0.0:
+		_scout_left = SCOUT_CHECK_SECONDS
+		_scout()
 	if not first_hunt:
 		return
 	_tip_left -= delta
@@ -130,20 +139,29 @@ func _set_traps_at_zones(zones: Array[Vector2]) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("summon_rooster"):
-		summon(CompanionRules.ROOSTER)
-	elif event.is_action_pressed("summon_turkey"):
-		summon(CompanionRules.TURKEY)
+	if event.is_action_pressed("release_helper"):
+		summon(_companion())
 
 
-## Calls a helper from the camp pen (M016, M017): the rooster drives the nearest group at the hunter,
-## the turkey marks every boar on the minimap.
+## The helper taken on this hunt: the one chosen in the pens, else the first one the pen has.
+func _companion() -> String:
+	if helpers.get(companion, 0) > 0:
+		return companion
+	for animal_id in [CompanionRules.ROOSTER, CompanionRules.TURKEY]:
+		if helpers.get(animal_id, 0) > 0:
+			return animal_id
+	return ""
+
+
+## Releases the helper taken from the camp pen (M016, M017), once per hunt: the rooster drives the
+## nearest group at the hunter, the turkey keeps a herd, group or loner marked on the minimap.
 func summon(animal_id: String) -> void:
-	if helpers.get(animal_id, 0) == 0 or animal_id in _helpers_used or hunt.is_over():
+	if helpers.get(animal_id, 0) == 0 or not _helpers_used.is_empty() or hunt.is_over():
 		return
 	_helpers_used.append(animal_id)
 	if animal_id == CompanionRules.TURKEY:
-		$Hud/Minimap.reveal_left = CompanionRules.SCOUT_SECONDS
+		_scouting = true
+		_scout()
 	else:
 		var hunter_pos := Vector2(_hunter.global_position.x, _hunter.global_position.z)
 		var spots: Array[Vector2] = []
@@ -237,11 +255,38 @@ func _announce(text: String) -> void:
 	create_tween().tween_property(label, "modulate:a", 0.0, 2.5).set_delay(1.0)
 
 
+## Keeps the turkey's group marked; when every marked boar is gone, caught or one of them runs,
+## it picks the calm group nearest the hunter instead.
+func _scout() -> void:
+	var minimap := $Hud/Minimap
+	var calm := 0
+	var running := false
+	for boar in minimap.marked:
+		if is_instance_valid(boar) and boar.boar.is_free():
+			if boar.state_name() == "WANDER":
+				calm += 1
+			else:
+				running = true
+	if calm > 0 and not running:
+		return
+	var best: Node3D = null
+	for boar in $Boars.get_children():
+		if boar.state_name() == "WANDER" and boar not in minimap.marked \
+				and (best == null or boar.global_position.distance_to(_hunter.global_position) < best.global_position.distance_to(_hunter.global_position)):
+			best = boar
+	var group: Array[Node3D] = []
+	if best:
+		for mate in (best.herd if not best.herd.is_empty() else [best]):
+			if is_instance_valid(mate) and mate.boar.is_free():
+				group.append(mate)
+	minimap.marked = group
+
+
 func _show_goal() -> void:
 	var pen := PackedStringArray()
-	for animal_id in [CompanionRules.ROOSTER, CompanionRules.TURKEY]:
-		if helpers.get(animal_id, 0) > 0 and animal_id not in _helpers_used:
-			pen.append("[%s] %s" % ["Z" if animal_id == CompanionRules.ROOSTER else "X", animal_id])
+	var animal_id := _companion()
+	if animal_id != "" and _helpers_used.is_empty():
+		pen.append("[Z] release %s" % animal_id)
 	_goal.text = "Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d\nHelpers: %s" % [
 		hunt.remaining(),
 		hunt.held,

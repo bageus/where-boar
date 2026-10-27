@@ -16,6 +16,8 @@ var items: Dictionary = {}
 var helpers: Dictionary = {}
 ## Hunts finished; 0 means the next hunt is the first and shows hints (section 16).
 var hunts := 0
+## Helper animal taken on the next hunt ("rooster", "turkey" or "" for the first one in the pen).
+var companion := ""
 
 
 ## Adds a finished hunt's tusks and live catches and takes spent consumables out of stock.
@@ -43,6 +45,11 @@ func spend(cost: int) -> bool:
 ## Buys one catalog item; false when unknown, already owned (unique), locked or too expensive.
 func buy(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
+	if item.has("companion"):
+		if not unlocked(item_id):
+			return false
+		companion = item["companion"]
+		return true
 	if item.is_empty() or sold_out(item_id) or not unlocked(item_id) or not spend(ShopCatalog.price(item_id)):
 		return false
 	items[item_id] = mini(items.get(item_id, 0) + item.get("pack", 1), item.get("max", 1 << 30))
@@ -52,12 +59,17 @@ func buy(item_id: String) -> bool:
 ## True when no more of item_id can be bought: a unique item owned, or a stack at its max.
 func sold_out(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
+	if item.has("companion"):
+		return companion == item["companion"]
 	var have: int = items.get(item_id, 0)
 	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
 
 
 ## A saddle needs a caught boar of its type in the pens (D021).
 func unlocked(item_id: String) -> bool:
+	var animal: String = ShopCatalog.ITEMS.get(item_id, {}).get("companion", "")
+	if animal != "":
+		return helpers.get(animal, 0) > 0
 	var needs: String = ShopCatalog.ITEMS.get(item_id, {}).get("requires_caught", "")
 	return needs == "" or caught.get(needs, 0) > 0 or ShopCatalog.free_for_testing
 
@@ -68,7 +80,7 @@ func owns(item_id: String) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(),
-		"hunts": hunts, "kit": true}
+		"hunts": hunts, "kit": true, "companion": companion}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
@@ -79,6 +91,7 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.caught = _counts(data.get("caught", {}))
 	progress.items = _counts(data.get("items", {}))
 	progress.helpers = _counts(data.get("helpers", {}))
+	progress.companion = str(data.get("companion", ""))
 	# New games, and saves from before ammo became stock, get the starter kit once.
 	if not data.get("kit", false):
 		for item_id in ShopCatalog.STARTER_KIT:

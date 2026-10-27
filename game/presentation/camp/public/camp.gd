@@ -9,6 +9,12 @@ signal purchased
 
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
+const PEN_ANIMALS := {
+	"rooster": preload("res://game/features/companions/public/wild_rooster.tscn"),
+	"turkey": preload("res://game/features/companions/public/wild_turkey.tscn"),
+}
+## At most this many of each helper animal stand in the pen (owner, 2026-10-27).
+const PEN_SHOWN := 4
 
 const USE_RADIUS := 2.5
 
@@ -26,6 +32,20 @@ func _ready() -> void:
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
 	_show_progress()
+	_fill_pen()
+
+
+## Roosters and turkeys caught on hunts stand by the pens.
+func _fill_pen() -> void:
+	var pen: Vector3 = $Stations/Pens.global_position
+	var row := 0
+	for animal_id in PEN_ANIMALS:
+		for i in mini(progress.helpers.get(animal_id, 0), PEN_SHOWN):
+			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
+			animal.process_mode = Node.PROCESS_MODE_DISABLED
+			add_child(animal)
+			animal.global_position = pen + Vector3(2.5 + i * 0.9, 0.0, -1.5 + row * 1.2)
+		row += 1
 
 
 ## Shows the tribe's tusks and live catches in the camp HUD.

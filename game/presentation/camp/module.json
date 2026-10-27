@@ -10,6 +10,7 @@
   "dependencies": [
     "features.boar",
     "features.hunter",
-    "features.settlement"
+    "features.settlement",
+    "features.companions"
   ]
 }

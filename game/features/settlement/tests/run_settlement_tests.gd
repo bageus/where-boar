@@ -15,6 +15,7 @@ func _init() -> void:
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
+	failures += _check(_pick_helper_from_pen(), "a helper in the pen can be taken on the hunt, one at a time")
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	print("settlement tests: %d failure(s)" % failures)
@@ -67,6 +68,15 @@ func _free_for_testing_costs_nothing() -> bool:
 	var ok := progress.buy("item_bow") and progress.buy("item_saddle_runner_grey") and progress.tusks == 0
 	ShopCatalog.free_for_testing = false
 	return ok
+
+
+func _pick_helper_from_pen() -> bool:
+	var progress := Progress.new()
+	var empty_pen := not progress.buy("item_take_turkey") and progress.companion == ""
+	progress.helpers = {"rooster": 1, "turkey": 2}
+	var turkey := progress.buy("item_take_turkey") and progress.sold_out("item_take_turkey")
+	var rooster := progress.buy("item_take_rooster") and not progress.sold_out("item_take_turkey")
+	return empty_pen and turkey and rooster and Progress.from_dict(progress.to_dict()).companion == "rooster"
 
 
 func _buy_weapon_once() -> bool:
