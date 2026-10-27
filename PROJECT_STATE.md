@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-015 done; riding waits for the owner's confirmation.
+None. P3-001..P3-015 done; riding confirmed as saddled (D026).
 
 ## Last completed work
 
@@ -74,7 +74,7 @@ None. P3-001..P3-015 done; riding waits for the owner's confirmation.
 
 ## Next action
 
-Owner playtest of the vertical slice; answer on riding (P3-012).
+Owner playtest of the vertical slice (playtest fixes of 2026-10-27 included).
 
 ## Handoff notes
 

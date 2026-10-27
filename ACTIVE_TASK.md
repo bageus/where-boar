@@ -54,7 +54,7 @@ P3-012 — ездовые кабаны из пойманных (D021).
 
 ## Next exact action
 
-Phase 3 backlog done; wait for the owner's answer on riding (P3-012) and a playtest of the vertical slice.
+Phase 3 backlog done; riding confirmed (D026). Wait for a playtest of the vertical slice.
 
 ## Session handoff
 
