@@ -10,6 +10,11 @@ permissions:
   pages: write
   id-token: write
 
+# One Pages deployment at a time; a newer push replaces a queued one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 env:
   GODOT_VERSION: 4.7.2
 
