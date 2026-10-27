@@ -25,6 +25,9 @@ const STUN_SECONDS := 1.0
 
 enum Weapon { SPEAR, NET }
 
+## Fact: the hunter pressed interact (E); the map decides what it means, e.g. return to camp.
+signal interacted
+
 var stamina := Stamina.new()
 var loadout := Loadout.new()
 var weapon := Weapon.SPEAR
@@ -61,6 +64,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		weapon = Weapon.NET
 	elif event.is_action_pressed("interact"):
 		_pick_up()
+		interacted.emit()
 	_update_hud()
 
 

@@ -26,4 +26,5 @@ python tools/validate_workflow_state.py --ready
 python tools/validate_project.py
 godot --headless --path . --editor --quit   # Godot 4.7.2, when available
 ```
+If `godot` is missing in a cloud session (the SessionStart hook does not always run in project threads), run `.claude/hooks/install-godot.sh` once.
 `validate_project.py` runs the architecture, source-size and import-file checks.

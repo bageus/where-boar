@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/hunt_map/public/hunt_map.gd" id="1_map"]
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/ground.tscn" id="2_ground"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/rock.tscn" id="5_rock"]
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/escape_zone.tscn" id="6_zone"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/public/hunter.tscn" id="7_hunter"]
+[ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/return_point.tscn" id="8_return"]
+[ext_resource type="PackedScene" path="res://game/presentation/hunt_map/hud/minimap.tscn" id="9_minimap"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 
@@ -139,3 +141,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0.5, 26)
 
 [node name="Hunter" parent="." instance=ExtResource("7_hunter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 30)
+
+[node name="ReturnPoint" parent="." instance=ExtResource("8_return")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 33)
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Goal" type="Label" parent="Hud"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -560.0
+offset_top = 190.0
+offset_right = -20.0
+offset_bottom = 216.0
+grow_horizontal = 0
+horizontal_alignment = 2
+
+[node name="Minimap" parent="Hud" instance=ExtResource("9_minimap")]

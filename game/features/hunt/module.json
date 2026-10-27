@@ -5,7 +5,9 @@
   "state_owner": [
     "Results of the current hunt"
   ],
-  "public_api": [],
+  "public_api": [
+    "public/hunt.gd"
+  ],
   "dependencies": [
     "features.boar"
   ]

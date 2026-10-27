@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 2
 current_milestone: P2_PROTOTYPE
-active_task_id: P2-004
-last_completed_task_id: P2-004
+active_task_id: P2-005
+last_completed_task_id: P2-005
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P2_PROTOTYPE — один полный цикл охоты (M001–M005, M007). 
 
 ## Active task
 
-None. P2-001..P2-004 done; next is P2-005.
+None. Phase 2 tasks P2-001..P2-005 done.
 
 ## Last completed work
 
@@ -35,6 +35,7 @@ None. P2-001..P2-004 done; next is P2-005.
 - P1-001, P1-002: boar and hunt domain, perception and escape rules.
 - P2-001..P2-003: `features.hunter`, boar agent scene, `presentation.hunt_map`, main scene runs the map.
 - P2-004: boar ram knockback + hunter stun; playtest fixes (hotbar HUD, central stamina bar, wall sliding).
+- P2-005: start screen, goal HUD, return to camp, results with tusks; boar health bar; minimap with escape zones.
 
 ## Build and validation
 
@@ -58,8 +59,8 @@ None. P2-001..P2-004 done; next is P2-005.
 
 ## Next action
 
-Plan P2-005 (hunt flow).
+Plan phase 3 (vertical slice).
 
 ## Handoff notes
 
-Run the game from `game/bootstrap/app/main.tscn`. Controls are listed on the HUD.
+Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD.

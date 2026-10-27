@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Mat_return"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.2, 0.8, 0.3, 0.45)
+
+[sub_resource type="CylinderMesh" id="Mesh_return"]
+material = SubResource("Mat_return")
+top_radius = 3.0
+bottom_radius = 3.0
+height = 0.05
+
+[node name="ReturnPoint" type="Marker3D"]
+
+[node name="Disc" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("Mesh_return")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+font_size = 48
+text = "Camp: press E to end the hunt"

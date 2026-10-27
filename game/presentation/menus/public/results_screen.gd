@@ -1,0 +1,22 @@
+extends CenterContainer
+
+## Hunt results (M007): boars killed, caught and escaped per type, and the tusks earned.
+
+const Hunt = preload("res://game/features/hunt/public/hunt.gd")
+const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
+
+
+func show_results(hunt: Hunt) -> void:
+	var lines: PackedStringArray = []
+	for type_id in hunt.type_ids():
+		lines.append("%s: killed %d, caught %d, escaped %d" % [
+			type_id,
+			hunt.count(type_id, BoarOutcome.Kind.DEAD),
+			hunt.count(type_id, BoarOutcome.Kind.CAPTURED),
+			hunt.count(type_id, BoarOutcome.Kind.ESCAPED),
+		])
+	if lines.is_empty():
+		lines.append("No boars this time.")
+	lines.append("")
+	lines.append("Tusks earned: %d" % hunt.tusks())
+	%Summary.text = "\n".join(lines)

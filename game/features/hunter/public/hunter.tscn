@@ -73,4 +73,4 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 900.0
 offset_bottom = 44.0
-text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB stab/throw, RMB aim spear, 1/2 weapon, E pick up, Esc free mouse"
+text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB stab/throw, RMB aim spear, 1/2 weapon, E pick up or end hunt at camp, Esc free mouse"

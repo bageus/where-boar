@@ -1,23 +1,35 @@
 extends SceneTree
 
-## Loads the main scene headless and checks the hunt wiring: boars spawn, see the hunter,
-## and react to a thrown net and spear.
+## Loads the main scene headless and checks the hunt wiring: start, boars spawn, see the hunter,
+## react to a thrown net and spear, the goal counts the capture and returning to camp shows results.
 
 const MainScene = preload("res://game/bootstrap/app/main.tscn")
+const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 var _frame := 0
 var _failures := 0
+var _main: Node
 var _map: Node3D
 
 
 func _initialize() -> void:
-	var main := MainScene.instantiate()
-	root.add_child(main)
-	_map = main.get_node("HuntMap")
+	_main = MainScene.instantiate()
+	root.add_child(_main)
 
 
 func _physics_process(_delta: float) -> bool:
 	_frame += 1
+	if _frame == 1:
+		_main.current.get_node("%Start").pressed.emit()
+		_map = _main.current
+		return false
+	if _frame == 122:
+		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
+		_check("caught 1" in _main.current.get_node("%Summary").text, "results list the caught boar")
+		print("hunt map smoke test: %d failure(s)" % _failures)
+		quit(1 if _failures else 0)
+	if _frame > 120:
+		return false
 	var hunter: CharacterBody3D = _map.get_node("Hunter")
 	var boars := _map.get_node("Boars").get_children()
 	match _frame:
@@ -46,8 +58,10 @@ func _physics_process(_delta: float) -> bool:
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
 			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 2, "loadout spent")
-			print("hunt map smoke test: %d failure(s)" % _failures)
-			quit(1 if _failures else 0)
+			_check(_map.hunt.remaining() == 3 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
+			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
+			hunter.global_position = _map.get_node("ReturnPoint").global_position
+			hunter.interacted.emit()
 	return false
 
 

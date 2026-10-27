@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://game/features/boar/public/boar_body.gd" id="1_boar"]
 
@@ -18,6 +18,26 @@ height = 1.6
 material = SubResource("Mat_hide")
 size = Vector3(0.3, 0.25, 0.3)
 
+[sub_resource type="StandardMaterial3D" id="Mat_bar_back"]
+shading_mode = 0
+billboard_mode = 1
+billboard_keep_scale = true
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bar_fill"]
+resource_local_to_scene = true
+shading_mode = 0
+billboard_mode = 1
+billboard_keep_scale = true
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="QuadMesh" id="Mesh_bar"]
+size = Vector2(1, 0.12)
+
+[sub_resource type="QuadMesh" id="Mesh_fill"]
+size = Vector2(1, 0.12)
+center_offset = Vector3(0, 0, 0.01)
+
 [node name="BoarBody" type="CharacterBody3D"]
 script = ExtResource("1_boar")
 
@@ -33,8 +53,19 @@ mesh = SubResource("Mesh_body")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.9)
 mesh = SubResource("Mesh_snout")
 
-[node name="Label" type="Label3D" parent="."]
+[node name="HealthBar" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+
+[node name="Back" type="MeshInstance3D" parent="HealthBar"]
+mesh = SubResource("Mesh_bar")
+material_override = SubResource("Mat_bar_back")
+
+[node name="Fill" type="MeshInstance3D" parent="HealthBar"]
+mesh = SubResource("Mesh_fill")
+material_override = SubResource("Mat_bar_fill")
+
+[node name="Label" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 billboard = 1
-font_size = 48
+font_size = 32
 text = "WANDER"

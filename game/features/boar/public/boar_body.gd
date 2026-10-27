@@ -4,6 +4,7 @@ extends CharacterBody3D
 
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
+const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 # ASSUMPTION numbers (D013), tuned in phase 2. Flee and panic outrun a sprinting hunter (7 m/s).
 const WANDER_SPEED := 1.5
@@ -21,7 +22,10 @@ const RAM_IMPULSE := 14.0
 const RAM_COOLDOWN := 1.0
 const KNOCK_DECAY := 6.0
 
-@export var type_id := "runner"
+## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
+signal outcome_reached(type_id: String, kind: int)
+
+@export var type_id := "common_brown"
 @export var max_health := 3
 
 ## Injected by the scene that spawns the boar.
@@ -37,8 +41,10 @@ var _knock := Vector3.ZERO
 var _ram_cooldown := 0.0
 ## Last wall (XZ normal) the boar slid on, used to steer out of corners.
 var _wall := Vector2.ZERO
+var _reported := false
 
 @onready var _label: Label3D = $Label
+@onready var _health_fill: MeshInstance3D = $HealthBar/Fill
 
 
 func _ready() -> void:
@@ -64,6 +70,7 @@ func knock(impulse: Vector3) -> void:
 
 func _after_change() -> void:
 	_show_state()
+	_report_outcome()
 	if boar.state == Boar.State.DEAD:
 		rotation.z = PI / 2.0
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(queue_free)
@@ -85,6 +92,7 @@ func _physics_process(delta: float) -> void:
 	for zone in escape_zones:
 		BoarSenses.enter_zone(boar, pos, zone, ESCAPE_RADIUS)
 	if boar.state == Boar.State.ESCAPED:
+		_report_outcome()
 		queue_free()
 		return
 	if boar.state != before:
@@ -150,5 +158,16 @@ func state_name() -> String:
 	return Boar.State.keys()[boar.state]
 
 
+func _report_outcome() -> void:
+	var kind := boar.outcome_kind()
+	if kind != BoarOutcome.Kind.NONE and not _reported:
+		_reported = true
+		outcome_reached.emit(type_id, kind)
+
+
 func _show_state() -> void:
-	_label.text = "%s %d/%d" % [state_name(), boar.health, max_health]
+	_label.text = state_name()
+	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
+	var ratio := float(boar.health) / max_health
+	_health_fill.scale.x = maxf(ratio, 0.001)
+	(_health_fill.material_override as StandardMaterial3D).albedo_color = Color.RED.lerp(Color.GREEN, ratio)

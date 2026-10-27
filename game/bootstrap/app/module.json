@@ -8,6 +8,7 @@
   ],
   "public_api": [],
   "dependencies": [
-    "presentation.hunt_map"
+    "presentation.hunt_map",
+    "presentation.menus"
   ]
 }
