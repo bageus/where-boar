@@ -18,6 +18,9 @@ const ITEM_IDS := {
 ## Bait item ids, the strongest first: place_bait uses the first one left (ASSUMPTION).
 const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
 
+## Trap item ids in the order G cycles through them (M015).
+const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]
+
 var spear_in_hand := true
 var nets := START_NETS
 var arrows := START_ARROWS
@@ -25,6 +28,10 @@ var arrows := START_ARROWS
 var baits: Dictionary = {}
 ## item_id -> consumables spent this hunt; camp takes them out of stock afterwards.
 var used: Dictionary = {}
+## item_id -> traps carried this hunt.
+var traps: Dictionary = {}
+## Index into TRAP_IDS of the trap T places.
+var trap_index := 0
 var _bought: Array[Weapon] = []
 
 
@@ -37,6 +44,9 @@ func equip(items: Dictionary) -> void:
 	baits.clear()
 	for item_id in BAIT_IDS:
 		baits[item_id] = items.get(item_id, 0)
+	traps.clear()
+	for item_id in TRAP_IDS:
+		traps[item_id] = items.get(item_id, 0)
 
 
 func has(weapon: Weapon) -> bool:
@@ -82,3 +92,22 @@ func place_bait() -> String:
 			used[item_id] = used.get(item_id, 0) + 1
 			return item_id
 	return ""
+
+
+## Selects the next trap type.
+func cycle_trap() -> void:
+	trap_index = (trap_index + 1) % TRAP_IDS.size()
+
+
+func selected_trap() -> String:
+	return TRAP_IDS[trap_index]
+
+
+## Spends the selected trap; returns its item id, or "" when none is left.
+func place_trap() -> String:
+	var item_id := selected_trap()
+	if traps.get(item_id, 0) == 0:
+		return ""
+	traps[item_id] -= 1
+	used[item_id] = used.get(item_id, 0) + 1
+	return item_id

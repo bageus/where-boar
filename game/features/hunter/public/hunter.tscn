@@ -83,7 +83,7 @@ anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 20.0
 offset_top = -50.0
-offset_right = 600.0
+offset_right = 900.0
 offset_bottom = -20.0
 grow_vertical = 0
 
@@ -92,4 +92,4 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 900.0
 offset_bottom = 44.0
-text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, F bait, R shout, E pick up or end hunt at camp, Esc free mouse"
+text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, F bait, R shout, G/T trap, E pick up or end hunt at camp, Esc free mouse"

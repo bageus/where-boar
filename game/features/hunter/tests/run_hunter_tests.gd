@@ -16,6 +16,7 @@ func _init() -> void:
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
+	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -96,3 +97,12 @@ func _bait_strongest_first() -> bool:
 	var second := loadout.place_bait()
 	return first == "item_apple" and second == "item_acorns" and loadout.place_bait() == "" \
 		and loadout.used == {"item_apple": 1, "item_acorns": 1}
+
+
+func _traps_cycle_and_run_out() -> bool:
+	var loadout := Loadout.new()
+	loadout.equip({"item_snare": 1})
+	var none := loadout.place_trap() == ""
+	loadout.cycle_trap()
+	return none and loadout.place_trap() == "item_snare" and loadout.place_trap() == "" \
+		and loadout.used == {"item_snare": 1}

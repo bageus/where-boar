@@ -24,11 +24,15 @@ func flee() -> void:
 		state = State.FLEE
 
 
+## A trapped boar stays in the trap when hurt, unless the hit kills it.
 func take_hit(damage: int) -> void:
 	if state in [State.CAPTURED, State.DEAD, State.ESCAPED]:
 		return
 	health = max(0, health - damage)
-	state = State.DEAD if health == 0 else State.PANIC
+	if health == 0:
+		state = State.DEAD
+	elif state != State.TRAPPED:
+		state = State.PANIC
 
 
 ## After an attack a panicking boar may turn and ram the hunter (D018).
@@ -43,14 +47,21 @@ func end_charge() -> void:
 		state = State.FLEE
 
 
+## A net or a closing cage captures a free or trapped boar (M004, D023).
 func net_capture() -> void:
-	if is_free():
+	if is_free() or state == State.TRAPPED:
 		state = State.CAPTURED
 
 
 func trap() -> void:
 	if is_free():
 		state = State.TRAPPED
+
+
+## A big boar tore out of a snare (D023) and runs.
+func break_free() -> void:
+	if state == State.TRAPPED:
+		state = State.PANIC
 
 
 func escape() -> void:

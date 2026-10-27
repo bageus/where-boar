@@ -10,6 +10,7 @@ func _init() -> void:
 	failures += _check(_empty_hunt_pays_nothing(), "empty hunt has no results and no tusks")
 	failures += _check(_ends_when_no_boars_left(), "hunt ends when every boar is resolved")
 	failures += _check(_ends_on_return(), "hunt ends when the hunter returns early")
+	failures += _check(_trapped_boars_end_hunt_and_count(), "trapped boars end the hunt and count as captured")
 	print("hunt tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -51,3 +52,13 @@ func _ends_on_return() -> bool:
 	var hunt := Hunt.new(3)
 	hunt.returned = true
 	return hunt.is_over() and hunt.tusks() == 0
+
+
+func _trapped_boars_end_hunt_and_count() -> bool:
+	var hunt := Hunt.new(2)
+	hunt.record("common_brown", BoarOutcome.Kind.DEAD)
+	hunt.held += 1
+	var over := hunt.is_over()
+	hunt.close_traps(["armored_black"])
+	return over and hunt.held == 0 and hunt.count("armored_black", BoarOutcome.Kind.CAPTURED) == 1 \
+		and hunt.tusks() == 2 + 14

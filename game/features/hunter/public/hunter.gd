@@ -12,6 +12,13 @@ const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
 const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
 const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
+const TRAP_SCENES := {
+	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
+	"item_snare": preload("res://game/features/hunter/presentation/traps/snare.tscn"),
+	"item_tripwire": preload("res://game/features/hunter/presentation/traps/tripwire.tscn"),
+	"item_cage": preload("res://game/features/hunter/presentation/traps/cage.tscn"),
+	"item_fence": preload("res://game/features/hunter/presentation/traps/fence.tscn"),
+}
 
 # ASSUMPTION numbers (D013), tuned in phase 2.
 const WALK_SPEED := 4.0
@@ -95,6 +102,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		shout()
 	elif event.is_action_pressed("bait"):
 		_place_bait()
+	elif event.is_action_pressed("trap_next"):
+		loadout.cycle_trap()
+	elif event.is_action_pressed("trap_place"):
+		place_trap()
 	else:
 		for i in WEAPON_NAMES.size():
 			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
@@ -132,6 +143,17 @@ func _place_bait() -> void:
 	add_child(bait)
 	bait.global_position = global_position - global_basis.z * 1.0
 	bait_placed.emit(bait)
+
+
+## Sets the selected trap on the ground 2 m ahead, facing the hunter's way (M015).
+func place_trap() -> void:
+	var item_id := loadout.place_trap()
+	if item_id == "":
+		return
+	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
+	trap.top_level = true
+	add_child(trap)
+	trap.global_transform = Transform3D(global_basis, global_position - global_basis.z * 2.0)
 
 
 func _physics_process(delta: float) -> void:
@@ -235,4 +257,6 @@ func _update_hud() -> void:
 	var bait_counts := PackedStringArray()
 	for item_id in Loadout.BAIT_IDS:
 		bait_counts.append("%s %d" % [item_id.trim_prefix("item_"), loadout.baits.get(item_id, 0)])
-	_bait_label.text = "[F] Bait: %s    [R] Shout" % ", ".join(bait_counts)
+	var trap_id := loadout.selected_trap()
+	_bait_label.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d" % [
+		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0)]

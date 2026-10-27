@@ -41,6 +41,7 @@ func _ready() -> void:
 		boar.baits = _baits
 		boar.position = spawns[i].position
 		boar.outcome_reached.connect(_on_outcome)
+		boar.held_changed.connect(_on_held_changed)
 		$Boars.add_child(boar)
 	_hunter.equip(items)
 	_hunter.interacted.connect(_on_interacted)
@@ -63,6 +64,15 @@ func _on_outcome(type_id: String, kind: int) -> void:
 		_end()
 
 
+func _on_held_changed(held: bool) -> void:
+	if hunt.is_over():
+		return
+	hunt.held += 1 if held else -1
+	_show_goal()
+	if hunt.is_over():
+		_end()
+
+
 func _on_interacted() -> void:
 	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
 		return
@@ -80,6 +90,11 @@ func _on_downed() -> void:
 
 func _end() -> void:
 	hunt.used_items = _hunter.loadout.used.duplicate()
+	var held_types := []
+	for boar in $Boars.get_children():
+		if boar.state_name() == "TRAPPED":
+			held_types.append(boar.boar_type.id)
+	hunt.close_traps(held_types)
 	hunt_ended.emit(hunt)
 
 
@@ -96,8 +111,9 @@ func _on_bait_placed(bait: Node3D) -> void:
 
 
 func _show_goal() -> void:
-	_goal.text = "Boars left: %d   Killed: %d   Caught: %d   Escaped: %d" % [
+	_goal.text = "Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d" % [
 		hunt.remaining(),
+		hunt.held,
 		hunt.count_all(BoarOutcome.Kind.DEAD),
 		hunt.count_all(BoarOutcome.Kind.CAPTURED),
 		hunt.count_all(BoarOutcome.Kind.ESCAPED),

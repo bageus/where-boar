@@ -15,6 +15,7 @@ func _init() -> void:
 	failures += _check(_trap_held_counts_as_captured(), "trap held to hunt end counts as captured")
 	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
 	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
+	failures += _check(_trapped_boar_stays_until_freed(), "trapped boar stays when hurt, can be netted or break free")
 	print("boar tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -88,3 +89,15 @@ func _types_pick_by_weight() -> bool:
 		and BoarTypes.pick(0.0).id == "common_brown" \
 		and BoarTypes.pick(0.999).id == "golden_tusk" \
 		and BoarTypes.rewards()["golden_tusk"] == {"dead": 10, "captured": 20}
+
+
+func _trapped_boar_stays_until_freed() -> bool:
+	var boar := Boar.new("runner", 3)
+	boar.trap()
+	boar.take_hit(1)
+	var held := boar.state == Boar.State.TRAPPED and not boar.is_free()
+	boar.break_free()
+	var loose := boar.state == Boar.State.PANIC
+	boar.trap()
+	boar.net_capture()
+	return held and loose and boar.state == Boar.State.CAPTURED

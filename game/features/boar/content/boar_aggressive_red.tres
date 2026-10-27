@@ -15,5 +15,6 @@ panic_speed = 10.0
 perception_radius = 12.0
 aggression = 1.0
 knock_scale = 1.0
+snare_break_seconds = 12.0
 reward_dead = 6
 reward_captured = 10

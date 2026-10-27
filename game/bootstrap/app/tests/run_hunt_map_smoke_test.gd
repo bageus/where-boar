@@ -10,6 +10,7 @@ var _frame := 0
 var _failures := 0
 var _main: Node
 var _map: Node3D
+var _hunt: RefCounted
 
 
 func _initialize() -> void:
@@ -34,7 +35,8 @@ func _physics_process(_delta: float) -> bool:
 		return false
 	if _frame == 122:
 		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
-		_check("caught 1" in _main.current.get_node("%Summary").text, "results list the caught boar")
+		_check("caught 1" in _main.current.get_node("%Summary").text or "caught 2" in _main.current.get_node("%Summary").text, "results list the caught boars")
+		_check(_hunt.count_all(BoarOutcome.Kind.CAPTURED) == 2 and _hunt.held == 0, "the trapped boar counts as caught at hunt end")
 		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
@@ -73,6 +75,11 @@ func _physics_process(_delta: float) -> bool:
 			hunter._attack()
 		60:
 			_check(boars[1].state_name() == "CAPTURED", "thrown net captures boar")
+			# A pit dug under a parked boar holds it.
+			var pit: Node3D = hunter.TRAP_SCENES["item_pit"].instantiate()
+			_map.add_child(pit)
+			pit.global_position = boars[3].global_position
+			boars[3].set_physics_process(true)
 			_freeze_and_aim(hunter, boars[2], Vector3(3, 0, 20))
 			hunter.weapon = hunter.Weapon.SPEAR
 			Input.action_press("aim")
@@ -81,7 +88,9 @@ func _physics_process(_delta: float) -> bool:
 		120:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
 			_check(not hunter.loadout.spear_in_hand and hunter.loadout.nets == 2, "loadout spent")
-			_check(_map.hunt.remaining() == 5 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
+			_check(_map.hunt.remaining() == 4 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
+			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
+			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()

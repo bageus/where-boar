@@ -22,13 +22,16 @@ const KNOCK_DECAY := 6.0
 # Charge after an attack (D018), ASSUMPTION numbers (D013).
 const PANIC_SECONDS := 2.5
 const CHARGE_SECONDS := 4.0
-## How long a shout steers a boar before it flees normally again.
+## How long a shout or a fence steers a boar before it runs normally again.
 const SHOUT_SECONDS := 2.0
+const FENCE_TURN_SECONDS := 1.5
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
 
 ## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
 signal outcome_reached(type_id: String, kind: int)
+## Fact: a trap started (true) or stopped (false) holding the boar. Held boars count as caught at hunt end.
+signal held_changed(held: bool)
 
 @export var boar_type: BoarType = preload("res://game/features/boar/content/boar_common_brown.tres")
 
@@ -51,8 +54,11 @@ var _reported := false
 ## Seconds in the current domain state.
 var _state_time := 0.0
 var _charge_rolled := false
-var _shout_heading := Vector2.ZERO
-var _shout_left := 0.0
+var _forced_heading := Vector2.ZERO
+var _forced_left := 0.0
+var _stun_left := 0.0
+## Seconds until a snared boar breaks free; INF while it never will.
+var _snare_left := INF
 
 @onready var _label: Label3D = $Label
 @onready var _health_fill: MeshInstance3D = $HealthBar/Fill
@@ -81,14 +87,49 @@ func hear_shout(shout_pos: Vector3) -> void:
 		return
 	var pos := Vector2(global_position.x, global_position.z)
 	var side := 1 if randf() < 0.5 else -1
-	_shout_heading = BoarSenses.shout_heading(boar, pos, Vector2(shout_pos.x, shout_pos.z), side)
-	_shout_left = SHOUT_SECONDS
+	_forced_heading = BoarSenses.shout_heading(boar, pos, Vector2(shout_pos.x, shout_pos.z), side)
+	_forced_left = SHOUT_SECONDS
 	_show_state()
 
 
 func net_hit() -> void:
+	var was_held := boar.state == Boar.State.TRAPPED
 	boar.net_capture()
+	if was_held:
+		held_changed.emit(false)
 	_after_change()
+
+
+## Pit with leaves: holds the boar until the hunt ends (D023).
+func fall_in_pit() -> void:
+	_hold(INF)
+
+
+## Snare: holds the boar; big types tear free after a while (D023).
+func snare() -> void:
+	var seconds := boar_type.snare_break_seconds
+	_hold(seconds if seconds > 0.0 else INF)
+
+
+## Tripwire: knocks the boar down and stuns it for a while (D023).
+func trip(seconds: float) -> void:
+	if boar.is_free():
+		_stun_left = seconds
+		rotation.z = PI / 2.0
+
+
+## Stake cage closes on the boar that walked in (D023).
+func cage_capture() -> void:
+	net_hit()
+
+
+func _hold(seconds: float) -> void:
+	if not boar.is_free():
+		return
+	boar.trap()
+	_snare_left = seconds
+	_show_state()
+	held_changed.emit(true)
 
 
 ## Knocked by a ram or another boar: pushed along `impulse` for a moment.
@@ -107,7 +148,18 @@ func _after_change() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	if not boar.is_free():
+	if boar.state == Boar.State.TRAPPED:
+		_snare_left -= delta
+		if _snare_left <= 0.0:
+			boar.break_free()
+			_state_time = 0.0
+			_show_state()
+			held_changed.emit(false)
+	if _stun_left > 0.0:
+		_stun_left -= delta
+		if _stun_left <= 0.0 and boar.state != Boar.State.DEAD:
+			rotation.z = 0.0
+	if not boar.is_free() or _stun_left > 0.0:
 		velocity.x = 0.0
 		velocity.z = 0.0
 		_apply_knock(delta)
@@ -146,7 +198,7 @@ func _maybe_charge() -> void:
 
 func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	_turn_left -= delta
-	_shout_left -= delta
+	_forced_left -= delta
 	var speed := WANDER_SPEED
 	match boar.state:
 		Boar.State.WANDER:
@@ -162,7 +214,7 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 					_turn_left = WANDER_TURN_SECONDS
 				_heading = Vector2.from_angle(_turn)
 		Boar.State.FLEE:
-			_heading = _shout_heading if _shout_left > 0.0 else BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
+			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
 			speed = boar_type.flee_speed
 		Boar.State.CHARGE:
 			_heading = (hunter_pos - pos).normalized()
@@ -173,6 +225,8 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 				_turn_left = PANIC_TURN_SECONDS
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn)
 			speed = boar_type.panic_speed
+	if _forced_left > 0.0 and boar.state != Boar.State.CHARGE:
+		_heading = _forced_heading
 	if _wall != Vector2.ZERO and _heading.dot(_wall) < 0.0 and boar.state != Boar.State.WANDER:
 		var zone := BoarSenses.nearest_zone(pos, escape_zones)
 		var toward := escape_zones[zone] - pos if zone != -1 else pos - hunter_pos
@@ -213,6 +267,10 @@ func _ram(delta: float) -> void:
 				boar.end_charge()
 				_state_time = 0.0
 				_show_state()
+		elif other.has_method("turns_boars"):
+			# Fence (D024): turn round and run off along its normal.
+			_forced_heading = Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
+			_forced_left = FENCE_TURN_SECONDS
 		elif absf(hit.get_normal().y) < 0.5:
 			_wall = Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
 
@@ -222,9 +280,10 @@ func state_name() -> String:
 	return Boar.State.keys()[boar.state]
 
 
+## Final outcomes only; a trapped boar is counted by the map when the hunt ends.
 func _report_outcome() -> void:
 	var kind := boar.outcome_kind()
-	if kind != BoarOutcome.Kind.NONE and not _reported:
+	if kind != BoarOutcome.Kind.NONE and not _reported and boar.state != Boar.State.TRAPPED:
 		_reported = true
 		outcome_reached.emit(boar_type.id, kind)
 

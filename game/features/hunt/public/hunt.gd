@@ -11,6 +11,8 @@ var total := 0
 var returned := false
 ## item_id -> consumables (bait, traps) spent during the hunt.
 var used_items: Dictionary = {}
+## Boars held in traps right now; not free, counted as caught when the hunt ends (M007).
+var held := 0
 ## type_id -> BoarOutcome.Kind -> count
 var _counts: Dictionary = {}
 var _resolved := 0
@@ -48,7 +50,14 @@ func type_ids() -> Array:
 
 ## Boars still free on the map.
 func remaining() -> int:
-	return total - _resolved
+	return total - _resolved - held
+
+
+## Hunt end: every boar still in a trap counts as captured (M007).
+func close_traps(held_type_ids: Array) -> void:
+	for type_id in held_type_ids:
+		held -= 1
+		record(type_id, BoarOutcome.Kind.CAPTURED)
 
 
 ## The hunt ends when the hunter returns to camp or no free boars are left (section 07).

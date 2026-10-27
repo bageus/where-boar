@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://game/features/hunter/presentation/traps/trap.gd" id="1_trap"]
+
+[sub_resource type="BoxShape3D" id="Shape_trap"]
+size = Vector3(2, 0.05, 2)
+
+[sub_resource type="StandardMaterial3D" id="Mat_trap"]
+albedo_color = Color(0.35, 0.5, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Mesh_trap"]
+material = SubResource("Mat_trap")
+size = Vector3(2, 0.05, 2)
+
+[node name="Pit" type="Area3D"]
+script = ExtResource("1_trap")
+kind = "pit"
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("Shape_trap")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_trap")
