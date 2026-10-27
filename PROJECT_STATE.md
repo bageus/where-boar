@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-014
-last_completed_task_id: P3-014
+active_task_id: P3-015
+last_completed_task_id: P3-015
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-P3-014 done; next P3-015.
+P3-015 done; next P3-012.
 
 ## Last completed work
 
@@ -49,6 +49,7 @@ P3-014 done; next P3-015.
 - P3-011: tavern helpers: porter carries extra nets and arrows, trap setter sets traps at escape zones.
 - P3-013: Green Valley grey-box map 160×160: river with fords, jungle, hills, narrow pass, 7 escape zones, 47 boars.
 - P3-014: pause menu with FOV, mouse sensitivity and camera-motion settings saved apart from progress; first-hunt tips.
+- P3-015: synthesized squeal, stomps and thud; knockback camera roll; outcome messages in the HUD.
 
 ## Build and validation
 
@@ -72,7 +73,7 @@ P3-014 done; next P3-015.
 
 ## Next action
 
-Start P3-015.
+Start P3-012.
 
 ## Handoff notes
 

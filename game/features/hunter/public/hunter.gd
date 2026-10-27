@@ -5,6 +5,7 @@ extends CharacterBody3D
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
+const Synth = preload("res://game/core/synth/public/synth.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Spear = preload("res://game/features/hunter/presentation/spear.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
@@ -36,6 +37,8 @@ const PICKUP_RADIUS := 2.5
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
+## Camera roll when knocked down (M005), kept small against motion sickness.
+const KNOCK_ROLL := 0.6
 ## ASSUMPTION (D013): one shout every 2 s.
 const SHOUT_COOLDOWN := 2.0
 ## Stamina one sip of water gives back (M012, ASSUMPTION).
@@ -77,6 +80,7 @@ var camera_motion := true
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
+	$Thud.stream = Synth.thud()
 	for weapon_name in WEAPON_NAMES:
 		var slot := Label.new()
 		slot.add_theme_font_size_override("font_size", 22)
@@ -130,6 +134,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func knock(impulse: Vector3, damage: int = 0) -> void:
 	velocity = impulse
 	_stun = STUN_SECONDS
+	$Thud.play()
+	if camera_motion:
+		var roll := create_tween()
+		roll.tween_property(_camera, "rotation:z", KNOCK_ROLL * (1 if randf() < 0.5 else -1), 0.15)
+		roll.tween_property(_camera, "rotation:z", 0.0, STUN_SECONDS - 0.15)
 	if health.is_down():
 		return
 	health.take(damage)

@@ -12,5 +12,7 @@
     "public/boar_type.gd",
     "public/boar_types.gd"
   ],
-  "dependencies": []
+  "dependencies": [
+    "core.synth"
+  ]
 }

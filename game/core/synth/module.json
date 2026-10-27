@@ -1,0 +1,10 @@
+{
+  "id": "core.synth",
+  "layer": "core",
+  "purpose": "Make the placeholder sound effects in code (squeal, stomp, thud) so the slice has audio without licensed assets.",
+  "state_owner": [],
+  "public_api": [
+    "public/synth.gd"
+  ],
+  "dependencies": []
+}

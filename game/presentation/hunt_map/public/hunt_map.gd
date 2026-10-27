@@ -160,6 +160,7 @@ func summon(animal_id: String) -> void:
 
 func _on_helper_caught(animal_id: String) -> void:
 	hunt.helpers_caught[animal_id] = hunt.helpers_caught.get(animal_id, 0) + 1
+	_announce("Caught a %s for the pen" % animal_id)
 	_show_goal()
 
 
@@ -167,6 +168,9 @@ func _on_outcome(type_id: String, kind: int) -> void:
 	if hunt.is_over():
 		return
 	hunt.record(type_id, kind)
+	var type := BoarTypes.find(type_id)
+	var verb: String = {BoarOutcome.Kind.DEAD: "killed", BoarOutcome.Kind.CAPTURED: "caught", BoarOutcome.Kind.ESCAPED: "escaped!"}[kind]
+	_announce("%s %s" % [type.display_name if type else type_id, verb])
 	_show_goal()
 	if hunt.is_over():
 		_end()
@@ -216,6 +220,14 @@ func _on_bait_placed(bait: Node3D) -> void:
 	# Drop eaten bait; boars skip freed entries in between.
 	_baits.assign(_baits.filter(is_instance_valid))
 	_baits.append(bait)
+
+
+## Short HUD message for an outcome (M006 feedback), fading out.
+func _announce(text: String) -> void:
+	var label: Label = $Hud/Message
+	label.text = text
+	label.modulate.a = 1.0
+	create_tween().tween_property(label, "modulate:a", 0.0, 2.5).set_delay(1.0)
 
 
 func _show_goal() -> void:

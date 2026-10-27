@@ -95,3 +95,5 @@ offset_bottom = 120.0
 theme_override_font_sizes/font_size = 14
 autowrap_mode = 3
 text = "WASD move, Shift sprint, Ctrl crouch, Space jump/lunge, LMB attack/throw, RMB aim spear, 1-5 weapon, F bait, R shout, G/T trap, Q drink, E pick up or end hunt at camp, Esc pause"
+
+[node name="Thud" type="AudioStreamPlayer" parent="."]

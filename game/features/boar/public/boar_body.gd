@@ -81,6 +81,7 @@ func _ready() -> void:
 
 func spear_hit(amount: int) -> void:
 	boar.take_hit(amount)
+	$Sounds.squeal()
 	_turn_left = 0.0
 	_state_time = 0.0
 	_charge_rolled = false
@@ -303,6 +304,7 @@ func _report_outcome() -> void:
 
 func _show_state() -> void:
 	_label.text = state_name()
+	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE]
 	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
 	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)
