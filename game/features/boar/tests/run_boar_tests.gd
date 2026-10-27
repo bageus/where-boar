@@ -17,6 +17,7 @@ func _init() -> void:
 	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
 	failures += _check(_hit_scares_attacker_but_not_rammer(), "hit scares an attacking boar off, a ramming one keeps charging")
 	failures += _check(_alert_rises_in_stages_and_fades(), "alert rises 1-2-3 while noticed, faster up close, and fades a level per cooldown")
+	failures += _check(_quiet_captures_make_mates_wary_then_run(), "a quiet capture makes mates wary; a second one makes them run")
 	failures += _check(_flight_calms_and_alarmed_boar_attacks(), "a fleeing boar calms down; an alarmed calm boar can attack")
 	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
 	failures += _check(_trapped_boar_stays_until_freed(), "trapped boar stays when hurt, can be netted or break free")
@@ -115,6 +116,12 @@ func _alert_rises_in_stages_and_fades() -> bool:
 	var close := BoarAlert.new()
 	close.tick(0.75, true, 4.0)
 	return heard and wary and held and faded and close.alarmed()
+
+
+func _quiet_captures_make_mates_wary_then_run() -> bool:
+	var alert := BoarAlert.new()
+	var first := not alert.witness_capture() and alert.level() == 2
+	return first and alert.witness_capture() and alert.alarmed()
 
 
 func _flight_calms_and_alarmed_boar_attacks() -> bool:

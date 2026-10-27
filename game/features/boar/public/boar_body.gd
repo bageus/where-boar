@@ -159,7 +159,10 @@ func driven_from(pos: Vector3) -> void:
 
 func net_hit() -> void:
 	var was_held := boar.state == Boar.State.TRAPPED
+	var unaware := boar.state == Boar.State.WANDER
 	boar.net_capture()
+	if unaware and boar.state == Boar.State.CAPTURED:
+		_warn_herd_of_capture()
 	if was_held:
 		held_changed.emit(false)
 	_after_change()
@@ -227,6 +230,21 @@ func _warn_witnesses() -> void:
 		var facing := Vector2(-other.global_basis.z.x, -other.global_basis.z.z)
 		if other_pos.distance_to(pos) <= other.boar_type.perception_radius and BoarSenses.in_view(other_pos, facing, pos):
 			other.saw_kill()
+
+
+## Caught from ambush: nearby herd mates turn wary, or run if they already were (owner, 2026-10-27).
+func _warn_herd_of_capture() -> void:
+	for mate in herd:
+		if mate != self and is_instance_valid(mate) and mate.global_position.distance_to(global_position) <= HERD_ALARM_RADIUS:
+			mate.witness_capture()
+
+
+func witness_capture() -> void:
+	if boar.state != Boar.State.WANDER:
+		return
+	if alert.witness_capture():
+		boar.flee()
+	_show_alert()
 
 
 func saw_kill() -> void:

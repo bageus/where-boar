@@ -40,6 +40,17 @@ func alarm() -> void:
 	_quiet = 0.0
 
 
+## A herd mate was quietly caught nearby (owner, 2026-10-27): the first time the boar turns wary,
+## a second time while its alert has not faded out yet it is alarmed. Returns true when it should run.
+func witness_capture() -> bool:
+	if level() >= 1:
+		alarm()
+		return true
+	progress = MAX_LEVEL - 1.0
+	_quiet = 0.0
+	return false
+
+
 ## After a flight ends the boar stays wary for a while.
 func settle() -> void:
 	progress = MAX_LEVEL - 1.0
