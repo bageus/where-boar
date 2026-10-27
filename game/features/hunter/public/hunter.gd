@@ -33,7 +33,6 @@ const CLUB_KNOCK := 6.0
 const SLING_SPEED := 24.0
 const ARROW_SPEED := 32.0
 const PICKUP_RADIUS := 2.5
-const MOUSE_SENSITIVITY := 0.002
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
@@ -62,6 +61,10 @@ var weapon: Loadout.Weapon = Weapon.SPEAR
 var _thrown: Array[RigidBody3D] = []
 var _stun := 0.0
 var _shout_cooldown := 0.0
+## From the settings screen (section 16).
+var mouse_sensitivity := 0.002
+## Off reduces camera motion (knockback roll) for players who get motion sick.
+var camera_motion := true
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -81,6 +84,13 @@ func _ready() -> void:
 	_update_hud()
 
 
+## Applies player settings: {"fov", "mouse_sensitivity", "camera_motion"} (section 16).
+func apply_settings(settings: Dictionary) -> void:
+	_camera.fov = settings["fov"]
+	mouse_sensitivity = settings["mouse_sensitivity"]
+	camera_motion = settings["camera_motion"]
+
+
 ## Gives the hunter the weapons bought in camp (item_id -> count).
 func equip(items: Dictionary) -> void:
 	loadout.equip(items)
@@ -89,10 +99,8 @@ func equip(items: Dictionary) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		_camera.rotation.x = clampf(_camera.rotation.x - event.relative.y * MOUSE_SENSITIVITY, -1.5, 1.5)
-	elif event.is_action_pressed("pause"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		_camera.rotation.x = clampf(_camera.rotation.x - event.relative.y * mouse_sensitivity, -1.5, 1.5)
 	elif event.is_action_pressed("attack"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			_attack()

@@ -10,7 +10,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 25
+const EXPECTED_CHECKS := 28
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -21,7 +21,8 @@ func _initialize() -> void:
 	_main = MainScene.instantiate()
 	# Keep the player's real save out of the test.
 	_main.save_store.path = "user://smoke_save.json"
-	for file_path in [_main.save_store.path, _main.save_store.backup_path()]:
+	_main.settings_store.path = "user://smoke_settings.json"
+	for file_path in [_main.save_store.path, _main.save_store.backup_path(), _main.settings_store.path]:
 		if FileAccess.file_exists(file_path):
 			DirAccess.remove_absolute(file_path)
 	root.add_child(_main)
@@ -32,6 +33,7 @@ func _physics_process(_delta: float) -> bool:
 	if _frame == 1:
 		_main.current.get_node("%Start").pressed.emit()
 		var camp: Node3D = _main.current
+		_check_pause_and_settings(camp)
 		camp.hunter.global_position = camp.get_node("Stations/StartHunt").global_position + Vector3(0, 0, 1.5)
 		camp.hunter.interacted.emit()
 		_map = _main.current
@@ -112,6 +114,19 @@ func _physics_process(_delta: float) -> bool:
 			hunter.global_position = _map.get_node("ReturnPoint").global_position
 			hunter.interacted.emit()
 	return false
+
+
+## Esc pauses the camp; changing FOV applies to the hunter and is saved; Continue unpauses.
+func _check_pause_and_settings(camp: Node3D) -> void:
+	var esc := InputEventAction.new()
+	esc.action = "pause"
+	esc.pressed = true
+	_main._unhandled_input(esc)
+	_check(paused and _main._pause.visible, "Esc pauses the game")
+	_main._pause.get_node("%Fov").value = 95.0
+	_check(is_equal_approx(camp.hunter.get_node("Camera").fov, 95.0) and FileAccess.file_exists(_main.settings_store.path), "FOV setting applies and is saved")
+	_main._pause.get_node("%Continue").pressed.emit()
+	_check(not paused, "Continue unpauses")
 
 
 ## A hired trap setter puts two traps from stock at escape zones when a hunt starts.

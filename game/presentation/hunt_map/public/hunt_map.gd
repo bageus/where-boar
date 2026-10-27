@@ -24,6 +24,15 @@ const SHOUT_RADIUS := 15.0
 ## The hired trap setter covers this many escape zones, this far in front of each (ASSUMPTION).
 const SETTER_TRAPS := 2
 const SETTER_OFFSET := 5.0
+const TIP_SECONDS := 8.0
+const TIPS := [
+	"Boars flee when you get close. Crouch (Ctrl) to sneak up.",
+	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
+	"Switch to the net (2) and throw it to catch a boar alive: caught boars pay more tusks.",
+	"Fleeing boars escape through the red zones shown on the minimap.",
+	"A hurt boar may turn and ram you. Keep moving!",
+	"Walk back to the green camp zone and press E to end the hunt with your loot.",
+]
 
 var hunt: Hunt
 ## Camp gear (item_id -> count), injected before the map enters the tree.
@@ -31,6 +40,10 @@ var items: Dictionary = {}
 ## Helper animals in the camp pen (animal_id -> count), injected like items. Each kind helps once per hunt.
 var helpers: Dictionary = {}
 var _helpers_used: Array[String] = []
+## Injected: the player's first hunt shows tips (section 16).
+var first_hunt := false
+var _tip := 0
+var _tip_left := 0.0
 ## Bait on the ground; the same array is shared with every boar.
 var _baits: Array[Node3D] = []
 
@@ -72,6 +85,19 @@ func _ready() -> void:
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	minimap.boars = $Boars
 	_show_goal()
+	$Hud/Tip.visible = first_hunt
+
+
+## First-hunt tips, one every TIP_SECONDS.
+func _process(delta: float) -> void:
+	if not first_hunt:
+		return
+	_tip_left -= delta
+	if _tip_left > 0.0:
+		return
+	_tip_left = TIP_SECONDS
+	$Hud/Tip.text = TIPS[_tip] if _tip < TIPS.size() else ""
+	_tip += 1
 
 
 ## Spawns size boars in a ring around centre; a group of two or more shares one herd array.

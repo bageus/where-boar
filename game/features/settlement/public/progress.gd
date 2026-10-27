@@ -14,10 +14,13 @@ var caught: Dictionary = {}
 var items: Dictionary = {}
 ## animal_id -> helper animals (rooster, turkey) living in the camp pen (D024).
 var helpers: Dictionary = {}
+## Hunts finished; 0 means the next hunt is the first and shows hints (section 16).
+var hunts := 0
 
 
 ## Adds a finished hunt's tusks and live catches and takes spent consumables out of stock.
 func add_hunt(hunt: Hunt) -> void:
+	hunts += 1
 	tusks += hunt.tusks()
 	for animal_id in hunt.helpers_caught:
 		helpers[animal_id] = helpers.get(animal_id, 0) + hunt.helpers_caught[animal_id]
@@ -51,13 +54,14 @@ func owns(item_id: String) -> bool:
 
 
 func to_dict() -> Dictionary:
-	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate()}
+	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(), "hunts": hunts}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
 static func from_dict(data: Dictionary) -> RefCounted:
 	var progress := new()
 	progress.tusks = maxi(0, int(data.get("tusks", 0)))
+	progress.hunts = maxi(0, int(data.get("hunts", 0)))
 	progress.caught = _counts(data.get("caught", {}))
 	progress.items = _counts(data.get("items", {}))
 	progress.helpers = _counts(data.get("helpers", {}))

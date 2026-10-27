@@ -32,7 +32,7 @@ func _hunt_adds_tusks_and_catches() -> bool:
 	var progress := Progress.new()
 	progress.items = {"item_acorns": 3}
 	progress.add_hunt(hunt)
-	return progress.tusks == 22 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2 \
+	return progress.tusks == 22 and progress.hunts == 1 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2 \
 		and progress.helpers == {"rooster": 1}
 
 
