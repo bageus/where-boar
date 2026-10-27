@@ -7,7 +7,7 @@ const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 
 var pickup_kind := "spear"
 
-## ASSUMPTION (D013): a thrown spear hits harder than a stab.
+## ASSUMPTION (D013): a thrown spear hits as hard as a stab.
 const DAMAGE := 2
 
 ## The boar this spear is stuck in, if any.

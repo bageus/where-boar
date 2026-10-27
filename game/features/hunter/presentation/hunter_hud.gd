@@ -4,7 +4,7 @@ extends CanvasLayer
 
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 
-const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
+const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow", "Knife"]
 
 
 func _ready() -> void:
@@ -38,6 +38,7 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 		"",
 		" x%d" % loadout.stones,
 		" x%d" % loadout.arrows,
+		"",
 	]
 	for i in WEAPON_NAMES.size():
 		var slot: Label = $Hotbar.get_child(i)

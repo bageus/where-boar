@@ -2,7 +2,7 @@ extends RefCounted
 
 ## What the hunter carries: spear and nets always, plus weapons bought in camp (M003, M004, D022).
 
-enum Weapon { SPEAR, NET, CLUB, SLING, BOW }
+enum Weapon { SPEAR, NET, CLUB, SLING, BOW, KNIFE }
 
 ## ASSUMPTION: per hunt, balanced later (D013).
 const START_NETS := 3
@@ -92,7 +92,8 @@ func equip(items: Dictionary) -> void:
 
 
 func has(weapon: Weapon) -> bool:
-	return weapon in [Weapon.SPEAR, Weapon.NET] or weapon in _bought
+	# The knife is never lost: the one weapon left when everything else is thrown away (owner, 2026-10-27).
+	return weapon in [Weapon.SPEAR, Weapon.NET, Weapon.KNIFE] or weapon in _bought
 
 
 func throw_spear() -> bool:

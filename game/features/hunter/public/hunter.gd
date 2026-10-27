@@ -33,8 +33,11 @@ const THROW_SPEED := 18.0
 const AIM_CHARGE_SECONDS := 1.0
 const WEAK_THROW_SCALE := 0.5
 const STRONG_THROW_SCALE := 1.4
-const STAB_DAMAGE := 1
-const CLUB_DAMAGE := 2
+# Melee: knife < spear stab < club in damage, club < spear in reach, knife shortest (owner, 2026-10-27).
+const KNIFE_DAMAGE := 1
+const KNIFE_REACH := 1.2
+const STAB_DAMAGE := 2
+const CLUB_DAMAGE := 3
 const CLUB_KNOCK := 6.0
 ## The club hits harder than the spear but reaches less far (owner, 2026-10-27).
 const CLUB_REACH := 1.8
@@ -313,14 +316,18 @@ func _attack() -> void:
 			if loadout.throw_net():
 				$Camera/Hands.strike()
 				_throw(NetScene, THROW_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power))
+		Weapon.KNIFE:
+			$Camera/Hands.strike()
+			if _in_reach(KNIFE_REACH):
+				_reach.get_collider().spear_hit(KNIFE_DAMAGE)
 		Weapon.CLUB:
 			$Camera/Hands.strike()
 			var target := _reach.get_collider()
-			var in_reach := target != null and _reach.get_collision_point().distance_to(_camera.global_position) <= CLUB_REACH
-			if in_reach and _hits_boar(target):
+			if _in_reach(CLUB_REACH):
 				var scale := lerpf(1.0, CHARGED_DAMAGE_SCALE, power)
 				target.spear_hit(roundi(CLUB_DAMAGE * scale))
-				target.knock(-_camera.global_basis.z * CLUB_KNOCK * scale)
+				if target.has_method("knock"):
+					target.knock(-_camera.global_basis.z * CLUB_KNOCK * scale)
 		Weapon.SLING:
 			if loadout.sling_stone():
 				$Camera/Hands.strike()
@@ -332,7 +339,13 @@ func _attack() -> void:
 				arrow.damage = roundi(arrow.damage * lerpf(1.0, CHARGED_DAMAGE_SCALE, power))
 
 
-## A boar or its larger hitbox; wild birds and the hunter's mount do not take spear hits.
+## True when the reach ray hits something that takes hits within reach metres of the eye.
+func _in_reach(reach: float) -> bool:
+	var target := _reach.get_collider()
+	return _hits_boar(target) and _reach.get_collision_point().distance_to(_camera.global_position) <= reach
+
+
+## A boar, its larger hitbox or a wild bird; the hunter's mount does not take hits.
 func _hits_boar(target: Object) -> bool:
 	return target is BoarBody or (target != null and target.has_method("spear_hit"))
 

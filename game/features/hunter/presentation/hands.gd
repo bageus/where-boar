@@ -14,8 +14,8 @@ const FOLLOW_RATE := 14.0
 
 var _striking := false
 
-## Children in Loadout.Weapon order: spear, net, club, sling, bow.
-@onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow]
+## Children in Loadout.Weapon order: spear, net, club, sling, bow, knife.
+@onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow, $Knife]
 
 
 ## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets or arrows).

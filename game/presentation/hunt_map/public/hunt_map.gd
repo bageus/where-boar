@@ -70,6 +70,7 @@ func _ready() -> void:
 		animal.hunter = _hunter
 		animal.position = spawns[groups + w].position
 		animal.caught.connect(_on_helper_caught)
+		animal.killed.connect(func(animal_id: String) -> void: _announce("Killed a %s" % animal_id))
 		$Wild.add_child(animal)
 	_hunter.equip(items)
 	_hunter.start_hunt()

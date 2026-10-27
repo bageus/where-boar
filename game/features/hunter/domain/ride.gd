@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Riding a saddled boar (D021, owner's choice "верхом"): the mount's type sets speed and perk;
-## no stamina is spent and only the spear stab works from the saddle.
+## no stamina is spent; every weapon works from the saddle.
 
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
@@ -28,12 +28,9 @@ func speed(on_foot: float) -> float:
 	return type.flee_speed if type else on_foot
 
 
-## From the saddle the rider stabs with the spear, shoots the bow and casts nets (owner, 2026-10-27);
-## no spear throws, club swings or sling shots.
-func allows(weapon: Loadout.Weapon, aiming: bool) -> bool:
-	if not type:
-		return true
-	return weapon in [Loadout.Weapon.BOW, Loadout.Weapon.NET] or (weapon == Loadout.Weapon.SPEAR and not aiming)
+## Every weapon works from the saddle (owner, 2026-10-27); kept as the one place to restrict it again.
+func allows(_weapon: Loadout.Weapon, _aiming: bool) -> bool:
+	return true
 
 
 ## The armored mount barely moves when rammed, so its rider is not knocked off.

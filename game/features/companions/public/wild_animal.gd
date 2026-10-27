@@ -7,6 +7,8 @@ const Synth = preload("res://game/core/synth/public/synth.gd")
 
 ## Fact: a net caught this animal; it goes to the camp pen.
 signal caught(animal_id: String)
+## Fact: a weapon killed this animal (owner, 2026-10-27); nothing goes to the pen.
+signal killed(animal_id: String)
 
 # ASSUMPTION numbers (D013): slower than a sprinting hunter (7 m/s).
 const WANDER_SPEED := 1.0
@@ -37,6 +39,12 @@ func try_grab(hunter_pos: Vector3) -> bool:
 		return false
 	net_hit()
 	return true
+
+
+## Any weapon hit kills a bird.
+func spear_hit(_amount: int) -> void:
+	killed.emit(animal_id)
+	queue_free()
 
 
 ## Same entry point the net uses on boars.
