@@ -38,5 +38,7 @@ static func find(id: String) -> BoarType:
 static func rewards() -> Dictionary:
 	var table := {}
 	for type in ALL:
-		table[type.id] = {"dead": type.reward_dead, "captured": type.reward_captured}
+		# A wounded boar caught alive pays halfway between killed and whole (playtest 2026-10-27).
+		table[type.id] = {"dead": type.reward_dead, "captured": type.reward_captured,
+				"wounded": (type.reward_dead + type.reward_captured) / 2}
 	return table

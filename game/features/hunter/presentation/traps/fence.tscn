@@ -1,6 +1,4 @@
-[gd_scene load_steps=5 format=3]
-
-[ext_resource type="Script" path="res://game/features/hunter/presentation/traps/fence.gd" id="1_fence"]
+[gd_scene load_steps=4 format=3]
 
 [sub_resource type="BoxShape3D" id="Shape_fence"]
 size = Vector3(4, 1.2, 0.3)
@@ -13,7 +11,6 @@ material = SubResource("Mat_fence")
 size = Vector3(4, 1.2, 0.3)
 
 [node name="Fence" type="StaticBody3D"]
-script = ExtResource("1_fence")
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)

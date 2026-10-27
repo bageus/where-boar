@@ -35,7 +35,7 @@ func _check(ok: bool, name: String) -> int:
 
 func _sprint_drains_stamina() -> bool:
 	var stamina := Stamina.new()
-	return stamina.tick(1.0, true) and is_equal_approx(stamina.value, 80.0)
+	return stamina.tick(1.0, true) and is_equal_approx(stamina.value, 98.0)
 
 
 func _walking_restores_stamina() -> bool:
@@ -46,7 +46,7 @@ func _walking_restores_stamina() -> bool:
 
 func _empty_stamina_locks_sprint_until_recovered() -> bool:
 	var stamina := Stamina.new()
-	stamina.tick(10.0, true)
+	stamina.tick(100.0, true)
 	var emptied := stamina.value == 0.0
 	var locked := not stamina.tick(1.0, true)
 	var still_locked := not stamina.tick(0.1, true)

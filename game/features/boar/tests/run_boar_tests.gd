@@ -14,6 +14,7 @@ func _init() -> void:
 	failures += _check(_escape_only_when_fleeing(), "escape only when fleeing")
 	failures += _check(_trap_held_counts_as_captured(), "trap held to hunt end counts as captured")
 	failures += _check(_only_panic_turns_to_charge(), "only a panicking boar charges, then flees")
+	failures += _check(_hit_scares_attacker_but_not_rammer(), "hit scares an attacking boar off, a ramming one keeps charging")
 	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
 	failures += _check(_trapped_boar_stays_until_freed(), "trapped boar stays when hurt, can be netted or break free")
 	print("boar tests: %d failure(s)" % failures)
@@ -83,12 +84,27 @@ func _only_panic_turns_to_charge() -> bool:
 	return calm.state == Boar.State.WANDER and charging and stays and boar.state == Boar.State.FLEE
 
 
+func _hit_scares_attacker_but_not_rammer() -> bool:
+	var attacker := Boar.new("runner", 5)
+	attacker.take_hit(1)
+	attacker.charge()
+	attacker.take_hit(1)
+	var rammer := Boar.new("runner", 5)
+	rammer.take_hit(1)
+	rammer.charge()
+	rammer.ramming = true
+	rammer.take_hit(1)
+	var whole := Boar.new("runner", 5)
+	return attacker.state == Boar.State.FLEE and rammer.state == Boar.State.CHARGE \
+			and rammer.is_wounded() and not whole.is_wounded()
+
+
 func _types_pick_by_weight() -> bool:
 	var ids := BoarTypes.ALL.map(func(type: Resource) -> String: return type.id)
 	return ids == ["common_brown", "runner_grey", "aggressive_red", "armored_black", "golden_tusk"] \
 		and BoarTypes.pick(0.0).id == "common_brown" \
 		and BoarTypes.pick(0.999).id == "golden_tusk" \
-		and BoarTypes.rewards()["golden_tusk"] == {"dead": 10, "captured": 20}
+		and BoarTypes.rewards()["golden_tusk"] == {"dead": 10, "captured": 20, "wounded": 15}
 
 
 func _trapped_boar_stays_until_freed() -> bool:

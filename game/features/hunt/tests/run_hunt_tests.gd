@@ -7,6 +7,7 @@ const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 func _init() -> void:
 	var failures := 0
 	failures += _check(_results_and_tusks(), "results count per type and tusks follow rewards")
+	failures += _check(_wounded_capture_pays_less(), "wounded captured boar counts as caught, pays between dead and whole")
 	failures += _check(_empty_hunt_pays_nothing(), "empty hunt has no results and no tusks")
 	failures += _check(_ends_when_no_boars_left(), "hunt ends when every boar is resolved")
 	failures += _check(_ends_on_return(), "hunt ends when the hunter returns early")
@@ -31,6 +32,14 @@ func _results_and_tusks() -> bool:
 		and hunt.count("runner", BoarOutcome.Kind.CAPTURED) == 1 \
 		and hunt.count("runner", BoarOutcome.Kind.ESCAPED) == 1 \
 		and hunt.tusks(rewards) == 7
+
+
+func _wounded_capture_pays_less() -> bool:
+	var hunt := Hunt.new()
+	hunt.record("runner", BoarOutcome.Kind.CAPTURED, true)
+	hunt.record("runner", BoarOutcome.Kind.CAPTURED)
+	var rewards := {"runner": {"dead": 2, "captured": 6, "wounded": 4}}
+	return hunt.count("runner", BoarOutcome.Kind.CAPTURED) == 2 and hunt.tusks(rewards) == 10
 
 
 func _empty_hunt_pays_nothing() -> bool:

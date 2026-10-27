@@ -7,6 +7,7 @@ const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 func _init() -> void:
 	var failures := 0
 	failures += _check(_perceive_starts_flee_inside_radius(), "hunter inside radius starts flee, outside does not")
+	failures += _check(_scatter_splits_into_groups_and_loners(), "scared herd splits into groups and wide-angle loners")
 	failures += _check(_sneaking_hunter_behind_or_in_cover_is_unseen(), "sneaking hunter is unseen behind the boar or in cover")
 	failures += _check(_shout_deflects_without_panic(), "shout deflects 30 degrees and does not panic")
 	failures += _check(_bait_pulls_within_radius(), "nearest bait in reach pulls the boar")
@@ -15,8 +16,6 @@ func _init() -> void:
 	failures += _check(_nearest_zone_choice(), "nearest escape zone is chosen")
 	failures += _check(_zone_escape_rules(), "only fleeing or panicking boars escape in a zone")
 	failures += _check(_flee_heading_bends_to_zone(), "flee heading bends toward a zone ahead, ignores a zone behind")
-	failures += _check(BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).is_equal_approx(Vector2.DOWN) or BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).is_equal_approx(Vector2.UP), "slide heading is along the wall")
-	failures += _check(BoarSenses.slide_heading(Vector2.LEFT, Vector2(0, 5)).y > 0.0, "slide heading picks the side towards the target")
 	print("senses tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -33,6 +32,14 @@ func _perceive_starts_flee_inside_radius() -> bool:
 	var far := Boar.new("runner", 5)
 	BoarSenses.perceive(far, Vector2.ZERO, Vector2(20, 0), 10.0)
 	return near.state == Boar.State.FLEE and far.state == Boar.State.WANDER
+
+
+func _scatter_splits_into_groups_and_loners() -> bool:
+	var groups := [BoarSenses.scatter_angle(0.5, 0.1), BoarSenses.scatter_angle(0.9, 0.5), BoarSenses.scatter_angle(0.5, 0.99)]
+	var loner_left := rad_to_deg(BoarSenses.scatter_angle(0.1, 0.2))
+	var loner_right := rad_to_deg(BoarSenses.scatter_angle(0.1, 0.7))
+	return is_equal_approx(rad_to_deg(groups[0]), -45.0) and groups[1] == 0.0 and is_equal_approx(rad_to_deg(groups[2]), 45.0) \
+			and loner_left <= -40.0 and loner_left >= -100.0 and loner_right >= 40.0 and loner_right <= 100.0
 
 
 func _sneaking_hunter_behind_or_in_cover_is_unseen() -> bool:

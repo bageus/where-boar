@@ -9,6 +9,7 @@ func _init() -> void:
 	failures += _check(squeal.data.size() == int(0.35 * Synth.RATE) * 2, "squeal has 0.35 s of 16-bit samples")
 	failures += _check(Synth.squeal() == squeal, "sounds are made once and reused")
 	failures += _check(Synth.stomp().get_length() > 0.1 and Synth.thud().get_length() > 0.3, "stomp and thud have length")
+	failures += _check([Synth.grunt(), Synth.shout(), Synth.crow(), Synth.gobble()].all(func(s: AudioStreamWAV) -> bool: return s.get_length() > 0.2), "grunt, shout, crow and gobble have length")
 	print("synth tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 

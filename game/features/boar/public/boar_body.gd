@@ -29,6 +29,14 @@ const FENCE_TURN_SECONDS := 1.5
 # Herds (M009), ASSUMPTION numbers (D013).
 const HERD_ALARM_RADIUS := 8.0
 const HERD_SPREAD := 6.0
+## Split-off groups and loners rejoin mates within this reach once calm (playtest 2026-10-27).
+const HERD_REJOIN_RADIUS := 30.0
+# Ram dash (playtest 2026-10-27): close to the hunter a charging boar locks on and runs through him.
+const RAM_DASH_DISTANCE := 4.0
+const RAM_DASH_SECONDS := 1.0
+const RAM_HIT_DISTANCE := 1.3
+## How far a wall or fence turns a boar away from its normal, radians.
+const WALL_TURN_SPREAD := PI / 4.0
 ## Physics layer 5: bushes and other cover that block a boar's sight but not movement.
 const COVER_LAYER := 1 << 4
 ## Boar eye and hunter body heights for the line of sight, metres (ASSUMPTION).
@@ -40,7 +48,8 @@ const WADE_SPEED_SCALE := 0.5
 const HP_PER_DAMAGE := 20
 
 ## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
-signal outcome_reached(type_id: String, kind: int)
+## wounded: the boar was hurt before it was caught (pays less).
+signal outcome_reached(type_id: String, kind: int, wounded: bool)
 ## Fact: a trap started (true) or stopped (false) holding the boar. Held boars count as caught at hunt end.
 signal held_changed(held: bool)
 
@@ -61,8 +70,11 @@ var _turn := 0.0
 var _turn_left := 0.0
 var _knock := Vector3.ZERO
 var _ram_cooldown := 0.0
-## Last wall (XZ normal) the boar slid on, used to steer out of corners.
-var _wall := Vector2.ZERO
+## Flight deflection rolled when the boar gets scared, so a herd scatters.
+var _scatter := 0.0
+var _dash_heading := Vector2.ZERO
+var _dash_left := 0.0
+var _dash_hit := false
 var _reported := false
 ## River segments the boar is standing in; rivers call wade().
 var _wading := 0
@@ -89,8 +101,18 @@ func _ready() -> void:
 
 
 func spear_hit(amount: int) -> void:
+	var was_charging := boar.state == Boar.State.CHARGE
 	boar.take_hit(amount)
 	$Sounds.squeal()
+	if boar.state == Boar.State.CHARGE:
+		# Mid-ram: the hit hurts but does not stop it.
+		_after_change()
+		return
+	if was_charging and boar.state == Boar.State.FLEE:
+		# Scared off: runs any way that leads away from the hunter.
+		var away := Vector2(global_position.x - hunter.global_position.x, global_position.z - hunter.global_position.z).normalized()
+		_forced_heading = away.rotated(randf_range(-PI / 2.0, PI / 2.0))
+		_forced_left = SHOUT_SECONDS
 	_turn_left = 0.0
 	_state_time = 0.0
 	_charge_rolled = false
@@ -207,6 +229,9 @@ func _physics_process(delta: float) -> void:
 	_maybe_charge()
 	if boar.state != before:
 		_state_time = 0.0
+		if before == Boar.State.WANDER:
+			_scatter = BoarSenses.scatter_angle(randf(), randf())
+			$Sounds.squeal()
 		_show_state()
 	_steer(delta, pos, hunter_pos)
 	_apply_knock(delta)
@@ -243,7 +268,7 @@ func _maybe_charge() -> void:
 		_charge_rolled = true
 		if randf() < boar_type.aggression:
 			boar.charge()
-	elif boar.state == Boar.State.CHARGE and _state_time >= CHARGE_SECONDS:
+	elif boar.state == Boar.State.CHARGE and _state_time >= CHARGE_SECONDS and not boar.ramming:
 		boar.end_charge()
 
 
@@ -264,27 +289,23 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 					_turn = randf() * TAU
 					_turn_left = WANDER_TURN_SECONDS
 				_heading = Vector2.from_angle(_turn)
-				var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD)
+				var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD, HERD_REJOIN_RADIUS)
 				if back != Vector2.ZERO:
 					_heading = back
 		Boar.State.FLEE:
-			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones)
+			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_scatter)
 			speed = boar_type.flee_speed
 		Boar.State.CHARGE:
-			_heading = (hunter_pos - pos).normalized()
+			_charge_heading(delta, pos, hunter_pos)
 			speed = boar_type.flee_speed
 		_:
 			if _turn_left <= 0.0:
 				_turn = randf_range(-PANIC_TURN_MAX, PANIC_TURN_MAX)
 				_turn_left = PANIC_TURN_SECONDS
-			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn)
+			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn + _scatter)
 			speed = boar_type.panic_speed
 	if _forced_left > 0.0 and boar.state != Boar.State.CHARGE:
 		_heading = _forced_heading
-	if _wall != Vector2.ZERO and _heading.dot(_wall) < 0.0 and boar.state != Boar.State.WANDER:
-		var zone := BoarSenses.nearest_zone(pos, escape_zones)
-		var toward := escape_zones[zone] - pos if zone != -1 else pos - hunter_pos
-		_heading = BoarSenses.slide_heading(_wall, toward)
 	if _wading > 0:
 		speed *= WADE_SPEED_SCALE
 	velocity.x = _heading.x * speed
@@ -293,16 +314,39 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		rotation.y = atan2(-_heading.x, -_heading.y)
 
 
+## Runs at the hunter; once close it locks its line and dashes through him (playtest 2026-10-27).
+func _charge_heading(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
+	if not boar.ramming:
+		_heading = (hunter_pos - pos).normalized()
+		if pos.distance_to(hunter_pos) <= RAM_DASH_DISTANCE:
+			boar.ramming = true
+			_dash_heading = _heading
+			_dash_left = RAM_DASH_SECONDS
+			_dash_hit = false
+			add_collision_exception_with(hunter)
+		return
+	_heading = _dash_heading
+	if not _dash_hit and global_position.distance_to(hunter.global_position) <= RAM_HIT_DISTANCE:
+		_dash_hit = true
+		var push := Vector3(_dash_heading.x, 0.0, _dash_heading.y)
+		hunter.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE)
+	_dash_left -= delta
+	if _dash_left <= 0.0:
+		remove_collision_exception_with(hunter)
+		boar.end_charge()
+		_state_time = 0.0
+		_show_state()
+
+
 func _apply_knock(delta: float) -> void:
 	velocity.x += _knock.x
 	velocity.z += _knock.z
 	_knock = _knock.move_toward(Vector3.ZERO, KNOCK_DECAY * RAM_IMPULSE * delta)
 
 
-## A fast boar that touches the hunter or another boar knocks it back (M005); also remembers walls.
+## A fast boar that touches the hunter or another boar knocks it back (M005); walls and fences turn it round.
 func _ram(delta: float) -> void:
 	_ram_cooldown -= delta
-	_wall = Vector2.ZERO
 	for i in get_slide_collision_count():
 		var hit := get_slide_collision(i)
 		var other := hit.get_collider()
@@ -315,12 +359,14 @@ func _ram(delta: float) -> void:
 				boar.end_charge()
 				_state_time = 0.0
 				_show_state()
-		elif other.has_method("turns_boars"):
-			# Fence (D024): turn round and run off along its normal.
-			_forced_heading = Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
-			_forced_left = FENCE_TURN_SECONDS
-		elif absf(hit.get_normal().y) < 0.5:
-			_wall = Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
+		elif absf(hit.get_normal().y) < 0.5 and not boar.ramming:
+			# Fence (D024) or wall (playtest 2026-10-27): turn round and run off roughly along its normal.
+			var normal := Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
+			if _forced_left <= 0.0 or _forced_heading.dot(normal) < 0.0:
+				_forced_heading = normal.rotated(randf_range(-WALL_TURN_SPREAD, WALL_TURN_SPREAD))
+				_forced_left = FENCE_TURN_SECONDS
+				if boar.state == Boar.State.WANDER:
+					_turn = _forced_heading.angle()
 
 
 ## Name of the current domain state, e.g. "FLEE".
@@ -333,7 +379,7 @@ func _report_outcome() -> void:
 	var kind := boar.outcome_kind()
 	if kind != BoarOutcome.Kind.NONE and not _reported and boar.state != Boar.State.TRAPPED:
 		_reported = true
-		outcome_reached.emit(boar_type.id, kind)
+		outcome_reached.emit(boar_type.id, kind, boar.is_wounded())
 
 
 func _show_state() -> void:

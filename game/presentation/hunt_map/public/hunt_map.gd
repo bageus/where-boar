@@ -164,12 +164,14 @@ func _on_helper_caught(animal_id: String) -> void:
 	_show_goal()
 
 
-func _on_outcome(type_id: String, kind: int) -> void:
+func _on_outcome(type_id: String, kind: int, wounded: bool) -> void:
 	if hunt.is_over():
 		return
-	hunt.record(type_id, kind)
+	hunt.record(type_id, kind, wounded)
 	var type := BoarTypes.find(type_id)
 	var verb: String = {BoarOutcome.Kind.DEAD: "killed", BoarOutcome.Kind.CAPTURED: "caught", BoarOutcome.Kind.ESCAPED: "escaped!"}[kind]
+	if wounded and kind == BoarOutcome.Kind.CAPTURED:
+		verb = "caught wounded (pays less)"
 	_announce("%s %s" % [type.display_name if type else type_id, verb])
 	_show_goal()
 	if hunt.is_over():

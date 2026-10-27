@@ -6,11 +6,14 @@ const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 
 
-## XZ positions of the boar's living herd mates; only fleeing or panicking ones when scared_only.
-static func herd_positions(body: Node3D, scared_only: bool) -> Array[Vector2]:
+## XZ positions of the boar's living herd mates; only fleeing or panicking ones when scared_only,
+## only those within within metres when given.
+static func herd_positions(body: Node3D, scared_only: bool, within := INF) -> Array[Vector2]:
 	var spots: Array[Vector2] = []
 	for mate in body.herd:
 		if mate == body or not is_instance_valid(mate):
+			continue
+		if body.global_position.distance_to(mate.global_position) > within:
 			continue
 		if scared_only and mate.boar.state not in [Boar.State.FLEE, Boar.State.PANIC]:
 			continue
@@ -18,9 +21,10 @@ static func herd_positions(body: Node3D, scared_only: bool) -> Array[Vector2]:
 	return spots
 
 
-## Heading back to the herd centre for a stray, or ZERO.
-static func herd_cohesion(body: Node3D, pos: Vector2, spread: float) -> Vector2:
-	var mates := herd_positions(body, false)
+## Heading back to the centre of the herd mates in reach for a stray, or ZERO.
+## Split groups that come within reach of each other merge back (playtest 2026-10-27).
+static func herd_cohesion(body: Node3D, pos: Vector2, spread: float, reach: float) -> Vector2:
+	var mates := herd_positions(body, false, reach)
 	if mates.is_empty():
 		return Vector2.ZERO
 	var centre := Vector2.ZERO

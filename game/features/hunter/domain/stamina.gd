@@ -4,7 +4,8 @@ extends RefCounted
 ## Numbers are ASSUMPTION (D013), balanced in phase 2.
 
 const MAX := 100.0
-const SPRINT_COST := 20.0
+## Owner asked for 2 per second of running (playtest 2026-10-27).
+const SPRINT_COST := 2.0
 const LUNGE_COST := 25.0
 const REGEN := 15.0
 ## After running dry, sprint stays locked until stamina is back to this value.

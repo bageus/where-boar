@@ -27,6 +27,36 @@ static func thud() -> AudioStreamWAV:
 		return (sin(TAU * 55.0 * t) + 0.6 * randf_range(-1.0, 1.0)) * exp(-t * 12.0), 0.4)
 
 
+## Low, rough grunt of a boar rooting for food.
+static func grunt() -> AudioStreamWAV:
+	return _cached("grunt", func(t: float) -> float:
+		var buzz := signf(sin(TAU * (95.0 - 40.0 * t) * t)) * 0.5 + 0.3 * randf_range(-1.0, 1.0)
+		return buzz * sin(PI * t / 0.25), 0.25)
+
+
+## The hunter's shout: a short falling "hey!" with a rough edge.
+static func shout() -> AudioStreamWAV:
+	return _cached("shout", func(t: float) -> float:
+		var pitch := 320.0 - 300.0 * t
+		var voice := sin(TAU * pitch * t) + 0.5 * sin(TAU * pitch * 2.0 * t) + 0.15 * randf_range(-1.0, 1.0)
+		return 0.6 * voice * minf(1.0, t * 40.0) * (1.0 - t / 0.4), 0.4)
+
+
+## Rooster's alarmed crow: two quick rising notes.
+static func crow() -> AudioStreamWAV:
+	return _cached("crow", func(t: float) -> float:
+		var note := fmod(t, 0.15) / 0.15
+		var pitch := 900.0 + 500.0 * note
+		return sin(TAU * pitch * t) * sin(PI * note) * 0.7, 0.3)
+
+
+## Turkey's gobble: a fast warble.
+static func gobble() -> AudioStreamWAV:
+	return _cached("gobble", func(t: float) -> float:
+		var pitch := 450.0 + 120.0 * sin(TAU * 25.0 * t)
+		return sin(TAU * pitch * t) * (1.0 - t / 0.35) * 0.7, 0.35)
+
+
 static func _cached(key: String, wave: Callable, seconds: float) -> AudioStreamWAV:
 	if not _cache.has(key):
 		_cache[key] = _render(wave, seconds)

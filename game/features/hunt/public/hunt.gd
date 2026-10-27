@@ -17,6 +17,8 @@ var held := 0
 var helpers_caught: Dictionary = {}
 ## type_id -> BoarOutcome.Kind -> count
 var _counts: Dictionary = {}
+## type_id -> how many of the captured boars were wounded.
+var _wounded: Dictionary = {}
 var _resolved := 0
 
 
@@ -25,9 +27,12 @@ func _init(p_total: int = 0) -> void:
 
 
 ## Callers pass the public outcome; NONE means the boar was never counted.
-func record(type_id: String, kind: BoarOutcome.Kind) -> void:
+## wounded only matters for CAPTURED: such a boar still counts as caught but pays less.
+func record(type_id: String, kind: BoarOutcome.Kind, wounded := false) -> void:
 	if kind == BoarOutcome.Kind.NONE:
 		return
+	if wounded and kind == BoarOutcome.Kind.CAPTURED:
+		_wounded[type_id] = _wounded.get(type_id, 0) + 1
 	var per_type: Dictionary = _counts.get(type_id, {})
 	per_type[kind] = per_type.get(kind, 0) + 1
 	_counts[type_id] = per_type
@@ -67,12 +72,14 @@ func is_over() -> bool:
 	return returned or remaining() <= 0
 
 
-## rewards: type_id -> {"dead": int, "captured": int}. Missing types pay nothing.
+## rewards: type_id -> {"dead": int, "captured": int, "wounded": int}. Missing types pay nothing.
 ## Defaults to the authored boar types' rewards (section 15).
 func tusks(rewards: Dictionary = BoarTypes.rewards()) -> int:
 	var total_tusks := 0
 	for type_id in _counts:
 		var reward: Dictionary = rewards.get(type_id, {})
 		total_tusks += count(type_id, BoarOutcome.Kind.DEAD) * reward.get("dead", 0)
-		total_tusks += count(type_id, BoarOutcome.Kind.CAPTURED) * reward.get("captured", 0)
+		var wounded: int = _wounded.get(type_id, 0)
+		total_tusks += (count(type_id, BoarOutcome.Kind.CAPTURED) - wounded) * reward.get("captured", 0)
+		total_tusks += wounded * reward.get("wounded", reward.get("captured", 0))
 	return total_tusks

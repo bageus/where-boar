@@ -67,11 +67,23 @@ static func flee_heading(boar_pos: Vector2, hunter_pos: Vector2, zones: Array[Ve
 	return (away + to_zone).normalized()
 
 
-## Heading along a wall of normal `wall_normal` (XZ), on the side that points towards `toward`.
-## Keeps a boar sliding out of a corner instead of pushing into it.
-static func slide_heading(wall_normal: Vector2, toward: Vector2) -> Vector2:
-	var tangent := Vector2(-wall_normal.y, wall_normal.x)
-	return tangent if tangent.dot(toward) >= 0.0 else -tangent
+## Share of a scared herd that breaks off alone; the rest splits into SCATTER_BRANCHES groups (ASSUMPTION).
+const LONER_SHARE := 0.2
+const SCATTER_BRANCHES := [-45.0, 0.0, 45.0]
+const LONER_MIN_DEG := 40.0
+const LONER_MAX_DEG := 100.0
+
+
+## Deflection (radians) a scared boar adds to its flight, so a herd scatters (playtest 2026-10-27):
+## boars that roll the same branch run together as a group, loners run off at a wide angle.
+## Both rolls are in [0, 1).
+static func scatter_angle(split_roll: float, angle_roll: float) -> float:
+	if split_roll < LONER_SHARE:
+		var side := -1.0 if angle_roll < 0.5 else 1.0
+		var spread := fmod(angle_roll * 2.0, 1.0)
+		return deg_to_rad(side * lerpf(LONER_MIN_DEG, LONER_MAX_DEG, spread))
+	var branch := mini(int(angle_roll * SCATTER_BRANCHES.size()), SCATTER_BRANCHES.size() - 1)
+	return deg_to_rad(SCATTER_BRANCHES[branch])
 
 
 ## Index of the nearest bait whose pull radius reaches the boar, or -1 (M011).
