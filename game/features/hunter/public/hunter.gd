@@ -45,7 +45,6 @@ const SHOUT_COOLDOWN := 2.0
 const WATER_STAMINA := 40.0
 
 const Weapon = Loadout.Weapon
-const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow"]
 
 ## Fact: the hunter pressed interact (E); the map decides what it means, e.g. return to camp.
 signal interacted
@@ -71,20 +70,13 @@ var camera_motion := true
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
-@onready var _stamina_bar: ProgressBar = $Hud/Stamina
-@onready var _health_bar: ProgressBar = $Hud/Health
-@onready var _hotbar: HBoxContainer = $Hud/Hotbar
-@onready var _bait_label: Label = $Hud/Bait
+@onready var _hud: CanvasLayer = $Hud
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
 	$Thud.stream = Synth.thud()
-	for weapon_name in WEAPON_NAMES:
-		var slot := Label.new()
-		slot.add_theme_font_size_override("font_size", 22)
-		_hotbar.add_child(slot)
 	_update_hud()
 
 
@@ -124,7 +116,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("trap_place"):
 		place_trap()
 	else:
-		for i in WEAPON_NAMES.size():
+		for i in Loadout.Weapon.size():
 			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
 				weapon = i
 	_update_hud()
@@ -142,7 +134,7 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 	if health.is_down():
 		return
 	health.take(damage)
-	_health_bar.value = health.value
+	_hud.show_health(health.value)
 	if health.is_down():
 		downed.emit()
 
@@ -150,8 +142,7 @@ func knock(impulse: Vector3, damage: int = 0) -> void:
 ## Called when a hunt starts: the best camp meal is eaten for extra stamina (M012).
 func start_hunt() -> void:
 	stamina.eat(loadout.eat_best_meal())
-	_stamina_bar.max_value = stamina.max_value
-	_stamina_bar.value = stamina.value
+	_hud.show_stamina(stamina.value, stamina.max_value)
 
 
 ## Scares boars in earshot sideways (M014); limited by a short cooldown.
@@ -218,7 +209,7 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 	_camera.position.y = CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT
 	move_and_slide()
-	_stamina_bar.value = stamina.value
+	_hud.show_stamina(stamina.value, stamina.max_value)
 
 
 ## Space with a direction is a lunge (M001); without one, or without stamina, a plain jump.
@@ -281,21 +272,4 @@ func _pick_up() -> void:
 
 
 func _update_hud() -> void:
-	var extras := [
-		" (in hand)" if loadout.spear_in_hand else " (thrown)",
-		" x%d" % loadout.nets,
-		"",
-		"",
-		" x%d" % loadout.arrows,
-	]
-	for i in WEAPON_NAMES.size():
-		var slot: Label = _hotbar.get_child(i)
-		slot.visible = loadout.has(i)
-		slot.text = "[%d] %s%s" % [i + 1, WEAPON_NAMES[i], extras[i]]
-		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE
-	var bait_counts := PackedStringArray()
-	for item_id in Loadout.BAIT_IDS:
-		bait_counts.append("%s %d" % [item_id.trim_prefix("item_"), loadout.baits.get(item_id, 0)])
-	var trap_id := loadout.selected_trap()
-	_bait_label.text = "[F] Bait: %s    [R] Shout    [G/T] Trap: %s x%d    [Q] Water x%d" % [
-		", ".join(bait_counts), trap_id.trim_prefix("item_"), loadout.traps.get(trap_id, 0), loadout.water_sips]
+	_hud.show_loadout(loadout, weapon)
