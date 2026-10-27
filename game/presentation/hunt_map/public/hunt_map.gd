@@ -8,6 +8,7 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
+const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
 	preload("res://game/features/companions/public/wild_turkey.tscn"),
@@ -239,6 +240,12 @@ func _on_shouted(at: Vector3) -> void:
 	for boar in $Boars.get_children():
 		if boar.global_position.distance_to(at) <= SHOUT_RADIUS:
 			boar.hear_shout(at)
+	# A wave shows the shout's reach, and the minimap points out where the saddled boar waits (owner, 2026-10-27).
+	var wave: MeshInstance3D = ShoutWaveScene.instantiate()
+	wave.radius = SHOUT_RADIUS
+	wave.position = Vector3(at.x, at.y + 0.3, at.z)
+	add_child(wave)
+	$Hud/Minimap.show_mount(_hunter.mount_node())
 
 
 func _on_bait_placed(bait: Node3D) -> void:
@@ -287,7 +294,8 @@ func _show_goal() -> void:
 	var animal_id := _companion()
 	if animal_id != "" and _helpers_used.is_empty():
 		pen.append("[Z] release %s" % animal_id)
-	_goal.text = "Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d\nHelpers: %s" % [
+	_goal.text = "Tusks: %s   Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d\nHelpers: %s" % [
+		Hunt.tusk_bracket(hunt.tusks()),
 		hunt.remaining(),
 		hunt.held,
 		hunt.count_all(BoarOutcome.Kind.DEAD),

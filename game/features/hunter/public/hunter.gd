@@ -188,6 +188,11 @@ func wade(entered: bool) -> void:
 	_wading += 1 if entered else -1
 
 
+## The saddled boar brought on this hunt, or null.
+func mount_node() -> Node3D:
+	return $Rider.mount
+
+
 ## Called when a hunt starts: camp meals are eaten and raise max stamina for the hunt (M012),
 ## and the first saddled boar waits beside the hunter.
 func start_hunt() -> void:

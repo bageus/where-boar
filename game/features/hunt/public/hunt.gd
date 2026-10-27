@@ -72,6 +72,14 @@ func is_over() -> bool:
 	return returned or remaining() <= 0
 
 
+## Rough tusk count shown during the hunt (owner, 2026-10-27): "< 10", "< 20", ... "< 1000", then "1000+".
+static func tusk_bracket(tusk_count: int) -> String:
+	for limit in [10, 20, 50, 100, 200, 500, 1000]:
+		if tusk_count < limit:
+			return "< %d" % limit
+	return "1000+"
+
+
 ## rewards: type_id -> {"dead": int, "captured": int, "wounded": int}. Missing types pay nothing.
 ## Defaults to the authored boar types' rewards (section 15).
 func tusks(rewards: Dictionary = BoarTypes.rewards()) -> int:

@@ -7,6 +7,7 @@ extends Control
 ## Half the map's side in metres; the map is centred on the origin.
 const MAP_HALF_SIZE := 80.0
 const ZONE_RADIUS := 3.0
+const MOUNT_SECONDS := 5.0
 ## Same name as the hunter's PLACED_TRAPS_GROUP; the map may not depend on the hunter's internals.
 const TRAPS_GROUP := "placed_traps"
 
@@ -15,10 +16,20 @@ var escape_zones: Array[Vector2] = []
 var return_point := Vector2.ZERO
 ## Boars the turkey marked (one herd, group or loner), set by the map.
 var marked: Array[Node3D] = []
+## The hunter's saddled boar, shown for MOUNT_SECONDS after a shout.
+var _mount: Node3D
+var _mount_left := 0.0
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_mount_left -= delta
 	queue_redraw()
+
+
+## Highlights where the saddled boar is for a few seconds; null when there is none.
+func show_mount(mount: Node3D) -> void:
+	_mount = mount
+	_mount_left = MOUNT_SECONDS
 
 
 func _draw() -> void:
@@ -33,6 +44,10 @@ func _draw() -> void:
 	for boar in marked:
 		if is_instance_valid(boar):
 			draw_circle(_to_px(Vector2(boar.global_position.x, boar.global_position.z)), 3.0, Color(1, 0.85, 0.3))
+	if _mount_left > 0.0 and is_instance_valid(_mount):
+		var spot := _to_px(Vector2(_mount.global_position.x, _mount.global_position.z))
+		draw_arc(spot, 7.0, 0.0, TAU, 20, Color(0.3, 0.9, 1.0), 2.0)
+		draw_circle(spot, 3.0, Color(0.3, 0.9, 1.0))
 	if hunter:
 		var at := _to_px(Vector2(hunter.global_position.x, hunter.global_position.z))
 		var forward := Vector2(-hunter.global_basis.z.x, -hunter.global_basis.z.z).normalized()

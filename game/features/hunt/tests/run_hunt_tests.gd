@@ -8,6 +8,8 @@ func _init() -> void:
 	var failures := 0
 	failures += _check(_results_and_tusks(), "results count per type and tusks follow rewards")
 	failures += _check(_wounded_capture_pays_less(), "wounded captured boar counts as caught, pays between dead and whole")
+	failures += _check(Hunt.tusk_bracket(0) == "< 10" and Hunt.tusk_bracket(10) == "< 20" and Hunt.tusk_bracket(499) == "< 500" \
+			and Hunt.tusk_bracket(1000) == "1000+", "tusks show as rough brackets")
 	failures += _check(_empty_hunt_pays_nothing(), "empty hunt has no results and no tusks")
 	failures += _check(_ends_when_no_boars_left(), "hunt ends when every boar is resolved")
 	failures += _check(_ends_on_return(), "hunt ends when the hunter returns early")
