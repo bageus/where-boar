@@ -41,9 +41,11 @@ const CLUB_DAMAGE := 3
 const CLUB_KNOCK := 6.0
 ## The club hits harder than the spear but reaches less far (owner, 2026-10-27).
 const CLUB_REACH := 1.8
-## Holding LMB charges these weapons (owner, 2026-10-27); a full charge doubles club and bow damage
+## Holding LMB charges these weapons (owner, 2026-10-27); a full charge doubles knife, club and bow damage
 ## and sends nets and sling stones CHARGED_RANGE_SCALE times faster (so further).
-const CHARGED_WEAPONS := [Loadout.Weapon.NET, Loadout.Weapon.CLUB, Loadout.Weapon.SLING, Loadout.Weapon.BOW]
+const CHARGED_WEAPONS := [
+	Loadout.Weapon.NET, Loadout.Weapon.CLUB, Loadout.Weapon.SLING, Loadout.Weapon.BOW, Loadout.Weapon.KNIFE,
+]
 const CHARGED_DAMAGE_SCALE := 2.0
 const CHARGED_RANGE_SCALE := 1.6
 const SLING_SPEED := 24.0
@@ -324,7 +326,7 @@ func _attack() -> void:
 		Weapon.KNIFE:
 			$Camera/Hands.strike()
 			if _in_reach(KNIFE_REACH):
-				_reach.get_collider().spear_hit(KNIFE_DAMAGE)
+				_reach.get_collider().spear_hit(roundi(KNIFE_DAMAGE * lerpf(1.0, CHARGED_DAMAGE_SCALE, power)))
 		Weapon.CLUB:
 			$Camera/Hands.strike()
 			var target := _reach.get_collider()

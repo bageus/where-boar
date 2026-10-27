@@ -29,7 +29,7 @@ const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
 ## Trap item ids in the order G cycles through them (M015).
 const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]
 
-## Camp meals and their stamina bonus; all carried meals are eaten at hunt start (M012, ASSUMPTION).
+## Camp meals and their stamina bonus; one of each kind is eaten at hunt start (M012, ASSUMPTION).
 const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
 const WATER_BAG_ID := "item_water_bag"
 ## Sips the bag holds; unused water stays in camp stock (owner, 2026-10-27).
@@ -210,14 +210,13 @@ func _spend_trap(item_id: String) -> String:
 	return item_id
 
 
-## Eats the best meal in stock before a hunt; returns its stamina bonus, 0 without one.
-## Eats every camp meal carried; their bonuses stack for the whole hunt (owner, 2026-10-27).
+## Eats one of each meal kind carried; different meals stack, the same one does not (owner, 2026-10-27).
 func eat_meals() -> float:
 	var bonus := 0.0
 	for item_id in MEALS:
-		bonus += MEALS[item_id] * _meals[item_id]
 		if _meals[item_id] > 0:
-			used[item_id] = used.get(item_id, 0) + _meals[item_id]
+			bonus += MEALS[item_id]
+			used[item_id] = used.get(item_id, 0) + 1
 		_meals[item_id] = 0
 	return bonus
 
