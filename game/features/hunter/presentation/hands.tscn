@@ -1,70 +1,13 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hands.gd" id="1_hands"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_wood"]
-albedo_color = Color(0.55, 0.38, 0.2, 1)
-
-[sub_resource type="CylinderMesh" id="Mesh_shaft"]
-material = SubResource("Mat_wood")
-top_radius = 0.025
-bottom_radius = 0.025
-height = 1.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_stone"]
-albedo_color = Color(0.6, 0.6, 0.62, 1)
-
-[sub_resource type="CylinderMesh" id="Mesh_tip"]
-material = SubResource("Mat_stone")
-top_radius = 0.0
-bottom_radius = 0.05
-height = 0.2
-
-[sub_resource type="StandardMaterial3D" id="Mat_rope"]
-transparency = 1
-albedo_color = Color(0.85, 0.8, 0.6, 0.7)
-
-[sub_resource type="BoxMesh" id="Mesh_net"]
-material = SubResource("Mat_rope")
-size = Vector3(0.3, 0.03, 0.3)
-
-[sub_resource type="CylinderMesh" id="Mesh_club"]
-material = SubResource("Mat_wood")
-top_radius = 0.07
-bottom_radius = 0.035
-height = 0.7
-
-[sub_resource type="SphereMesh" id="Mesh_club_head"]
-material = SubResource("Mat_wood")
-radius = 0.11
-height = 0.22
-
-[sub_resource type="BoxMesh" id="Mesh_strap"]
-material = SubResource("Mat_rope")
-size = Vector3(0.04, 0.4, 0.02)
-
-[sub_resource type="SphereMesh" id="Mesh_pebble"]
-material = SubResource("Mat_stone")
-radius = 0.05
-height = 0.1
-
-[sub_resource type="CylinderMesh" id="Mesh_limb"]
-material = SubResource("Mat_wood")
-top_radius = 0.015
-bottom_radius = 0.015
-height = 0.55
-
-[sub_resource type="BoxMesh" id="Mesh_string"]
-material = SubResource("Mat_rope")
-size = Vector3(0.006, 0.95, 0.006)
-
-[sub_resource type="BoxMesh" id="Mesh_blade"]
-material = SubResource("Mat_stone")
-size = Vector3(0.03, 0.01, 0.22)
-
-[sub_resource type="BoxMesh" id="Mesh_grip"]
-material = SubResource("Mat_wood")
-size = Vector3(0.035, 0.035, 0.12)
+[ext_resource type="PackedScene" path="res://assets/models/hand.glb" id="2_hand"]
+[ext_resource type="PackedScene" path="res://assets/models/spear.glb" id="3_spear"]
+[ext_resource type="PackedScene" path="res://assets/models/net_bundle.glb" id="4_net"]
+[ext_resource type="PackedScene" path="res://assets/models/club.glb" id="5_club"]
+[ext_resource type="PackedScene" path="res://assets/models/sling.glb" id="6_sling"]
+[ext_resource type="PackedScene" path="res://assets/models/bow.glb" id="7_bow"]
+[ext_resource type="PackedScene" path="res://assets/models/knife.glb" id="8_knife"]
 
 [node name="Hands" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.35, -0.5)
@@ -73,74 +16,52 @@ script = ExtResource("1_hands")
 [node name="Spear" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -0.3)
 
-[node name="Shaft" type="MeshInstance3D" parent="Spear"]
-cast_shadow = 0
-mesh = SubResource("Mesh_shaft")
+[node name="Model" parent="Spear" instance=ExtResource("3_spear")]
 
-[node name="Tip" type="MeshInstance3D" parent="Spear"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_tip")
+[node name="Hand" parent="Spear" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.35, 0)
 
-[node name="Net" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.9, 0.3, 0, -0.3, 0.9, 0, 0, 0, 1, 0, -0.05, -0.1)
+[node name="Net" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 visible = false
-cast_shadow = 0
-mesh = SubResource("Mesh_net")
+
+[node name="Model" parent="Net" instance=ExtResource("4_net")]
+
+[node name="Hand" parent="Net" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, -0.04, 0.1)
 
 [node name="Club" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.8, 0.6, 0, -0.6, 0.8, 0, 0.05, 0)
 visible = false
 
-[node name="Handle" type="MeshInstance3D" parent="Club"]
-cast_shadow = 0
-mesh = SubResource("Mesh_club")
+[node name="Model" parent="Club" instance=ExtResource("5_club")]
 
-[node name="Head" type="MeshInstance3D" parent="Club"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.38, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_club_head")
+[node name="Hand" parent="Club" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 0.8, -0.6, 0, 0.6, 0.8, 0, -0.25, 0)
 
 [node name="Sling" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.3, 0)
 visible = false
 
-[node name="Strap" type="MeshInstance3D" parent="Sling"]
-cast_shadow = 0
-mesh = SubResource("Mesh_strap")
+[node name="Model" parent="Sling" instance=ExtResource("6_sling")]
 
-[node name="Pebble" type="MeshInstance3D" parent="Sling"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.22, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_pebble")
+[node name="Hand" parent="Sling" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0, 0.2, 0)
 
 [node name="Bow" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.1, -0.1)
 visible = false
 
-[node name="Upper" type="MeshInstance3D" parent="Bow"]
-transform = Transform3D(0.97, 0.26, 0, -0.26, 0.97, 0, 0, 0, 1, 0.07, 0.26, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_limb")
+[node name="Model" parent="Bow" instance=ExtResource("7_bow")]
 
-[node name="Lower" type="MeshInstance3D" parent="Bow"]
-transform = Transform3D(0.97, -0.26, 0, 0.26, 0.97, 0, 0, 0, 1, 0.07, -0.26, 0)
-cast_shadow = 0
-mesh = SubResource("Mesh_limb")
-
-[node name="String" type="MeshInstance3D" parent="Bow"]
-cast_shadow = 0
-mesh = SubResource("Mesh_string")
+[node name="Hand" parent="Bow" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.085, 0, 0)
 
 [node name="Knife" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.1, 0)
 visible = false
 
-[node name="Grip" type="MeshInstance3D" parent="Knife"]
-cast_shadow = 0
-mesh = SubResource("Mesh_grip")
+[node name="Model" parent="Knife" instance=ExtResource("8_knife")]
 
-[node name="Blade" type="MeshInstance3D" parent="Knife"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.17)
-cast_shadow = 0
-mesh = SubResource("Mesh_blade")
+[node name="Hand" parent="Knife" instance=ExtResource("2_hand")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.02)

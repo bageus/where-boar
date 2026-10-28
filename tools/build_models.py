@@ -27,8 +27,13 @@ COLOURS = {
     "snout": (0.86, 0.6, 0.58),
     "tusk": (0.97, 0.94, 0.82),
     "dark": (0.1, 0.07, 0.06),
+    "wood": (0.62, 0.43, 0.24),
+    "rope": (0.86, 0.78, 0.55),
+    "flint": (0.42, 0.44, 0.5),
+    "skin": (0.93, 0.7, 0.52),
+    "leather": (0.5, 0.3, 0.15),
 }
-HIDE, BARK, LEAF, STONE, SNOUT, TUSK, DARK = COLOURS
+HIDE, BARK, LEAF, STONE, SNOUT, TUSK, DARK, WOOD, ROPE, FLINT, SKIN, LEATHER = COLOURS
 
 
 # ---- shapes: each returns a list of triangles (three xyz tuples) ----
@@ -135,7 +140,62 @@ def stone() -> list:
     return [(STONE, ball((0, 0.08, 0), (0.13, 0.1, 0.12), 0.15, 40))]
 
 
-MODELS = {"boar": boar, "tree": tree, "bush": bush, "rock": rock, "stone": stone}
+# Weapons keep the frames of the grey-box meshes they replace in hands.tscn: the long ones run along +y.
+
+def spear() -> list:
+    return [(WOOD, rod((0, -0.8, 0), (0, 0.8, 0), 0.025, 0.022, 6)),
+            (ROPE, rod((0, 0.74, 0), (0, 0.82, 0), 0.032, 0.032, 6)),
+            (FLINT, ball((0, 0.92, 0), (0.05, 0.16, 0.02), 0.05, 50))]
+
+
+def arrow() -> list:
+    return [(WOOD, rod((0, -0.4, 0), (0, 0.32, 0), 0.01, 0.01, 5)),
+            (FLINT, ball((0, 0.36, 0), (0.025, 0.06, 0.008))),
+            (DARK, box((0, -0.34, 0), (0.07, 0.1, 0.004))), (DARK, box((0, -0.34, 0), (0.004, 0.1, 0.07)))]
+
+
+def club() -> list:
+    parts = [(WOOD, rod((0, -0.35, 0), (0, 0.3, 0), 0.03, 0.05, 6)),
+             (LEATHER, rod((0, -0.33, 0), (0, -0.15, 0), 0.036, 0.04, 6)),
+             (WOOD, ball((0, 0.38, 0), (0.12, 0.15, 0.12), 0.08, 51, 1))]
+    for k in range(5):
+        a = 2 * math.pi * k / 5
+        base = (0.1 * math.cos(a), 0.38 + 0.05 * (k % 2), 0.1 * math.sin(a))
+        parts.append((FLINT, rod(base, (0.18 * math.cos(a), base[1] + 0.03, 0.18 * math.sin(a)), 0.03, 0.0, 4)))
+    return parts
+
+
+def sling() -> list:
+    return [(ROPE, rod((0, 0.2, 0), (0, -0.18, 0), 0.01, 0.01, 4)),
+            (LEATHER, ball((0, -0.22, 0), (0.06, 0.04, 0.06))),
+            (STONE, ball((0, -0.19, 0), (0.04, 0.035, 0.04), 0.1, 52))]
+
+
+def bow() -> list:
+    arc = [(0.0, 0.48), (0.06, 0.3), (0.085, 0.1), (0.085, -0.1), (0.06, -0.3), (0.0, -0.48)]
+    parts = [(WOOD, rod((x0, y0, 0), (x1, y1, 0), 0.02, 0.02, 5)) for (x0, y0), (x1, y1) in zip(arc, arc[1:])]
+    return parts + [(ROPE, rod((0, 0.48, 0), (0, -0.48, 0), 0.004, 0.004, 3)),
+                    (LEATHER, rod((0.085, -0.08, 0), (0.085, 0.08, 0), 0.026, 0.026, 6))]
+
+
+def knife() -> list:
+    return [(WOOD, rod((0, 0, 0.07), (0, 0, -0.06), 0.02, 0.018, 6)),
+            (FLINT, ball((0, 0, -0.17), (0.032, 0.01, 0.12), 0.08, 53))]
+
+
+def net_bundle() -> list:
+    return [(ROPE, ball((0, 0, 0), (0.16, 0.07, 0.15), 0.2, 54, 1))]
+
+
+def hand() -> list:
+    """A fist at the origin and a forearm reaching back to the bottom right of the view."""
+    return [(SKIN, ball((0, 0, 0), (0.05, 0.045, 0.06), 0.08, 55)),
+            (SKIN, rod((0.01, -0.01, 0.03), (0.06, -0.12, 0.32), 0.035, 0.045, 6)),
+            (LEATHER, rod((0.04, -0.07, 0.2), (0.07, -0.14, 0.36), 0.05, 0.055, 6))]
+
+
+MODELS = {"boar": boar, "tree": tree, "bush": bush, "rock": rock, "stone": stone, "spear": spear, "arrow": arrow,
+          "club": club, "sling": sling, "bow": bow, "knife": knife, "net_bundle": net_bundle, "hand": hand}
 
 
 # ---- glTF writer ----

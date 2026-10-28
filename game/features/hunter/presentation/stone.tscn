@@ -1,17 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/missile.gd" id="1_missile"]
+[ext_resource type="PackedScene" path="res://assets/models/stone.glb" id="9_model"]
 
 [sub_resource type="SphereShape3D" id="Shape_m"]
 radius = 0.08
-
-[sub_resource type="StandardMaterial3D" id="Mat_m"]
-albedo_color = Color(0.5, 0.5, 0.5, 1)
-
-[sub_resource type="SphereMesh" id="Mesh_m"]
-material = SubResource("Mat_m")
-radius = 0.08
-height = 0.16
 
 [node name="Stone" type="RigidBody3D"]
 collision_mask = 33
@@ -28,6 +21,5 @@ damage = 1
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("Shape_m")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("Mesh_m")
+[node name="Mesh" parent="." instance=ExtResource("9_model")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, -0.05, 0)
