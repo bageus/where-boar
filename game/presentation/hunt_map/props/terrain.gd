@@ -4,17 +4,17 @@ extends StaticBody3D
 ## Green Valley ground (D039): one smooth height map with hills, a mesa, a cliff over the river and hollows.
 ## The heights are baked by tools/bake_green_valley.py; the visible surface is drawn from the same data.
 
-const GRASS := Color(0.28, 0.58, 0.2)
+const GRASS := Color(0.16, 0.4, 0.1)
 const ROCK := Color(0.58, 0.52, 0.42)
 const MUD := Color(0.5, 0.36, 0.2)
 ## Slopes steeper than this (normal.y below it, about 40 degrees) look like bare rock.
 const ROCK_NORMAL_Y := 0.75
 ## Stylized grass (assets/grass, MIT, StayAtHomeDev): clumps on grass-coloured ground, in square chunks
 ## that disappear beyond GRASS_RANGE metres, so far grass costs nothing.
-const GRASS_MESH := preload("res://assets/grass/grass2.glb")
+const GRASS_MESH := preload("res://assets/grass/grass.glb")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GRASS_CHUNK := 20
-const GRASS_PER_METRE := 1
+const GRASS_PER_METRE := 3
 const GRASS_RANGE := 40.0
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
@@ -60,7 +60,7 @@ func _plant_grass() -> void:
 					for k in GRASS_PER_METRE:
 						var x := i + rng.randf() - (w - 1) * 0.5
 						var z := j + rng.randf() - (d - 1) * 0.5
-						var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.6, 1.0))
+						var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(rng.randf_range(0.3, 0.4), rng.randf_range(0.25, 0.35), rng.randf_range(0.3, 0.4)))
 						spots.append(Transform3D(basis, Vector3(x, height_at(x, z) - 0.05, z) - centre))
 			if spots.is_empty():
 				continue
@@ -76,8 +76,7 @@ func _plant_grass() -> void:
 			chunk.material_override = GRASS_MATERIAL
 			chunk.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			chunk.visibility_range_end = GRASS_RANGE
-			chunk.visibility_range_end_margin = 10.0
-			chunk.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			chunk.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 			add_child(chunk)
 
 
