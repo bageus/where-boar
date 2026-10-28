@@ -87,7 +87,7 @@ func _physics_process(_delta: float) -> bool:
 			for i in boars.size():
 				boars[i].set_physics_process(false)
 				boars[i].global_position = _on_ground(Vector3(-40 + i * 2, 0, -60))
-			_freeze_and_aim(hunter, boars[1], Vector3(-3, 0, 20))
+			_freeze_and_aim(hunter, boars[1], Vector3(-3, 0, 20), hunter.NET_SPEED)
 			hunter.weapon = hunter.Weapon.NET
 			hunter._attack()
 		60:
@@ -205,13 +205,14 @@ func _buy_club(camp: Node3D) -> void:
 
 
 ## Moves the target to open ground at spot and puts the hunter 6 m south of it, aiming at its body.
-func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vector3) -> void:
+func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vector3, speed: float = 18.0) -> void:
 	boar.global_position = _on_ground(spot)
 	hunter.global_position = _on_ground(spot + Vector3(0, 0, 6)) + Vector3(0, 0.05, 0)
 	hunter.rotation = Vector3.ZERO
-	# Eye 1.6 m, boar body 0.5 m, about 0.5 m of throw drop over 6 m, plus the ground's rise.
+	# Eye 1.6 m, boar body 0.5 m, the throw's drop over 6 m at this speed, plus the ground's rise.
+	var drop := 4.9 * pow(6.0 / speed, 2.0)
 	var rise := hunter.global_position.y - boar.global_position.y
-	hunter.get_node("Camera").rotation = Vector3(-atan((0.6 + rise) / 6.0), 0, 0)
+	hunter.get_node("Camera").rotation = Vector3(-atan((1.1 - drop + rise) / 6.0), 0, 0)
 
 
 func _check(ok: bool, name: String) -> void:
