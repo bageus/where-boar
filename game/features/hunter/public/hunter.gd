@@ -49,7 +49,12 @@ const CHARGED_WEAPONS := [
 const CHARGED_DAMAGE_SCALE := 2.0
 const CHARGED_RANGE_SCALE := 1.6
 const SLING_SPEED := 24.0
-const ARROW_SPEED := 32.0
+const ARROW_SPEED := 40.0
+## Throw speed caps (owner, 2026-10-28): range net < spear < sling < bow; charge cannot exceed them.
+const NET_SPEED := 10.0
+const NET_MAX_SPEED := 16.0
+const SPEAR_MAX_SPEED := 22.0
+const SLING_MAX_SPEED := 30.0
 const PICKUP_RADIUS := 2.5
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
@@ -329,7 +334,7 @@ func _attack() -> void:
 		Weapon.SPEAR:
 			if Input.is_action_pressed("aim"):
 				if loadout.throw_spear():
-					_throw(SpearScene, THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power))
+					_throw(SpearScene, minf(THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power), SPEAR_MAX_SPEED))
 			elif loadout.spear_in_hand:
 				$Camera/Hands.strike()
 				if _hits_boar(_reach.get_collider()):
@@ -337,7 +342,7 @@ func _attack() -> void:
 		Weapon.NET:
 			if loadout.throw_net():
 				$Camera/Hands.strike()
-				_throw(NetScene, THROW_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power))
+				_throw(NetScene, minf(NET_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), NET_MAX_SPEED))
 		Weapon.KNIFE:
 			$Camera/Hands.strike()
 			if _in_reach(KNIFE_REACH):
@@ -353,7 +358,7 @@ func _attack() -> void:
 		Weapon.SLING:
 			if loadout.sling_stone():
 				$Camera/Hands.strike()
-				_throw(StoneScene, SLING_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power))
+				_throw(StoneScene, minf(SLING_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), SLING_MAX_SPEED))
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
