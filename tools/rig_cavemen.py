@@ -113,6 +113,20 @@ def skin(mesh: bpy.types.Object, rig: bpy.types.Object) -> None:
             continue
         nearest = min(bones, key=lambda b: _segment_distance(vertex.co, b.head_local, b.tail_local))
         mesh.vertex_groups[nearest.name].add([vertex.index], 1.0, "REPLACE")
+    # The finger bones run down the middle finger, so bone heat leaves the outer fingers on the
+    # hand and they stay straight in a fist: everything past the knuckles follows the finger bones.
+    for side in ("l", "r"):
+        groups = [mesh.vertex_groups[f"{n}_{side}"] for n in ("hand", "fingers", "fingertips")]
+        knuckle, middle = bones[f"fingers_{side}"].head_local, bones[f"fingertips_{side}"].head_local
+        along = (bones[f"hand_{side}"].tail_local - bones[f"hand_{side}"].head_local).normalized()
+        for vertex in mesh.data.vertices:
+            hand = sum(g.weight for g in vertex.groups if g.group in [x.index for x in groups])
+            if hand < 0.5 or (vertex.co - knuckle).dot(along) < 0.005:
+                continue
+            for group in groups:
+                group.remove([vertex.index])
+            tip = (vertex.co - middle).dot(along) > 0
+            groups[2 if tip else 1].add([vertex.index], 1.0, "REPLACE")
 
 
 def cut(mesh: bpy.types.Object) -> None:
@@ -244,12 +258,14 @@ def strong_attack() -> list:
 
 
 def bow_shot() -> list:
+    """The bow arm aims in front of the face; the right fist finds the string at the bow ("reach",
+    solved in animate) and draws it back along the arrow line to the chin."""
     rest = merge(ARMS_DOWN, {})
     aim = {"chest": [("Z", -25)], "neck": [("Z", 15)], "head": [("Z", 12)],
-           "upper_arm_l": [("X", 90), ("Z", -62), ("Y", -4)], "forearm_l": [("Z", -4)]}  # X 90 stands the bow upright
-    nock = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 8), ("Z", 20)], "forearm_r": [("Z", 95)]})
-    draw = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 12), ("Z", -12)], "forearm_r": [("Z", 140)]})
-    loose = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 16), ("Z", -32)], "forearm_r": [("Z", 105)]})
+           "upper_arm_l": [("X", -90), ("Z", -78), ("Y", -4)], "forearm_l": [("Z", -4)]}  # X -90 stands the bow upright
+    nock = merge(ARMS_DOWN, aim, {"reach": 0.0})
+    draw = merge(ARMS_DOWN, aim, {"reach": 1.0})
+    loose = merge(ARMS_DOWN, aim, {"reach": 1.15})
     return [(0, rest), (10, nock), (24, draw), (32, draw), (34, loose), (44, loose), (58, rest)]
 
 
@@ -276,6 +292,41 @@ def _crouch(rig: bpy.types.Object, pose: dict) -> float:
     return shin.tail_local.z - ankle.z
 
 
+def _fk(rig: bpy.types.Object, pose: dict) -> dict:
+    """Armature-space (head, rotation) of every posed bone; parents come before children."""
+    out = {}
+    for bone in rig.data.bones:
+        q = _quat(pose.get(bone.name, []))
+        if bone.parent:
+            head, rotation = out[bone.parent.name]
+            out[bone.name] = (head + rotation @ (bone.head_local - bone.parent.head_local), rotation @ q)
+        else:
+            out[bone.name] = (bone.head_local.copy(), q)
+    return out
+
+
+def _reach(rig: bpy.types.Object, pose: dict, pull: float) -> dict:
+    """Right arm rotations that put the right fist on the bow string, drawn back `pull` of the way
+    from the bow to the chin along the arrow line."""
+    bones = _fk(rig, pose)
+    grip = bones["fingers_l"][0]
+    aim = (grip - bones["hand_l"][0]).normalized()
+    chin = bones["head"][0] + aim * 0.05
+    target = grip - aim * (0.1 + ((grip - chin).dot(aim) - 0.1) * pull)
+    angles = [10.0, 0.0, 90.0]
+    arm = lambda a: {"upper_arm_r": [("Y", a[0]), ("Z", a[1])], "forearm_r": [("Z", a[2])]}
+    miss = lambda a: (_fk(rig, merge(pose, arm(a)))["fingers_r"][0] - target).length
+    for step in (16, 8, 4, 2, 1, 0.5):
+        for i in range(3):
+            for delta in (step, -step):
+                trial = angles.copy()
+                trial[i] += delta
+                while miss(trial) < miss(angles):
+                    angles = trial.copy()
+                    trial[i] += delta
+    return arm(angles)
+
+
 def animate(rig: bpy.types.Object, name: str, keys: list) -> bpy.types.Action:
     action = bpy.data.actions.new(name)
     action.use_fake_user = True
@@ -288,6 +339,8 @@ def animate(rig: bpy.types.Object, name: str, keys: list) -> bpy.types.Action:
         if lift == "crouch":
             lift = _crouch(rig, pose)
         pose = merge(FISTS, pose)
+        if "reach" in pose:
+            pose = merge(pose, _reach(rig, pose, pose["reach"]))
         for bone in rig.pose.bones:
             rest = bone.bone.matrix_local.to_quaternion()
             bone.rotation_mode = "QUATERNION"

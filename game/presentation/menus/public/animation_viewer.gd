@@ -14,6 +14,8 @@ const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Club = preload("res://assets/models/club.glb")
 const Bow = preload("res://assets/models/bow.glb")
+const Arrow = preload("res://assets/models/arrow.glb")
+const LOOSE_TIME := 34.0 / 30.0  # bow_shot frame where the string is released (tools/rig_cavemen.py)
 const GRIP := Vector3(0, 0.1, -0.04)  # inside the fist, in hand bone space
 
 var character: Node3D
@@ -24,6 +26,7 @@ var animations: Array[String] = ANIMATIONS
 var _skeleton: Skeleton3D
 var _club: Node3D
 var _bow: Node3D
+var _arrow := Node3D.new()
 var _yaw := 0.5
 var _pitch := -0.15
 var _distance := 3.2
@@ -39,6 +42,10 @@ func _ready() -> void:
 	for boar_type in BoarTypes.ALL:
 		_add_button(%Models, boar_type.display_name, show_boar.bind(boar_type.id))
 	_boar.show_type(BoarTypes.find("common_brown"))
+	var arrow_model: Node3D = Arrow.instantiate()
+	arrow_model.transform = Transform3D(Basis(Vector3(1, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0)), Vector3.ZERO)  # tip toward -Z
+	_arrow.add_child(arrow_model)
+	add_child(_arrow)
 	show_model(MODELS.keys()[0])
 	_place_camera()
 
@@ -99,7 +106,22 @@ func play(anim: String) -> void:
 	_bow.visible = anim == "bow_shot"
 	_boar.visible = anim == "ride"
 	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone("hips")).origin.y
-	character.position.y = _boar.top() * 0.85 + 0.12 - hips_height  # on the saddle, as in mount.gd if anim == "ride" else 0.0
+	# On the saddle, as in mount.gd.
+	character.position.y = _boar.top() * 0.85 + 0.12 - hips_height if anim == "ride" else 0.0
+
+
+# The arrow lies from the drawing fist through the bow grip until the string is released.
+func _process(_delta: float) -> void:
+	_arrow.visible = animation == "bow_shot" and player.current_animation_position < LOOSE_TIME
+	if not _arrow.visible:
+		return
+	var nock := _bone_position("fingers_r")
+	var aim := (_bone_position("fingers_l") - nock).normalized()
+	_arrow.look_at_from_position(nock + aim * 0.4, nock + aim, Vector3.UP)
+
+
+func _bone_position(bone: String) -> Vector3:
+	return _skeleton.global_transform * _skeleton.get_bone_global_pose(_skeleton.find_bone(bone)).origin
 
 
 func _attach(scene: PackedScene, bone: String, offset: Transform3D) -> Node3D:
