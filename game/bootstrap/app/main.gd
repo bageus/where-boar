@@ -5,6 +5,7 @@ extends Node
 const StartScene = preload("res://game/presentation/menus/public/start_screen.tscn")
 const ResultsScene = preload("res://game/presentation/menus/public/results_screen.tscn")
 const PauseScene = preload("res://game/presentation/menus/public/pause_menu.tscn")
+const ViewerScene = preload("res://game/presentation/menus/public/animation_viewer.tscn")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
@@ -78,6 +79,13 @@ func show_start() -> void:
 	_swap(start)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	start.get_node("%Start").pressed.connect(show_camp)
+	start.get_node("%Animations").pressed.connect(show_viewer)
+
+
+func show_viewer() -> void:
+	var viewer := ViewerScene.instantiate()
+	_swap(viewer)
+	viewer.closed.connect(show_start)
 
 
 func show_camp() -> void:

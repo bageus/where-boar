@@ -1,14 +1,16 @@
 {
   "id": "presentation.menus",
   "layer": "presentation",
-  "purpose": "Full-screen menus around a hunt: start screen, hunt results and the pause menu with settings (M007, section 16).",
+  "purpose": "Full-screen menus around a hunt: start screen, hunt results, the pause menu with settings (M007, section 16) and the character animation viewer.",
   "state_owner": [],
   "public_api": [
     "public/start_screen.tscn",
     "public/results_screen.tscn",
     "public/results_screen.gd",
     "public/pause_menu.tscn",
-    "public/pause_menu.gd"
+    "public/pause_menu.gd",
+    "public/animation_viewer.tscn",
+    "public/animation_viewer.gd"
   ],
   "dependencies": [
     "features.boar",

@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-023
-last_completed_task_id: P3-023
+active_task_id: P3-024
+last_completed_task_id: P3-024
 build_status: PASS
 updated: 2026-10-28
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-023 done.
+None. P3-001..P3-024 done.
 
 ## Last completed work
 
@@ -58,6 +58,7 @@ None. P3-001..P3-023 done.
 - P3-019: owner's nature pack baked by `tools/bake_nature_meshes.gd`: massive grey rocks on every cliff, 32 rock shapes, oak/spruce/dead trees, palms for jungle trees (`props/varied_mesh.gd` picks by node name), 30 stumps and 24 logs with collision, 12 tall-grass patches with wheat, leafy bushes; neutral ambient light so grey no longer looks blue.
 - P3-021: winding river (`river_z` in `tools/bake_green_valley.py`), one water plane with flow ripples, soft depth edge and no shadows, sandy banks, a log bridge; cliff rocks denser and solid (convex hulls); tall-grass patches are cover; no grass under stumps, logs and 70 extra trees.
 - P3-022: owner's ferns (260, drawn within 35 m), Tree_1..3 among the trees, 36 fallen trees and logs; the bake gives every tree, log, stump, palm and fern one bark/leaf/needle palette and merges same-colour surfaces.
+- P3-024: owner's caveman models (skinny, heavy) cut to 5000 triangles, 1024 px textures, 19-bone skeleton with automatic skin weights, animations idle, walk, run, sneak, ride, attack, strong_attack, bow_shot; built by `tools/rig_cavemen.py` (needs `pip install bpy`). "Character animations" on the start screen opens a viewer (pick model and animation, orbit camera, boar under the rider, club/bow in hand). Not yet used in gameplay (first-person game).
 - P3-023: hunt HUD redesign: no controls legend; active bait on the left (F), active trap on the right (T), holding the key opens a ring menu to pick another; water under stamina; helpers line above the trap; tusks under the minimap and "+N" popups for tusks and picked-up items; boar counts in the Esc menu. A placed trap is a ghost that works only once built: hold E next to it (pit 6 s, cage 5 s, fence 4 s, snare 3 s, tripwire 2 s) or the hired trap setter walks over and builds it.
 - P3-020: throw speed caps in `hunter.gd` (range net < spear < sling < bow): net 10 (charged 16), spear max 22, sling 24 (charged max 30), arrow 40.
 

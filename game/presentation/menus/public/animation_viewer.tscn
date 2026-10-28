@@ -1,0 +1,82 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/menus/public/animation_viewer.gd" id="1_viewer"]
+[ext_resource type="PackedScene" path="res://game/features/boar/public/boar_model.tscn" id="2_boar"]
+
+[sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("Sky_mat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+
+[sub_resource type="StandardMaterial3D" id="Mat_ground"]
+albedo_color = Color(0.36, 0.5, 0.26, 1)
+
+[sub_resource type="PlaneMesh" id="Mesh_ground"]
+material = SubResource("Mat_ground")
+size = Vector2(40, 40)
+
+[node name="AnimationViewer" type="Node3D"]
+script = ExtResource("1_viewer")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 4, 0)
+shadow_enabled = true
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_ground")
+
+[node name="Camera" type="Camera3D" parent="."]
+unique_name_in_owner = true
+current = true
+
+[node name="Boar" parent="." instance=ExtResource("2_boar")]
+unique_name_in_owner = true
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="Ui" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="VBoxContainer" parent="Ui"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 216.0
+offset_bottom = 600.0
+theme_override_constants/separation = 6
+
+[node name="ModelsTitle" type="Label" parent="Ui/Panel"]
+layout_mode = 2
+text = "Model"
+
+[node name="Models" type="VBoxContainer" parent="Ui/Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AnimationsTitle" type="Label" parent="Ui/Panel"]
+layout_mode = 2
+text = "Animation"
+
+[node name="Animations" type="VBoxContainer" parent="Ui/Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Back" type="Button" parent="Ui/Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
+
+[node name="Hint" type="Label" parent="Ui"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -40.0
+offset_right = 416.0
+offset_bottom = -16.0
+text = "Drag to orbit, mouse wheel to zoom"
