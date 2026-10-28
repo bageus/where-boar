@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-020 done.
+None. P3-001..P3-021 done.
 
 ## Last completed work
 
