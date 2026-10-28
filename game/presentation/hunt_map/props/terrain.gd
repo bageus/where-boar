@@ -14,8 +14,8 @@ const ROCK_NORMAL_Y := 0.75
 const GRASS_MESH := preload("res://assets/grass/grass.glb")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GRASS_CHUNK := 20
-const GRASS_PER_METRE := 3
-const GRASS_RANGE := 40.0
+const GRASS_PER_METRE := 6
+const GRASS_RANGE := 30.0
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
@@ -60,7 +60,7 @@ func _plant_grass() -> void:
 					for k in GRASS_PER_METRE:
 						var x := i + rng.randf() - (w - 1) * 0.5
 						var z := j + rng.randf() - (d - 1) * 0.5
-						var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(rng.randf_range(0.3, 0.4), rng.randf_range(0.25, 0.35), rng.randf_range(0.3, 0.4)))
+						var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.35, 0.45))
 						spots.append(Transform3D(basis, Vector3(x, height_at(x, z) - 0.05, z) - centre))
 			if spots.is_empty():
 				continue
