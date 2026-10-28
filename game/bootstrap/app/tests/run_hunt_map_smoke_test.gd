@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 34
+const EXPECTED_CHECKS := 36
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -184,6 +184,14 @@ func _check_trap_setter() -> void:
 	var traps := hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)
 	_check(traps.size() == 2 and hunter.loadout.traps["item_snare"] == 1 \
 			and traps.all(func(n: Node) -> bool: return n.is_in_group("placed_traps") and n.has_node("Marker")), "trap setter sets two marked traps")
+	# A trap the hunter sets is a ghost until built; the setter comes along to build it.
+	hunter.place_trap()
+	var ghost: Node3D = hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)[-1]
+	var BuildSite = hunter.BuildSite
+	var was_ghost: bool = BuildSite.is_ghost(ghost) and hunter.loadout.traps["item_snare"] == 0
+	_check(was_ghost and BuildSite.build(ghost, 10.0) and not BuildSite.is_ghost(ghost) \
+			and hunter.get_children().any(func(n: Node) -> bool: return n.get_script() == hunter.TrapSetter), "a placed trap is a ghost until built; the setter comes along")
+	_check("Boars left: 47" in map.stats_text() and map.get_node("Hud/Goal").text.begins_with("Tusks:"), "boar stats for the pause menu; tusks under the minimap")
 	var mount: Node3D = hunter.get_node("Rider").mount
 	_check(mount != null and mount.boar_type.id == "runner_grey", "the saddled runner waits beside the hunter")
 	hunter.get_node("Rider").toggle()

@@ -16,6 +16,8 @@ const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 const Highlight = preload("res://game/features/hunter/presentation/highlight.gd")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
+const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
+const TrapSetter = preload("res://game/features/hunter/presentation/trap_setter.gd")
 const TRAP_SCENES := {
 	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
 	"item_snare": preload("res://game/features/hunter/presentation/traps/snare.tscn"),
@@ -23,6 +25,13 @@ const TRAP_SCENES := {
 	"item_cage": preload("res://game/features/hunter/presentation/traps/cage.tscn"),
 	"item_fence": preload("res://game/features/hunter/presentation/traps/fence.tscn"),
 }
+
+## Seconds of work to build each trap from its ghost (owner, 2026-10-28; numbers ASSUMPTION).
+const TRAP_BUILD_SECONDS := {"item_pit": 6.0, "item_snare": 3.0, "item_tripwire": 2.0, "item_cage": 5.0, "item_fence": 4.0}
+## Holding E builds a ghost within this many metres.
+const BUILD_RADIUS := 2.5
+## Holding F or T this long opens the bait or trap menu instead of placing.
+const MENU_HOLD_SECONDS := 0.3
 
 # ASSUMPTION numbers (D013), tuned in phase 2.
 const WALK_SPEED := 4.0
@@ -115,6 +124,9 @@ var camera_motion := true
 # shortcut: our own toggle, not the OS lock state (Godot does not expose it), so the
 # keyboard light can disagree if Caps Lock was on before the hunt; fine until playtest says otherwise.
 var crouching := false
+## "bait" or "trap" while F or T is held; the menu opens after MENU_HOLD_SECONDS.
+var _held_key := ""
+var _held_for := 0.0
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -145,6 +157,8 @@ func equip(items: Dictionary) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and _hud.menu_open():
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		_camera.rotation.x = clampf(_camera.rotation.x - event.relative.y * mouse_sensitivity, -1.5, 1.5)
@@ -166,15 +180,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		crouching = not crouching and not ride.is_riding()
 	elif event.is_action_pressed("shout"):
 		shout()
-	elif event.is_action_pressed("bait"):
-		_place_bait()
+	elif event.is_action_pressed("bait") or event.is_action_pressed("trap_place"):
+		_held_key = "bait" if event.is_action_pressed("bait") else "trap"
+		_held_for = 0.0
+	elif (event.is_action_released("bait") and _held_key == "bait") or (event.is_action_released("trap_place") and _held_key == "trap"):
+		_release_held_key()
 	elif event.is_action_pressed("drink"):
 		if loadout.drink():
 			stamina.drink(WATER_STAMINA)
-	elif event.is_action_pressed("trap_next"):
-		loadout.cycle_trap()
-	elif event.is_action_pressed("trap_place"):
-		place_trap()
 	else:
 		for i in Loadout.Weapon.size():
 			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
@@ -221,6 +234,41 @@ func start_hunt() -> void:
 	_hud.show_stamina(stamina.value, stamina.max_value)
 
 
+## A short tap places the active bait or trap; after a hold the menu picks the active one (owner, 2026-10-28).
+func _release_held_key() -> void:
+	var key := _held_key
+	_held_key = ""
+	if _hud.menu_open():
+		var picked: String = _hud.close_menu()
+		if picked != "" and key == "bait":
+			loadout.bait_id = picked
+		elif picked != "":
+			loadout.trap_id = picked
+	elif key == "bait":
+		_place_bait()
+	else:
+		place_trap()
+
+
+## Big "+N ..." in the middle of the screen, e.g. for tusks or picked-up items.
+func show_gain(text: String) -> void:
+	_hud.show_gain(text)
+
+
+## Helper line above the trap slot, "" hides it.
+func show_helper(text: String) -> void:
+	_hud.show_helper(text)
+
+
+## The hired trap setter comes along and builds every trap ghost (M013).
+func bring_trap_setter() -> void:
+	var setter := TrapSetter.new()
+	setter.hunter = self
+	setter.top_level = true
+	add_child(setter)
+	setter.global_position = ground_at(global_position + global_basis.x * 2.0)
+
+
 ## Scares boars in earshot sideways (M014); limited by a short cooldown.
 func shout() -> void:
 	if _shout_cooldown > 0.0:
@@ -248,24 +296,27 @@ const GROUND_STONES_GROUP := "stone_piles"
 const PLACED_TRAPS_GROUP := "placed_traps"
 
 
-## Sets the selected trap on the ground 2 m ahead, facing the hunter's way (M015).
+## Puts a ghost of the active trap on the ground 2 m ahead, facing the hunter's way (M015); it works once built.
 func place_trap() -> void:
-	_set_trap(loadout.place_trap(), Transform3D(global_basis, global_position - global_basis.z * 2.0))
+	_set_trap(loadout.place_trap(), Transform3D(global_basis, global_position - global_basis.z * 2.0), true)
 
 
-## The hired trap setter puts any trap from stock at where (M013); false when none is left.
+## The hired trap setter puts any trap from stock at where before the hunt (M013); false when none is left.
 func set_trap_for_hunter(where: Transform3D) -> bool:
-	return _set_trap(loadout.place_any_trap(), where)
+	return _set_trap(loadout.place_any_trap(), where, false)
 
 
-func _set_trap(item_id: String, where: Transform3D) -> bool:
+func _set_trap(item_id: String, where: Transform3D, ghost: bool) -> bool:
 	if item_id == "":
 		return false
 	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
 	trap.top_level = true
 	trap.add_to_group(PLACED_TRAPS_GROUP)
+	trap.set_meta("item_id", item_id)
 	add_child(trap)
 	trap.global_transform = Transform3D(where.basis, ground_at(where.origin))
+	if ghost:
+		BuildSite.make_ghost(trap, TRAP_BUILD_SECONDS[item_id])
 	_update_hud()
 	return true
 
@@ -284,6 +335,11 @@ func _physics_process(delta: float) -> void:
 		_highlight_timer = 0.25
 		_update_highlights()
 	_shout_cooldown -= delta
+	if _held_key != "":
+		_held_for += delta
+		if _held_for >= MENU_HOLD_SECONDS and not _hud.menu_open():
+			_hud.open_menu(loadout, _held_key)
+	_build_nearby(delta)
 	if _stun > 0.0:
 		_stun -= delta
 		velocity += get_gravity() * delta
@@ -418,9 +474,22 @@ func _update_highlights() -> void:
 		Highlight.set_on(pile, pile.global_position.distance_to(global_position) <= HIGHLIGHT_RADIUS)
 
 
+## Holding E next to a trap ghost builds it; the HUD shows the nearest ghost's progress.
+func _build_nearby(delta: float) -> void:
+	var site: Node3D = null
+	for trap: Node3D in get_tree().get_nodes_in_group(PLACED_TRAPS_GROUP):
+		if BuildSite.is_ghost(trap) and trap.global_position.distance_to(global_position) <= BUILD_RADIUS:
+			site = trap
+			break
+	if site and Input.is_action_pressed("interact") and BuildSite.build(site, delta):
+		_hud.show_gain("Trap ready")
+	_hud.show_build(site)
+
+
 func _pick_up() -> void:
 	# Untyped: a typed lambda cannot take a freed item (one that left with an escaped boar).
 	_thrown = _thrown.filter(func(item) -> bool: return is_instance_valid(item))
+	var before := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
 	for item in _thrown.duplicate():
 		if item.global_position.distance_to(global_position) > PICKUP_RADIUS or not Landing.can_pick(item):
 			continue
@@ -440,6 +509,13 @@ func _pick_up() -> void:
 		if pile.global_position.distance_to(global_position) <= PICKUP_RADIUS:
 			loadout.pick_stones(pile.get_meta("stones", 1))
 			pile.queue_free()
+	var gains := PackedStringArray()
+	var after := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
+	for i in after.size():
+		if after[i] > before[i]:
+			gains.append("+%d %s" % [after[i] - before[i], ["spear", "net", "arrow", "stone"][i] + ("s" if after[i] - before[i] > 1 else "")])
+	if not gains.is_empty():
+		_hud.show_gain(", ".join(gains))
 
 
 func _update_hud() -> void:

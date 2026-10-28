@@ -23,10 +23,10 @@ const ITEM_IDS := {
 	Weapon.BOW: "item_bow",
 }
 
-## Bait item ids, the strongest first: place_bait uses the first one left (ASSUMPTION).
+## Bait item ids, the strongest first; the first one in stock starts active (ASSUMPTION).
 const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
 
-## Trap item ids in the order G cycles through them (M015).
+## Trap item ids in the order the trap menu shows them (M015).
 const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]
 
 ## Camp meals and their stamina bonus; one of each kind is eaten at hunt start (M012, ASSUMPTION).
@@ -60,8 +60,9 @@ var baits: Dictionary = {}
 var used: Dictionary = {}
 ## item_id -> traps carried this hunt.
 var traps: Dictionary = {}
-## Index into TRAP_IDS of the trap T places.
-var trap_index := 0
+## Active bait and trap (F and T place them; holding the key opens a menu to pick another).
+var bait_id: String = BAIT_IDS[0]
+var trap_id: String = TRAP_IDS[0]
 var water_sips := 0
 var _meals: Dictionary = {}
 ## Boar type ids with a saddle bought in camp (D021).
@@ -81,6 +82,8 @@ func equip(items: Dictionary) -> void:
 	traps.clear()
 	for item_id in TRAP_IDS:
 		traps[item_id] = items.get(item_id, 0)
+	bait_id = _first_in_stock(BAIT_IDS, baits)
+	trap_id = _first_in_stock(TRAP_IDS, traps)
 	_meals.clear()
 	for item_id in MEALS:
 		_meals[item_id] = items.get(item_id, 0)
@@ -170,28 +173,31 @@ func shoot_arrow() -> bool:
 	return true
 
 
-## Spends the strongest bait left; returns its item id, or "" when out of bait.
+## Spends the active bait, or the strongest one left when it ran out (and makes that one active);
+## returns its item id, or "" when out of bait.
 func place_bait() -> String:
-	for item_id in BAIT_IDS:
-		if baits.get(item_id, 0) > 0:
-			baits[item_id] -= 1
-			used[item_id] = used.get(item_id, 0) + 1
-			return item_id
-	return ""
+	if baits.get(bait_id, 0) == 0:
+		bait_id = _first_in_stock(BAIT_IDS, baits)
+	if baits.get(bait_id, 0) == 0:
+		return ""
+	baits[bait_id] -= 1
+	used[bait_id] = used.get(bait_id, 0) + 1
+	return bait_id
 
 
-## Selects the next trap type.
-func cycle_trap() -> void:
-	trap_index = (trap_index + 1) % TRAP_IDS.size()
-
-
-func selected_trap() -> String:
-	return TRAP_IDS[trap_index]
-
-
-## Spends the selected trap; returns its item id, or "" when none is left.
+## Spends the active trap, or the first one left when it ran out; returns its item id, or "" when none is left.
 func place_trap() -> String:
-	return _spend_trap(selected_trap())
+	if traps.get(trap_id, 0) == 0:
+		trap_id = _first_in_stock(TRAP_IDS, traps)
+	return _spend_trap(trap_id)
+
+
+## The first id with stock, else the first id.
+static func _first_in_stock(ids: Array, stock: Dictionary) -> String:
+	for item_id in ids:
+		if stock.get(item_id, 0) > 0:
+			return item_id
+	return ids[0]
 
 
 ## Spends the first trap in stock, any type; for the trap setter (M013).

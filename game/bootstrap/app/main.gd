@@ -51,7 +51,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not get_tree().paused and current and current.has_node("Hunter"):
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		_pause.open(settings)
+		_pause.open(settings, current.stats_text() if current.has_method("stats_text") else "")
 
 
 func _resume() -> void:

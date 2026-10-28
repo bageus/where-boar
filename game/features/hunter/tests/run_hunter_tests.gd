@@ -5,6 +5,7 @@ const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const RadialMenu = preload("res://game/features/hunter/presentation/radial_menu.gd")
 
 
 func _init() -> void:
@@ -18,12 +19,13 @@ func _init() -> void:
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
-	failures += _check(_traps_cycle_and_run_out(), "traps cycle and run out")
+	failures += _check(_traps_cycle_and_run_out(), "the active trap is placed, then the next in stock")
 	failures += _check(_sling_stones_run_out_and_refill(), "sling stones run out, piles refill them, a new hunt restores the pouch")
 	failures += _check(_meal_and_water(), "one of each meal kind stacks on max stamina; water sips restore it")
 	failures += _check(_porter_and_any_trap(), "porter adds nets and arrows; any trap in stock can be set")
 	failures += _check(_ride_by_mount_type(), "mount type sets speed and perk; only the stab works when riding")
 	failures += _check(_saddles_from_items(), "saddled mount types come from camp items")
+	failures += _check(_radial_choice(), "the ring menu picks the choice the mouse points at")
 	print("hunter tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -120,11 +122,10 @@ func _bait_strongest_first() -> bool:
 
 func _traps_cycle_and_run_out() -> bool:
 	var loadout := Loadout.new()
-	loadout.equip({"item_snare": 1})
-	var none := loadout.place_trap() == ""
-	loadout.cycle_trap()
-	return none and loadout.place_trap() == "item_snare" and loadout.place_trap() == "" \
-		and loadout.used == {"item_snare": 1}
+	loadout.equip({"item_snare": 1, "item_cage": 1})
+	loadout.trap_id = "item_cage"
+	return loadout.place_trap() == "item_cage" and loadout.place_trap() == "item_snare" and loadout.place_trap() == "" \
+		and loadout.used == {"item_snare": 1, "item_cage": 1}
 
 
 func _sling_stones_run_out_and_refill() -> bool:
@@ -180,3 +181,10 @@ func _saddles_from_items() -> bool:
 	var loadout := Loadout.new()
 	loadout.equip({"item_saddle_aggressive_red": 1, "item_saddle_runner_grey": 0})
 	return loadout.saddled == ["aggressive_red"]
+
+
+func _radial_choice() -> bool:
+	# Four choices: top, right, bottom, left (screen y grows down).
+	return RadialMenu.choice_at(Vector2(0, -100), 4) == 0 and RadialMenu.choice_at(Vector2(100, 10), 4) == 1 \
+		and RadialMenu.choice_at(Vector2(0, 100), 4) == 2 and RadialMenu.choice_at(Vector2(-100, 0), 4) == 3 \
+		and RadialMenu.choice_at(Vector2(5, 5), 4) == -1

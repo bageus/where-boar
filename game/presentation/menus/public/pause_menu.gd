@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-## Pause menu (section 16): continue, settings (FOV, mouse sensitivity, camera motion), quit to the start screen.
+## Pause menu (section 16): hunt stats, continue, settings (FOV, mouse sensitivity, camera motion), quit to the start screen.
 ## Runs while the tree is paused.
 
 signal resumed
@@ -20,8 +20,11 @@ func _ready() -> void:
 	%CameraMotion.toggled.connect(func(on: bool) -> void: _change("camera_motion", on))
 
 
-func open(settings: Dictionary) -> void:
+## stats: the hunt's boar counts shown above the buttons (owner, 2026-10-28); "" hides them.
+func open(settings: Dictionary, stats := "") -> void:
 	_settings = settings.duplicate()
+	%Stats.text = stats
+	%Stats.visible = stats != ""
 	%Fov.set_value_no_signal(settings["fov"])
 	%Sensitivity.set_value_no_signal(settings["mouse_sensitivity"] * 1000.0)
 	%CameraMotion.set_pressed_no_signal(settings["camera_motion"])

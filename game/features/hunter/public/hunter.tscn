@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/public/hunter.gd" id="1_hunter"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hunter_hud.gd" id="2_hud"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/rider.gd" id="3_rider"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/presentation/hands.tscn" id="4_hands"]
+[ext_resource type="Script" path="res://game/features/hunter/presentation/radial_menu.gd" id="5_menu"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_hunter"]
 radius = 0.4
@@ -112,23 +113,110 @@ alignment = 1
 
 
 [node name="Bait" type="Label" parent="Hud"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
 offset_left = 20.0
-offset_top = -50.0
-offset_right = 1100.0
-offset_bottom = -20.0
-grow_vertical = 0
+offset_top = 60.0
+offset_right = 320.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 22
 
-[node name="Help" type="Label" parent="Hud"]
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 400.0
-offset_bottom = 120.0
-theme_override_font_sizes/font_size = 14
-autowrap_mode = 3
-text = "WASD move, Shift sprint, Caps Lock sneak on/off, Space jump/lunge, LMB attack (hold to charge), RMB aim spear, 1-6 weapon, F bait, R shout, G/T trap, Q drink, E pick up or end hunt at camp, Esc pause"
+[node name="Trap" type="Label" parent="Hud"]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = 60.0
+offset_right = -20.0
+offset_bottom = 90.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+
+[node name="Helper" type="Label" parent="Hud"]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = 0.0
+offset_right = -20.0
+offset_bottom = 55.0
+grow_horizontal = 0
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Water" type="Label" parent="Hud"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -55.0
+offset_right = 150.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1
+
+[node name="Build" type="ProgressBar" parent="Hud"]
+visible = false
+modulate = Color(0.6, 0.9, 1, 1)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 110.0
+offset_right = 150.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+show_percentage = false
+
+[node name="Value" type="Label" parent="Hud/Build"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Gain" type="Label" parent="Hud"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -110.0
+offset_right = 300.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 34
+horizontal_alignment = 1
+
+[node name="Menu" type="Control" parent="Hud"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("5_menu")
 
 [node name="Voice" type="AudioStreamPlayer" parent="."]
 volume_db = -4.0

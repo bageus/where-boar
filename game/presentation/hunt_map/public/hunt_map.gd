@@ -84,6 +84,7 @@ func _ready() -> void:
 	_hunter.start_hunt()
 	if items.get("item_trap_setter", 0) > 0:
 		_set_traps_at_zones(zones)
+		_hunter.bring_trap_setter()
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
 	_hunter.shouted.connect(_on_shouted)
@@ -189,7 +190,10 @@ func _on_helper_caught(animal_id: String) -> void:
 func _on_outcome(type_id: String, kind: int, wounded: bool) -> void:
 	if hunt.is_over():
 		return
+	var tusks_before := hunt.tusks()
 	hunt.record(type_id, kind, wounded)
+	if hunt.tusks() > tusks_before:
+		_hunter.show_gain("+%d tusks" % (hunt.tusks() - tusks_before))
 	var type := BoarTypes.find(type_id)
 	var verb: String = {BoarOutcome.Kind.DEAD: "killed", BoarOutcome.Kind.CAPTURED: "caught", BoarOutcome.Kind.ESCAPED: "escaped!"}[kind]
 	if wounded and kind == BoarOutcome.Kind.CAPTURED:
@@ -291,17 +295,24 @@ func _scout() -> void:
 	minimap.marked = group
 
 
+## Tusks under the minimap; the helpers line sits above the trap slot (owner, 2026-10-28).
 func _show_goal() -> void:
-	var pen := PackedStringArray()
+	_goal.text = "Tusks: %s" % Hunt.tusk_bracket(hunt.tusks())
+	var lines := PackedStringArray()
+	if items.get("item_trap_setter", 0) > 0:
+		lines.append("Helper: trap setter")
 	var animal_id := _companion()
 	if animal_id != "" and _helpers_used.is_empty():
-		pen.append("[Z] release %s" % animal_id)
-	_goal.text = "Tusks: %s   Boars left: %d   In traps: %d   Killed: %d   Caught: %d   Escaped: %d\nHelpers: %s" % [
-		Hunt.tusk_bracket(hunt.tusks()),
+		lines.append("[Z] release %s" % animal_id)
+	_hunter.show_helper("\n".join(lines))
+
+
+## Boar counts for the pause menu (owner, 2026-10-28: stats on Esc, not on screen).
+func stats_text() -> String:
+	return "Boars left: %d\nIn traps: %d\nKilled: %d\nCaught: %d\nEscaped: %d" % [
 		hunt.remaining(),
 		hunt.held,
 		hunt.count_all(BoarOutcome.Kind.DEAD),
 		hunt.count_all(BoarOutcome.Kind.CAPTURED),
 		hunt.count_all(BoarOutcome.Kind.ESCAPED),
-		", ".join(pen) if not pen.is_empty() else "none",
 	]
