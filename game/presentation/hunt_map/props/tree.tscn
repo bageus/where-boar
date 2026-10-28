@@ -5,7 +5,7 @@ radius = 0.4
 height = 4.0
 
 [sub_resource type="StandardMaterial3D" id="Mat_bark"]
-albedo_color = Color(0.35, 0.25, 0.18, 1)
+albedo_color = Color(0.45, 0.27, 0.13, 1)
 
 [sub_resource type="CylinderMesh" id="Mesh_trunk"]
 material = SubResource("Mat_bark")
@@ -14,7 +14,7 @@ bottom_radius = 0.4
 height = 4.0
 
 [sub_resource type="StandardMaterial3D" id="Mat_leaves"]
-albedo_color = Color(0.2, 0.38, 0.2, 1)
+albedo_color = Color(0.1, 0.55, 0.18, 1)
 
 [sub_resource type="SphereMesh" id="Mesh_crown"]
 material = SubResource("Mat_leaves")

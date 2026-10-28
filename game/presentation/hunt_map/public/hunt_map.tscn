@@ -14,6 +14,9 @@
 [ext_resource type="PackedScene" path="res://game/presentation/hunt_map/props/stone_pile.tscn" id="13_stones"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
+sky_top_color = Color(0.15, 0.4, 0.9, 1)
+sky_horizon_color = Color(0.65, 0.82, 1, 1)
+ground_horizon_color = Color(0.65, 0.82, 1, 1)
 
 [sub_resource type="Sky" id="Sky_res"]
 sky_material = SubResource("Sky_mat")
@@ -22,6 +25,9 @@ sky_material = SubResource("Sky_mat")
 background_mode = 2
 sky = SubResource("Sky_res")
 ambient_light_source = 3
+adjustment_enabled = true
+adjustment_saturation = 1.35
+adjustment_contrast = 1.08
 
 [node name="HuntMap" type="Node3D"]
 script = ExtResource("1_map")

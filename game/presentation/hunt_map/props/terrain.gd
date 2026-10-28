@@ -4,9 +4,9 @@ extends StaticBody3D
 ## Green Valley ground (D039): one smooth height map with hills, a mesa, a cliff over the river and hollows.
 ## The heights are baked by tools/bake_green_valley.py; the visible surface is drawn from the same data.
 
-const GRASS := Color(0.36, 0.45, 0.3)
-const ROCK := Color(0.5, 0.47, 0.4)
-const MUD := Color(0.4, 0.36, 0.28)
+const GRASS := Color(0.28, 0.58, 0.2)
+const ROCK := Color(0.58, 0.52, 0.42)
+const MUD := Color(0.5, 0.36, 0.2)
 ## Slopes steeper than this (normal.y below it, about 40 degrees) look like bare rock.
 const ROCK_NORMAL_Y := 0.75
 

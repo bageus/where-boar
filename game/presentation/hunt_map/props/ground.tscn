@@ -4,7 +4,7 @@
 size = Vector3(160, 1, 160)
 
 [sub_resource type="StandardMaterial3D" id="Mat_grass"]
-albedo_color = Color(0.36, 0.45, 0.3, 1)
+albedo_color = Color(0.28, 0.58, 0.2, 1)
 
 [sub_resource type="BoxMesh" id="Mesh_ground"]
 material = SubResource("Mat_grass")
