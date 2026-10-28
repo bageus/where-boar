@@ -42,6 +42,11 @@ func _ready() -> void:
 	show_start()
 
 
+## Frame rate in the top-right corner (owner, 2026-10-28).
+func _process(_delta: float) -> void:
+	$FpsLayer/Fps.text = "FPS %d" % Engine.get_frames_per_second()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not get_tree().paused and current and current.has_node("Hunter"):
 		get_tree().paused = true

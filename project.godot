@@ -119,3 +119,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 3d_physics/layer_5="cover"
 3d_physics/layer_6="boar_hitbox"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
