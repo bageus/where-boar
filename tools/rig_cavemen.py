@@ -2,7 +2,7 @@
 """Rig, skin and animate the owner's caveman models into assets/models/caveman_<kind>.glb.
 
 Needs Blender as a Python module (`pip install bpy`). The source models are Meshy exports in
-T-pose, about 80k-110k triangles each; they are cut to TRIANGLES, given one 19-bone skeleton
+T-pose, about 80k-110k triangles each; they are cut to TRIANGLES, given one 25-bone skeleton
 (joints placed from the landmarks below), skinned with Blender's automatic weights, and get
 the animations in ANIMATIONS. Run after a change:
     python tools/rig_cavemen.py skinny path/to/caveman_skinny.glb
@@ -31,19 +31,24 @@ MODELS = {
     "skinny": {
         "height": 1.8,
         "spine": [(0, 0.02, -0.22), (0, 0.02, -0.05), (0, 0.02, 0.10), (0, 0.02, 0.26), (0, 0.0, 0.34), (0, 0.0, 0.72)],
-        "arm": [(0.03, 0.02, 0.22), (0.13, 0.02, 0.19), (0.42, 0.02, 0.17), (0.72, 0.02, 0.17), (0.92, 0.02, 0.16)],
+        "arm": [(0.03, 0.02, 0.22), (0.13, 0.02, 0.19), (0.42, 0.02, 0.17), (0.72, 0.02, 0.17), (0.84, 0.04, 0.18)],
+        "fingers": [(0.84, 0.04, 0.18), (0.90, 0.05, 0.18), (0.95, 0.05, 0.18)],
+        "thumb": [(0.74, -0.02, 0.15), (0.80, -0.11, 0.10)],
         "leg": [(0.09, 0.02, -0.24), (0.10, 0.05, -0.50), (0.12, 0.08, -0.72), (0.19, -0.18, -0.78)],
     },
     "heavy": {
         "height": 1.65,
         "spine": [(0, 0.03, -0.20), (0, 0.03, -0.02), (0, 0.03, 0.12), (0, 0.03, 0.28), (0, 0.0, 0.34), (0, 0.0, 0.62)],
-        "arm": [(0.06, 0.03, 0.25), (0.30, 0.04, 0.23), (0.58, 0.04, 0.21), (0.78, 0.04, 0.20), (0.93, 0.04, 0.19)],
+        "arm": [(0.06, 0.03, 0.25), (0.30, 0.04, 0.23), (0.58, 0.04, 0.21), (0.78, 0.04, 0.20), (0.86, 0.05, 0.20)],
+        "fingers": [(0.86, 0.05, 0.20), (0.91, 0.05, 0.20), (0.96, 0.05, 0.20)],
+        "thumb": [(0.80, -0.03, 0.17), (0.84, -0.12, 0.13)],
         "leg": [(0.17, 0.03, -0.22), (0.17, 0.04, -0.42), (0.18, 0.05, -0.56), (0.22, -0.15, -0.61)],
     },
 }
 SPINE = ["hips", "spine", "chest", "neck", "head"]
 ARM = ["shoulder", "upper_arm", "forearm", "hand"]
 LEG = ["thigh", "shin", "foot"]
+FINGERS = ["fingers", "fingertips"]  # the cartoon hands have three fingers and a thumb
 AXES = {"X": Vector((1, 0, 0)), "Y": Vector((0, 1, 0)), "Z": Vector((0, 0, 1))}
 
 
@@ -61,9 +66,6 @@ def build_mesh(source: str, spec: dict) -> tuple[bpy.types.Object, Matrix]:
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.remove_doubles(threshold=0.0005)  # Meshy splits vertices at UV seams
     bpy.ops.object.mode_set(mode="OBJECT")
-    cut = mesh.modifiers.new("cut", "DECIMATE")
-    cut.ratio = TRIANGLES / len(mesh.data.polygons)
-    bpy.ops.object.modifier_apply(modifier=cut.name)
     for image in bpy.data.images:
         if image.size[0] > TEXTURE_SIZE:
             image.scale(TEXTURE_SIZE, TEXTURE_SIZE)
@@ -89,6 +91,8 @@ def build_skeleton(spec: dict, place: Matrix) -> bpy.types.Object:
     for side, sign in (("l", 1), ("r", -1)):
         mirror = lambda points: [(x * sign, y, z) for x, y, z in points]
         chain([f"{n}_{side}" for n in ARM], mirror(spec["arm"]), data.edit_bones["chest"])
+        chain([f"{n}_{side}" for n in FINGERS], mirror(spec["fingers"]), data.edit_bones[f"hand_{side}"])
+        chain([f"thumb_{side}"], mirror(spec["thumb"]), data.edit_bones[f"hand_{side}"])
         chain([f"{n}_{side}" for n in LEG], mirror(spec["leg"]), data.edit_bones["hips"])
     for bone in data.edit_bones:
         bone.roll = 0.0
@@ -109,6 +113,15 @@ def skin(mesh: bpy.types.Object, rig: bpy.types.Object) -> None:
             continue
         nearest = min(bones, key=lambda b: _segment_distance(vertex.co, b.head_local, b.tail_local))
         mesh.vertex_groups[nearest.name].add([vertex.index], 1.0, "REPLACE")
+
+
+def cut(mesh: bpy.types.Object) -> None:
+    """Decimate after skinning: weights computed on the full mesh keep fingers and joints clean."""
+    bpy.context.view_layer.objects.active = mesh
+    modifier = mesh.modifiers.new("cut", "DECIMATE")
+    modifier.ratio = TRIANGLES / len(mesh.data.polygons)
+    bpy.ops.object.modifier_move_to_index(modifier=modifier.name, index=0)
+    bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 
 def _segment_distance(point: Vector, a: Vector, b: Vector) -> float:
@@ -144,6 +157,8 @@ def merge(*poses: dict) -> dict:
 
 
 ARMS_DOWN = sym({"upper_arm_l": [("Y", 72)], "forearm_l": [("Z", -12)]})
+# Fists around a weapon handle; every pose has them unless it says otherwise.
+FISTS = sym({"fingers_l": [("Y", 85)], "fingertips_l": [("Y", 80)], "thumb_l": [("Z", 55), ("Y", 20)]})
 
 
 def stride(swing_l: float, knee_l: float, swing_r: float, knee_r: float, arm: float, elbow: float) -> dict:
@@ -211,20 +226,27 @@ def attack() -> list:
 
 
 def strong_attack() -> list:
+    """Charged blow: a deep wind-up held while the weapon shakes with effort, then the release."""
     rest = merge(ARMS_DOWN, {})
-    windup = merge(sym({"upper_arm_l": [("Y", -78), ("X", 12)], "forearm_l": [("Z", 60)],
-                        "thigh_l": [("X", -12)], "shin_l": [("X", 20)], "foot_l": [("X", -8)]}),
-                   {"spine": [("X", -16)], "chest": [("X", -10)], "head": [("X", 10)], "lift": 0.03})
-    slam = merge(sym({"upper_arm_l": [("Y", 72), ("X", -80)], "forearm_l": [("Z", -8)],
-                      "thigh_l": [("X", -35)], "shin_l": [("X", 60)], "foot_l": [("X", -25)]}),
-                 {"spine": [("X", 30)], "chest": [("X", 14)], "head": [("X", -32)], "lift": "crouch"})
-    return [(0, rest), (20, windup), (28, windup), (34, slam), (46, slam), (60, rest)]
+    held = lambda shake: merge(ARMS_DOWN, {
+        "upper_arm_r": [("Y", 85), ("X", 30 + shake)], "forearm_r": [("Z", -110)],
+        "chest": [("Z", -40), ("X", -10 + shake * 0.5)], "spine": [("X", -6), ("Z", -10)], "head": [("Z", 25)],
+        "upper_arm_l": [("Y", 60), ("X", -45)], "forearm_l": [("Z", -40)],
+        "thigh_l": [("X", -25)], "shin_l": [("X", 35)], "foot_l": [("X", -10)],
+        "thigh_r": [("X", 15)], "shin_r": [("X", 35)], "foot_r": [("X", -50)], "lift": "crouch"})
+    release = merge(ARMS_DOWN, {
+        "upper_arm_r": [("Y", -72), ("X", -85)], "forearm_r": [("Z", 5)],
+        "chest": [("Z", 30), ("X", 18)], "spine": [("X", 16)], "head": [("X", -20)],
+        "thigh_l": [("X", -35)], "shin_l": [("X", 50)], "foot_l": [("X", -15)],
+        "thigh_r": [("X", 20)], "shin_r": [("X", 30)], "foot_r": [("X", -50)], "lift": "crouch"})
+    hold = [(18 + i * 4, held(2.5 if i % 2 else -2.5)) for i in range(9)]
+    return [(0, rest), (14, held(0))] + hold + [(56, held(0)), (61, release), (72, release), (90, rest)]
 
 
 def bow_shot() -> list:
     rest = merge(ARMS_DOWN, {})
     aim = {"chest": [("Z", -25)], "neck": [("Z", 15)], "head": [("Z", 12)],
-           "upper_arm_l": [("Z", -62), ("Y", -4)], "forearm_l": [("Z", -4)]}
+           "upper_arm_l": [("X", 90), ("Z", -62), ("Y", -4)], "forearm_l": [("Z", -4)]}  # X 90 stands the bow upright
     nock = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 8), ("Z", 20)], "forearm_r": [("Z", 95)]})
     draw = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 12), ("Z", -12)], "forearm_r": [("Z", 140)]})
     loose = merge(ARMS_DOWN, aim, {"upper_arm_r": [("Y", 16), ("Z", -32)], "forearm_r": [("Z", 105)]})
@@ -265,6 +287,7 @@ def animate(rig: bpy.types.Object, name: str, keys: list) -> bpy.types.Action:
         lift = pose.get("lift", 0.0)
         if lift == "crouch":
             lift = _crouch(rig, pose)
+        pose = merge(FISTS, pose)
         for bone in rig.pose.bones:
             rest = bone.bone.matrix_local.to_quaternion()
             bone.rotation_mode = "QUATERNION"
@@ -317,6 +340,7 @@ def main() -> None:
     mesh, place = build_mesh(source, spec)
     rig = build_skeleton(spec, place)
     skin(mesh, rig)
+    cut(mesh)
     actions = [animate(rig, name, make()) for name, make in ANIMATIONS.items()]
     rig.animation_data.action = actions[0]
     print(kind, "triangles:", sum(len(p.vertices) - 2 for p in mesh.data.polygons))

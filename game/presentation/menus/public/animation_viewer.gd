@@ -13,6 +13,7 @@ const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const Club = preload("res://assets/models/club.glb")
 const Bow = preload("res://assets/models/bow.glb")
 const SADDLE_HEIGHT := 1.02  # top of the saddle in mount.tscn
+const GRIP := Vector3(0, 0.1, -0.04)  # inside the fist, in hand bone space
 
 var character: Node3D
 var player: AnimationPlayer
@@ -48,15 +49,17 @@ func show_model(model_name: String) -> void:
 	_skeleton = character.find_child("Skeleton3D") as Skeleton3D
 	for anim in ANIMATIONS:
 		player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR  # the viewer repeats every animation
-	_club = _attach(Club, "hand_r", Transform3D(Basis.from_euler(Vector3(0, 0, PI / 2)), Vector3(0.05, 0.02, 0)))
-	_bow = _attach(Bow, "hand_l", Transform3D(Basis.from_euler(Vector3(PI / 2, 0, 0)), Vector3(0.05, 0, 0)))
+	# Hand bones run wrist -> knuckles along +Y, the palm faces -Z and the fingers curl around X.
+	_club = _attach(Club, "hand_r", Transform3D(Basis(Vector3(0, 1, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1)), GRIP + Vector3(-0.25, 0, 0)))
+	_bow = _attach(Bow, "hand_l", Transform3D(Basis(Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, -1, 0)), GRIP))
 	play(animation)
 
 
 func play(anim: String) -> void:
 	animation = anim
 	player.play(anim)
-	_club.visible = anim in ["attack", "strong_attack"]
+	# Cavemen always carry a weapon: the bow for shooting, the club otherwise.
+	_club.visible = anim != "bow_shot"
 	_bow.visible = anim == "bow_shot"
 	_boar.visible = anim == "ride"
 	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone("hips")).origin.y
