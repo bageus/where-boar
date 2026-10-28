@@ -16,6 +16,9 @@
 [ext_resource type="ArrayMesh" path="res://assets/nature/meshes/06_coconut_palm.res" id="35_m"]
 [ext_resource type="ArrayMesh" path="res://assets/nature/meshes/07_leaning_palm.res" id="36_m"]
 [ext_resource type="ArrayMesh" path="res://assets/nature/meshes/08_twin_palms.res" id="37_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Tree_1.res" id="51_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Tree_2.res" id="52_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Tree_3.res" id="53_m"]
 
 [sub_resource type="CylinderShape3D" id="Shape_trunk"]
 radius = 0.4
@@ -23,7 +26,7 @@ height = 4.0
 
 [node name="Tree" type="StaticBody3D"]
 script = ExtResource("1_varied")
-meshes = Array[Mesh]([ExtResource("10_m"), ExtResource("11_m"), ExtResource("12_m"), ExtResource("13_m"), ExtResource("14_m"), ExtResource("15_m"), ExtResource("16_m")])
+meshes = Array[Mesh]([ExtResource("10_m"), ExtResource("11_m"), ExtResource("12_m"), ExtResource("13_m"), ExtResource("14_m"), ExtResource("15_m"), ExtResource("16_m"), ExtResource("51_m"), ExtResource("52_m"), ExtResource("53_m")])
 jungle_meshes = Array[Mesh]([ExtResource("30_m"), ExtResource("31_m"), ExtResource("32_m"), ExtResource("33_m"), ExtResource("34_m"), ExtResource("35_m"), ExtResource("36_m"), ExtResource("37_m")])
 size_range = Vector2(6, 10)
 

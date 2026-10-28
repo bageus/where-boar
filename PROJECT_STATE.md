@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-021
-last_completed_task_id: P3-021
+active_task_id: P3-022
+last_completed_task_id: P3-022
 build_status: PASS
 updated: 2026-10-28
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-021 done.
+None. P3-001..P3-022 done.
 
 ## Last completed work
 
@@ -57,6 +57,7 @@ None. P3-001..P3-021 done.
 - P3-018: cartoon low-poly models built by `tools/build_models.py` into `assets/models/*.glb`; boars (hide tinted per type), mount, trees, bushes, rocks, stones, first-person fist with spear, net, club, sling, bow, knife; thrown spear, arrow, stone; camp tents, palisade, stalls, campfire, signpost. Stylized grass (owner's MIT shader and mesh in `assets/grass/`) on grassy ground of the hunt map, 6 clumps per m², 20 m chunks hidden beyond 30 m.
 - P3-019: owner's nature pack baked by `tools/bake_nature_meshes.gd`: massive grey rocks on every cliff, 32 rock shapes, oak/spruce/dead trees, palms for jungle trees (`props/varied_mesh.gd` picks by node name), 30 stumps and 24 logs with collision, 12 tall-grass patches with wheat, leafy bushes; neutral ambient light so grey no longer looks blue.
 - P3-021: winding river (`river_z` in `tools/bake_green_valley.py`), one water plane with flow ripples, soft depth edge and no shadows, sandy banks, a log bridge; cliff rocks denser and solid (convex hulls); tall-grass patches are cover; no grass under stumps, logs and 70 extra trees.
+- P3-022: owner's ferns (260, drawn within 35 m), Tree_1..3 among the trees, 36 fallen trees and logs; the bake gives every tree, log, stump, palm and fern one bark/leaf/needle palette and merges same-colour surfaces.
 - P3-020: throw speed caps in `hunter.gd` (range net < spear < sling < bow): net 10 (charged 16), spear max 22, sling 24 (charged max 30), arrow 40.
 
 ## Build and validation

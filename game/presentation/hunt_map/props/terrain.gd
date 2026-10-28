@@ -39,14 +39,27 @@ const CLIFF_ROCKS: Array[Mesh] = [
 ## One massive rock per CLIFF_STEP x CLIFF_STEP metres of cliff; each is solid.
 const CLIFF_STEP := 3
 const STUMP := preload("res://assets/nature/meshes/TreeStump_Moss.res")
-const LOG := preload("res://assets/nature/meshes/WoodLog.res")
+## Fallen trees and logs (owner, 2026-10-28).
+const LOGS: Array[Mesh] = [
+	preload("res://assets/nature/meshes/WoodLog.res"), preload("res://assets/nature/meshes/Log_1.res"),
+	preload("res://assets/nature/meshes/Log_2.res"), preload("res://assets/nature/meshes/Log_3.res"),
+]
 const STUMPS := 30
-const LOGS := 24
+const LOG_COUNT := 36
+## Ferns: decoration only, a few thousand triangles each, so drawn within FERN_RANGE metres.
+const FERNS: Array[Mesh] = [
+	preload("res://assets/nature/meshes/05_spreading_fern.res"), preload("res://assets/nature/meshes/06_upright_fern.res"),
+	preload("res://assets/nature/meshes/07_small_fern.res"), preload("res://assets/nature/meshes/08_dense_fern.res"),
+]
+const FERN_COUNT := 260
+const FERN_RANGE := 35.0
 ## Trees added on top of the authored ones (owner, 2026-10-28: more trees).
 const TREES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
 	preload("res://assets/nature/meshes/OakTree3.res"), preload("res://assets/nature/meshes/SpruceTree1.res"),
 	preload("res://assets/nature/meshes/SpruceTree2.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
+	preload("res://assets/nature/meshes/Tree_1.res"), preload("res://assets/nature/meshes/Tree_2.res"),
+	preload("res://assets/nature/meshes/Tree_3.res"),
 ]
 const EXTRA_TREES := 70
 ## Scattered things keep this far from props, zones, spawns and each other.
@@ -65,8 +78,9 @@ func _ready() -> void:
 		if node != self and not is_ancestor_of(node):
 			_taken.append((node as Node3D).global_position)
 	_scatter([STUMP], STUMPS, Vector2(1.0, 1.4), false, 13)
-	_scatter([LOG], LOGS, Vector2(1.0, 1.3), false, 14)
+	_scatter(LOGS, LOG_COUNT, Vector2(1.0, 1.4), false, 14)
 	_scatter(TREES, EXTRA_TREES, Vector2(6.0, 10.0), true, 15)
+	_scatter(FERNS, FERN_COUNT, Vector2(1.0, 1.6), false, 16, false, 1.5)
 	_plant_grass()
 	_place_cliff_rocks()
 
@@ -169,9 +183,11 @@ func _place_cliff_rocks() -> void:
 		_add_multimesh(CLIFF_ROCKS[k], spots[k], Vector3.ZERO, null, 0.0)
 
 
-## Puts count copies of meshes on open grass, clear of everything else; each gets a collision shape on this
-## body: a box for stumps and logs, a trunk for trees (fit_height: size_range is the height, else a scale).
-func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: bool, rng_seed: int) -> void:
+## Puts count copies of meshes on open grass, clear of everything else by clear metres. A solid one gets a
+## collision shape on this body: a box for stumps and logs, a trunk for trees (fit_height: size_range is the
+## height, else a scale). The rest (ferns) are drawn only near the camera, like grass.
+func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: bool, rng_seed: int,
+		solid := true, clear := CLEAR_RADIUS) -> void:
 	var w := _shape.map_width
 	var d := _shape.map_depth
 	var rng := RandomNumberGenerator.new()
@@ -184,7 +200,7 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		var i := rng.randi_range(4, w - 5)
 		var j := rng.randi_range(4, d - 5)
 		var at := Vector3(i - (w - 1) * 0.5, 0.0, j - (d - 1) * 0.5)
-		if not _grassy(i, j) or _taken.any(func(p: Vector3) -> bool: return Vector2(p.x - at.x, p.z - at.z).length() < CLEAR_RADIUS):
+		if not _grassy(i, j) or _taken.any(func(p: Vector3) -> bool: return Vector2(p.x - at.x, p.z - at.z).length() < clear):
 			continue
 		_taken.append(at)
 		placed += 1
@@ -194,6 +210,16 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		at.y = height_at(at.x, at.z) - 0.1
 		var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), at)
 		spots[k].append(spot)
+		# No grass inside the footprint (a tree: its trunk), turned with the model.
+		var reach := ceili(maxf(box.size.x, box.size.z) * size * 0.5)
+		var half := Vector2(box.size.x, box.size.z) * (0.08 if fit_height else 0.5)
+		for dj in range(-reach, reach + 1):
+			for di in range(-reach, reach + 1):
+				var local := spot.affine_inverse() * Vector3(at.x + di, at.y, at.z + dj) - box.get_center()
+				if absf(local.x) < half.x + 0.3 / size and absf(local.z) < half.y + 0.3 / size:
+					_blocked[Vector2i(i + di, j + dj)] = true
+		if not solid:
+			continue
 		var shape := CollisionShape3D.new()
 		if fit_height:
 			shape.shape = CylinderShape3D.new()
@@ -204,12 +230,8 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 			(shape.shape as BoxShape3D).size = box.size * size * Vector3(0.7, 1.0, 0.9)
 			shape.transform = Transform3D(spot.basis.orthonormalized(), spot * box.get_center())
 		add_child(shape)
-		var reach := ceili(maxf(box.size.x, box.size.z) * size * (0.15 if fit_height else 0.5))
-		for dj in range(-reach, reach + 1):
-			for di in range(-reach, reach + 1):
-				_blocked[Vector2i(i + di, j + dj)] = true
 	for k in meshes.size():
-		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0)
+		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE)
 
 
 ## Open, gentle, dry ground that is not sand: where grass, stumps, logs and trees go.
