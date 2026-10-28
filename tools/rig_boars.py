@@ -173,38 +173,42 @@ def leg_pose(name: str, phase: float, swing: float, lift: float) -> dict:
     return {f"leg_{name}": [("X", swing * s + lift * 0.4 * up)], f"shin_{name}": [("X", -lift * up)]}
 
 
-def gait(t: float, phases: dict, swing: float, lift: float, bob: float, flex: float, spine: list) -> dict:
+def gait(t: float, swing: float, lift: float, bob: float, neck: float) -> dict:
+    """Trot: diagonal legs move together. Only the legs work; the body barely bobs and the head
+    stays level (owner, 2026-10-28: on these stocky boars a swaying body shakes the head)."""
     pose: dict = {}
-    for name, offset in phases.items():
+    for name, offset in {"fl": 0.0, "hr": 0.0, "fr": 0.5, "hl": 0.5}.items():
         pose.update(leg_pose(name, t + offset, swing, lift))
-    bend = math.sin(t * 2 * math.pi) * 3 / len(spine)  # the same total arch for long backs
-    for name in spine:
-        pose[name] = [("X", flex * bend)]
-    pose["neck"] = [("X", -flex * 1.5 * bend)]
+    pose["neck"] = [("X", neck)]
     pose["tail"] = [("Z", 20 * math.sin(t * 4 * math.pi))]
     pose["move"] = Vector((0, 0, bob * abs(math.cos(t * 2 * math.pi))))
     return pose
 
 
-def idle(t: float, spine: list) -> dict:
+def idle(t: float, spine: list, fit: dict) -> dict:
     breathe = math.sin(t * 2 * math.pi)
     sniff = max(0.0, math.sin(t * 2 * math.pi)) ** 2
     return {"neck": [("X", -12 * sniff)], "head": [("X", -8 * sniff + 3 * breathe)],
             "tail": [("Z", 25 * math.sin(t * 6 * math.pi))], "move": Vector((0, 0, 0.008 * breathe))}
 
 
-def walk(t: float, spine: list) -> dict:
-    return gait(t, {"fl": 0.0, "hr": 0.0, "fr": 0.5, "hl": 0.5}, 18, 30, 0.02, 2, spine)
+def walk(t: float, spine: list, fit: dict) -> dict:
+    return gait(t, 18, 30, 0.004, 0)
 
 
-def run(t: float, spine: list) -> dict:
-    # Gallop: the front legs land together, then the hind legs; the back flexes with the stride.
-    pose = gait(t, {"fl": 0.0, "fr": 0.08, "hl": 0.5, "hr": 0.58}, 34, 55, 0.08, 7, spine)
-    pose["neck"] = [("X", -8 + 6 * math.sin(t * 2 * math.pi))]
-    return pose
+def run(t: float, spine: list, fit: dict) -> dict:
+    return gait(t, 32, 55, 0.012, -6)  # head a little lower, as when charging
 
 
-def attack(t: float, spine: list) -> dict:
+def eat(t: float, spine: list, fit: dict) -> dict:
+    """Snout on the ground, rooting: small nods and a side-to-side push, front legs a little bent."""
+    nod = 5 * math.sin(t * 6 * math.pi)
+    return {"neck": [("X", -fit["graze"] + nod), ("Z", 6 * math.sin(t * 2 * math.pi))], "head": [("X", -nod * 0.6)],
+            "leg_fl": [("X", 8)], "leg_fr": [("X", 8)], "shin_fl": [("X", -16)], "shin_fr": [("X", -16)],
+            "tail": [("Z", 25 * math.sin(t * 4 * math.pi))], "move": Vector((0, 0, -0.02))}
+
+
+def attack(t: float, spine: list, fit: dict) -> dict:
     """Head low and back, a lunge with an upward tusk rip, then back to standing."""
     keys = [(0.0, 0, 0, 0), (0.3, -28, -0.12, -8), (0.45, 30, 0.3, 6), (0.6, 18, 0.25, 4), (1.0, 0, 0, 0)]
     head, push, crouch = _interpolate(keys, t)
@@ -213,9 +217,9 @@ def attack(t: float, spine: list) -> dict:
             "leg_fr": [("X", -crouch)], "tail": [("X", 30 * min(1.0, t * 3))]}
 
 
-def death(t: float, spine: list, roll_drop: float) -> dict:
+def death(t: float, spine: list, fit: dict) -> dict:
     """Legs buckle, the boar rolls onto its right side and the legs stiffen; the last frame holds."""
-    keys = [(0.0, 0, 0, 0), (0.3, 0, -0.15, 1), (0.6, 90, -roll_drop, 1), (0.75, 85, -roll_drop, 0.4), (1.0, 90, -roll_drop, 0)]
+    keys = [(0.0, 0, 0, 0), (0.3, 0, -0.15, 1), (0.6, 90, -fit["roll_drop"], 1), (0.75, 85, -fit["roll_drop"], 0.4), (1.0, 90, -fit["roll_drop"], 0)]
     roll, drop, buckle = _interpolate(keys, t)
     stiff = min(1.0, max(0.0, (t - 0.6) / 0.4))
     pose = {"hips": [("Y", roll)], "move": Vector((0, 0, drop)), "neck": [("X", -25 * buckle - 10 * stiff)],
@@ -224,6 +228,15 @@ def death(t: float, spine: list, roll_drop: float) -> dict:
         pose[f"leg_{name}"] = [("X", (-35 * buckle) * end + 25 * stiff * end)]
         pose[f"shin_{name}"] = [("X", 60 * buckle * -end)]
     return pose
+
+
+def graze_angle(rig: bpy.types.Object) -> float:
+    """Degrees the neck turns down so the snout reaches the ground, at most 75."""
+    neck, head = rig.data.bones["neck"], rig.data.bones["head"]
+    joint, snout = neck.head_local, head.tail_local
+    reach = Vector((snout.y - joint.y, snout.z - joint.z))
+    target = max(-1.0, (0.06 - joint.z) / reach.length)
+    return min(75.0, math.degrees(math.atan2(reach.y, reach.x) - math.asin(target)))
 
 
 def _interpolate(keys: list, t: float) -> tuple:
@@ -235,8 +248,8 @@ def _interpolate(keys: list, t: float) -> tuple:
     return tuple(keys[-1][1:])
 
 
-# name: (pose function, frames, loops). The game loops idle, walk and run.
-ANIMATIONS = {"idle": (idle, 60, True), "walk": (walk, 30, True), "run": (run, 18, True),
+# name: (pose function, frames, loops). The game loops idle, walk, run and eat.
+ANIMATIONS = {"idle": (idle, 60, True), "walk": (walk, 30, True), "run": (run, 18, True), "eat": (eat, 60, True),
               "attack": (attack, 24, False), "death": (death, 36, False)}
 
 
@@ -247,7 +260,7 @@ def _quat(rots: list) -> Quaternion:
     return q
 
 
-def animate(rig: bpy.types.Object, name: str, make, frames: int, loops: bool, spine: list, roll_drop: float):
+def animate(rig: bpy.types.Object, name: str, make, frames: int, loops: bool, spine: list, fit: dict):
     action = bpy.data.actions.new(name)
     action.use_fake_user = True
     rig.animation_data_create()
@@ -255,7 +268,7 @@ def animate(rig: bpy.types.Object, name: str, make, frames: int, loops: bool, sp
     hips_rest = rig.data.bones["hips"].matrix_local.to_quaternion()
     for frame in range(0, frames + 1, 2):
         t = frame / frames
-        pose = make(t, spine, roll_drop) if make is death else make(t % 1.0 if loops else t, spine)
+        pose = make(t % 1.0 if loops else t, spine, fit)
         for bone in rig.pose.bones:
             rest = bone.bone.matrix_local.to_quaternion()
             bone.rotation_mode = "QUATERNION"
@@ -308,9 +321,9 @@ def main() -> None:
     rig = build_skeleton(marks)
     skin(mesh, rig)
     half_width = max(abs(v.co.x) for v in mesh.data.vertices if v.co.z > marks["belly"])
-    roll_drop = max(0.0, marks["spine"][0].z - half_width * 0.8)
+    fit = {"roll_drop": max(0.0, marks["spine"][0].z - half_width * 0.8), "graze": graze_angle(rig)}
     spine = [b.name for b in rig.data.bones if b.name.startswith("spine_") or b.name == "chest"]
-    actions = [animate(rig, name, make, frames, loops, spine, roll_drop)
+    actions = [animate(rig, name, make, frames, loops, spine, fit)
                for name, (make, frames, loops) in ANIMATIONS.items()]
     rig.animation_data.action = actions[0]
     print(kind, "triangles:", sum(len(p.vertices) - 2 for p in mesh.data.polygons))

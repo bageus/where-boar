@@ -101,6 +101,8 @@ var _forced_left := 0.0
 var _stun_left := 0.0
 ## Seconds until a snared boar breaks free; INF while it never will.
 var _snare_left := INF
+## Standing at a bait and eating it.
+var _eating := false
 
 @onready var _label: Label3D = $Label
 @onready var _alert_mark: Label3D = $AlertMark
@@ -306,7 +308,7 @@ func _physics_process(delta: float) -> void:
 	_steer(delta, pos, hunter_pos)
 	_apply_knock(delta)
 	move_and_slide()
-	$Model.move(Vector2(velocity.x, velocity.z).length())
+	$Model.move(Vector2(velocity.x, velocity.z).length(), _eating)
 	_ram(delta)
 
 
@@ -386,6 +388,7 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	_turn_left -= delta
 	_forced_left -= delta
 	var speed := WANDER_SPEED
+	_eating = false
 	match boar.state:
 		Boar.State.WANDER:
 			var spots := Surroundings.bait_spots(baits)
@@ -393,7 +396,8 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 			if bait != -1:
 				# Walk up to the bait, then stand and eat.
 				var to_bait := Vector2(spots[bait].x, spots[bait].y) - pos
-				_heading = to_bait.normalized() if to_bait.length() > BoarSenses.EAT_DISTANCE else Vector2.ZERO
+				_eating = to_bait.length() <= BoarSenses.EAT_DISTANCE
+				_heading = Vector2.ZERO if _eating else to_bait.normalized()
 			else:
 				if _turn_left <= 0.0:
 					_turn = randf() * TAU
