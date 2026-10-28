@@ -55,7 +55,7 @@ visible = false
 [node name="Model" parent="Bow" instance=ExtResource("7_bow")]
 
 [node name="Hand" parent="Bow" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.085, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Knife" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.1, 0)
