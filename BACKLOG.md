@@ -56,6 +56,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-021 | 3 | Playtest fixes: solid rocky cliffs, no grass through stumps, cover in tall grass, winding river with flow, sand and log bridge, more trees | P3-019 | DONE |
 | P3-022 | 3 | Ferns, more tree kinds and fallen trees; one bark and leaf palette for all trees | P3-021 | DONE |
 | P3-020 | 3 | Max throw range per ranged weapon: net < spear < sling < bow | P3-019 | DONE |
+| P3-023 | 3 | Hunt HUD redesign: bait/trap ring menus, water under stamina, tusks under minimap, +N popups, stats in Esc; trap ghosts built with E or by the trap setter | P3-022 | DONE |
 
 ## Icebox
 
