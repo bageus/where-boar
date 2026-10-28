@@ -1,15 +1,34 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/tree.glb" id="1_tree"]
+[ext_resource type="Script" path="res://game/presentation/hunt_map/props/varied_mesh.gd" id="1_varied"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/OakTree1.res" id="10_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/OakTree2.res" id="11_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/OakTree3.res" id="12_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/SpruceTree1.res" id="13_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/SpruceTree2.res" id="14_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/SpruceTree3.res" id="15_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/DeadOak2.res" id="16_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/01_straight_palm.res" id="30_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/02_curved_palm.res" id="31_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/03_young_palm.res" id="32_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/04_tall_palm.res" id="33_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/05_dense_crown_palm.res" id="34_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/06_coconut_palm.res" id="35_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/07_leaning_palm.res" id="36_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/08_twin_palms.res" id="37_m"]
 
 [sub_resource type="CylinderShape3D" id="Shape_trunk"]
 radius = 0.4
 height = 4.0
 
 [node name="Tree" type="StaticBody3D"]
+script = ExtResource("1_varied")
+meshes = Array[Mesh]([ExtResource("10_m"), ExtResource("11_m"), ExtResource("12_m"), ExtResource("13_m"), ExtResource("14_m"), ExtResource("15_m"), ExtResource("16_m")])
+jungle_meshes = Array[Mesh]([ExtResource("30_m"), ExtResource("31_m"), ExtResource("32_m"), ExtResource("33_m"), ExtResource("34_m"), ExtResource("35_m"), ExtResource("36_m"), ExtResource("37_m")])
+size_range = Vector2(6, 10)
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 shape = SubResource("Shape_trunk")
 
-[node name="Mesh" parent="." instance=ExtResource("1_tree")]
+[node name="Mesh" type="MeshInstance3D" parent="."]

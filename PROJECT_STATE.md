@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-018
-last_completed_task_id: P3-018
+active_task_id: P3-019
+last_completed_task_id: P3-019
 build_status: PASS
 updated: 2026-10-28
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-018 done.
+None. P3-001..P3-019 done.
 
 ## Last completed work
 
@@ -55,6 +55,7 @@ None. P3-001..P3-018 done.
 - P3-017: the relief is one smooth height map (HeightMapShape3D + mesh drawn from it, rock colour on cliffs) baked by `tools/bake_green_valley.py`, which also puts props, spawns and zones on the ground.
 - Perf fix 2026-10-28: Godot Physics was slow on the height map (physics ~31 ms/frame headless); switched to Jolt Physics (~9 ms, flat map was ~8 ms). FPS counter in the bottom-right corner.
 - P3-018: cartoon low-poly models built by `tools/build_models.py` into `assets/models/*.glb`; boars (hide tinted per type), mount, trees, bushes, rocks, stones, first-person fist with spear, net, club, sling, bow, knife; thrown spear, arrow, stone; camp tents, palisade, stalls, campfire, signpost. Stylized grass (owner's MIT shader and mesh in `assets/grass/`) on grassy ground of the hunt map, 6 clumps per m², 20 m chunks hidden beyond 30 m.
+- P3-019: owner's nature pack baked by `tools/bake_nature_meshes.gd`: massive grey rocks on every cliff, 32 rock shapes, oak/spruce/dead trees, palms for jungle trees (`props/varied_mesh.gd` picks by node name), 30 stumps and 24 logs with collision, 12 tall-grass patches with wheat, leafy bushes; neutral ambient light so grey no longer looks blue.
 
 ## Build and validation
 

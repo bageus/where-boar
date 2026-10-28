@@ -52,6 +52,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-016 | 3 | Hunt map relief: hills, ledges, cliffs, clearings; climb up to spot boars (D039) | P3-013 | DONE |
 | P3-017 | 3 | Smooth height-map terrain instead of primitives (D039) | P3-016 | DONE |
 | P3-018 | 3 | Low-poly models instead of placeholders: boars, nature, hands and weapons, camp (section 17) | P3-017 | DONE |
+| P3-019 | 3 | Owner's nature pack: rocky cliffs, varied rocks and trees, palms in the jungle, stumps, logs, tall grass, leafy bushes | P3-018 | DONE |
 
 ## Icebox
 

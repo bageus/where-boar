@@ -1,14 +1,51 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/rock.glb" id="1_rock"]
+[ext_resource type="Script" path="res://game/presentation/hunt_map/props/varied_mesh.gd" id="1_varied"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock1.res" id="10_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock2.res" id="11_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock3.res" id="12_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock4.res" id="13_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock5.res" id="14_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock6.res" id="15_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock7.res" id="16_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock8.res" id="17_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock9.res" id="18_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_10.res" id="19_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_11.res" id="20_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_12.res" id="21_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_13.res" id="22_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_14.res" id="23_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_15.res" id="24_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_16.res" id="25_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_17.res" id="26_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_18.res" id="27_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_19.res" id="28_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_20.res" id="29_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_21.res" id="30_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_22.res" id="31_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_23.res" id="32_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_24.res" id="33_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_25.res" id="34_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_1.res" id="35_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_2.res" id="36_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_3.res" id="37_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_4.res" id="38_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_5.res" id="39_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_6.res" id="40_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/Rock_7.res" id="41_m"]
 
 [sub_resource type="BoxShape3D" id="Shape_rock"]
 size = Vector3(2, 1.2, 2)
 
 [node name="Rock" type="StaticBody3D"]
+script = ExtResource("1_varied")
+meshes = Array[Mesh]([ExtResource("10_m"), ExtResource("11_m"), ExtResource("12_m"), ExtResource("13_m"), ExtResource("14_m"), ExtResource("15_m"), ExtResource("16_m"), ExtResource("17_m"), ExtResource("18_m"), ExtResource("19_m"), ExtResource("20_m"), ExtResource("21_m"), ExtResource("22_m"), ExtResource("23_m"), ExtResource("24_m"), ExtResource("25_m"), ExtResource("26_m"), ExtResource("27_m"), ExtResource("28_m"), ExtResource("29_m"), ExtResource("30_m"), ExtResource("31_m"), ExtResource("32_m"), ExtResource("33_m"), ExtResource("34_m"), ExtResource("35_m"), ExtResource("36_m"), ExtResource("37_m"), ExtResource("38_m"), ExtResource("39_m"), ExtResource("40_m"), ExtResource("41_m")])
+size_range = Vector2(2.0, 3.2)
+fit_height = false
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("Shape_rock")
 
-[node name="Mesh" parent="." instance=ExtResource("1_rock")]
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)

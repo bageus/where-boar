@@ -23,6 +23,8 @@ COLOURS = {
     "hide": (1.0, 1.0, 1.0),
     "bark": (0.45, 0.28, 0.14),
     "leaf": (0.2, 0.5, 0.15),
+    "leaf_dark": (0.1, 0.3, 0.08),
+    "leaf_light": (0.36, 0.62, 0.2),
     "stone": (0.55, 0.55, 0.58),
     "snout": (0.86, 0.6, 0.58),
     "tusk": (0.97, 0.94, 0.82),
@@ -37,7 +39,7 @@ COLOURS = {
     "flame": (1.0, 0.45, 0.1),
     "glow": (1.0, 0.85, 0.3),
 }
-(HIDE, BARK, LEAF, STONE, SNOUT, TUSK, DARK, WOOD, ROPE, FLINT, SKIN, LEATHER, CANVAS, STRAW, FLAME,
+(HIDE, BARK, LEAF, LEAF_DARK, LEAF_LIGHT, STONE, SNOUT, TUSK, DARK, WOOD, ROPE, FLINT, SKIN, LEATHER, CANVAS, STRAW, FLAME,
  GLOW) = COLOURS
 
 
@@ -94,6 +96,14 @@ def rod(p0, p1, r0, r1, sides=6) -> list:
     return [t for t in tris if _area(t) > 1e-9]
 
 
+def leaf(centre, axis, length, width, rng) -> list:
+    """A two-sided diamond along axis."""
+    side = _norm(_cross(axis, (rng.uniform(-1, 1), 1.0, rng.uniform(-1, 1))))
+    base, tip = (tuple(centre[i] + s * axis[i] * length / 2 for i in range(3)) for s in (-1, 1))
+    left, right = (tuple(centre[i] + s * side[i] * width / 2 for i in range(3)) for s in (-1, 1))
+    return [(base, left, tip), (base, tip, right), (base, tip, left), (base, right, tip)]
+
+
 def box(center, size) -> list:
     h = [s / 2 for s in size]
     c = [tuple(center[i] + (h[i] if (k >> i) & 1 else -h[i]) for i in range(3)) for k in range(8)]
@@ -125,20 +135,21 @@ def boar() -> list:
     return parts
 
 
-def tree() -> list:
-    parts = [(BARK, rod((0, -0.2, 0), (0, 3.6, 0), 0.4, 0.26, 7))]
-    for k, (x, y, z, r) in enumerate([(0, 4.7, 0, 1.8), (0.9, 4.2, 0.5, 1.2), (-0.8, 4.4, -0.6, 1.3), (0.1, 5.8, -0.2, 1.2)]):
-        parts.append((LEAF, ball((x, y, z), (r, r * 0.85, r), 0.12, 10 + k, 1)))
-    return parts
-
-
 def bush() -> list:
-    return [(LEAF, ball((x, 0.5, z), (r, r * 0.75, r), 0.12, 20 + k, 1))
-            for k, (x, z, r) in enumerate([(0, 0, 0.8), (0.45, 0.25, 0.55), (-0.4, -0.3, 0.6), (0.1, -0.45, 0.5)])]
-
-
-def rock() -> list:
-    return [(STONE, ball((0, 0.5, 0), (1.05, 0.7, 1.05), 0.15, 30, 1))]
+    """Three dark lobes under 240 loose leaves pointing outwards, so it reads as foliage, not a green stone."""
+    rng = random.Random(20)
+    lobes = [(0, 0.6, 0, 0.7), (0.4, 0.5, 0.25, 0.5), (-0.35, 0.5, -0.3, 0.5)]
+    parts = [(LEAF_DARK, ball((x, y, z), (r * 0.75, r * 0.7, r * 0.75), 0.15, 21 + k, 1)) for k, (x, y, z, r) in enumerate(lobes)]
+    for k in range(240):
+        x, y, z, r = lobes[k % 3]
+        out = _norm((rng.uniform(-1, 1), rng.uniform(-0.2, 1), rng.uniform(-1, 1)))
+        centre = (x + out[0] * r, y + out[1] * r * 0.85, z + out[2] * r)
+        axis = _norm(tuple(out[i] + rng.uniform(-0.6, 0.6) for i in range(3)))
+        parts.append((LEAF if k % 3 else LEAF_LIGHT, leaf(centre, axis, rng.uniform(0.4, 0.55), rng.uniform(0.2, 0.28), rng)))
+    for k in range(5):
+        a = 2 * math.pi * k / 5
+        parts.append((BARK, rod((0, 0, 0), (0.5 * math.cos(a), 0.6, 0.5 * math.sin(a)), 0.03, 0.015, 4)))
+    return parts
 
 
 def stone() -> list:
@@ -243,7 +254,7 @@ def signpost() -> list:
             (WOOD, [((0.85, 1.85, -0.1), (1.15, 1.65, -0.1), (0.85, 1.45, -0.1)), ((0.85, 1.85, -0.1), (0.85, 1.45, -0.1), (1.15, 1.65, -0.1))])]
 
 
-MODELS = {"tent": tent, "fence": fence, "stall": stall, "campfire": campfire, "signpost": signpost, "boar": boar, "tree": tree, "bush": bush, "rock": rock, "stone": stone, "spear": spear, "arrow": arrow,
+MODELS = {"tent": tent, "fence": fence, "stall": stall, "campfire": campfire, "signpost": signpost, "boar": boar, "bush": bush, "stone": stone, "spear": spear, "arrow": arrow,
           "club": club, "sling": sling, "bow": bow, "knife": knife, "net_bundle": net_bundle, "hand": hand}
 
 
