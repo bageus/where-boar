@@ -32,8 +32,13 @@ COLOURS = {
     "flint": (0.42, 0.44, 0.5),
     "skin": (0.93, 0.7, 0.52),
     "leather": (0.5, 0.3, 0.15),
+    "canvas": (0.82, 0.7, 0.5),
+    "straw": (0.88, 0.76, 0.4),
+    "flame": (1.0, 0.45, 0.1),
+    "glow": (1.0, 0.85, 0.3),
 }
-HIDE, BARK, LEAF, STONE, SNOUT, TUSK, DARK, WOOD, ROPE, FLINT, SKIN, LEATHER = COLOURS
+(HIDE, BARK, LEAF, STONE, SNOUT, TUSK, DARK, WOOD, ROPE, FLINT, SKIN, LEATHER, CANVAS, STRAW, FLAME,
+ GLOW) = COLOURS
 
 
 # ---- shapes: each returns a list of triangles (three xyz tuples) ----
@@ -194,7 +199,51 @@ def hand() -> list:
             (LEATHER, rod((0.04, -0.07, 0.2), (0.07, -0.14, 0.36), 0.05, 0.055, 6))]
 
 
-MODELS = {"boar": boar, "tree": tree, "bush": bush, "rock": rock, "stone": stone, "spear": spear, "arrow": arrow,
+# Camp: sizes match the collision boxes in game/presentation/camp/props.
+
+def tent() -> list:
+    a, b, c, d, l, r = (-2, 0, -2), (2, 0, -2), (2, 0, 2), (-2, 0, 2), (0, 3, -2), (0, 3, 2)
+    parts = [(CANVAS, [(a, l, b), (d, c, r), (a, d, r), (a, r, l), (b, l, r), (b, r, c)]),
+             (DARK, [((-0.6, 0.01, -2.02), (0, 1.8, -2.02), (0.6, 0.01, -2.02))])]
+    for z in (-2.05, 2.05):
+        parts += [(WOOD, rod((-0.5, 3.6, z), (0.3, 2.4, z), 0.06, 0.06, 5)), (WOOD, rod((0.5, 3.6, z), (-0.3, 2.4, z), 0.06, 0.06, 5))]
+    return parts
+
+
+def fence() -> list:
+    """Palisade 40 m long along x."""
+    parts = []
+    for k in range(81):
+        x = -20 + k * 0.5
+        h = 1.4 + 0.12 * ((k * 7) % 3)
+        parts += [(BARK, rod((x, -0.1, 0), (x, h, 0), 0.13, 0.12, 5)), (BARK, rod((x, h, 0), (x, h + 0.3, 0), 0.12, 0.0, 5))]
+    return parts + [(WOOD, box((0, y, 0.15), (40, 0.12, 0.08))) for y in (0.45, 1.1)]
+
+
+def stall() -> list:
+    parts = [(WOOD, box((0, 0.45, 0), (2, 0.9, 0.8))), (STRAW, box((0, 2.3, 0), (2.5, 0.14, 1.5)))]
+    for x in (-0.95, 0.95):
+        for z in (-0.45, 0.45):
+            parts.append((BARK, rod((x, 0, z), (x, 2.25, z), 0.06, 0.06, 5)))
+    return parts
+
+
+def campfire() -> list:
+    parts = [(STONE, ball((0.75 * math.cos(a), 0.1, 0.75 * math.sin(a)), (0.2, 0.15, 0.2), 0.15, 60 + k))
+             for k, a in enumerate(2 * math.pi * k / 9 for k in range(9))]
+    for k in range(3):
+        a = math.pi * k / 3
+        dx, dz = 0.55 * math.cos(a), 0.55 * math.sin(a)
+        parts.append((BARK, rod((-dx, 0.08, -dz), (dx, 0.2, dz), 0.08, 0.08, 6)))
+    return parts + [(FLAME, rod((0, 0.1, 0), (0, 1.0, 0), 0.35, 0.0, 6)), (GLOW, rod((0.05, 0.1, -0.05), (0.05, 0.7, -0.05), 0.2, 0.0, 5))]
+
+
+def signpost() -> list:
+    return [(BARK, rod((0, 0, 0), (0, 2.0, 0), 0.08, 0.07, 6)), (WOOD, box((0.25, 1.65, -0.1), (1.2, 0.35, 0.08))),
+            (WOOD, [((0.85, 1.85, -0.1), (1.15, 1.65, -0.1), (0.85, 1.45, -0.1)), ((0.85, 1.85, -0.1), (0.85, 1.45, -0.1), (1.15, 1.65, -0.1))])]
+
+
+MODELS = {"tent": tent, "fence": fence, "stall": stall, "campfire": campfire, "signpost": signpost, "boar": boar, "tree": tree, "bush": bush, "rock": rock, "stone": stone, "spear": spear, "arrow": arrow,
           "club": club, "sling": sling, "bow": bow, "knife": knife, "net_bundle": net_bundle, "hand": hand}
 
 

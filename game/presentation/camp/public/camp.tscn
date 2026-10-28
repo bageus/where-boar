@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/station.tscn" id="5_station"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/public/hunter.tscn" id="6_hunter"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/hud/shop_panel.tscn" id="7_shop"]
+[ext_resource type="PackedScene" path="res://assets/models/campfire.glb" id="9_campfire"]
+[ext_resource type="PackedScene" path="res://assets/models/signpost.glb" id="10_signpost"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 
@@ -54,6 +56,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -12)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
 station_id = "start_hunt"
 title = "Start hunt"
+model = ExtResource("10_signpost")
 
 [node name="WeaponShop" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -14, 0, 0)
@@ -69,6 +72,7 @@ title = "Hunting hut"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 station_id = "campfire"
 title = "Campfire (meal for the next hunt)"
+model = ExtResource("9_campfire")
 
 [node name="Tavern" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14)

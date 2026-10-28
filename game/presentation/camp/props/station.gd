@@ -4,7 +4,9 @@ extends Node3D
 
 @export var station_id := ""
 @export var title := ""
+@export var model: PackedScene = preload("res://assets/models/stall.glb")
 
 
 func _ready() -> void:
+	add_child(model.instantiate())
 	$Label.text = "%s [E]" % title
