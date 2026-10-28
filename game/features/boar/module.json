@@ -9,6 +9,8 @@
     "public/boar_outcome.gd",
     "public/boar_body.tscn",
     "public/boar_body.gd",
+    "public/boar_model.tscn",
+    "public/boar_model.gd",
     "public/boar_type.gd",
     "public/boar_types.gd",
     "public/boar_hitbox.gd"

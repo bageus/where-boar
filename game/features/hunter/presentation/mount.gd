@@ -8,9 +8,7 @@ var boar_type: BoarType
 
 
 func _ready() -> void:
-	var hide := StandardMaterial3D.new()
-	hide.albedo_color = boar_type.color
-	$Body.material_override = hide
+	$Model.paint(boar_type.color)
 	$Label.text = "%s — ride [E]" % boar_type.display_name
 
 

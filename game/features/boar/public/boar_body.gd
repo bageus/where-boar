@@ -108,10 +108,7 @@ var _snare_left := INF
 
 func _ready() -> void:
 	boar = Boar.new(boar_type.id, boar_type.max_health)
-	var hide := StandardMaterial3D.new()
-	hide.albedo_color = boar_type.color
-	$Body.material_override = hide
-	$Snout.material_override = hide
+	$Model.paint(boar_type.color)
 	_show_state()
 
 

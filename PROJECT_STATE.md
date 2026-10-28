@@ -3,10 +3,10 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-017
+active_task_id: P3-018
 last_completed_task_id: P3-017
 build_status: PASS
-updated: 2026-10-27
+updated: 2026-10-28
 ---
 
 # Project State
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-017 done.
+P3-018 — low-poly models instead of placeholders (boars and nature done; hands, weapons, camp next).
 
 ## Last completed work
 
@@ -54,6 +54,7 @@ None. P3-001..P3-017 done.
 - P3-016: map relief: 6 m lookout plateau with ramp, 5 m cliff over the river, 0.7 m ledges up to 3.5 m, bigger hills, clearings; jumping at a ledge climbs it; traps, bait and the mount sit on slopes; boars never notice a hunter 3 m or more above them.
 - P3-017: the relief is one smooth height map (HeightMapShape3D + mesh drawn from it, rock colour on cliffs) baked by `tools/bake_green_valley.py`, which also puts props, spawns and zones on the ground.
 - Perf fix 2026-10-28: Godot Physics was slow on the height map (physics ~31 ms/frame headless); switched to Jolt Physics (~9 ms, flat map was ~8 ms). FPS counter in the bottom-right corner.
+- P3-018 (in progress): cartoon low-poly models built by `tools/build_models.py` into `assets/models/*.glb`; boars (hide tinted per type), mount, trees, bushes, rocks, stones.
 
 ## Build and validation
 

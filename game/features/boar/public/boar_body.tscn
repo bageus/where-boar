@@ -1,8 +1,9 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://game/features/boar/public/boar_body.gd" id="1_boar"]
 [ext_resource type="Script" path="res://game/features/boar/presentation/boar_sounds.gd" id="2_sounds"]
 [ext_resource type="Script" path="res://game/features/boar/public/boar_hitbox.gd" id="3_hitbox"]
+[ext_resource type="PackedScene" path="res://game/features/boar/public/boar_model.tscn" id="4_model"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 radius = 0.45
@@ -11,18 +12,6 @@ height = 1.6
 [sub_resource type="CapsuleShape3D" id="Shape_hitbox"]
 radius = 0.8
 height = 2.3
-
-[sub_resource type="StandardMaterial3D" id="Mat_hide"]
-albedo_color = Color(0.42, 0.27, 0.16, 1)
-
-[sub_resource type="CapsuleMesh" id="Mesh_body"]
-material = SubResource("Mat_hide")
-radius = 0.45
-height = 1.6
-
-[sub_resource type="BoxMesh" id="Mesh_snout"]
-material = SubResource("Mat_hide")
-size = Vector3(0.3, 0.25, 0.3)
 
 [sub_resource type="StandardMaterial3D" id="Mat_bar_back"]
 shading_mode = 0
@@ -51,13 +40,7 @@ script = ExtResource("1_boar")
 transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.5, 0)
 shape = SubResource("Shape_body")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.5, 0)
-mesh = SubResource("Mesh_body")
-
-[node name="Snout" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.9)
-mesh = SubResource("Mesh_snout")
+[node name="Model" parent="." instance=ExtResource("4_model")]
 
 [node name="HealthBar" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
