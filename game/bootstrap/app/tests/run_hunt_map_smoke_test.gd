@@ -68,7 +68,7 @@ func _physics_process(_delta: float) -> bool:
 		2:
 			_check(boars.size() == 47, "herds, groups and loners spawn")
 			# Put the hunter 5 m from the first boar, facing it; it must start fleeing.
-			hunter.global_position = boars[0].global_position + Vector3(0, -0.4, 5)
+			hunter.global_position = _on_ground(boars[0].global_position + Vector3(0, 0, 5))
 			hunter.rotation = Vector3.ZERO
 		3:
 			# Alert builds up over time (playtest 2026-10-27); a witnessed kill makes it run at once.
@@ -86,7 +86,7 @@ func _physics_process(_delta: float) -> bool:
 			# Park every boar far away so none wanders into the throws below.
 			for i in boars.size():
 				boars[i].set_physics_process(false)
-				boars[i].global_position = Vector3(-40 + i * 2, 0, -60)
+				boars[i].global_position = _on_ground(Vector3(-40 + i * 2, 0, -60))
 			_freeze_and_aim(hunter, boars[1], Vector3(-3, 0, 20))
 			hunter.weapon = hunter.Weapon.NET
 			hunter._attack()
@@ -145,15 +145,21 @@ func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D
 	_check(hunter.loadout.stones == stones + 3 and pile.is_queued_for_deletion(), "a stone pile on the map refills the sling pouch")
 
 
-## Relief (owner, 2026-10-27): the lookout's cliff hides a hunter on top from a boar below;
-## a trap set on the ramp lies on its slope (3 m up halfway).
+## Relief (owner, 2026-10-27): the lookout mesa's cliff hides a hunter on top from a boar below;
+## things set on its gentle east slope lie on the ground.
 func _check_relief(hunter: CharacterBody3D, boar: CharacterBody3D) -> void:
-	var lookout: Node3D = _map.get_node("Props/Lookout")
-	boar.global_position = lookout.global_position + Vector3(0, 0, -10)
-	hunter.global_position = lookout.global_position + Vector3(0, 6, 0)
-	_check(not boar._sight_clear(), "a hunter on the lookout is out of sight of a boar under the cliff")
-	var on_ramp: Vector3 = hunter.ground_at(lookout.global_position + Vector3(14, 2.1, 0))
-	_check(is_equal_approx(on_ramp.y, 3.0), "things set on the ramp lie on its slope")
+	boar.global_position = _on_ground(Vector3(-30, 0, 15))
+	hunter.global_position = _on_ground(Vector3(-30, 0, 25))
+	_check(hunter.global_position.y - boar.global_position.y > 4.0 and not boar._sight_clear(),
+			"a hunter on the lookout is out of sight of a boar under the cliff")
+	var slope := Vector3(-18, 0, 25)
+	var set_down: Vector3 = hunter.ground_at(slope + Vector3.UP * (_on_ground(slope).y + 1.0))
+	_check(absf(set_down.y - _on_ground(slope).y) < 0.1, "things set on a slope lie on the ground")
+
+
+## point moved onto the terrain surface.
+func _on_ground(point: Vector3) -> Vector3:
+	return Vector3(point.x, _map.get_node("Terrain").height_at(point.x, point.z), point.z)
 
 
 ## Esc pauses the camp; changing FOV applies to the hunter and is saved; Continue unpauses.
@@ -200,11 +206,12 @@ func _buy_club(camp: Node3D) -> void:
 
 ## Moves the target to open ground at spot and puts the hunter 6 m south of it, aiming at its body.
 func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vector3) -> void:
-	boar.global_position = spot
-	hunter.global_position = spot + Vector3(0, 0.05, 6)
+	boar.global_position = _on_ground(spot)
+	hunter.global_position = _on_ground(spot + Vector3(0, 0, 6)) + Vector3(0, 0.05, 0)
 	hunter.rotation = Vector3.ZERO
-	# Eye 1.6 m, boar body 0.5 m, about 0.5 m of throw drop over 6 m.
-	hunter.get_node("Camera").rotation = Vector3(-atan(0.6 / 6.0), 0, 0)
+	# Eye 1.6 m, boar body 0.5 m, about 0.5 m of throw drop over 6 m, plus the ground's rise.
+	var rise := hunter.global_position.y - boar.global_position.y
+	hunter.get_node("Camera").rotation = Vector3(-atan((0.6 + rise) / 6.0), 0, 0)
 
 
 func _check(ok: bool, name: String) -> void:

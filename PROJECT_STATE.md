@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-016
-last_completed_task_id: P3-016
+active_task_id: P3-017
+last_completed_task_id: P3-017
 build_status: PASS
 updated: 2026-10-27
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-016 done.
+None. P3-001..P3-017 done.
 
 ## Last completed work
 
@@ -52,6 +52,7 @@ None. P3-001..P3-016 done.
 - P3-015: synthesized squeal, stomps and thud; knockback camera roll; outcome messages in the HUD.
 - P3-012: saddled mounts from caught boars: ride with E; runner is fast, angry boar rams, armored boar is steady.
 - P3-016: map relief: 6 m lookout plateau with ramp, 5 m cliff over the river, 0.7 m ledges up to 3.5 m, bigger hills, clearings; jumping at a ledge climbs it; traps, bait and the mount sit on slopes; boars never notice a hunter 3 m or more above them.
+- P3-017: the relief is one smooth height map (HeightMapShape3D + mesh drawn from it, rock colour on cliffs) baked by `tools/bake_green_valley.py`, which also puts props, spawns and zones on the ground.
 
 ## Build and validation
 
@@ -79,4 +80,4 @@ Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in,
 
 ## Handoff notes
 
-Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD.
+Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD. After changing the Green Valley relief run `python tools/bake_green_valley.py`.

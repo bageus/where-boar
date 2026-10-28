@@ -55,6 +55,7 @@ var _tip_left := 0.0
 var _baits: Array[Node3D] = []
 
 @onready var _hunter: CharacterBody3D = $Hunter
+@onready var _terrain: StaticBody3D = $Terrain
 @onready var _goal: Label = $Hud/Goal
 
 
@@ -125,6 +126,7 @@ func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
 			herd.append(boar)
 		var ring := 1.2 * sqrt(size)
 		boar.position = centre + Vector3(cos(TAU * i / size) * ring, 0.0, sin(TAU * i / size) * ring)
+		boar.position.y = _terrain.height_at(boar.position.x, boar.position.z) + 0.5
 		boar.outcome_reached.connect(_on_outcome)
 		boar.held_changed.connect(_on_held_changed)
 		$Boars.add_child(boar)
@@ -135,7 +137,7 @@ func _set_traps_at_zones(zones: Array[Vector2]) -> void:
 	for zone: Vector2 in zones.slice(0, SETTER_TRAPS):
 		var spot := zone - zone.normalized() * SETTER_OFFSET
 		var facing := Basis(Vector3.UP, atan2(zone.x, zone.y))
-		if not _hunter.set_trap_for_hunter(Transform3D(facing, Vector3(spot.x, 0.0, spot.y))):
+		if not _hunter.set_trap_for_hunter(Transform3D(facing, Vector3(spot.x, _terrain.height_at(spot.x, spot.y), spot.y))):
 			return
 
 
@@ -171,7 +173,7 @@ func summon(animal_id: String) -> void:
 		var centre := CompanionRules.target_group_centre(spots, hunter_pos, 10.0)
 		var land := CompanionRules.drive_point(centre, hunter_pos)
 		var rooster: Node3D = RoosterScene.instantiate()
-		rooster.target = Vector3(land.x, 0.5, land.y)
+		rooster.target = Vector3(land.x, _terrain.height_at(land.x, land.y) + 0.5, land.y)
 		rooster.boars = $Boars.get_children()
 		rooster.position = _hunter.position + Vector3.UP * 3.0
 		add_child(rooster)
