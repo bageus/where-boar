@@ -38,6 +38,7 @@ const CLIFF_ROCKS: Array[Mesh] = [
 ]
 ## One massive rock per CLIFF_STEP x CLIFF_STEP metres of cliff; each is solid.
 const CLIFF_STEP := 3
+const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
 const STUMP := preload("res://assets/nature/meshes/TreeStump_Moss.res")
 ## Fallen trees and logs (owner, 2026-10-28).
 const LOGS: Array[Mesh] = [
@@ -223,8 +224,9 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		var shape := CollisionShape3D.new()
 		if fit_height:
 			shape.shape = CylinderShape3D.new()
-			(shape.shape as CylinderShape3D).radius = 0.35
-			shape.position = at + Vector3.UP
+			var trunk := Trunk.base(meshes[k])
+			(shape.shape as CylinderShape3D).radius = maxf(0.35, trunk.y * size)
+			shape.position = spot * Vector3(trunk.x, 0.0, trunk.z) + Vector3.UP
 		else:
 			shape.shape = BoxShape3D.new()
 			(shape.shape as BoxShape3D).size = box.size * size * Vector3(0.7, 1.0, 0.9)

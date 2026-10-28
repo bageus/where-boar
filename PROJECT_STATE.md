@@ -85,6 +85,8 @@ None. P3-001..P3-023 done.
 
 - 2026-10-28: pickups (stone piles, landed spears/arrows/stones/nets) get a pulsing outline within 8 m (`highlight.gd`); a net that hits a tree or rock now drops to the ground instead of freezing in the air.
 
+- 2026-10-28 playtest fixes: tree collision now sits on the real trunk (many models keep it off the origin), corpses lie by turning only the model (no sinking), sling stones bounce off boars and lie as pickups.
+
 ## Next action
 
 Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in, D027).

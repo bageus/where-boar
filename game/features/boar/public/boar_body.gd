@@ -16,6 +16,7 @@ const WANDER_TURN_SECONDS := 2.0
 const PANIC_TURN_SECONDS := 0.6
 const PANIC_TURN_MAX := PI / 3.0
 const CORPSE_SECONDS := 3.0
+const LYING_LIFT := 0.45
 # Ram (M005): exaggerated knockback by speed, ASSUMPTION numbers (D013).
 const RAM_MIN_SPEED := 6.0
 const RAM_IMPULSE := 14.0
@@ -180,7 +181,14 @@ func snare() -> void:
 func trip(seconds: float) -> void:
 	if boar.is_free():
 		_stun_left = seconds
-		rotation.z = PI / 2.0
+		_lie(true)
+
+
+## Lays only the model on its side, lifted by half its width so it rests on the ground; turning the physics
+## body sank corpses into the terrain (playtest 2026-10-28).
+func _lie(down: bool) -> void:
+	$Model.rotation.z = PI / 2.0 if down else 0.0
+	$Model.position.y = LYING_LIFT if down else 0.0
 
 
 ## Stake cage closes on the boar that walked in (D023).
@@ -206,7 +214,7 @@ func _after_change() -> void:
 	_show_state()
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
-		rotation.z = PI / 2.0
+		_lie(true)
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
 		_warn_witnesses()
 
@@ -266,7 +274,7 @@ func _physics_process(delta: float) -> void:
 	if _stun_left > 0.0:
 		_stun_left -= delta
 		if _stun_left <= 0.0 and boar.state != Boar.State.DEAD:
-			rotation.z = 0.0
+			_lie(false)
 	if not boar.is_free() or _stun_left > 0.0:
 		velocity.x = 0.0
 		velocity.z = 0.0
