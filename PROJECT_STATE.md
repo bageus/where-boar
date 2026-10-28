@@ -79,6 +79,10 @@ None. P3-001..P3-021 done.
 - One-week prototype deadline for a solo developer.
 - All speeds and damage are AI assumptions (D013); not yet playtested by a human.
 
+## Latest
+
+- 2026-10-28: pickups (stone piles, landed spears/arrows/stones/nets) get a pulsing outline within 8 m (`highlight.gd`); a net that hits a tree or rock now drops to the ground instead of freezing in the air.
+
 ## Next action
 
 Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in, D027).

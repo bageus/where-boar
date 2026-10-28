@@ -3,6 +3,7 @@ extends RigidBody3D
 ## Thrown net: captures the first boar or wild helper animal it touches (M004). A miss lies on the
 ## ground; a net on a caught boar is taken back by walking up to it (owner, 2026-10-27).
 
+const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 
 var pickup_kind := "net"
@@ -20,6 +21,11 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
+	# Anything but a boar or helper animal (tree, rock): drop straight down, never freeze mid-air.
+	if not body.has_method("net_hit") and not body.get_parent() is BoarBody:
+		linear_velocity = Vector3.ZERO
+		set_deferred("collision_mask", 1)
+		return
 	# Boars and wild roosters/turkeys both answer net_hit; the hunter does not know helper animals.
 	if body.has_method("net_hit"):
 		body.net_hit()

@@ -13,6 +13,7 @@ const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
 const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
 const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
+const Highlight = preload("res://game/features/hunter/presentation/highlight.gd")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
 const TRAP_SCENES := {
 	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
@@ -56,6 +57,9 @@ const NET_MAX_SPEED := 16.0
 const SPEAR_MAX_SPEED := 22.0
 const SLING_MAX_SPEED := 30.0
 const PICKUP_RADIUS := 2.5
+## Pickups within this distance glow; checked a few times a second to stay cheap.
+const HIGHLIGHT_RADIUS := 8.0
+var _highlight_timer := 0.0
 const EYE_HEIGHT := 1.6
 const CROUCH_EYE_HEIGHT := 1.0
 const STUN_SECONDS := 1.0
@@ -268,6 +272,10 @@ func ground_at(point: Vector3) -> Vector3:
 
 
 func _physics_process(delta: float) -> void:
+	_highlight_timer -= delta
+	if _highlight_timer <= 0.0:
+		_highlight_timer = 0.25
+		_update_highlights()
 	_shout_cooldown -= delta
 	if _stun > 0.0:
 		_stun -= delta
@@ -388,6 +396,16 @@ func _throw(scene: PackedScene, speed: float = THROW_SPEED, keep: bool = true) -
 	if keep:
 		_thrown.append(item)
 	return item
+
+
+## Outlines the stone piles and landed spears, arrows, stones and nets that can be taken back.
+func _update_highlights() -> void:
+	for item in _thrown:
+		if is_instance_valid(item):
+			var landed: bool = item.freeze or item.sleeping
+			Highlight.set_on(item, landed and Landing.can_pick(item) and item.global_position.distance_to(global_position) <= HIGHLIGHT_RADIUS)
+	for pile: Node3D in get_tree().get_nodes_in_group(GROUND_STONES_GROUP):
+		Highlight.set_on(pile, pile.global_position.distance_to(global_position) <= HIGHLIGHT_RADIUS)
 
 
 func _pick_up() -> void:
