@@ -316,7 +316,7 @@ func _perceive(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	var clear := true
 	if sneaking and distance <= radius and BoarSenses.in_view(pos, facing, hunter_pos):
 		clear = _sight_clear()
-	var noticed := BoarSenses.notices(pos, hunter_pos, radius, facing, sneaking, clear)
+	var noticed := BoarSenses.notices(pos, hunter_pos, radius, facing, sneaking, clear, hunter.global_position.y - global_position.y)
 	alert.tick(delta, noticed, radius / maxf(distance, 0.1))
 	if alert.alarmed():
 		if randf() < boar_type.aggression * ALERT_ATTACK_SHARE:

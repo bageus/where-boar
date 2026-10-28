@@ -51,7 +51,7 @@ None. P3-001..P3-016 done.
 - P3-014: pause menu with FOV, mouse sensitivity and camera-motion settings saved apart from progress; first-hunt tips.
 - P3-015: synthesized squeal, stomps and thud; knockback camera roll; outcome messages in the HUD.
 - P3-012: saddled mounts from caught boars: ride with E; runner is fast, angry boar rams, armored boar is steady.
-- P3-016: map relief: 6 m lookout plateau with ramp, 5 m cliff over the river, 0.7 m ledges up to 3.5 m, bigger hills, clearings; jumping at a ledge climbs it; traps, bait and the mount sit on slopes.
+- P3-016: map relief: 6 m lookout plateau with ramp, 5 m cliff over the river, 0.7 m ledges up to 3.5 m, bigger hills, clearings; jumping at a ledge climbs it; traps, bait and the mount sit on slopes; boars never notice a hunter 3 m or more above them.
 
 ## Build and validation
 

@@ -9,6 +9,7 @@ func _init() -> void:
 	failures += _check(_perceive_starts_flee_inside_radius(), "hunter is noticed inside the radius, not outside")
 	failures += _check(_scatter_splits_into_groups_and_loners(), "scared herd splits into groups and wide-angle loners")
 	failures += _check(_sneaking_hunter_behind_or_in_cover_is_unseen(), "sneaking hunter is unseen behind the boar or in cover")
+	failures += _check(_hunter_far_above_is_unnoticed(), "a hunter 3 m or more above the boar is not noticed")
 	failures += _check(_shout_deflects_without_panic(), "shout deflects 30 degrees and does not panic")
 	failures += _check(_bait_pulls_within_radius(), "nearest bait in reach pulls the boar")
 	failures += _check(_fear_spreads_in_herd(), "a scared herd mate nearby makes a calm boar flee")
@@ -36,6 +37,12 @@ func _scatter_splits_into_groups_and_loners() -> bool:
 	var loner_right := rad_to_deg(BoarSenses.scatter_angle(0.1, 0.7))
 	return is_equal_approx(rad_to_deg(groups[0]), -45.0) and groups[1] == 0.0 and is_equal_approx(rad_to_deg(groups[2]), 45.0) \
 			and loner_left <= -40.0 and loner_left >= -100.0 and loner_right >= 40.0 and loner_right <= 100.0
+
+
+func _hunter_far_above_is_unnoticed() -> bool:
+	var above := BoarSenses.notices(Vector2.ZERO, Vector2(5, 0), 10.0, Vector2.RIGHT, false, true, 3.0)
+	var slightly_above := BoarSenses.notices(Vector2.ZERO, Vector2(5, 0), 10.0, Vector2.RIGHT, false, true, 1.5)
+	return not above and slightly_above
 
 
 func _sneaking_hunter_behind_or_in_cover_is_unseen() -> bool:

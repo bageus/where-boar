@@ -11,14 +11,16 @@ const EAT_DISTANCE := 1.0
 
 ## Half-angle of a boar's sight; a sneaking hunter outside it (behind the boar) is not seen (ASSUMPTION).
 const VIEW_HALF_ANGLE_DEG := 120.0
+## A hunter standing this many metres or more above the boar is not noticed at all (owner, 2026-10-28; ASSUMPTION).
+const UNNOTICED_HEIGHT := 3.0
 
 
 ## Whether a boar notices the hunter inside its perception radius (M002); BoarAlert turns that into flight.
 ## A walking hunter is heard anywhere in the radius; a sneaking one only when seen:
-## in front of the boar (facing) and not behind cover (sight_clear).
+## in front of the boar (facing) and not behind cover (sight_clear). One far above it (height_above) goes unnoticed.
 static func notices(boar_pos: Vector2, hunter_pos: Vector2, radius: float,
-		facing := Vector2.ZERO, sneaking := false, sight_clear := true) -> bool:
-	if boar_pos.distance_to(hunter_pos) > radius:
+		facing := Vector2.ZERO, sneaking := false, sight_clear := true, height_above := 0.0) -> bool:
+	if boar_pos.distance_to(hunter_pos) > radius or height_above >= UNNOTICED_HEIGHT:
 		return false
 	return not sneaking or (in_view(boar_pos, facing, hunter_pos) and sight_clear)
 
