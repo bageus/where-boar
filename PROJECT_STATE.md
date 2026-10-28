@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-022
-last_completed_task_id: P3-022
+active_task_id: P3-023
+last_completed_task_id: P3-023
 build_status: PASS
 updated: 2026-10-28
 ---
@@ -91,3 +91,5 @@ Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in,
 ## Handoff notes
 
 Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD. After changing the Green Valley relief run `python tools/bake_green_valley.py`.
+
+- 2026-10-28 P3-023: езда верхом — покачивание камеры, нельзя красться в седле, кабаны замечают всадника раньше (радиус x1.5, тревога x2) и убегают без атаки, крупные кабаны (здоровье >= 4) сбивают из седла (броня-ездовой держится).

@@ -308,15 +308,16 @@ func _perceive(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		return
 	var facing := Vector2(-global_basis.z.x, -global_basis.z.z)
 	var sneaking: bool = hunter.get("crouching") == true
-	var radius := boar_type.perception_radius
+	var mounted: bool = hunter.get("ride") != null and hunter.ride.is_riding()
+	var radius := boar_type.perception_radius * (BoarSenses.MOUNTED_RADIUS_SCALE if mounted else 1.0)
 	var distance := pos.distance_to(hunter_pos)
 	var clear := true
 	if sneaking and distance <= radius and BoarSenses.in_view(pos, facing, hunter_pos):
 		clear = _sight_clear()
 	var noticed := BoarSenses.notices(pos, hunter_pos, radius, facing, sneaking, clear, hunter.global_position.y - global_position.y)
-	alert.tick(delta, noticed, radius / maxf(distance, 0.1))
+	alert.tick(delta, noticed, radius / maxf(distance, 0.1) * (BoarSenses.MOUNTED_ALARM_RATE_SCALE if mounted else 1.0))
 	if alert.alarmed():
-		if randf() < boar_type.aggression * ALERT_ATTACK_SHARE:
+		if not mounted and randf() < boar_type.aggression * ALERT_ATTACK_SHARE:
 			boar.attack()
 			_charge_rolled = true
 		else:
@@ -428,7 +429,7 @@ func _charge_heading(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	if not _dash_hit and global_position.distance_to(hunter.global_position) <= RAM_HIT_DISTANCE:
 		_dash_hit = true
 		var push := Vector3(_dash_heading.x, 0.0, _dash_heading.y)
-		hunter.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE)
+		hunter.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE, boar_type)
 	_dash_left -= delta
 	if _dash_left <= 0.0:
 		remove_collision_exception_with(hunter)
@@ -452,7 +453,7 @@ func _ram(delta: float) -> void:
 		if other.has_method("knock") and _ram_cooldown <= 0.0 and Vector2(velocity.x, velocity.z).length() >= RAM_MIN_SPEED:
 			var push := Vector3(velocity.x, 0.0, velocity.z).normalized()
 			var charging := boar.state == Boar.State.CHARGE
-			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE if charging else 0)
+			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE if charging else 0, boar_type)
 			_ram_cooldown = RAM_COOLDOWN
 			if charging:
 				boar.end_charge()

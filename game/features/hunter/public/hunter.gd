@@ -6,6 +6,7 @@ const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
 const Synth = preload("res://game/core/synth/public/synth.gd")
+const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
@@ -66,6 +67,10 @@ const STUN_SECONDS := 1.0
 ## Camera roll when knocked down (M005), kept small against motion sickness.
 const KNOCK_ROLL := 0.6
 const SADDLE_EYE_RISE := 0.6
+## Saddle sway while riding: vertical camera amplitude (m) and rate, scaled by speed (owner, 2026-10-28).
+const RIDE_SWAY := 0.05
+const RIDE_SWAY_RATE := 14.0
+var _sway_time := 0.0
 ## ASSUMPTION (D013): one shout every 2 s.
 const SHOUT_COOLDOWN := 2.0
 ## Speed share left while wading through a river (ASSUMPTION).
@@ -158,7 +163,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		$Rider.toggle()
 		interacted.emit()
 	elif event.is_action_pressed("crouch"):
-		crouching = not crouching
+		crouching = not crouching and not ride.is_riding()
 	elif event.is_action_pressed("shout"):
 		shout()
 	elif event.is_action_pressed("bait"):
@@ -178,8 +183,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Rammed by a boar (M005): thrown back, hurt by a charge, and out of control for a moment.
-func knock(impulse: Vector3, damage: int = 0) -> void:
+func knock(impulse: Vector3, damage: int = 0, rammer: BoarType = null) -> void:
 	$Thud.play()
+	if rammer and ride.is_unseated_by(rammer):
+		$Rider.toggle()
 	if not ride.shrugs_off_knock():
 		velocity = impulse
 		_stun = STUN_SECONDS
@@ -314,6 +321,9 @@ func _physics_process(delta: float) -> void:
 			velocity.x = direction.x * speed
 			velocity.z = direction.z * speed
 	_camera.position.y = (CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT) + (SADDLE_EYE_RISE if ride.is_riding() else 0.0)
+	if camera_motion and ride.is_riding() and is_on_floor():
+		_sway_time += delta * RIDE_SWAY_RATE
+		_camera.position.y += sin(_sway_time) * RIDE_SWAY * clampf(velocity.length() / WALK_SPEED, 0.0, 2.0)
 	move_and_slide()
 	$Rider.ram(delta)
 	_hud.show_stamina(stamina.value, stamina.max_value)

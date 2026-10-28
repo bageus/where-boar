@@ -11,6 +11,10 @@ const EAT_DISTANCE := 1.0
 
 ## Half-angle of a boar's sight; a sneaking hunter outside it (behind the boar) is not seen (ASSUMPTION).
 const VIEW_HALF_ANGLE_DEG := 120.0
+## A mounted hunter is noticed from further away and boars get alarmed faster, then flee without attacking
+## (owner, 2026-10-28; ASSUMPTION).
+const MOUNTED_RADIUS_SCALE := 1.5
+const MOUNTED_ALARM_RATE_SCALE := 2.0
 ## A hunter standing this many metres or more above the boar is not noticed at all (owner, 2026-10-28; ASSUMPTION).
 const UNNOTICED_HEIGHT := 3.0
 

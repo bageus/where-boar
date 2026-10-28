@@ -38,6 +38,7 @@ func toggle() -> void:
 		mount.set_ridden(false)
 	elif mount and mount.global_position.distance_to(_hunter.global_position) <= MOUNT_REACH:
 		ride.mount(mount.boar_type)
+		_hunter.crouching = false
 		mount.set_ridden(true)
 
 

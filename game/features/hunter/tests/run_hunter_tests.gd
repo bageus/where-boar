@@ -168,8 +168,12 @@ func _ride_by_mount_type() -> bool:
 	var angry := ride.rams() and not ride.shrugs_off_knock()
 	var stab_only := ride.allows(Loadout.Weapon.SPEAR, true) and ride.allows(Loadout.Weapon.CLUB, false) \
 		and ride.allows(Loadout.Weapon.SLING, false)
+	var unseated := ride.is_unseated_by(BoarTypes.find("armored_black")) \
+		and not ride.is_unseated_by(BoarTypes.find("common_brown"))
+	ride.mount(BoarTypes.find("armored_black"))
+	unseated = unseated and not ride.is_unseated_by(BoarTypes.find("armored_black"))
 	ride.dismount()
-	return on_foot and armored and angry and stab_only and not ride.is_riding()
+	return on_foot and armored and angry and unseated and stab_only and not ride.is_riding()
 
 
 func _saddles_from_items() -> bool:
