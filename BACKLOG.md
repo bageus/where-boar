@@ -53,6 +53,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-017 | 3 | Smooth height-map terrain instead of primitives (D039) | P3-016 | DONE |
 | P3-018 | 3 | Low-poly models instead of placeholders: boars, nature, hands and weapons, camp (section 17) | P3-017 | DONE |
 | P3-019 | 3 | Owner's nature pack: rocky cliffs, varied rocks and trees, palms in the jungle, stumps, logs, tall grass, leafy bushes | P3-018 | DONE |
+| P3-021 | 3 | Playtest fixes: solid rocky cliffs, no grass through stumps, cover in tall grass, winding river with flow, sand and log bridge, more trees | P3-019 | DONE |
 | P3-020 | 3 | Max throw range per ranged weapon: net < spear < sling < bow | P3-019 | DONE |
 
 ## Icebox
