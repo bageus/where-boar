@@ -161,7 +161,7 @@ def stone() -> list:
 def spear() -> list:
     return [(WOOD, rod((0, -0.8, 0), (0, 0.8, 0), 0.025, 0.022, 6)),
             (ROPE, rod((0, 0.74, 0), (0, 0.82, 0), 0.032, 0.032, 6)),
-            (FLINT, ball((0, 0.92, 0), (0.05, 0.16, 0.02), 0.05, 50))]
+            (FLINT, ball((0, 0.92, 0), (0.05, 0.16, 0.02)))]
 
 
 def arrow() -> list:
@@ -182,9 +182,14 @@ def club() -> list:
 
 
 def sling() -> list:
-    return [(ROPE, rod((0, 0.2, 0), (0, -0.18, 0), 0.01, 0.01, 4)),
-            (LEATHER, ball((0, -0.22, 0), (0.06, 0.04, 0.06))),
-            (STONE, ball((0, -0.19, 0), (0.04, 0.035, 0.04), 0.1, 52))]
+    """Y-shaped slingshot: handle at y 0..0.22, fork prongs up, two bands from the prong tips to the pouch."""
+    tips = [(-0.07, 0.34, 0), (0.07, 0.34, 0)]
+    pouch = (0, 0.3, 0.12)
+    parts = [(WOOD, rod((0, 0.0, 0), (0, 0.22, 0), 0.025, 0.022, 6))]
+    for tip in tips:
+        parts += [(WOOD, rod((0, 0.21, 0), tip, 0.022, 0.018, 6)),
+                  (ROPE, rod(tip, pouch, 0.008, 0.008, 4))]
+    return parts + [(LEATHER, ball(pouch, (0.05, 0.035, 0.03))), (STONE, ball((0, 0.3, 0.1), (0.03, 0.03, 0.03), 0.1, 52))]
 
 
 def bow() -> list:
@@ -195,7 +200,7 @@ def bow() -> list:
 
 
 def knife() -> list:
-    return [(WOOD, rod((0, 0, 0.07), (0, 0, -0.06), 0.02, 0.018, 6)),
+    return [(WOOD, rod((0, 0, 0.07), (0, 0, -0.09), 0.02, 0.018, 6)),
             (FLINT, ball((0, 0, -0.17), (0.032, 0.01, 0.12), 0.08, 53))]
 
 

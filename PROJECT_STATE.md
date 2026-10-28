@@ -86,6 +86,7 @@ None. P3-001..P3-023 done.
 - 2026-10-28: pickups (stone piles, landed spears/arrows/stones/nets) get a pulsing outline within 8 m (`highlight.gd`); a net that hits a tree or rock now drops to the ground instead of freezing in the air.
 
 - 2026-10-28 playtest fixes: tree collision now sits on the real trunk (many models keep it off the origin), corpses lie by turning only the model (no sinking), sling stones bounce off boars and lie as pickups.
+- 2026-10-28 weapon model audit: all weapons are 44-168 triangles with no detached parts and outward normals; slingshot rebuilt as a Y-fork with two bands attached to the pouch, spear head made symmetric (no jitter), knife blade joined to its handle. Non-weapon heavy models: fence 2454 and bush 1280 triangles.
 
 ## Next action
 
