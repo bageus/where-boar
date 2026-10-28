@@ -58,6 +58,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-020 | 3 | Max throw range per ranged weapon: net < spear < sling < bow | P3-019 | DONE |
 | P3-023 | 3 | Hunt HUD redesign: bait/trap ring menus, water under stamina, tusks under minimap, +N popups, stats in Esc; trap ghosts built with E or by the trap setter | P3-022 | DONE |
 | P3-024 | 3 | Owner's caveman models rigged and animated (walk, run, sneak, ride, attack, strong attack, bow shot); animation viewer from the start screen | P3-018 | DONE |
+| P3-025 | 3 | Owner's 13 boar models rigged and animated (idle, walk, run, attack, death) for the five types and eight rare variants; boars in the animation viewer | P3-024 | DONE |
 
 ## Icebox
 

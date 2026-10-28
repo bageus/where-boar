@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Loads the animation viewer headless: both cavemen have every animation, the boar shows only for
-## riding, and Back reports that the viewer closed.
+## riding, every boar type has its animations, and Back reports that the viewer closed.
 
 const Viewer = preload("res://game/presentation/menus/public/animation_viewer.tscn")
 
@@ -25,6 +25,12 @@ func _process(_delta: float) -> bool:
 			_check(viewer.get_node("%Boar").visible == (anim == "ride"), "boar only for ride (%s)" % anim)
 		viewer.play("ride")
 		_check(viewer.character.position.y > 0.3, "%s sits on the boar" % model_name)
+	for boar_type: Resource in viewer.BoarTypes.ALL:
+		viewer.show_boar(boar_type.id)
+		for anim: String in viewer.BOAR_ANIMATIONS:
+			viewer.play(anim)
+			_check(viewer.player.current_animation == anim, "%s plays %s" % [boar_type.id, anim])
+		_check(not viewer.get_node("%Boar").visible, "no saddle boar under " + boar_type.id)
 	var closed := [false]
 	viewer.closed.connect(func() -> void: closed[0] = true)
 	viewer.get_node("%Back").pressed.emit()

@@ -135,7 +135,8 @@ func _flight_calms_and_alarmed_boar_attacks() -> bool:
 
 func _types_pick_by_weight() -> bool:
 	var ids := BoarTypes.ALL.map(func(type: Resource) -> String: return type.id)
-	return ids == ["common_brown", "runner_grey", "aggressive_red", "armored_black", "golden_tusk"] \
+	return ids == ["common_brown", "runner_grey", "aggressive_red", "armored_black", "bone", "bun", "bubble",
+			"mohawk", "dachshund", "camo", "hairy", "tiny", "golden_tusk"] \
 		and BoarTypes.pick(0.0).id == "common_brown" \
 		and BoarTypes.pick(0.999).id == "golden_tusk" \
 		and BoarTypes.rewards()["golden_tusk"] == {"dead": 10, "captured": 20, "wounded": 15}

@@ -1,6 +1,6 @@
 ---
 task_version: 1
-task_id: P3-024
+task_id: P3-025
 status: DONE
 phase: 3
 owner: AI
@@ -9,37 +9,38 @@ updated: 2026-10-28
 
 # Active Task
 
-P3-024 — риги, веса и анимации для моделей пещерных людей; страница просмотра анимаций.
+P3-025 — риги, веса и анимации для моделей кабанов владельца; редкие кабаны; кабаны в просмотрщике анимаций.
 
 ## Goal
 
-Две модели владельца (худой и толстый пещерный человек) с риггингом и анимациями, которые можно посмотреть в игре.
+13 моделей кабанов владельца с риггингом и анимациями в игре: пять типов и восемь редких вариантов.
 
 ## Why this matters
 
-Просьба владельца 2026-10-28 с двумя моделями .glb.
+Просьба владельца 2026-10-28 с 13 моделями .glb.
 
 ## In scope
 
-- Скелет и веса кожи, облегчённые модели (как оружие).
-- Анимации: ходьба, бег, подкрадывание, езда на кабане, удар оружием, сильный удар, выстрел из лука (+ стойка).
-- Отдельный экран просмотра анимаций из стартового меню.
+- Облегчённые модели (сравнение рендеров до/после), скелет, веса.
+- Анимации: стойка, ходьба, бег, атака, смерть.
+- Модели для пяти типов и восемь редких типов; кабаны в просмотрщике анимаций и на веб-странице.
 
 ## Out of scope
 
-- Использование персонажей в игре (игра от первого лица; NPC/кооп позже).
+- Особые умения редких кабанов (камуфляж, длинное тело и т. п.) сверх чисел в .tres.
 
 ## Acceptance criteria
 
-- [x] Given обе модели, Then у каждой скелет, веса и 8 анимаций, не более 5000 треугольников.
-- [x] Given стартовый экран, When "Character animations", Then экран просмотра: выбор модели и анимации, вращение камеры, кабан под всадником.
+- [x] Given 13 моделей, Then у каждой скелет, веса и 5 анимаций, не более 3000 треугольников (костяной 4000).
+- [x] Given охота, Then каждый тип кабана показывает свою модель; ходьба/бег по скорости, атака при рывке, смерть при убийстве.
+- [x] Given просмотрщик анимаций, Then можно выбрать любого кабана и анимацию.
 
 ## Decisions made during this task
 
-- (ASSUMPTION) Рост: худой 1.8 м, толстый 1.65 м; 5000 треугольников, текстуры 1024 px.
-- Пальцы: кости fingers, fingertips, thumb; руки всегда в кулаке вокруг оружия. Сильный удар = замах и удержание (заряд) с дрожью, затем удар (отзыв владельца).
-- Анимации процедурные (ключевые позы в `tools/rig_cavemen.py`), без root motion; удары правой рукой, лук в левой.
-- Веб-версия просмотрщика опубликована как Artifact (three.js) для просмотра без запуска игры.
+- Владелец: копилка (golden_piggy_bank) — золотой кабан, тотем (tusker_totem) — боевой (Angry boar).
+- (ASSUMPTION) Остальные: Forest = boar_buddy, Runner = neon_boar, Armored = blocky_boar; редкие: Bone, Bun (cinnamon_tuskboar), Bubble, Mohawk (spiky_boar_monster), Long (boaripede), Camouflage, Hairy (cozy_boar_cloak), Tiny tusker; веса появления 1.5–2, числа в .tres — ASSUMPTION.
+- Анимации процедурные (`tools/rig_boars.py`), без root motion; скорость ходьбы/бега подгоняется под скорость кабана.
+- Цвет типа больше не красит модель (у моделей свои текстуры); поле осталось в .tres (сейчас не используется).
 
 ## Progress
 
@@ -47,7 +48,7 @@ P3-024 — риги, веса и анимации для моделей пеще
 
 ## Validation evidence
 
-- `run_animation_viewer_smoke_test.gd` 0 failures; все domain и smoke тесты 0 failures; `validate_project.py` passed; editor import без ошибок.
+- Все domain и smoke тесты 0 failures; `validate_project.py` passed; скриншоты просмотрщика в Godot проверены.
 
 ## Blockers
 
@@ -55,8 +56,8 @@ P3-024 — риги, веса и анимации для моделей пеще
 
 ## Next exact action
 
-Owner review of the animations in the viewer.
+Owner review of the boar animations and rare-boar numbers.
 
 ## Session handoff
 
-- Completed: P3-024. Source .glb files are not in the repo; to rebuild, pass them to `tools/rig_cavemen.py`.
+- Completed: P3-025. Source .glb files are not in the repo; to rebuild, pass them to `tools/rig_boars.py`.

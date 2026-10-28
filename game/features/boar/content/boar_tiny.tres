@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_tiny.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_type")
+id = "tiny"
+display_name = "Tiny tusker"
+model = ExtResource("2_model")
+color = Color(0.65, 0.38, 0.2, 1)
+spawn_weight = 2.0
+max_health = 2
+damage = 1
+flee_speed = 11.5
+panic_speed = 13.5
+perception_radius = 16.0
+aggression = 0.1
+knock_scale = 1.0
+snare_break_seconds = 0.0
+reward_dead = 6
+reward_captured = 12

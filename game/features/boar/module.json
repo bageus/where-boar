@@ -1,7 +1,7 @@
 {
   "id": "features.boar",
   "layer": "features",
-  "purpose": "Own boar state and the five authored boar types: type, health, capture, death and escape (M002, M004, M006), and the boar agent scene that steers by it.",
+  "purpose": "Own boar state and the authored boar types (five MVP types and rare variants): type, health, capture, death and escape (M002, M004, M006), and the boar agent scene that steers by it.",
   "state_owner": [
     "Boar runtime state for one hunt"
   ],

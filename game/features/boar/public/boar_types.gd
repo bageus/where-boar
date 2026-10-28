@@ -1,6 +1,6 @@
 extends RefCounted
 
-## The five MVP boar types (D022) and rarity-weighted picks.
+## The five MVP boar types (D022), the owner's rare variants (P3-025) and rarity-weighted picks.
 
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 
@@ -9,6 +9,14 @@ const ALL: Array[BoarType] = [
 	preload("res://game/features/boar/content/boar_runner_grey.tres"),
 	preload("res://game/features/boar/content/boar_aggressive_red.tres"),
 	preload("res://game/features/boar/content/boar_armored_black.tres"),
+	preload("res://game/features/boar/content/boar_bone.tres"),
+	preload("res://game/features/boar/content/boar_bun.tres"),
+	preload("res://game/features/boar/content/boar_bubble.tres"),
+	preload("res://game/features/boar/content/boar_mohawk.tres"),
+	preload("res://game/features/boar/content/boar_dachshund.tres"),
+	preload("res://game/features/boar/content/boar_camo.tres"),
+	preload("res://game/features/boar/content/boar_hairy.tres"),
+	preload("res://game/features/boar/content/boar_tiny.tres"),
 	preload("res://game/features/boar/content/boar_golden_tusk.tres"),
 ]
 

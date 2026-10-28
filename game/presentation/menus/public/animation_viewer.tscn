@@ -46,7 +46,7 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 [node name="Panel" type="VBoxContainer" parent="Ui"]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 216.0
+offset_right = 316.0
 offset_bottom = 600.0
 theme_override_constants/separation = 6
 
@@ -54,9 +54,10 @@ theme_override_constants/separation = 6
 layout_mode = 2
 text = "Model"
 
-[node name="Models" type="VBoxContainer" parent="Ui/Panel"]
+[node name="Models" type="GridContainer" parent="Ui/Panel"]
 unique_name_in_owner = true
 layout_mode = 2
+columns = 2
 
 [node name="AnimationsTitle" type="Label" parent="Ui/Panel"]
 layout_mode = 2

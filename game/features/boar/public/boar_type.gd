@@ -7,6 +7,8 @@ extends Resource
 @export var id := ""
 @export var display_name := ""
 @export var color := Color(0.42, 0.27, 0.16)
+## Rigged model with idle, walk, run, attack and death (tools/rig_boars.py).
+@export var model: PackedScene
 ## Relative spawn weight; rarer types have smaller weights.
 @export var spawn_weight := 1.0
 @export var max_health := 3

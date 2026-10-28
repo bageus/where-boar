@@ -8,7 +8,8 @@ var boar_type: BoarType
 
 
 func _ready() -> void:
-	$Model.paint(boar_type.color)
+	$Model.show_type(boar_type)
+	$Saddle.position.y = $Model.top() * 0.85  # on the back, below ears and bristles
 	$Label.text = "%s — ride [E]" % boar_type.display_name
 
 

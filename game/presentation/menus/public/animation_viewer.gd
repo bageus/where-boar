@@ -1,6 +1,6 @@
 extends Node3D
 
-## Animation viewer from the start screen: pick a caveman and an animation; drag to orbit, wheel to zoom.
+## Animation viewer from the start screen: pick a caveman or a boar and an animation; drag to orbit, wheel to zoom.
 
 signal closed
 
@@ -9,15 +9,18 @@ const MODELS := {
 	"Heavy": preload("res://assets/models/caveman_heavy.glb"),
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
+const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "attack", "death"]
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
+const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Club = preload("res://assets/models/club.glb")
 const Bow = preload("res://assets/models/bow.glb")
-const SADDLE_HEIGHT := 1.02  # top of the saddle in mount.tscn
 const GRIP := Vector3(0, 0.1, -0.04)  # inside the fist, in hand bone space
 
 var character: Node3D
 var player: AnimationPlayer
 var animation := "idle"
+## Animations of the shown model: ANIMATIONS for a caveman, BOAR_ANIMATIONS for a boar.
+var animations: Array[String] = ANIMATIONS
 var _skeleton: Skeleton3D
 var _club: Node3D
 var _bow: Node3D
@@ -33,16 +36,15 @@ func _ready() -> void:
 	%Back.pressed.connect(closed.emit)
 	for model_name: String in MODELS:
 		_add_button(%Models, model_name, show_model.bind(model_name))
-	for anim in ANIMATIONS:
-		_add_button(%Animations, anim.capitalize(), play.bind(anim))
-	_boar.paint(Color(0.45, 0.3, 0.2))
+	for boar_type in BoarTypes.ALL:
+		_add_button(%Models, boar_type.display_name, show_boar.bind(boar_type.id))
+	_boar.show_type(BoarTypes.find("common_brown"))
 	show_model(MODELS.keys()[0])
 	_place_camera()
 
 
 func show_model(model_name: String) -> void:
-	if character:
-		character.queue_free()
+	_clear()
 	character = MODELS[model_name].instantiate()
 	add_child(character)
 	player = character.find_child("AnimationPlayer") as AnimationPlayer
@@ -52,18 +54,52 @@ func show_model(model_name: String) -> void:
 	# Hand bones run wrist -> knuckles along +Y, the palm faces -Z and the fingers curl around X.
 	_club = _attach(Club, "hand_r", Transform3D(Basis(Vector3(0, 1, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1)), GRIP + Vector3(-0.25, 0, 0)))
 	_bow = _attach(Bow, "hand_l", Transform3D(Basis(Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, -1, 0)), GRIP))
-	play(animation)
+	_list_animations(ANIMATIONS)
+
+
+## Boars turned to face the camera; attack and death replay when they end instead of looping, because
+## looping the shared animation resources would make dead boars in a hunt get up again.
+func show_boar(type_id: String) -> void:
+	_clear()
+	character = BoarModel.instantiate()
+	add_child(character)
+	character.rotation.y = PI
+	character.show_type(BoarTypes.find(type_id))
+	player = character.player()
+	player.animation_finished.connect(func(anim: StringName) -> void: player.play(anim))
+	_list_animations(BOAR_ANIMATIONS)
+
+
+func _clear() -> void:
+	if character:
+		remove_child(character)
+		character.queue_free()
+	character = null
+	_club = null
+	_bow = null
+	_boar.visible = false
+
+
+func _list_animations(names: Array[String]) -> void:
+	animations = names
+	for button in %Animations.get_children():
+		button.free()
+	for anim in names:
+		_add_button(%Animations, anim.capitalize(), play.bind(anim))
+	play(animation if animation in names else "idle")
 
 
 func play(anim: String) -> void:
 	animation = anim
 	player.play(anim)
+	if not _club:
+		return
 	# Cavemen always carry a weapon: the bow for shooting, the club otherwise.
 	_club.visible = anim != "bow_shot"
 	_bow.visible = anim == "bow_shot"
 	_boar.visible = anim == "ride"
 	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone("hips")).origin.y
-	character.position.y = SADDLE_HEIGHT + 0.05 - hips_height if anim == "ride" else 0.0
+	character.position.y = _boar.top() * 0.85 + 0.12 - hips_height  # on the saddle, as in mount.gd if anim == "ride" else 0.0
 
 
 func _attach(scene: PackedScene, bone: String, offset: Transform3D) -> Node3D:

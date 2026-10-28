@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_hairy.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_type")
+id = "hairy"
+display_name = "Hairy boar"
+model = ExtResource("2_model")
+color = Color(0.3, 0.17, 0.12, 1)
+spawn_weight = 1.5
+max_health = 7
+damage = 2
+flee_speed = 7.0
+panic_speed = 9.0
+perception_radius = 12.0
+aggression = 0.5
+knock_scale = 0.6
+snare_break_seconds = 6.0
+reward_dead = 7
+reward_captured = 14

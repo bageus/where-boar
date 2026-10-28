@@ -1,11 +1,13 @@
-[gd_resource type="Resource" script_class="BoarType" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BoarType" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_armored_black.glb" id="2_model"]
 
 [resource]
 script = ExtResource("1_type")
 id = "armored_black"
 display_name = "Armored boar"
+model = ExtResource("2_model")
 color = Color(0.12, 0.12, 0.14, 1)
 spawn_weight = 8.0
 max_health = 8

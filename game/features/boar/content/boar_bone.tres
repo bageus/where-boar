@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_bone.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_type")
+id = "bone"
+display_name = "Bone boar"
+model = ExtResource("2_model")
+color = Color(0.9, 0.86, 0.72, 1)
+spawn_weight = 1.5
+max_health = 6
+damage = 2
+flee_speed = 8.0
+panic_speed = 10.0
+perception_radius = 14.0
+aggression = 0.6
+knock_scale = 0.8
+snare_break_seconds = 6.0
+reward_dead = 8
+reward_captured = 14

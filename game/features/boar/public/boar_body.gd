@@ -109,7 +109,7 @@ var _snare_left := INF
 
 func _ready() -> void:
 	boar = Boar.new(boar_type.id, boar_type.max_health)
-	$Model.paint(boar_type.color)
+	$Model.show_type(boar_type)
 	_show_state()
 
 
@@ -214,7 +214,7 @@ func _after_change() -> void:
 	_show_state()
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
-		_lie(true)
+		$Model.die()
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
 		_warn_witnesses()
 
@@ -280,6 +280,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = 0.0
 		_apply_knock(delta)
 		move_and_slide()
+		$Model.move(0.0)
 		return
 	var pos := Vector2(global_position.x, global_position.z)
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
@@ -305,6 +306,7 @@ func _physics_process(delta: float) -> void:
 	_steer(delta, pos, hunter_pos)
 	_apply_knock(delta)
 	move_and_slide()
+	$Model.move(Vector2(velocity.x, velocity.z).length())
 	_ram(delta)
 
 
@@ -428,6 +430,7 @@ func _charge_heading(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		_heading = (hunter_pos - pos).normalized()
 		if pos.distance_to(hunter_pos) <= RAM_DASH_DISTANCE:
 			boar.ramming = true
+			$Model.attack()
 			_dash_heading = _heading
 			_dash_left = RAM_DASH_SECONDS
 			_dash_hit = false

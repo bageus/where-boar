@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="BoarType" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/boar_type.gd" id="1_type"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_camo.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_type")
+id = "camo"
+display_name = "Camouflage boar"
+model = ExtResource("2_model")
+color = Color(0.45, 0.45, 0.25, 1)
+spawn_weight = 1.5
+max_health = 4
+damage = 1
+flee_speed = 8.5
+panic_speed = 10.5
+perception_radius = 18.0
+aggression = 0.3
+knock_scale = 1.0
+snare_break_seconds = 0.0
+reward_dead = 7
+reward_captured = 14
