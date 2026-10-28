@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://game/presentation/camp/hud/shop_panel.tscn" id="7_shop"]
 [ext_resource type="PackedScene" path="res://assets/models/campfire.glb" id="9_campfire"]
 [ext_resource type="PackedScene" path="res://assets/models/signpost.glb" id="10_signpost"]
+[ext_resource type="Script" path="res://game/presentation/camp/props/scenery.gd" id="11_scenery"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 
@@ -31,6 +32,9 @@ transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.6
 shadow_enabled = true
 
 [node name="Ground" parent="." instance=ExtResource("2_ground")]
+
+[node name="Scenery" type="Node3D" parent="."]
+script = ExtResource("11_scenery")
 
 [node name="FenceNorth" parent="." instance=ExtResource("3_fence")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -20)
