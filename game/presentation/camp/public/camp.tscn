@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/weapon_stall.glb" id="11_weapon_stall"]
 [ext_resource type="PackedScene" path="res://assets/models/hunter_stall.glb" id="12_hunter_stall"]
 [ext_resource type="PackedScene" path="res://assets/models/boar_pen.glb" id="13_boar_pen"]
+[ext_resource type="PackedScene" path="res://assets/models/tavern.glb" id="15_tavern"]
 [ext_resource type="PackedScene" path="res://assets/models/cage_rack.glb" id="14_cage_rack"]
 [ext_resource type="Script" path="res://game/presentation/camp/props/scenery.gd" id="11_scenery"]
 
@@ -88,6 +89,7 @@ model = ExtResource("9_campfire")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 14)
 station_id = "tavern"
 title = "Tavern (hire helpers)"
+model = ExtResource("15_tavern")
 
 [node name="Pens" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 12, 0, 12)
