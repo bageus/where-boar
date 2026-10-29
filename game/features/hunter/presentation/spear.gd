@@ -4,6 +4,7 @@ extends RigidBody3D
 
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 var pickup_kind := "spear"
 
@@ -23,6 +24,7 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
+	Sfx.play(self, "spear_fell", 0.0, 20.0)
 	# A boar or its larger hitbox (playtest 2026-10-27).
 	if body is BoarBody or body.has_method("spear_hit"):
 		body.spear_hit(DAMAGE)

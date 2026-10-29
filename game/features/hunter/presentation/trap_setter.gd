@@ -6,6 +6,7 @@ extends Node3D
 
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 const Helper = preload("res://assets/models/caveman_helper.glb")
+const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
 
 const WALK_SPEED := 3.5
 const RUN_SPEED := 7.5  # a little over the hunter's sprint so he catches up
@@ -26,6 +27,10 @@ func _ready() -> void:
 	add_child(body)
 	_player = body.find_child("AnimationPlayer") as AnimationPlayer
 	_player.animation_finished.connect(func(anim: StringName) -> void: _player.play(anim))
+	var steps := Footsteps.new()
+	steps.grass = "character_step_grass"
+	steps.volume_db = -10.0
+	add_child(steps)
 
 
 # shortcut: walks straight over the ground with no collision or pathing, so it can pass through rocks;

@@ -5,6 +5,7 @@ extends RigidBody3D
 
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 @export var damage := 1
 ## "arrow" or "stone"; "" would make the missile vanish on contact.
@@ -27,6 +28,8 @@ func _on_body_entered(body: Node) -> void:
 	var hits := body is BoarBody or body.has_method("spear_hit")
 	if hits and _hurt:
 		return
+	# Heard where it lands, only by whoever is near (owner, 2026-10-29).
+	Sfx.play(self, "rock_fell" if pickup_kind == "stone" else "arrow_fell", 0.0, 20.0)
 	if hits:
 		_hurt = true
 		body.spear_hit(damage)

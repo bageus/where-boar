@@ -5,6 +5,7 @@ extends RigidBody3D
 
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 var pickup_kind := "net"
 
@@ -21,6 +22,7 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
+	Sfx.play(self, "net_fell", 0.0, 20.0)
 	# Anything but a boar or helper animal (tree, rock): drop straight down, never freeze mid-air.
 	if not body.has_method("net_hit") and not body.get_parent() is BoarBody:
 		linear_velocity = Vector3.ZERO

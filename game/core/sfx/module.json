@@ -1,0 +1,12 @@
+{
+  "id": "core.sfx",
+  "layer": "core",
+  "purpose": "Play the owner's recorded sound effects from assets/sfx: a random take with random pitch per group, one-shot 3D sounds, footsteps by surface and crossfaded ambient loops.",
+  "state_owner": [],
+  "public_api": [
+    "public/sfx.gd",
+    "public/footsteps.gd",
+    "public/sfx_loop.gd"
+  ],
+  "dependencies": []
+}

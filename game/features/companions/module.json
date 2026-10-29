@@ -14,6 +14,6 @@
     "public/companion_rules.gd"
   ],
   "dependencies": [
-    "core.synth"
+    "core.sfx"
   ]
 }

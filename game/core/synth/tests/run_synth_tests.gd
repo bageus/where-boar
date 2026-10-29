@@ -5,11 +5,9 @@ const Synth = preload("res://game/core/synth/public/synth.gd")
 
 func _init() -> void:
 	var failures := 0
-	var squeal := Synth.squeal()
-	failures += _check(squeal.data.size() == int(0.35 * Synth.RATE) * 2, "squeal has 0.35 s of 16-bit samples")
-	failures += _check(Synth.squeal() == squeal, "sounds are made once and reused")
-	failures += _check(Synth.stomp().get_length() > 0.1 and Synth.thud().get_length() > 0.3, "stomp and thud have length")
-	failures += _check([Synth.grunt(), Synth.shout(), Synth.crow(), Synth.gobble()].all(func(s: AudioStreamWAV) -> bool: return s.get_length() > 0.2), "grunt, shout, crow and gobble have length")
+	var thud := Synth.thud()
+	failures += _check(thud.data.size() == int(0.4 * Synth.RATE) * 2, "thud has 0.4 s of 16-bit samples")
+	failures += _check(Synth.thud() == thud, "sounds are made once and reused")
 	print("synth tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 

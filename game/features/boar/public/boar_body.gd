@@ -307,7 +307,7 @@ func _physics_process(delta: float) -> void:
 		_state_time = 0.0
 		if before == Boar.State.WANDER:
 			_scatter = BoarSenses.scatter_angle(randf(), randf())
-			$Sounds.squeal()
+			$Sounds.cry()
 		_show_state()
 	_steer(delta, pos, hunter_pos)
 	_apply_knock(delta)
@@ -439,6 +439,7 @@ func _charge_heading(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		if pos.distance_to(hunter_pos) <= RAM_DASH_DISTANCE:
 			boar.ramming = true
 			$Model.attack()
+			$Sounds.attack()
 			_dash_heading = _heading
 			_dash_left = RAM_DASH_SECONDS
 			_dash_hit = false
@@ -504,6 +505,7 @@ func _report_outcome() -> void:
 func _show_state() -> void:
 	_label.text = state_name()
 	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE]
+	$Sounds.panicking = boar.state == Boar.State.PANIC
 	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
 	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)

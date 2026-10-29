@@ -81,14 +81,3 @@ text = ""
 
 [node name="Sounds" type="Node3D" parent="."]
 script = ExtResource("2_sounds")
-
-[node name="Voice" type="AudioStreamPlayer3D" parent="Sounds"]
-max_distance = 40.0
-
-[node name="Hooves" type="AudioStreamPlayer3D" parent="Sounds"]
-volume_db = -6.0
-max_distance = 30.0
-
-[node name="Grunt" type="AudioStreamPlayer3D" parent="Sounds"]
-volume_db = -14.0
-max_distance = 20.0

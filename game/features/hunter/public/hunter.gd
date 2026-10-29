@@ -6,6 +6,7 @@ const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
 const Synth = preload("res://game/core/synth/public/synth.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
@@ -127,6 +128,8 @@ var crouching := false
 ## "bait" or "trap" while F or T is held; the menu opens after MENU_HOLD_SECONDS.
 var _held_key := ""
 var _held_for := 0.0
+## The bowstring, sling or spear wind-up sound while a shot is charged; stopped on release.
+var _draw_sound: AudioStreamPlayer3D
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -138,7 +141,7 @@ func _ready() -> void:
 	_reach.add_exception(self)
 	_base_fov = _camera.fov
 	$Thud.stream = Synth.thud()
-	$Voice.stream = Synth.shout()
+	$Voice.stream = Sfx.stream("character_roar")
 	_update_hud()
 
 
@@ -166,9 +169,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			if weapon in CHARGED_WEAPONS and ride.allows(weapon, false):
 				_holding_attack = true
+				_start_draw_sound()
 			else:
 				_attack()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	elif event.is_action_pressed("aim") and weapon == Weapon.SPEAR and loadout.spear_in_hand:
+		_start_draw_sound()
 	elif event.is_action_released("attack") and _holding_attack:
 		_holding_attack = false
 		_attack()
@@ -377,6 +383,8 @@ func _physics_process(delta: float) -> void:
 		if _steer_in_air:
 			velocity.x = direction.x * speed
 			velocity.z = direction.z * speed
+	$Footsteps.active = is_on_floor() and not ride.is_riding()
+	$Footsteps.quiet_db = -8.0 if crouching else 0.0
 	_camera.position.y = (CROUCH_EYE_HEIGHT if crouching else EYE_HEIGHT) + (SADDLE_EYE_RISE if ride.is_riding() else 0.0)
 	if camera_motion and ride.is_riding() and is_on_floor():
 		_sway_time += delta * RIDE_SWAY_RATE
@@ -403,29 +411,34 @@ func _jump_or_lunge(direction: Vector3) -> void:
 func _attack() -> void:
 	var power := _aim_power
 	_aim_power = 0.0
+	if is_instance_valid(_draw_sound):
+		_draw_sound.stop()
 	if not ride.allows(weapon, Input.is_action_pressed("aim")):
 		return
 	match weapon:
 		Weapon.SPEAR:
 			if Input.is_action_pressed("aim"):
 				if loadout.throw_spear():
+					Sfx.play(self, "spear_shot")
 					_throw(SpearScene, minf(THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power), SPEAR_MAX_SPEED))
 			elif loadout.spear_in_hand:
-				$Camera/Hands.strike()
+				_strike("spear_attack")
 				if _hits_boar(_reach.get_collider()):
 					_reach.get_collider().spear_hit(STAB_DAMAGE)
 		Weapon.NET:
 			if loadout.throw_net():
 				$Camera/Hands.strike()
+				Sfx.play(self, "net_throw")
 				_throw(NetScene, minf(NET_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), NET_MAX_SPEED))
 		Weapon.KNIFE:
-			$Camera/Hands.strike()
+			_strike("")
 			if _in_reach(KNIFE_REACH):
 				_reach.get_collider().spear_hit(roundi(KNIFE_DAMAGE * lerpf(1.0, CHARGED_DAMAGE_SCALE, power)))
 		Weapon.CLUB:
-			$Camera/Hands.strike()
+			_strike("")
 			var target := _reach.get_collider()
 			if _in_reach(CLUB_REACH):
+				Sfx.play(target as Node3D, "club", 0.0, 20.0)
 				var scale := lerpf(1.0, CHARGED_DAMAGE_SCALE, power)
 				target.spear_hit(roundi(CLUB_DAMAGE * scale))
 				if target.has_method("knock"):
@@ -433,12 +446,30 @@ func _attack() -> void:
 		Weapon.SLING:
 			if loadout.sling_stone():
 				$Camera/Hands.strike()
+				Sfx.play(self, "sling_shot")
 				_throw(StoneScene, minf(SLING_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), SLING_MAX_SPEED))
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
+				Sfx.play(self, "arrow_shot")
+				Sfx.play(self, "bow_attack", -3.0)
 				var arrow := _throw(ArrowScene, ARROW_SPEED)
 				arrow.damage = roundi(arrow.damage * lerpf(1.0, CHARGED_DAMAGE_SCALE, power))
+
+
+## A melee blow: the swing, plus the hunter's grunt as it lands (owner, 2026-10-29).
+func _strike(swing: String) -> void:
+	$Camera/Hands.strike()
+	if swing != "":
+		Sfx.play(self, swing, -4.0)
+	Sfx.play(self, "character_attack", -2.0, 30.0, 0.1)
+
+
+## The bowstring, sling or spear wind-up while a shot is charged.
+func _start_draw_sound() -> void:
+	var group: String = {Weapon.BOW: "bow_drawing", Weapon.SLING: "sling_drawing", Weapon.SPEAR: "spear_drawing"}.get(weapon, "")
+	if group != "" and (weapon != Weapon.BOW or loadout.arrows > 0) and (weapon != Weapon.SLING or loadout.stones > 0):
+		_draw_sound = Sfx.play(self, group, -4.0)
 
 
 ## True when the reach ray hits something that takes hits within reach metres of the eye.

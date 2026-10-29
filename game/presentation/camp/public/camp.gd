@@ -33,6 +33,12 @@ const Helper = preload("res://assets/models/caveman_helper.glb")
 const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25 / 1.3, 0.37)
 
 const USE_RADIUS := 2.5
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
+const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
+## The tavern hearth's flames, local to the tavern model.
+const TAVERN_HEARTH := Vector3(-1.63, 0.3, -0.75)
+## Penned boars grunt now and then, less than wild ones (owner, 2026-10-29).
+const PEN_VOICE_SECONDS := Vector2(6.0, 16.0)
 
 ## Injected before the camp enters the tree.
 var progress: Progress
@@ -50,6 +56,7 @@ func _ready() -> void:
 	_show_progress()
 	_fill_pen()
 	_seat_helper()
+	_fire_sounds()
 	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
 			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
 	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
@@ -67,17 +74,35 @@ func _fill_pen() -> void:
 			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
 			animal.rotation.y = PI / 2  # faces out of the cage
 			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage
+	var penned: Array[Node3D] = []
 	for i in mini(progress.pen.size(), PEN_SPOTS.size()):
 		var boar: Node3D = BoarModelScene.instantiate()
 		pens.add_child(boar)
+		penned.append(boar)
 		boar.show_type(BoarTypes.find(progress.pen[i]))
 		boar.position = Vector3(PEN_SPOTS[i].x, 0.0, PEN_SPOTS[i].y)
 		boar.rotation.y = PEN_SPOTS[i].z
+	if not penned.is_empty():
+		get_tree().create_timer(randf_range(0.0, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(penned))
 	for spot: Vector2 in RAIL_SADDLES:
 		var saddle: Node3D = Saddle.instantiate()
 		pens.add_child(saddle)
 		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
+
+
+## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by (owner, 2026-10-29).
+func _fire_sounds() -> void:
+	$Stations/Campfire.add_child(SfxLoop.new())
+	var hearth := SfxLoop.new()
+	hearth.position = TAVERN_HEARTH
+	hearth.volume_db = -4.0
+	$Stations/Tavern.add_child(hearth)
+
+
+func _pen_voice(boars: Array[Node3D]) -> void:
+	Sfx.play(boars.pick_random(), "boar_voice", -14.0, 15.0)
+	get_tree().create_timer(randf_range(PEN_VOICE_SECONDS.x, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(boars))
 
 
 ## The helper for hire sits at the tavern's feast table (owner, 2026-10-29), his hammer put away.

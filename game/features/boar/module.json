@@ -16,6 +16,6 @@
     "public/boar_hitbox.gd"
   ],
   "dependencies": [
-    "core.synth"
+    "core.sfx"
   ]
 }

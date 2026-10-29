@@ -4,7 +4,7 @@ extends CharacterBody3D
 ## caught by a net or by hand (E) when the hunter gets close enough. Shows the owner's thin bird model
 ## (bird_model.gd) that idles, pecks, walks and runs.
 
-const Synth = preload("res://game/core/synth/public/synth.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 ## Fact: a net caught this animal; it goes to the camp pen.
 signal caught(animal_id: String)
@@ -19,6 +19,9 @@ const TURN_SECONDS := 2.0
 ## How close the hunter must be to grab it with E (playtest 2026-10-27, ASSUMPTION).
 const CATCH_RADIUS := 1.8
 const CALL_SECONDS := 1.2
+## A calm bird clucks or gobbles quietly this often (ASSUMPTION).
+const IDLE_MIN_SECONDS := 6.0
+const IDLE_MAX_SECONDS := 15.0
 ## Share of wander turns spent standing and pecking the ground (ASSUMPTION).
 const PECK_CHANCE := 0.4
 const MODEL_WALK_SPEED := 1.0  # ground speed the walk cycle was keyed for, m/s (ASSUMPTION)
@@ -34,12 +37,13 @@ var hunter: Node3D
 var _heading := Vector2.ZERO
 var _turn_left := 0.0
 var _call_left := 0.0
+var _idle_left := randf_range(0.0, IDLE_MAX_SECONDS)
 var _pecking := false
 var _player: AnimationPlayer
 
 
 func _ready() -> void:
-	$Call.stream = Synth.crow() if animal_id == "rooster" else Synth.gobble()
+	$Call.stream = Sfx.stream(animal_id + "_call")
 	var model: Node3D = models.pick_random().instantiate()
 	model.name = "Model"
 	add_child(model)
@@ -83,9 +87,15 @@ func _physics_process(delta: float) -> void:
 		_call_left -= delta
 		if _call_left <= 0.0:
 			_call_left = CALL_SECONDS
-			$Call.pitch_scale = randf_range(0.9, 1.15)
 			$Call.play()
+			if randf() < 0.3:  # a second voice over the first now and then
+				Sfx.play(self, animal_id + "_call", -4.0, 30.0, randf_range(0.1, 0.3))
 	else:
+		_idle_left -= delta
+		if _idle_left <= 0.0:
+			_idle_left = randf_range(IDLE_MIN_SECONDS, IDLE_MAX_SECONDS)
+			if randf() < 0.6:  # not every time (owner, 2026-10-29)
+				Sfx.play(self, animal_id + "_idle", -10.0, 20.0)
 		_turn_left -= delta
 		if _turn_left <= 0.0:
 			_heading = Vector2.from_angle(randf() * TAU)

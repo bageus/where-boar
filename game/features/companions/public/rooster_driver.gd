@@ -3,6 +3,8 @@ extends Node3D
 ## Rooster summoned from the camp pen (M016): flies to the far side of a herd and crows,
 ## driving those boars straight at the hunter.
 
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
+
 const FLY_SPEED := 12.0
 ## ASSUMPTION (D013).
 const CROW_RADIUS := 12.0
@@ -28,4 +30,7 @@ func _physics_process(delta: float) -> void:
 	for boar in boars:
 		if is_instance_valid(boar) and boar.global_position.distance_to(target) <= CROW_RADIUS:
 			boar.driven_from(target)
+	# Two crows over each other; they stay at the landing spot after the rooster is gone.
+	for delay in [0.0, randf_range(0.2, 0.5)]:
+		Sfx.play(get_parent() as Node3D, "rooster_call", 0.0, 45.0, delay).global_position = target
 	queue_free()

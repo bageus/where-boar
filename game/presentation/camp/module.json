@@ -8,6 +8,7 @@
     "public/camp.gd"
   ],
   "dependencies": [
+    "core.sfx",
     "features.boar",
     "features.hunter",
     "features.settlement",

@@ -6,8 +6,7 @@
 size = Vector3(6, 1, 9)
 
 [node name="RiverSegment" type="Area3D"]
-collision_layer = 0
-monitorable = false
+collision_layer = 64
 script = ExtResource("1_river")
 
 [node name="Collision" type="CollisionShape3D" parent="."]

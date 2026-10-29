@@ -236,6 +236,13 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE)
 
 
+## True where grass grows at a map point; footsteps there rustle (core/sfx footsteps.gd).
+func grassy_at(x: float, z: float) -> bool:
+	var i := clampi(roundi(x + (_shape.map_width - 1) * 0.5), 1, _shape.map_width - 2)
+	var j := clampi(roundi(z + (_shape.map_depth - 1) * 0.5), 1, _shape.map_depth - 2)
+	return _grassy(i, j)
+
+
 ## Open, gentle, dry ground that is not sand: where grass, stumps, logs and trees go.
 func _grassy(i: int, j: int) -> bool:
 	return _shape.map_data[j * _shape.map_width + i] >= -0.3 and _normal(i, j).y >= ROCK_NORMAL_Y and not _sandy(i, j)
