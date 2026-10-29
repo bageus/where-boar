@@ -93,6 +93,7 @@ None. P3-001..P3-025 done.
 - 2026-10-28 camp scenery (`camp/props/scenery.gd`): green lawn beyond the fence, 70 oak/spruce trees, small rocks inside and outside, stylized grass along the inside of the fence and outside it (no collision; only seen from inside the fence).
 - 2026-10-28 camp campfire replaced by the owner's tribal cooking set (fire ring, tripod pot with soup, flame meshes, steam, plus a terracotta brazier ~2.3 m east; 10k triangles, left as is). Scene roots shifted so the fire sits at the station origin.
 - 2026-10-29 camp armory (WeaponShop station) uses the owner's tribal weapon stall (`assets/models/weapon_stall.glb`, 38k triangles, 267 small meshes, left as is); other stations keep `stall.glb`.
+- 2026-10-29 camp hunting hut station uses the owner's tribal hunter stall (`assets/models/hunter_stall.glb`, 63k triangles, 114 meshes, left as is).
 
 ## Next action
 

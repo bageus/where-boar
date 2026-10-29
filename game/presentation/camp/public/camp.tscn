@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/campfire.glb" id="9_campfire"]
 [ext_resource type="PackedScene" path="res://assets/models/signpost.glb" id="10_signpost"]
 [ext_resource type="PackedScene" path="res://assets/models/weapon_stall.glb" id="11_weapon_stall"]
+[ext_resource type="PackedScene" path="res://assets/models/hunter_stall.glb" id="12_hunter_stall"]
 [ext_resource type="Script" path="res://game/presentation/camp/props/scenery.gd" id="11_scenery"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
@@ -73,6 +74,7 @@ model = ExtResource("11_weapon_stall")
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 14, 0, 0)
 station_id = "hunting_hut"
 title = "Hunting hut"
+model = ExtResource("12_hunter_stall")
 
 [node name="Campfire" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
