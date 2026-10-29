@@ -10,12 +10,10 @@ const MODELS := {
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
 const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]
-## Roosters and turkeys (tools/build_birds.py).
+## Roosters and turkeys (bird_model.gd).
 const BIRDS := {
-	"Fat rooster": preload("res://assets/models/rooster_fat.glb"),
-	"Thin rooster": preload("res://assets/models/rooster_thin.glb"),
-	"Fat turkey": preload("res://assets/models/turkey_fat.glb"),
-	"Thin turkey": preload("res://assets/models/turkey_thin.glb"),
+	"Rooster": preload("res://game/features/companions/public/rooster_model.tscn"),
+	"Turkey": preload("res://game/features/companions/public/turkey_model.tscn"),
 }
 const BIRD_ANIMATIONS: Array[String] = ["idle", "walk", "run", "peck"]
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
@@ -93,8 +91,6 @@ func show_bird(bird_name: String) -> void:
 	add_child(character)
 	character.rotation.y = PI
 	player = character.find_child("AnimationPlayer") as AnimationPlayer
-	for anim in BIRD_ANIMATIONS:
-		player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
 	_list_animations(BIRD_ANIMATIONS)
 
 

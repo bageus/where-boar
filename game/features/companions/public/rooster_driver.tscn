@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://game/features/companions/public/rooster_driver.gd" id="1_driver"]
-[ext_resource type="PackedScene" path="res://assets/models/rooster_fat.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://game/features/companions/public/rooster_model.tscn" id="2_model"]
 
 [node name="RoosterDriver" type="Node3D"]
 script = ExtResource("1_driver")

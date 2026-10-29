@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
 ## A wild rooster or turkey on the hunt map (D024): wanders, runs from a close hunter crying out,
-## caught by a net or by hand (E) when the hunter gets close enough. Shows a fat or a thin model
-## (tools/build_birds.py), picked at random, that idles, pecks, walks and runs.
+## caught by a net or by hand (E) when the hunter gets close enough. Shows the owner's thin bird model
+## (bird_model.gd) that idles, pecks, walks and runs.
 
 const Synth = preload("res://game/core/synth/public/synth.gd")
 
@@ -25,7 +25,7 @@ const MODEL_WALK_SPEED := 1.0  # ground speed the walk cycle was keyed for, m/s 
 const MODEL_RUN_SPEED := 4.0
 
 @export var animal_id := "rooster"
-## Fat and thin builds; one is picked when the animal is made.
+## Model scenes; one is picked when the animal is made.
 @export var models: Array[PackedScene] = []
 
 ## Injected by the map.

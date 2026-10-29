@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cbj06n1xfvgis"
-path="res://.godot/imported/rooster_fat.glb-adab49d14561b13a261d2fe62034d69a.scn"
+uid="uid://58ja41xcv1ef"
+path="res://.godot/imported/tribal_turkey_3000.glb-ce8f8186d5f2c8c2517c952e6b99d7a6.scn"
 
 [deps]
 
-source_file="res://assets/models/rooster_fat.glb"
-dest_files=["res://.godot/imported/rooster_fat.glb-adab49d14561b13a261d2fe62034d69a.scn"]
+source_file="res://assets/models/tribal_turkey_3000.glb"
+dest_files=["res://.godot/imported/tribal_turkey_3000.glb-ce8f8186d5f2c8c2517c952e6b99d7a6.scn"]
 
 [params]
 

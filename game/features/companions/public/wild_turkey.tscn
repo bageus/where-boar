@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/features/companions/public/wild_animal.gd" id="1_animal"]
-[ext_resource type="PackedScene" path="res://assets/models/turkey_fat.glb" id="2_fat"]
-[ext_resource type="PackedScene" path="res://assets/models/turkey_thin.glb" id="3_thin"]
+[ext_resource type="PackedScene" path="res://game/features/companions/public/turkey_model.tscn" id="2_model"]
 
 [sub_resource type="SphereShape3D" id="Shape_bird"]
 radius = 0.35
@@ -10,7 +9,7 @@ radius = 0.35
 [node name="WildTurkey" type="CharacterBody3D"]
 script = ExtResource("1_animal")
 animal_id = "turkey"
-models = Array[PackedScene]([ExtResource("2_fat"), ExtResource("3_thin")])
+models = Array[PackedScene]([ExtResource("2_model")])
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
