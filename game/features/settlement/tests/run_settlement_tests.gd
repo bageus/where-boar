@@ -18,6 +18,7 @@ func _init() -> void:
 	failures += _check(_pick_helper_from_pen(), "a helper in the pen can be taken on the hunt, one at a time")
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
+	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -40,6 +41,18 @@ func _hunt_adds_tusks_and_catches() -> bool:
 	progress.add_hunt(hunt)
 	return progress.tusks == 22 and progress.hunts == 1 and progress.caught == {"golden_tusk": 1} and progress.items["item_acorns"] == 2 \
 		and progress.helpers == {"rooster": 1}
+
+
+func _pen_holds_five_newest() -> bool:
+	var hunt := Hunt.new(3)
+	for id in ["bone", "bone", "bun", "camo", "tiny", "golden_tusk"]:
+		hunt.record(id, BoarOutcome.Kind.CAPTURED)
+	var progress := Progress.new()
+	progress.add_hunt(hunt)
+	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
+	var old := Progress.from_dict({"caught": {"bun": 7}})
+	return progress.pen.size() == 5 and back.pen == progress.pen and old.pen.size() == 5 and progress.pen[-1] == "golden_tusk" \
+		and progress.pen[0] != "" and progress.pen.count("bone") == 1
 
 
 func _spend_needs_enough_tusks() -> bool:

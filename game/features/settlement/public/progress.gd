@@ -7,9 +7,13 @@ const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 
+const PEN_MAX := 5
+
 var tusks := 0
 ## type_id -> animals caught alive and kept in camp.
 var caught: Dictionary = {}
+## Boars standing in the camp pen, oldest first; a new catch pushes the oldest out (owner, 2026-10-29).
+var pen: Array[String] = []
 ## item_id -> count of bought gear.
 var items: Dictionary = {}
 ## animal_id -> helper animals (rooster, turkey) living in the camp pen (D024).
@@ -32,6 +36,9 @@ func add_hunt(hunt: Hunt) -> void:
 		var alive := hunt.count(type_id, BoarOutcome.Kind.CAPTURED)
 		if alive > 0:
 			caught[type_id] = caught.get(type_id, 0) + alive
+			for i in alive:
+				pen.append(type_id)
+	pen = pen.slice(maxi(0, pen.size() - PEN_MAX))
 
 
 ## Pays cost tusks; false and no change when there are not enough.
@@ -80,7 +87,7 @@ func owns(item_id: String) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(),
-		"hunts": hunts, "kit": true, "companion": companion}
+		"pen": pen.duplicate(), "hunts": hunts, "kit": true, "companion": companion}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
@@ -90,6 +97,15 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.hunts = maxi(0, int(data.get("hunts", 0)))
 	progress.caught = _counts(data.get("caught", {}))
 	progress.items = _counts(data.get("items", {}))
+	var saved_pen: Variant = data.get("pen")
+	if saved_pen is Array:
+		for type_id in saved_pen:
+			progress.pen.append(str(type_id))
+	else:  # saves from before the pen list: stand the old catches in it
+		for type_id in progress.caught:
+			for i in progress.caught[type_id]:
+				progress.pen.append(type_id)
+	progress.pen = progress.pen.slice(maxi(0, progress.pen.size() - PEN_MAX))
 	progress.helpers = _counts(data.get("helpers", {}))
 	progress.companion = str(data.get("companion", ""))
 	# New games, and saves from before ammo became stock, get the starter kit once.

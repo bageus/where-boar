@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/public/camp.gd" id="1_camp"]
 [ext_resource type="PackedScene" path="res://game/presentation/camp/props/ground.tscn" id="2_ground"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/signpost.glb" id="10_signpost"]
 [ext_resource type="PackedScene" path="res://assets/models/weapon_stall.glb" id="11_weapon_stall"]
 [ext_resource type="PackedScene" path="res://assets/models/hunter_stall.glb" id="12_hunter_stall"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_pen.glb" id="13_boar_pen"]
+[ext_resource type="PackedScene" path="res://assets/models/cage_rack.glb" id="14_cage_rack"]
 [ext_resource type="Script" path="res://game/presentation/camp/props/scenery.gd" id="11_scenery"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
@@ -88,9 +90,13 @@ station_id = "tavern"
 title = "Tavern (hire helpers)"
 
 [node name="Pens" parent="Stations" instance=ExtResource("5_station")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 12)
+transform = Transform3D(-0.7071, 0, -0.7071, 0, 1, 0, 0.7071, 0, -0.7071, 12, 0, 12)
 station_id = "pens"
 title = "Pens (saddle a boar, pick a helper)"
+model = ExtResource("13_boar_pen")
+
+[node name="CageRack" parent="Stations/Pens" instance=ExtResource("14_cage_rack")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -2.11, 0, -9.77)
 
 [node name="Hunter" parent="." instance=ExtResource("6_hunter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 8)
