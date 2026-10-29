@@ -92,6 +92,7 @@ None. P3-001..P3-025 done.
 - 2026-10-28 owner weapon models (textured .glb: spear, arrow, club, sling, bow, knife) replace the generated ones in hand and as thrown spear and arrow; decimated afterwards to 220-800 triangles (arrow 220, spear 378, knife 448, sling 499 plus bands, bow 548, club 798) with no visible loss. Placed into the old frames (long axis +y, tip/head +y, bow string toward the player); spear straightened (it was tilted 34 degrees), sling bands snapped to fork and pouch (gaps up to 4 cm), bow grip at the origin. `tools/build_models.py` no longer builds them.
 - 2026-10-28 camp scenery (`camp/props/scenery.gd`): green lawn beyond the fence, 70 oak/spruce trees, small rocks inside and outside, stylized grass along the inside of the fence and outside it (no collision; only seen from inside the fence).
 - 2026-10-28 camp campfire replaced by the owner's tribal cooking set (fire ring, tripod pot with soup, flame meshes, steam, plus a terracotta brazier ~2.3 m east; 10k triangles, left as is). Scene roots shifted so the fire sits at the station origin.
+- 2026-10-29 camp armory (WeaponShop station) uses the owner's tribal weapon stall (`assets/models/weapon_stall.glb`, 38k triangles, 267 small meshes, left as is); other stations keep `stall.glb`.
 
 ## Next action
 
