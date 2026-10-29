@@ -7,6 +7,10 @@ const WALK_SPEED := 1.5  # ground speed the walk cycle was keyed for, m/s (ASSUM
 const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
+const Saddle = preload("res://assets/models/saddle.glb")
+const SADDLE_WIDTH := 0.8  # boar width the saddle was modelled for, m
+const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
+
 var _player: AnimationPlayer
 var _dead := false
 
@@ -98,3 +102,23 @@ func top() -> float:
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		height = maxf(height, mesh.get_aabb().end.y)
 	return height
+
+
+## Straps the saddle (assets/models/saddle.glb) on the middle of the back, scaled to the boar's width; it follows the spine bone.
+func put_saddle() -> void:
+	var skeleton: Skeleton3D = find_children("*", "Skeleton3D", true, false)[0]
+	var bone := skeleton.find_bone("spine_1")
+	var box := AABB()
+	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+		box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
+	var fit := clampf(box.size.x / SADDLE_WIDTH, 0.7, 1.2)
+	# Saddle front is +Z, the boar's is -Z. The y is a guess at the back below ears and bristles.
+	var on_back := Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * fit),
+			Vector3(0.0, top() * 0.85 - SADDLE_PAD * fit, box.get_center().z - 0.05))
+	var attachment := BoneAttachment3D.new()
+	attachment.bone_name = "spine_1"
+	skeleton.add_child(attachment)
+	var rest := global_transform.affine_inverse() * skeleton.global_transform * skeleton.get_bone_global_rest(bone)
+	var saddle: Node3D = Saddle.instantiate()
+	attachment.add_child(saddle)
+	saddle.transform = rest.affine_inverse() * on_back

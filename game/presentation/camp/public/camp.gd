@@ -21,6 +21,11 @@ const CAGE_BIRD_SCALE := 0.45
 ## Standing spots inside the pen fence (x, z, yaw), local to the pens station; clear of shelter, trough and basin.
 const PEN_SPOTS: Array[Vector3] = [Vector3(-2.0, 0.6, 0.5), Vector3(1.0, 0.2, 2.2), Vector3(3.2, 1.2, -1.0),
 		Vector3(-1.0, 2.2, 3.5), Vector3(2.0, 2.3, -2.4)]
+## Saddles hung over the front fence rail (x, yaw), local to the pens station.
+const RAIL_SADDLES := [Vector2(-3.2, 0.0), Vector2(2.2, 0.1), Vector2(3.6, -0.1)]
+const RAIL_Z := 3.38
+const RAIL_TOP := 1.0
+const Saddle = preload("res://assets/models/saddle.glb")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 
 const USE_RADIUS := 2.5
@@ -59,6 +64,11 @@ func _fill_pen() -> void:
 		boar.show_type(BoarTypes.find(progress.pen[i]))
 		boar.position = Vector3(PEN_SPOTS[i].x, 0.0, PEN_SPOTS[i].y)
 		boar.rotation.y = PEN_SPOTS[i].z
+	for spot: Vector2 in RAIL_SADDLES:
+		var saddle: Node3D = Saddle.instantiate()
+		pens.add_child(saddle)
+		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
+		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
 
 
 ## Shows the tribe's tusks and live catches in the camp HUD.
