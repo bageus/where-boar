@@ -95,6 +95,7 @@ None. P3-001..P3-025 done.
 - 2026-10-29 camp armory (WeaponShop station) uses the owner's tribal weapon stall (`assets/models/weapon_stall.glb`, 38k triangles, 267 small meshes, left as is); other stations keep `stall.glb`.
 - 2026-10-29 camp hunting hut station uses the owner's tribal hunter stall (`assets/models/hunter_stall.glb`, 63k triangles, 114 meshes, left as is).
 - 2026-10-29 camp tavern station uses the owner's tribal tavern (`assets/models/tavern.glb`, ~19k triangles, 54 meshes, left as is); front orientation not checked in-game.
+- 2026-10-29 camp "Start hunt" station (exit toward the hunt, z=-16) uses the owner's tribal direction sign (`assets/models/direction_sign.glb`, 3k triangles, 10 meshes, ~2.7 m tall); replaces the placeholder `signpost.glb`; arrow direction not checked in-game.
 - 2026-10-29 camp Pens station uses the owner's tribal boar pen (`boar_pen.glb`, 31k triangles) with the tribal cage rack (`cage_rack.glb`, 43k, left as is) right behind it. Caught roosters/turkeys (up to 3 each) show in the rack's cages; the pen shows the last five caught boars as their own rigged models (`Progress.pen`, oldest out first, saved in the "pen" field).
 
 ## Next action
