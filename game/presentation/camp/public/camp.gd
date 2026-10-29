@@ -27,6 +27,10 @@ const RAIL_Z := 3.38
 const RAIL_TOP := 1.0
 const Saddle = preload("res://assets/models/saddle.glb")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
+const Helper = preload("res://assets/models/caveman_helper.glb")
+## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
+## lowered by his knee height (0.25 m) so he sits on the bench top (0.52).
+const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25 / 1.3, 0.37)
 
 const USE_RADIUS := 2.5
 
@@ -45,6 +49,7 @@ func _ready() -> void:
 	_shop.closed.connect(_on_shop_closed)
 	_show_progress()
 	_fill_pen()
+	_seat_helper()
 	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
 			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
 	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
@@ -73,6 +78,19 @@ func _fill_pen() -> void:
 		pens.add_child(saddle)
 		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
+
+
+## The helper for hire sits at the tavern's feast table (owner, 2026-10-29), his hammer put away.
+func _seat_helper() -> void:
+	var tavern: Node3D = $Stations/Tavern
+	var helper: Node3D = Helper.instantiate()
+	tavern.add_child(helper)
+	helper.position = HELPER_SEAT
+	helper.scale = Vector3.ONE / tavern.scale.x  # the tavern model is scaled up, the helper is not
+	helper.find_child("hammer").hide()
+	var player: AnimationPlayer = helper.find_child("AnimationPlayer")
+	player.get_animation("sit").loop_mode = Animation.LOOP_LINEAR
+	player.play("sit")
 
 
 ## Shows the tribe's tusks and live catches in the camp HUD.

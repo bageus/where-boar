@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Rig, skin and animate the owner's caveman models into assets/models/caveman_<kind>.glb.
 
+The "helper" kind is the tavern's tribesman (tribal_character_04_12000.glb): his own animations
+(walk, run, sneak, crouch, hammer, sit) and the owner's stone hammer in his right fist.
+
 Needs Blender as a Python module (`pip install bpy`). The source models are Meshy exports in
 T-pose, about 80k-110k triangles each; they are cut to TRIANGLES, given one 25-bone skeleton
 (joints placed from the landmarks below), skinned with Blender's automatic weights, and get
 the animations in ANIMATIONS. Run after a change:
     python tools/rig_cavemen.py skinny path/to/caveman_skinny.glb
     python tools/rig_cavemen.py heavy path/to/caveman_heavy.glb
+    python tools/rig_cavemen.py helper assets/models/tribal_character_04_12000.glb
 Add `--preview DIR` to also render a contact sheet of every animation into DIR.
 """
 
@@ -44,7 +48,19 @@ MODELS = {
         "thumb": [(0.80, -0.03, 0.17), (0.84, -0.12, 0.13)],
         "leg": [(0.17, 0.03, -0.22), (0.17, 0.04, -0.42), (0.18, 0.05, -0.56), (0.22, -0.15, -0.61)],
     },
+    "helper": {
+        "height": 1.5,
+        "spine": [(0, -0.02, 0.29), (0, -0.02, 0.40), (0, -0.02, 0.52), (0, -0.02, 0.66), (0, -0.01, 0.74), (0, -0.01, 1.05)],
+        "arm": [(0.03, 0, 0.68), (0.17, 0, 0.68), (0.31, 0, 0.67), (0.44, 0, 0.665), (0.48, 0, 0.665)],
+        "fingers": [(0.48, 0, 0.665), (0.52, 0, 0.665), (0.56, 0, 0.665)],
+        "thumb": [(0.44, -0.03, 0.66), (0.47, -0.07, 0.65)],
+        "leg": [(0.07, -0.01, 0.29), (0.07, -0.01, 0.19), (0.075, 0.0, 0.07), (0.08, -0.14, 0.02)],
+        "animations": ["idle", "walk", "run", "sneak", "crouch", "hammer", "sit"],
+        "hammer": ROOT / "assets" / "models" / "primitive_stone_hammer.glb",
+    },
 }
+HAMMER_LENGTH = 0.5  # metres, handle end to head
+HAMMER_TRIANGLES = 800
 SPINE = ["hips", "spine", "chest", "neck", "head"]
 ARM = ["shoulder", "upper_arm", "forearm", "hand"]
 LEG = ["thigh", "shin", "foot"]
@@ -55,6 +71,8 @@ AXES = {"X": Vector((1, 0, 0)), "Y": Vector((0, 1, 0)), "Z": Vector((0, 0, 1))}
 def build_mesh(source: str, spec: dict) -> tuple[bpy.types.Object, Matrix]:
     bpy.ops.import_scene.gltf(filepath=source)
     mesh = next(o for o in bpy.data.objects if o.type == "MESH")
+    mesh.data.transform(mesh.matrix_world)  # some exports stand the mesh up with a node rotation
+    mesh.matrix_world = Matrix()
     low_z = min(v.co.z for v in mesh.data.vertices)
     high_z = max(v.co.z for v in mesh.data.vertices)
     scale = spec["height"] / (high_z - low_z)
@@ -269,9 +287,40 @@ def bow_shot() -> list:
     return [(0, rest), (10, nock), (24, draw), (32, draw), (34, loose), (44, loose), (58, rest)]
 
 
+# The helper's squat: heels down, knees up to the chest; the left hand rests on the knee.
+SQUAT = merge(sym({"thigh_l": [("X", -100), ("Y", -15)], "shin_l": [("X", 140)], "foot_l": [("X", -40)]}),
+              {"upper_arm_l": [("Y", 72), ("X", -45)], "forearm_l": [("Z", -40)],
+               "upper_arm_r": [("Y", -72)], "spine": [("X", 28)], "chest": [("X", 8)], "head": [("X", -25)],
+               "lift": "crouch"})
+# Right arm at the bottom of a hammer blow: reaching down in front, so the head meets the ground.
+HAMMER_STRIKE = {"upper_arm_r": [("Y", -72), ("X", -55)], "forearm_r": [("Z", 25)]}
+
+
+def crouch() -> list:
+    breathe = lambda d: merge(SQUAT, {"chest": [("X", 8 + d)]})
+    return [(0, breathe(0)), (30, breathe(3)), (60, breathe(0))]
+
+
+def hammer() -> list:
+    """Squatting at a trap ghost: the hammer goes up over the shoulder and comes down on the ground."""
+    up = merge(SQUAT, {"upper_arm_r": [("Y", -72), ("X", -150)], "forearm_r": [("Z", 100)], "chest": [("X", 2), ("Z", -8)]})
+    strike = merge(SQUAT, HAMMER_STRIKE, {"chest": [("X", 14), ("Z", 6)]})
+    return [(0, up), (7, strike), (10, merge(strike, {"forearm_r": [("Z", 30)]})), (20, up)]
+
+
+def sit() -> list:
+    """At the tavern table: on a bench of knee height, forearms on the table."""
+    seat = merge(sym({"thigh_l": [("X", -88)], "shin_l": [("X", 88)], "foot_l": [("X", 0)],
+                      "upper_arm_l": [("Y", 72), ("X", -40)], "forearm_l": [("Z", -70)]}), {"lift": "crouch"})
+    breathe = lambda d: merge(seat, {"chest": [("X", 4 + d)], "head": [("X", -d), ("Z", d * 2)]})
+    return [(0, breathe(0)), (45, breathe(4)), (90, breathe(0))]
+
+
 # The game viewer loops idle, walk, run, sneak and ride.
 ANIMATIONS = {"idle": idle, "walk": walk, "run": run, "sneak": sneak, "ride": ride,
-              "attack": attack, "strong_attack": strong_attack, "bow_shot": bow_shot}
+              "attack": attack, "strong_attack": strong_attack, "bow_shot": bow_shot,
+              "crouch": crouch, "hammer": hammer, "sit": sit}
+DEFAULT_ANIMATIONS = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
 
 
 def _quat(rots: list) -> Quaternion:
@@ -352,6 +401,45 @@ def animate(rig: bpy.types.Object, name: str, keys: list) -> bpy.types.Action:
     return action
 
 
+def add_hammer(rig: bpy.types.Object, source: Path) -> None:
+    """The owner's stone hammer in the right fist, angled so that its head meets the ground at the
+    bottom of the blow; it rides on the hand bone."""
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=str(source))
+    parts = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+    bpy.ops.object.select_all(action="DESELECT")
+    for part in parts:
+        part.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.parent_clear(type="CLEAR_KEEP_TRANSFORM")
+    bpy.ops.object.join()
+    tool = bpy.context.view_layer.objects.active
+    tool.name = "hammer"
+    tool.data.transform(tool.matrix_world)
+    tool.matrix_world = Matrix()
+    for leftover in [o for o in bpy.data.objects if o not in before and o != tool]:
+        bpy.data.objects.remove(leftover)
+    modifier = tool.modifiers.new("cut", "DECIMATE")
+    modifier.ratio = min(1.0, HAMMER_TRIANGLES / len(tool.data.polygons))
+    bpy.ops.object.modifier_apply(modifier=modifier.name)
+    low = min(v.co.z for v in tool.data.vertices)
+    tool.data.transform(Matrix.Scale(HAMMER_LENGTH / (max(v.co.z for v in tool.data.vertices) - low), 4))
+    # Handle along local +Z from the grip at the origin. At the strike the handle points down and forward.
+    bones = _fk(rig, merge(FISTS, SQUAT, HAMMER_STRIKE))
+    hand = bones["hand_r"][1]
+    down = Vector((0, -0.6, -1)).normalized()
+    side = Vector((1, 0, 0))
+    aim = Matrix((side, down.cross(side), down)).transposed().to_quaternion()
+    rest_hand = hand.inverted() @ aim  # the handle's turn relative to the hand
+    rest_fist = rig.data.bones["fingers_r"].head_local
+    tool.matrix_world = Matrix.Translation(rest_fist) @ rest_hand.to_matrix().to_4x4()
+    tool.parent = rig
+    tool.parent_type = "BONE"
+    tool.parent_bone = "hand_r"
+    tool.matrix_parent_inverse = (rig.matrix_world @ Matrix.Translation(rig.data.bones["hand_r"].tail_local)
+                                  @ rig.data.bones["hand_r"].matrix_local.to_3x3().to_4x4()).inverted()
+
+
 def preview(rig: bpy.types.Object, actions: list, out_dir: Path, kind: str) -> None:
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"  # Workbench needs EGL, which headless machines often lack
@@ -394,7 +482,9 @@ def main() -> None:
     rig = build_skeleton(spec, place)
     skin(mesh, rig)
     cut(mesh)
-    actions = [animate(rig, name, make()) for name, make in ANIMATIONS.items()]
+    actions = [animate(rig, name, ANIMATIONS[name]()) for name in spec.get("animations", DEFAULT_ANIMATIONS)]
+    if "hammer" in spec:
+        add_hammer(rig, spec["hammer"])
     rig.animation_data.action = actions[0]
     print(kind, "triangles:", sum(len(p.vertices) - 2 for p in mesh.data.polygons))
     if preview_dir:

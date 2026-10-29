@@ -62,6 +62,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-026 | 3 | Toy rooster and turkey models (fat and thin, own colours) rigged with idle, walk, run, peck; in the hunt (6 of each), camp cages, rooster helper and the animation viewer | P3-025 | DONE |
 | P3-027 | 3 | Camp edges and decor: rock wall up (W, SW), drop-off with vista (E, SE: river, hills, woods, haze, toy clouds, birds), log palisade with ajar gate (N), owner's tents and well; water at the well | P3-026 | DONE |
 | P3-028 | 3 | Camp polish: rocks meet the ground and spill into camp, wobbly grass border, colourful ground trodden at the fire, doors and paths; compact camp (34 m), huts and tents +30%, every entrance faces the centre, cages right of the pen; hunter's shadow body; blue gradient sky with a sun; pebbles, ferns and bushes | P3-027 | DONE |
+| P3-029 | 3 | Hireable helper: owner's tribesman rigged (walk, run, sneak, crouch, hammer, sit) with the stone hammer; sits at the tavern table, follows the hunter on the hunt unseen by boars, squats and hammers at trap ghosts; hunter wears the owner's backpack on the hunt | P3-028 | DONE |
 
 ## Icebox
 
