@@ -61,6 +61,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-025 | 3 | Owner's 13 boar models rigged and animated (idle, walk, run, attack, death) for the five types and eight rare variants; boars in the animation viewer | P3-024 | DONE |
 | P3-026 | 3 | Toy rooster and turkey models (fat and thin, own colours) rigged with idle, walk, run, peck; in the hunt (6 of each), camp cages, rooster helper and the animation viewer | P3-025 | DONE |
 | P3-027 | 3 | Camp edges and decor: rock wall up (W, SW), drop-off with vista (E, SE: river, hills, woods, haze, toy clouds, birds), log palisade with ajar gate (N), owner's tents and well; water at the well | P3-026 | DONE |
+| P3-028 | 3 | Camp polish: rocks meet the ground and spill into camp, wobbly grass border, colourful ground trodden at the fire, doors and paths; compact camp (34 m), huts and tents +30%, every entrance faces the centre, cages right of the pen; hunter's shadow body; blue gradient sky with a sun; pebbles, ferns and bushes | P3-027 | DONE |
 
 ## Icebox
 

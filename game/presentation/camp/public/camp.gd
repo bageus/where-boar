@@ -13,10 +13,10 @@ const PEN_ANIMALS := {
 	"rooster": preload("res://game/features/companions/public/wild_rooster.tscn"),
 	"turkey": preload("res://game/features/companions/public/wild_turkey.tscn"),
 }
-## Cage slots on the rack, local to the pens station: roosters on the lower row, turkeys on the upper one.
+## Cage slots, local to the cage rack (its cages open towards +x): roosters on the lower row, turkeys on the upper one.
 const CAGE_ROW_Y := {"rooster": 0.25, "turkey": 1.07}
-const CAGE_X := [-0.71, 0.01, 0.73]
-const CAGE_Z := -4.62
+const CAGE_Z := [-1.4, -2.12, -2.84]
+const CAGE_X := 5.15
 const CAGE_BIRD_SCALE := 0.45
 ## Standing spots inside the pen fence (x, z, yaw), local to the pens station; clear of shelter, trough and basin.
 const PEN_SPOTS: Array[Vector3] = [Vector3(-2.0, 0.6, 0.5), Vector3(1.0, 0.2, 2.2), Vector3(3.2, 1.2, -1.0),
@@ -45,18 +45,22 @@ func _ready() -> void:
 	_shop.closed.connect(_on_shop_closed)
 	_show_progress()
 	_fill_pen()
+	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
+			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
+	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
 
 
 ## Roosters and turkeys caught on hunts stand in the cages, the newest boars (up to five) in the pen.
 func _fill_pen() -> void:
 	var pens: Node3D = $Stations/Pens
 	for animal_id in PEN_ANIMALS:
-		for i in mini(progress.helpers.get(animal_id, 0), CAGE_X.size()):
+		for i in mini(progress.helpers.get(animal_id, 0), CAGE_Z.size()):
 			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
 			animal.process_mode = Node.PROCESS_MODE_DISABLED
-			pens.add_child(animal)
+			$CageRack.add_child(animal)
 			animal.scale = Vector3.ONE * CAGE_BIRD_SCALE
-			animal.position = Vector3(CAGE_X[i], CAGE_ROW_Y[animal_id], CAGE_Z)
+			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
+			animal.rotation.y = PI / 2  # faces out of the cage
 			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage
 	for i in mini(progress.pen.size(), PEN_SPOTS.size()):
 		var boar: Node3D = BoarModelScene.instantiate()
@@ -81,7 +85,7 @@ func _show_progress() -> void:
 	for animal_id in progress.helpers:
 		lines.append("%s: %d in pens" % [animal_id, progress.helpers[animal_id]])
 	if progress.hunts == 0:
-		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south), Pens (south-east), Well (water).")
+		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens (south-west), Well (water).")
 	$Hud/Progress.text = "\n".join(lines)
 
 
