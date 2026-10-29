@@ -81,7 +81,7 @@ func _show_progress() -> void:
 	for animal_id in progress.helpers:
 		lines.append("%s: %d in pens" % [animal_id, progress.helpers[animal_id]])
 	if progress.hunts == 0:
-		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south), Pens (south-east).")
+		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south), Pens (south-east), Well (water).")
 	$Hud/Progress.text = "\n".join(lines)
 
 

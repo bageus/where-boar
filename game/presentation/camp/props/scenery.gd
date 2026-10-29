@@ -1,6 +1,9 @@
 extends Node3D
 
-## Camp dressing (owner, 2026-10-28): grass along the fence, small rocks and a ring of trees beyond it.
+## Camp edges (owner, 2026-10-29): a rock wall rising on the west side and south-west corner, a rocky
+## drop-off on the east side and south-east corner (the vista lies below it), and a palisade with an
+## ajar gate on the north side by the Start hunt sign, with forest beyond. The camp's StaticBody walls
+## in camp.tscn keep the hunter in; nothing here collides.
 
 const TREES_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
@@ -12,33 +15,48 @@ const ROCK_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/Rock3.res"), preload("res://assets/nature/meshes/Rock4.res"),
 	preload("res://assets/nature/meshes/Rock5.res"),
 ]
+const BIG_ROCK_MESHES: Array[Mesh] = [
+	preload("res://assets/nature/meshes/BigRock1.res"), preload("res://assets/nature/meshes/BigRock2.res"),
+	preload("res://assets/nature/meshes/BigRock3.res"), preload("res://assets/nature/meshes/BigRock4.res"),
+	preload("res://assets/nature/meshes/BigRock5.res"),
+]
 const GRASS_MESH := preload("res://assets/grass/grass.glb")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
-const HALF := 20.0  # the fence
-const OUTSIDE := 60.0
-const TREE_COUNT := 70
+const HALF := 20.0  # the camp's dirt square
+## The south side splits here: rock wall to the west of it, drop-off to the east.
+const SOUTH_SPLIT := 2.0
+## The forest behind the palisade: x and z ranges.
+const FOREST_X := Vector2(-40.0, 18.0)
+const FOREST_Z := Vector2(-70.0, -23.0)
+const TREE_COUNT := 75
 const ROCKS_INSIDE := 14
-const ROCKS_OUTSIDE := 30
 const GRASS_INSIDE := 2200
-const GRASS_OUTSIDE := 6000
+const GRASS_FOREST := 4000
+const GATE_HALF := 2.2
+const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
+const WOOD: Array[Color] = [Color(0.42, 0.3, 0.19), Color(0.5, 0.37, 0.24), Color(0.36, 0.26, 0.17), Color(0.47, 0.4, 0.3)]
 
 
 func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
-	_lawn()
+	_forest_floor()
 	for n in TREE_COUNT:
-		_prop(rng, TREES_MESHES, _ring(rng, HALF + 3.0, OUTSIDE - 5.0), Vector2(7, 11), true)
-	for n in ROCKS_OUTSIDE:
-		_prop(rng, ROCK_MESHES, _ring(rng, HALF + 1.5, OUTSIDE - 5.0), Vector2(0.6, 1.4), false)
+		var at := Vector3(rng.randf_range(FOREST_X.x, FOREST_X.y), 0.0, rng.randf_range(FOREST_Z.x, FOREST_Z.y))
+		_prop(rng, TREES_MESHES, at, Vector2(7, 12), true)
 	for n in ROCKS_INSIDE:
-		_prop(rng, ROCK_MESHES, _ring(rng, HALF - 3.5, HALF - 1.0), Vector2(0.5, 1.0), false)
-	_grass(rng, GRASS_INSIDE, HALF - 3.5, HALF - 0.6)
-	_grass(rng, GRASS_OUTSIDE, HALF + 0.6, OUTSIDE)
+		var at := _edge(rng, HALF - 3.5, HALF - 1.0)
+		if at.z > -HALF + 3.5 and not _by_drop(at):
+			_prop(rng, ROCK_MESHES, at, Vector2(0.5, 1.0), false)
+	_grass(rng, GRASS_INSIDE, func(): return _edge_grass(rng))
+	_grass(rng, GRASS_FOREST, func(): return Vector3(rng.randf_range(FOREST_X.x, FOREST_X.y + 2.0), 0.0, rng.randf_range(FOREST_Z.x, -HALF - 0.5)))
+	_rock_wall(rng)
+	_drop_off(rng)
+	_palisade(rng)
 
 
 ## A point in the square band between two half-widths (the camp is a square).
-func _ring(rng: RandomNumberGenerator, inner: float, outer: float) -> Vector3:
+func _edge(rng: RandomNumberGenerator, inner: float, outer: float) -> Vector3:
 	while true:
 		var p := Vector3(rng.randf_range(-outer, outer), 0.0, rng.randf_range(-outer, outer))
 		if maxf(absf(p.x), absf(p.z)) > inner:
@@ -46,7 +64,134 @@ func _ring(rng: RandomNumberGenerator, inner: float, outer: float) -> Vector3:
 	return Vector3.ZERO
 
 
-## shortcut: scenery has no collision (trees stand beyond the fence); add hulls if rocks must block.
+## Tall grass along the palisade and the rock wall; kept off the drop-off (it would hide the view)
+## and out of the gateway.
+func _edge_grass(rng: RandomNumberGenerator) -> Vector3:
+	while true:
+		var p := _edge(rng, HALF - 3.5, HALF - 0.6)
+		if not _by_drop(p) and not (p.z < -HALF + 3.5 and absf(p.x) < GATE_HALF + 1.0):
+			return p
+	return Vector3.ZERO
+
+
+func _by_drop(p: Vector3) -> bool:
+	return p.x > HALF - 4.0 or (p.z > HALF - 4.0 and p.x > SOUTH_SPLIT)
+
+
+## Big rocks in two rows along the west side and the west half of the south side; the back row
+## stands higher, so the wall climbs away from the camp.
+func _rock_wall(rng: RandomNumberGenerator) -> void:
+	for row in 2:
+		var step := 7.0
+		var lift := row * 9.0
+		var out := 8.0 + row * 9.0
+		for z in range(int(FOREST_Z.x), int(HALF + out), int(step)):
+			_big_rock(rng, Vector3(-HALF - out, lift, z + rng.randf_range(-1.5, 1.5)), Vector2(14, 20))
+		for x in range(int(-HALF - out), int(SOUTH_SPLIT), int(step)):
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), lift, HALF + out), Vector2(14, 20))
+
+
+## Rocks stepping down from the camp's rim towards the valley along the east side and the east half
+## of the south side.
+func _drop_off(rng: RandomNumberGenerator) -> void:
+	for row in 5:
+		var top := 0.4 - row * row * 2.2 - row * 2.0
+		var out := 3.0 + row * 5.5
+		for z in range(int(FOREST_Z.x), int(HALF + out), 5):
+			_big_rock(rng, Vector3(HALF + out, top, z + rng.randf_range(-1.0, 1.0)), Vector2(6, 9) + Vector2.ONE * row * 4.0, true)
+		for x in range(int(SOUTH_SPLIT), int(HALF + out), 5):
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.0, 1.0), top, HALF + out), Vector2(6, 9) + Vector2.ONE * row * 4.0, true)
+
+
+## A big rock of the given height range; by_top puts its top at `at.y` instead of its base.
+func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top := false) -> void:
+	var mesh: Mesh = BIG_ROCK_MESHES[rng.randi() % BIG_ROCK_MESHES.size()]
+	var box := mesh.get_aabb()
+	var k := rng.randf_range(height.x, height.y) / box.size.y
+	var node := MeshInstance3D.new()
+	node.mesh = mesh
+	node.scale = Vector3(k * rng.randf_range(0.6, 0.8), k, k * rng.randf_range(0.6, 0.8))
+	node.rotation.y = rng.randf() * TAU
+	node.position = at - Vector3(0.0, box.end.y * k if by_top else 1.0, 0.0)
+	add_child(node)
+
+
+## Logs of mixed thickness and height with sharpened tops, two binding rails on the inside, and two
+## gate leaves swung slightly out.
+func _palisade(rng: RandomNumberGenerator) -> void:
+	var materials: Array[StandardMaterial3D] = []
+	for color in WOOD:
+		var material := StandardMaterial3D.new()
+		material.albedo_color = color
+		material.roughness = 1.0
+		materials.append(material)
+	var x := -HALF - 1.0
+	while x < HALF + 1.0:
+		var radius := rng.randf_range(0.16, 0.3)
+		x += radius
+		if absf(x) > GATE_HALF + radius:
+			add_child(_log(rng, materials, Vector3(x, 0.0, -HALF - 0.4), radius, rng.randf_range(3.6, 5.2)))
+		x += radius + 0.02
+	for y in [1.1, 2.9]:
+		for side in [-1.0, 1.0]:
+			var rail := _beam(materials[2], HALF + 1.0 - GATE_HALF)
+			rail.position = Vector3(side * (GATE_HALF + HALF + 1.0) * 0.5, y, -HALF + 0.05)
+			add_child(rail)
+	for side in [-1.0, 1.0]:
+		var leaf := Node3D.new()
+		leaf.position = Vector3(side * GATE_HALF, 0.0, -HALF - 0.4)
+		leaf.rotation.y = side * -GATE_OPEN * rng.randf_range(0.7, 1.3)
+		var along := 0.0
+		while along < GATE_HALF - 0.1:
+			var radius := rng.randf_range(0.14, 0.18)
+			along += radius
+			leaf.add_child(_log(rng, materials, Vector3(-side * along, 0.0, 0.0), radius, rng.randf_range(3.0, 3.4)))
+			along += radius + 0.01
+		for y in [0.7, 2.4]:
+			var brace := _beam(materials[1], GATE_HALF)
+			brace.position = Vector3(-side * GATE_HALF * 0.5, y, 0.25)
+			leaf.add_child(brace)
+		add_child(leaf)
+
+
+func _log(rng: RandomNumberGenerator, materials: Array[StandardMaterial3D], at: Vector3, radius: float, height: float) -> Node3D:
+	var material: StandardMaterial3D = materials[rng.randi() % materials.size()]
+	var trunk := CylinderMesh.new()
+	trunk.top_radius = radius
+	trunk.bottom_radius = radius * rng.randf_range(1.0, 1.15)
+	trunk.height = height
+	trunk.radial_segments = 8
+	trunk.material = material
+	var tip := CylinderMesh.new()
+	tip.top_radius = 0.02
+	tip.bottom_radius = radius
+	tip.height = radius * rng.randf_range(2.0, 3.5)
+	tip.radial_segments = 8
+	tip.material = material
+	var node := MeshInstance3D.new()
+	node.mesh = trunk
+	node.position = at + Vector3(0.0, height * 0.5 - 0.3, 0.0)
+	node.rotation = Vector3(rng.randf_range(-0.04, 0.04), rng.randf() * TAU, rng.randf_range(-0.04, 0.04))
+	var cap := MeshInstance3D.new()
+	cap.mesh = tip
+	cap.position.y = (height + tip.height) * 0.5
+	node.add_child(cap)
+	return node
+
+
+func _beam(material: StandardMaterial3D, length: float) -> MeshInstance3D:
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.1
+	mesh.bottom_radius = 0.1
+	mesh.height = length
+	mesh.radial_segments = 6
+	mesh.material = material
+	var node := MeshInstance3D.new()
+	node.mesh = mesh
+	node.rotation.z = PI / 2
+	return node
+
+
 func _prop(rng: RandomNumberGenerator, pool: Array[Mesh], at: Vector3, size: Vector2, by_height: bool) -> void:
 	var mesh: Mesh = pool[rng.randi() % pool.size()]
 	var box := mesh.get_aabb()
@@ -59,27 +204,27 @@ func _prop(rng: RandomNumberGenerator, pool: Array[Mesh], at: Vector3, size: Vec
 	add_child(node)
 
 
-## Green ground beyond the dirt square.
-func _lawn() -> void:
+## Green ground under the forest beyond the palisade.
+func _forest_floor() -> void:
 	var mesh := PlaneMesh.new()
-	mesh.size = Vector2.ONE * OUTSIDE * 2.0
+	mesh.size = Vector2(FOREST_X.y - FOREST_X.x + 8.0, FOREST_Z.y - FOREST_Z.x + 10.0)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(0.16, 0.4, 0.1)
 	mesh.material = material
 	var lawn := MeshInstance3D.new()
 	lawn.mesh = mesh
-	lawn.position.y = -0.03
+	lawn.position = Vector3((FOREST_X.x + FOREST_X.y) * 0.5 - 2.0, -0.03, (FOREST_Z.x + FOREST_Z.y) * 0.5 + 1.0)
 	add_child(lawn)
 
 
-func _grass(rng: RandomNumberGenerator, count: int, inner: float, outer: float) -> void:
+func _grass(rng: RandomNumberGenerator, count: int, spot: Callable) -> void:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = (GRASS_MESH.instantiate().get_child(0) as MeshInstance3D).mesh
 	multimesh.instance_count = count
 	for n in count:
 		var size := rng.randf_range(0.4, 0.9)
-		multimesh.set_instance_transform(n, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), _ring(rng, inner, outer)))
+		multimesh.set_instance_transform(n, Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), spot.call()))
 	var node := MultiMeshInstance3D.new()
 	node.multimesh = multimesh
 	node.material_override = GRASS_MATERIAL

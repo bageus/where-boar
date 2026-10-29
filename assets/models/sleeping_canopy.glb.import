@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bfi0vir2fm2a"
-path="res://.godot/imported/fence.glb-797e835e7ffc8bbdaf188afcf7920135.scn"
+uid="uid://dl06vu4in0nte"
+path="res://.godot/imported/sleeping_canopy.glb-527f3c7116e35994eec362983562931b.scn"
 
 [deps]
 
-source_file="res://assets/models/fence.glb"
-dest_files=["res://.godot/imported/fence.glb-797e835e7ffc8bbdaf188afcf7920135.scn"]
+source_file="res://assets/models/sleeping_canopy.glb"
+dest_files=["res://.godot/imported/sleeping_canopy.glb-527f3c7116e35994eec362983562931b.scn"]
 
 [params]
 
