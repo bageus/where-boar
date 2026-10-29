@@ -1,35 +1,20 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/features/companions/public/wild_animal.gd" id="1_animal"]
+[ext_resource type="PackedScene" path="res://assets/models/rooster_fat.glb" id="2_fat"]
+[ext_resource type="PackedScene" path="res://assets/models/rooster_thin.glb" id="3_thin"]
 
 [sub_resource type="SphereShape3D" id="Shape_bird"]
 radius = 0.35
 
-[sub_resource type="StandardMaterial3D" id="Mat_bird"]
-albedo_color = Color(0.9, 0.3, 0.1, 1)
-
-[sub_resource type="SphereMesh" id="Mesh_bird"]
-material = SubResource("Mat_bird")
-radius = 0.35
-height = 0.7
-
 [node name="WildRooster" type="CharacterBody3D"]
 script = ExtResource("1_animal")
 animal_id = "rooster"
+models = Array[PackedScene]([ExtResource("2_fat"), ExtResource("3_thin")])
 
 [node name="Collision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
 shape = SubResource("Shape_bird")
-
-[node name="Mesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
-mesh = SubResource("Mesh_bird")
-
-[node name="Label" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
-billboard = 1
-font_size = 32
-text = "rooster"
 
 [node name="Call" type="AudioStreamPlayer3D" parent="."]
 max_distance = 30.0

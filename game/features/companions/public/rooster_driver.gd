@@ -12,7 +12,16 @@ var target := Vector3.ZERO
 var boars: Array[Node] = []
 
 
+func _ready() -> void:
+	var player := $Model.find_child("AnimationPlayer") as AnimationPlayer
+	player.get_animation("run").loop_mode = Animation.LOOP_LINEAR
+	player.play("run")  # wings flap on the way
+
+
 func _physics_process(delta: float) -> void:
+	var level := Vector3(target.x, global_position.y, target.z)
+	if global_position.distance_to(level) > 0.1:
+		look_at(level, Vector3.UP)  # the model faces -Z
 	global_position = global_position.move_toward(target, FLY_SPEED * delta)
 	if global_position.distance_to(target) > 0.1:
 		return

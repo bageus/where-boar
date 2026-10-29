@@ -25,6 +25,9 @@ const SHOUT_RADIUS := 15.0
 ## The hired trap setter covers this many escape zones, this far in front of each (ASSUMPTION).
 const SETTER_TRAPS := 2
 const SETTER_OFFSET := 5.0
+## Roosters and as many turkeys at each spare spawn point, scattered this far around it, metres (ASSUMPTION).
+const WILD_PER_SPOT := 3
+const WILD_SPREAD := 4.0
 const TIP_SECONDS := 8.0
 const SCOUT_CHECK_SECONDS := 0.5
 const TIPS := [
@@ -72,14 +75,14 @@ func _ready() -> void:
 	hunt = Hunt.new(total)
 	for g in groups:
 		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones)
-	# Spare spawn points get one wild rooster and one wild turkey to catch (D024).
-	for w in mini(WILD_SCENES.size(), spawns.size() - groups):
-		var animal: CharacterBody3D = WILD_SCENES[w].instantiate()
-		animal.hunter = _hunter
-		animal.position = spawns[groups + w].position
-		animal.caught.connect(_on_helper_caught)
-		animal.killed.connect(func(animal_id: String) -> void: _announce("Killed a %s" % animal_id))
-		$Wild.add_child(animal)
+	# Spare spawn points get a small flock of wild roosters and turkeys to catch (D024; owner 2026-10-29: more birds).
+	for spot in spawns.slice(groups):
+		for w in WILD_PER_SPOT * WILD_SCENES.size():
+			var animal: CharacterBody3D = WILD_SCENES[w % WILD_SCENES.size()].instantiate()
+			animal.hunter = _hunter
+			var at := Vector2(spot.position.x, spot.position.z) + Vector2.from_angle(randf() * TAU) * randf_range(1.0, WILD_SPREAD)
+			animal.position = Vector3(at.x, _terrain.height_at(at.x, at.y) + 0.3, at.y)
+			_add_wild(animal)
 	_hunter.equip(items)
 	_hunter.start_hunt()
 	if items.get("item_trap_setter", 0) > 0:
@@ -95,6 +98,12 @@ func _ready() -> void:
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
 	$Hud/Tip.visible = first_hunt
+
+
+func _add_wild(animal: CharacterBody3D) -> void:
+	animal.caught.connect(_on_helper_caught)
+	animal.killed.connect(func(animal_id: String) -> void: _announce("Killed a %s" % animal_id))
+	$Wild.add_child(animal)
 
 
 ## First-hunt tips, one every TIP_SECONDS; the turkey re-checks its marks.

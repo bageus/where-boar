@@ -1,6 +1,6 @@
 extends Node3D
 
-## Animation viewer from the start screen: pick a caveman or a boar and an animation; drag to orbit, wheel to zoom.
+## Animation viewer from the start screen: pick a caveman, a boar or a bird and an animation; drag to orbit, wheel to zoom.
 
 signal closed
 
@@ -10,6 +10,14 @@ const MODELS := {
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
 const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]
+## Roosters and turkeys (tools/build_birds.py).
+const BIRDS := {
+	"Fat rooster": preload("res://assets/models/rooster_fat.glb"),
+	"Thin rooster": preload("res://assets/models/rooster_thin.glb"),
+	"Fat turkey": preload("res://assets/models/turkey_fat.glb"),
+	"Thin turkey": preload("res://assets/models/turkey_thin.glb"),
+}
+const BIRD_ANIMATIONS: Array[String] = ["idle", "walk", "run", "peck"]
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Club = preload("res://assets/models/club.glb")
@@ -41,6 +49,8 @@ func _ready() -> void:
 		_add_button(%Models, model_name, show_model.bind(model_name))
 	for boar_type in BoarTypes.ALL:
 		_add_button(%Models, boar_type.display_name, show_boar.bind(boar_type.id))
+	for bird_name: String in BIRDS:
+		_add_button(%Models, bird_name, show_bird.bind(bird_name))
 	_boar.show_type(BoarTypes.find("common_brown"))
 	var arrow_model: Node3D = Arrow.instantiate()
 	arrow_model.transform = Transform3D(Basis(Vector3(1, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0)), Vector3.ZERO)  # tip toward -Z
@@ -75,6 +85,17 @@ func show_boar(type_id: String) -> void:
 	player = character.player()
 	player.animation_finished.connect(func(anim: StringName) -> void: player.play(anim))
 	_list_animations(BOAR_ANIMATIONS)
+
+
+func show_bird(bird_name: String) -> void:
+	_clear()
+	character = BIRDS[bird_name].instantiate()
+	add_child(character)
+	character.rotation.y = PI
+	player = character.find_child("AnimationPlayer") as AnimationPlayer
+	for anim in BIRD_ANIMATIONS:
+		player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
+	_list_animations(BIRD_ANIMATIONS)
 
 
 func _clear() -> void:

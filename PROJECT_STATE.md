@@ -3,10 +3,10 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-025
-last_completed_task_id: P3-025
+active_task_id: P3-026
+last_completed_task_id: P3-026
 build_status: PASS
-updated: 2026-10-28
+updated: 2026-10-29
 ---
 
 # Project State
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-025 done.
+None. P3-001..P3-026 done.
 
 ## Last completed work
 
@@ -60,6 +60,7 @@ None. P3-001..P3-025 done.
 - P3-022: owner's ferns (260, drawn within 35 m), Tree_1..3 among the trees, 36 fallen trees and logs; the bake gives every tree, log, stump, palm and fern one bark/leaf/needle palette and merges same-colour surfaces.
 - P3-024: owner's caveman models (skinny, heavy) cut to 5000 triangles, 1024 px textures, 25-bone skeleton with fingers (fists around the weapon) and automatic skin weights, animations idle, walk, run, sneak, ride, attack, strong_attack (wind-up held as a charge, then release), bow_shot (right fist solved onto the string and drawn to the chin; the viewer lays an arrow from it through the bow until release); built by `tools/rig_cavemen.py` (needs `pip install bpy`). "Character animations" on the start screen opens a viewer (pick model and animation, orbit camera, boar under the rider, always a weapon in hand: bow for the bow shot, club otherwise). Not yet used in gameplay (first-person game).
 - P3-025: owner's 13 boar models cut to 3000 triangles (bone boar 4000, flat shaded, 512 px textures), quadruped skeleton found from the mesh (feet, belly, back, snout, tail) with automatic weights, animations idle, walk, run (trot: only the legs work, body and head stay steady, owner 2026-10-28), eat (snout on the ground, played at a bait), attack (lunge with a tusk rip), death (rolls onto its side); built by `tools/rig_boars.py` into `assets/models/boar_<type>.glb`. Types: Forest boar = boar_buddy, Runner = neon_boar, Angry = tusker_totem, Armored = blocky_boar, Golden tusk = golden_piggy_bank; rare variants (weights 1.5–2 of ~114): Bone, Bun (cinnamon), Bubble, Mohawk (spiky), Long (boaripede), Camouflage, Hairy (cozy cloak), Tiny tusker. Boars play idle/walk/run by speed, attack when a charge locks on, death when killed; saddles sit on the model's back. Boars are in the in-game animation viewer and on a web page (Artifact "Boar Animations").
+- P3-026: toy roosters and turkeys after the owner's three references, own colours (rooster: cream, ochre wings, teal/navy/green sickle tail; turkey: brown, blue head and neck, bronze/teal/cream fan), fat and thin builds each, smooth vinyl look, rigid-part rig (body, neck, head, tail, wings, thighs, shins) with idle, walk, run (wings flap), peck (beak to the ground); built by `tools/build_birds.py` into `assets/models/<rooster|turkey>_<fat|thin>.glb`. Wild birds pick a build at random, face their heading, peck when they stop; 3 roosters and 3 turkeys around each spare spawn point (6 + 6 per hunt, was 1 + 1); caged birds idle in camp; the summoned rooster flies with flapping wings; birds are in the animation viewer.
 - P3-023: hunt HUD redesign: no controls legend; active bait on the left (F), active trap on the right (T), holding the key opens a ring menu to pick another; water under stamina; helpers line above the trap; tusks under the minimap and "+N" popups for tusks and picked-up items; boar counts in the Esc menu. A placed trap is a ghost that works only once built: hold E next to it (pit 6 s, cage 5 s, fence 4 s, snare 3 s, tripwire 2 s) or the hired trap setter walks over and builds it.
 - P3-020: throw speed caps in `hunter.gd` (range net < spear < sling < bow): net 10 (charged 16), spear max 22, sling 24 (charged max 30), arrow 40.
 

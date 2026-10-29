@@ -54,10 +54,10 @@ func _fill_pen() -> void:
 		for i in mini(progress.helpers.get(animal_id, 0), CAGE_X.size()):
 			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
 			animal.process_mode = Node.PROCESS_MODE_DISABLED
-			animal.get_node("Label").free()
 			pens.add_child(animal)
 			animal.scale = Vector3.ONE * CAGE_BIRD_SCALE
 			animal.position = Vector3(CAGE_X[i], CAGE_ROW_Y[animal_id], CAGE_Z)
+			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage
 	for i in mini(progress.pen.size(), PEN_SPOTS.size()):
 		var boar: Node3D = BoarModelScene.instantiate()
 		pens.add_child(boar)
