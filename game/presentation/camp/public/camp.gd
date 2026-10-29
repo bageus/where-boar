@@ -37,6 +37,9 @@ const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 ## The tavern hearth's flames, local to the tavern model.
 const TAVERN_HEARTH := Vector3(-1.63, 0.3, -0.75)
+## Wind over the drop-off (east side and south-east corner), heard near the rim; follows the hunter along it.
+const DROP_EAST := 17.0  # Dressing.HALF
+const DROP_SOUTH_FROM := 2.0  # Dressing.SOUTH_SPLIT
 ## Penned boars grunt now and then, less than wild ones (owner, 2026-10-29).
 const PEN_VOICE_SECONDS := Vector2(6.0, 16.0)
 
@@ -56,7 +59,7 @@ func _ready() -> void:
 	_show_progress()
 	_fill_pen()
 	_seat_helper()
-	_fire_sounds()
+	_ambience()
 	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
 			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
 	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
@@ -91,13 +94,32 @@ func _fill_pen() -> void:
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
 
 
-## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by (owner, 2026-10-29).
-func _fire_sounds() -> void:
+## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by; the jungle
+## all around; the wind at the drop-off (owner, 2026-10-29).
+func _ambience() -> void:
 	$Stations/Campfire.add_child(SfxLoop.new())
 	var hearth := SfxLoop.new()
 	hearth.position = TAVERN_HEARTH
 	hearth.volume_db = -4.0
 	$Stations/Tavern.add_child(hearth)
+	var jungle := SfxLoop.new()
+	jungle.group = "jungle_sound"
+	jungle.max_distance = 0.0
+	jungle.volume_db = -10.0
+	add_child(jungle)
+	var cliff := SfxLoop.new()
+	cliff.name = "CliffSound"
+	cliff.group = "cliff_sound"
+	cliff.single_take = true
+	cliff.max_distance = 20.0
+	add_child(cliff)
+
+
+func _process(_delta: float) -> void:
+	var at := hunter.global_position
+	var east := Vector3(DROP_EAST, 0.0, clampf(at.z, -DROP_EAST, DROP_EAST))
+	var south := Vector3(clampf(at.x, DROP_SOUTH_FROM, DROP_EAST), 0.0, DROP_EAST)
+	$CliffSound.position = east if at.distance_to(east) < at.distance_to(south) else south
 
 
 func _pen_voice(boars: Array[Node3D]) -> void:

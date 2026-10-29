@@ -5,7 +5,6 @@ extends CharacterBody3D
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
-const Synth = preload("res://game/core/synth/public/synth.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
@@ -140,7 +139,6 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
 	_base_fov = _camera.fov
-	$Thud.stream = Synth.thud()
 	$Voice.stream = Sfx.stream("character_roar")
 	_update_hud()
 
@@ -203,7 +201,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Rammed by a boar (M005): thrown back, hurt by a charge, and out of control for a moment.
 func knock(impulse: Vector3, damage: int = 0, rammer: BoarType = null) -> void:
-	$Thud.play()
 	if rammer and ride.is_unseated_by(rammer):
 		$Rider.toggle()
 	if not ride.shrugs_off_knock():

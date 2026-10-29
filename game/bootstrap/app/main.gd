@@ -17,7 +17,7 @@ var save_store := SaveStore.new()
 var progress: Progress
 ## Settings live in their own file, apart from progress (section 18).
 var settings_store := _settings_store()
-var settings := {"fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true}
+var settings := {"fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0}
 var _pause: CanvasLayer
 
 
@@ -35,6 +35,7 @@ func _ready() -> void:
 	for key in settings:
 		if saved.has(key) and typeof(saved[key]) in [TYPE_FLOAT, TYPE_INT, TYPE_BOOL]:
 			settings[key] = saved[key]
+	_apply_volume()
 	_pause = PauseScene.instantiate()
 	add_child(_pause)
 	_pause.resumed.connect(_resume)
@@ -67,9 +68,15 @@ func _quit_to_title() -> void:
 	show_start()
 
 
+## Every sound in the game is an effect, so the slider sets the master bus.
+func _apply_volume() -> void:
+	AudioServer.set_bus_volume_db(0, linear_to_db(settings["sfx_volume"]))
+
+
 func _on_settings_changed(changed: Dictionary) -> void:
 	settings = changed
 	settings_store.save_data(settings)
+	_apply_volume()
 	if current and current.has_node("Hunter"):
 		current.get_node("Hunter").apply_settings(settings)
 

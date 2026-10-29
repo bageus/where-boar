@@ -8,6 +8,7 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
+const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
@@ -67,6 +68,7 @@ var _baits: Array[Node3D] = []
 
 func _ready() -> void:
 	_batch_props()
+	_ambience()
 	var zones: Array[Vector2] = []
 	for zone: Node3D in $EscapeZones.get_children():
 		zones.append(Vector2(zone.position.x, zone.position.z))
@@ -138,7 +140,33 @@ func _add_wild(animal: CharacterBody3D) -> void:
 
 
 ## First-hunt tips, one every TIP_SECONDS; the turkey re-checks its marks.
+## Jungle all around, always on; the river heard only near the water (owner, 2026-10-29).
+func _ambience() -> void:
+	var jungle := SfxLoop.new()
+	jungle.group = "jungle_sound"
+	jungle.max_distance = 0.0
+	jungle.volume_db = -8.0
+	add_child(jungle)
+	var river := SfxLoop.new()
+	river.name = "RiverSound"
+	river.group = "river_sound"
+	river.max_distance = 25.0
+	add_child(river)
+
+
+## Puts the river sound on the point of the river nearest the hunter (each segment is a box, river_segment.tscn).
+func _place_river_sound() -> void:
+	var best := Vector3.INF
+	for segment: Node3D in $River.get_children():
+		var local := segment.to_local(_hunter.global_position)
+		var near := segment.to_global(Vector3(clampf(local.x, -3.0, 3.0), 0.5, clampf(local.z, -4.5, 4.5)))
+		if near.distance_to(_hunter.global_position) < best.distance_to(_hunter.global_position):
+			best = near
+	$RiverSound.global_position = best
+
+
 func _process(delta: float) -> void:
+	_place_river_sound()
 	_scout_left -= delta
 	if _scouting and _scout_left <= 0.0:
 		_scout_left = SCOUT_CHECK_SECONDS

@@ -226,8 +226,6 @@ script = ExtResource("5_menu")
 [node name="Voice" type="AudioStreamPlayer" parent="."]
 volume_db = -4.0
 
-[node name="Thud" type="AudioStreamPlayer" parent="."]
-
 [node name="Footsteps" type="Node3D" parent="."]
 script = ExtResource("7_steps")
 grass = "character_step_grass"
