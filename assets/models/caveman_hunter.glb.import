@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://xhraes3nusp7"
-path="res://.godot/imported/hand.glb-6dafb997b3af741d301a2fcac9eb3da7.scn"
+uid="uid://bfaths8gff7bi"
+path="res://.godot/imported/caveman_hunter.glb-ac77034d7d940a7655b5b40b79c3a44e.scn"
 
 [deps]
 
-source_file="res://assets/models/hand.glb"
-dest_files=["res://.godot/imported/hand.glb-6dafb997b3af741d301a2fcac9eb3da7.scn"]
+source_file="res://assets/models/caveman_hunter.glb"
+dest_files=["res://.godot/imported/caveman_hunter.glb-ac77034d7d940a7655b5b40b79c3a44e.scn"]
 
 [params]
 

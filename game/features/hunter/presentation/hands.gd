@@ -18,6 +18,13 @@ var _striking := false
 @onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow, $Knife]
 
 
+## The shadow body already casts the arm's shadow.
+func _ready() -> void:
+	for hand in find_children("Hand", "", true, false):
+		for mesh: GeometryInstance3D in hand.find_children("*", "GeometryInstance3D", true, false):
+			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
 ## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets or arrows).
 ## Aiming with power 0..1 raises the spear.
 func pose(weapon: int, armed: bool, aiming: bool, power: float, delta: float) -> void:

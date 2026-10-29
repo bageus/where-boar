@@ -2,12 +2,13 @@ extends Node3D
 
 ## The hunter's body, seen only through its shadow (owner, 2026-10-29: the hunter cast no shadow on
 ## the buildings): a caveman that never renders but casts a shadow, playing idle, walk, run, sneak or
-## ride to match its parent hunter. Child of the hunter; reads its parent.
+## ride to match its parent hunter. Child of the hunter; reads its parent. The first-person view
+## shows only its right arm (hunter_arm.glb in hands.tscn).
 
-const Caveman = preload("res://assets/models/caveman_skinny.glb")
+const Caveman = preload("res://assets/models/caveman_hunter.glb")
 const Backpack = preload("res://assets/models/primitive_backpack_optimized.glb")
 ## Where the backpack sits on the caveman, in the model's space (it faces +z, the back is -z).
-const BACKPACK_PLACE := Transform3D(Basis.IDENTITY * 0.6, Vector3(0.0, 0.9, -0.26))
+const BACKPACK_PLACE := Transform3D(Basis.IDENTITY * 0.6, Vector3(0.0, 0.9, -0.48))
 const RUN_SPEED := 5.0  # between the hunter's walk and sprint speeds
 const MOVING_SPEED := 0.3
 

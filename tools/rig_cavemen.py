@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Rig, skin and animate the owner's caveman models into assets/models/caveman_<kind>.glb.
 
-The "helper" kind is the tavern's tribesman (tribal_character_04_12000.glb): his own animations
-(walk, run, sneak, crouch, hammer, sit) and the owner's stone hammer in his right fist.
+The "hunter" kind is the player's body (shadow only) and also writes hunter_arm.glb, its right
+forearm and fist for the first-person view. The "helper" kind is the tavern's tribesman
+(tribal_character_04_12000.glb): his own animations (walk, run, sneak, crouch, hammer, sit) and the
+owner's stone hammer in his right fist.
 
-Needs Blender as a Python module (`pip install bpy`). The source models are Meshy exports in
-T-pose, about 80k-110k triangles each; they are cut to TRIANGLES, given one 25-bone skeleton
+Needs Blender as a Python module (`pip install bpy`). The source models are the owner's Meshy
+exports in assets/models/ (T-pose, 12k triangles, three 1024 maps); they are cut to TRIANGLES, given one 25-bone skeleton
 (joints placed from the landmarks below), skinned with Blender's automatic weights, and get
 the animations in ANIMATIONS. Run after a change:
-    python tools/rig_cavemen.py skinny path/to/caveman_skinny.glb
-    python tools/rig_cavemen.py heavy path/to/caveman_heavy.glb
+    python tools/rig_cavemen.py hunter assets/models/tribal_hunter_12000.glb
+    python tools/rig_cavemen.py skinny assets/models/tribal_character_02_12000.glb
+    python tools/rig_cavemen.py heavy assets/models/tribal_character_05_12000.glb
     python tools/rig_cavemen.py helper assets/models/tribal_character_04_12000.glb
 Add `--preview DIR` to also render a contact sheet of every animation into DIR.
 """
@@ -32,21 +35,30 @@ FPS = 30
 # Joints in the source model's own coordinates (Blender axes: +X is the left hand, -Y is the
 # front, +Z is up), read off orthographic renders. Left side only; the right side mirrors X.
 MODELS = {
+    "hunter": {
+        "height": 1.8,
+        "spine": [(0, 0.02, 0.22), (0, 0.02, 0.32), (0, 0.02, 0.44), (0, 0.0, 0.58), (0, -0.01, 0.66), (0, -0.01, 0.90)],
+        "arm": [(0.04, 0.02, 0.60), (0.20, 0.02, 0.605), (0.36, 0.01, 0.60), (0.47, 0, 0.60), (0.51, 0, 0.60)],
+        "fingers": [(0.51, 0, 0.60), (0.54, 0, 0.60), (0.57, 0, 0.60)],
+        "thumb": [(0.47, -0.03, 0.59), (0.49, -0.06, 0.55)],
+        "leg": [(0.11, 0.02, 0.22), (0.13, 0.02, 0.135), (0.14, 0.03, 0.05), (0.16, -0.12, 0.02)],
+        "arm_out": "hunter_arm",
+    },
     "skinny": {
         "height": 1.8,
-        "spine": [(0, 0.02, -0.22), (0, 0.02, -0.05), (0, 0.02, 0.10), (0, 0.02, 0.26), (0, 0.0, 0.34), (0, 0.0, 0.72)],
-        "arm": [(0.03, 0.02, 0.22), (0.13, 0.02, 0.19), (0.42, 0.02, 0.17), (0.72, 0.02, 0.17), (0.84, 0.04, 0.18)],
-        "fingers": [(0.84, 0.04, 0.18), (0.90, 0.05, 0.18), (0.95, 0.05, 0.18)],
-        "thumb": [(0.74, -0.02, 0.15), (0.80, -0.11, 0.10)],
-        "leg": [(0.09, 0.02, -0.24), (0.10, 0.05, -0.50), (0.12, 0.08, -0.72), (0.19, -0.18, -0.78)],
+        "spine": [(0, 0.01, 0.33), (0, 0.01, 0.40), (0, 0.01, 0.50), (0, 0.01, 0.62), (0, 0.0, 0.69), (0, 0.0, 0.99)],
+        "arm": [(0.03, 0, 0.61), (0.09, 0, 0.615), (0.25, 0, 0.605), (0.43, 0, 0.60), (0.48, 0, 0.60)],
+        "fingers": [(0.48, 0, 0.60), (0.53, 0, 0.60), (0.58, 0, 0.60)],
+        "thumb": [(0.44, -0.03, 0.59), (0.47, -0.06, 0.55)],
+        "leg": [(0.06, 0.01, 0.33), (0.065, 0.01, 0.20), (0.07, 0.02, 0.06), (0.09, -0.10, 0.02)],
     },
     "heavy": {
         "height": 1.65,
-        "spine": [(0, 0.03, -0.20), (0, 0.03, -0.02), (0, 0.03, 0.12), (0, 0.03, 0.28), (0, 0.0, 0.34), (0, 0.0, 0.62)],
-        "arm": [(0.06, 0.03, 0.25), (0.30, 0.04, 0.23), (0.58, 0.04, 0.21), (0.78, 0.04, 0.20), (0.86, 0.05, 0.20)],
-        "fingers": [(0.86, 0.05, 0.20), (0.91, 0.05, 0.20), (0.96, 0.05, 0.20)],
-        "thumb": [(0.80, -0.03, 0.17), (0.84, -0.12, 0.13)],
-        "leg": [(0.17, 0.03, -0.22), (0.17, 0.04, -0.42), (0.18, 0.05, -0.56), (0.22, -0.15, -0.61)],
+        "spine": [(0, 0.02, 0.18), (0, 0.02, 0.27), (0, 0.02, 0.38), (0, 0.0, 0.52), (0, -0.01, 0.58), (0, -0.01, 0.79)],
+        "arm": [(0.05, 0.02, 0.53), (0.20, 0.02, 0.53), (0.35, 0.02, 0.52), (0.48, 0.02, 0.51), (0.52, 0.02, 0.51)],
+        "fingers": [(0.52, 0.02, 0.51), (0.55, 0.02, 0.51), (0.58, 0.02, 0.51)],
+        "thumb": [(0.47, -0.01, 0.49), (0.49, -0.04, 0.45)],
+        "leg": [(0.11, 0.02, 0.18), (0.12, 0.02, 0.10), (0.13, 0.0, 0.04), (0.14, -0.12, 0.015)],
     },
     "helper": {
         "height": 1.5,
@@ -440,6 +452,55 @@ def add_hammer(rig: bpy.types.Object, source: Path) -> None:
                                   @ rig.data.bones["hand_r"].matrix_local.to_3x3().to_4x4()).inverted()
 
 
+def export_arm(mesh: bpy.types.Object, rig: bpy.types.Object, name: str) -> None:
+    """The right forearm and fist at full detail for the first-person view (hands.tscn): posed into
+    a fist, cut at the elbow, fist at the origin, thumb up and the forearm reaching back to the
+    bottom right of the view."""
+    action = animate(rig, "fist", [(0, {})])
+    bpy.context.scene.frame_set(0)
+    arm = mesh.copy()
+    arm.data = mesh.data.copy()
+    bpy.context.scene.collection.objects.link(arm)
+    bpy.ops.object.select_all(action="DESELECT")
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.modifier_apply(modifier=arm.modifiers[0].name)
+    arm.parent = None
+    names = {g.index: g.name for g in arm.vertex_groups}
+    owner = lambda v: names[max(v.groups, key=lambda g: g.weight).group] if v.groups else ""
+    keep = {f"{n}_r" for n in ("forearm", "hand", "fingers", "fingertips", "thumb")}
+    fist = [v.co.copy() for v in arm.data.vertices if owner(v) in keep - {"forearm_r"}]
+    thumb = [v.co.copy() for v in arm.data.vertices if owner(v) == "thumb_r"]
+    drop = [v.index for v in arm.data.vertices if owner(v) not in keep]
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for i in drop:
+        arm.data.vertices[i].select = True
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.delete(type="VERT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    arm.vertex_groups.clear()
+    smooth = arm.modifiers.new("smooth", "SUBSURF")  # the source has about 300 triangles here; seen up close
+    smooth.levels = 1
+    bpy.ops.object.modifier_apply(modifier=smooth.name)
+    bpy.ops.object.shade_smooth()
+    centre = sum(fist, Vector()) / len(fist)
+    back = (_fk(rig, FISTS)["forearm_r"][0] - centre).normalized()
+    up = sum(thumb, Vector()) / len(thumb) - centre
+    # Blender axes of hand.glb's forearm (glTF (0.05, -0.11, 0.29)): back toward the camera, down, right.
+    to_back = Vector((0.05, -0.29, -0.11)).normalized()
+    to_up = Vector((0, 0, 1))
+    basis = lambda b, u: Matrix((b, (u - b * u.dot(b)).normalized(), b.cross((u - b * u.dot(b)).normalized()))).transposed()
+    turn = basis(to_back, to_up) @ basis(back, up).inverted()
+    arm.data.transform(turn.to_4x4() @ Matrix.Translation(-centre))
+    print(name, "triangles:", sum(len(p.vertices) - 2 for p in arm.data.polygons))
+    bpy.ops.export_scene.gltf(filepath=str(OUT / f"{name}.glb"), export_format="GLB", export_image_format="JPEG",
+                              export_animations=False, export_skins=False, use_selection=True)
+    bpy.data.objects.remove(arm)
+    bpy.data.actions.remove(action)
+
+
 def preview(rig: bpy.types.Object, actions: list, out_dir: Path, kind: str) -> None:
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"  # Workbench needs EGL, which headless machines often lack
@@ -481,6 +542,8 @@ def main() -> None:
     mesh, place = build_mesh(source, spec)
     rig = build_skeleton(spec, place)
     skin(mesh, rig)
+    if "arm_out" in spec:
+        export_arm(mesh, rig, spec["arm_out"])
     cut(mesh)
     actions = [animate(rig, name, ANIMATIONS[name]()) for name in spec.get("animations", DEFAULT_ANIMATIONS)]
     if "hammer" in spec:

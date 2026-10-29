@@ -163,13 +163,6 @@ def net_bundle() -> list:
     return [(ROPE, ball((0, 0, 0), (0.16, 0.07, 0.15), 0.2, 54, 1))]
 
 
-def hand() -> list:
-    """A fist at the origin and a forearm reaching back to the bottom right of the view."""
-    return [(SKIN, ball((0, 0, 0), (0.05, 0.045, 0.06), 0.08, 55)),
-            (SKIN, rod((0.01, -0.01, 0.03), (0.06, -0.12, 0.32), 0.035, 0.045, 6)),
-            (LEATHER, rod((0.04, -0.07, 0.2), (0.07, -0.14, 0.36), 0.05, 0.055, 6))]
-
-
 # Camp: sizes match the collision boxes in game/presentation/camp/props.
 
 def tent() -> list:
@@ -215,7 +208,7 @@ def signpost() -> list:
 
 
 MODELS = {"tent": tent, "fence": fence, "stall": stall, "campfire": campfire, "signpost": signpost, "boar": boar, "bush": bush, "stone": stone,
-          "net_bundle": net_bundle, "hand": hand}
+          "net_bundle": net_bundle}
 
 
 # ---- glTF writer ----

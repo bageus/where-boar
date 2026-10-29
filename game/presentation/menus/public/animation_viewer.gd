@@ -5,6 +5,7 @@ extends Node3D
 signal closed
 
 const MODELS := {
+	"Hunter": preload("res://assets/models/caveman_hunter.glb"),
 	"Skinny": preload("res://assets/models/caveman_skinny.glb"),
 	"Heavy": preload("res://assets/models/caveman_heavy.glb"),
 }
