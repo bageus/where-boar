@@ -202,6 +202,7 @@ func _hold(seconds: float) -> void:
 	if not boar.is_free():
 		return
 	boar.trap()
+	$Model.net_fall()
 	_snare_left = seconds
 	_show_state()
 	held_changed.emit(true)
@@ -219,6 +220,8 @@ func _after_change() -> void:
 		$Model.die()
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
 		_warn_witnesses()
+	elif boar.state == Boar.State.CAPTURED:
+		$Model.net_fall()
 
 
 ## A corpse with spears, arrows or nets stuck in it stays until the hunt ends, so they can be taken back.
@@ -270,6 +273,7 @@ func _physics_process(delta: float) -> void:
 		_snare_left -= delta
 		if _snare_left <= 0.0:
 			boar.break_free()
+			$Model.stand()
 			_state_time = 0.0
 			_show_state()
 			held_changed.emit(false)

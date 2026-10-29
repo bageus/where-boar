@@ -9,7 +9,7 @@ const MODELS := {
 	"Heavy": preload("res://assets/models/caveman_heavy.glb"),
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
-const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death"]
+const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Club = preload("res://assets/models/club.glb")
