@@ -102,6 +102,8 @@ None. P3-001..P3-029 done.
 - 2026-10-29 camp "Start hunt" station (exit toward the hunt, z=-16) uses the owner's tribal direction sign (`assets/models/direction_sign.glb`, 3k triangles, 10 meshes, ~2.7 m tall); replaces the placeholder `signpost.glb`; arrow direction not checked in-game.
 - 2026-10-29 camp Pens station uses the owner's tribal boar pen (`boar_pen.glb`, 31k triangles) with the tribal cage rack (`cage_rack.glb`, 43k, left as is) right behind it. Caught roosters/turkeys (up to 3 each) show in the rack's cages; the pen shows the last five caught boars as their own rigged models (`Progress.pen`, oldest out first, saved in the "pen" field).
 
+- 2026-10-29 hunt FPS: map props (bushes, trees, rocks) are drawn as one MultiMesh per model and 80 m quadrant (`hunt_map.gd` `_batch_props`); sun shadows end at 60 m; stone piles and boar health bars cast no shadow. Measured at the hunter's start view (1280x720): 2289 -> 720 draw calls and 1.51M -> 1.07M triangles per frame. Scripts take ~0.5 ms per frame, so boar AI was not the cause.
+
 ## Next action
 
 Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in, D027).

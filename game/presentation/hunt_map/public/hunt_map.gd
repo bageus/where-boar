@@ -30,6 +30,9 @@ const WILD_PER_SPOT := 3
 const WILD_SPREAD := 4.0
 const TIP_SECONDS := 8.0
 const SCOUT_CHECK_SECONDS := 0.5
+## Props are drawn as one MultiMesh per model and square this wide, metres (80: the map's four quadrants) (owner, 2026-10-29: low FPS;
+## 169 bushes alone cost about 1100 draw calls). Stone piles stay separate: they get outlined and picked up.
+const BATCH_CELL := 80.0
 const TIPS := [
 	"Boars flee when you get close. Caps Lock toggles sneaking.",
 	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
@@ -63,6 +66,7 @@ var _baits: Array[Node3D] = []
 
 
 func _ready() -> void:
+	_batch_props()
 	var zones: Array[Vector2] = []
 	for zone: Node3D in $EscapeZones.get_children():
 		zones.append(Vector2(zone.position.x, zone.position.z))
@@ -98,6 +102,33 @@ func _ready() -> void:
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
 	$Hud/Tip.visible = first_hunt
+
+
+func _batch_props() -> void:
+	var batches := {}  # [mesh, cell, cast_shadow] -> Array[Transform3D]
+	for prop in $Props.get_children():
+		var piles: bool = prop.is_in_group("stone_piles")
+		for mesh_node: MeshInstance3D in prop.find_children("*", "MeshInstance3D", true, false):
+			if piles:  # a few pebbles: their shadow is not worth a draw call each
+				mesh_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				continue
+			var at := mesh_node.global_position
+			var key := [mesh_node.mesh, Vector2i(floori(at.x / BATCH_CELL), floori(at.z / BATCH_CELL)), mesh_node.cast_shadow]
+			if not batches.has(key):
+				batches[key] = [] as Array[Transform3D]
+			batches[key].append($Props.global_transform.affine_inverse() * mesh_node.global_transform)
+			mesh_node.queue_free()
+	for key: Array in batches:
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = key[0]
+		multimesh.instance_count = batches[key].size()
+		for n in batches[key].size():
+			multimesh.set_instance_transform(n, batches[key][n])
+		var node := MultiMeshInstance3D.new()
+		node.multimesh = multimesh
+		node.cast_shadow = key[2]
+		$Props.add_child(node)
 
 
 func _add_wild(animal: CharacterBody3D) -> void:

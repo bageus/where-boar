@@ -46,10 +46,12 @@ shape = SubResource("Shape_body")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 
 [node name="Back" type="MeshInstance3D" parent="HealthBar"]
+cast_shadow = 0
 mesh = SubResource("Mesh_bar")
 material_override = SubResource("Mat_bar_back")
 
 [node name="Fill" type="MeshInstance3D" parent="HealthBar"]
+cast_shadow = 0
 mesh = SubResource("Mesh_fill")
 material_override = SubResource("Mat_bar_fill")
 
