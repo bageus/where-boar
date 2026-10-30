@@ -24,6 +24,7 @@ const TREE_COUNT := 1400
 const NEAR_TREES := 450
 const NEAR_FROM := 58.0
 const NEAR_SPAN := Rect2(-40.0, -70.0, 150.0, 180.0)
+const TREE_CELL := 300.0
 const CLOUD_COUNT := 14
 const CLOUD_DRIFT := 1.2  # metres per second, along +x
 const CLOUD_SPAN := 900.0
@@ -135,13 +136,21 @@ func _trees(rng: RandomNumberGenerator) -> void:
 			continue
 		var size := rng.randf_range(0.8, 1.4)
 		spots[rng.randi() % spots.size()].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), Vector3(x, height_at(x, z) - 0.3, z)))
+	# One MultiMesh per model and TREE_CELL square, so the woods out of view are culled (owner, 2026-10-30: low FPS).
+	var cells := {}  # [model, cell] -> Array[Transform3D]
 	for m in TREE_MESHES.size():
+		for t: Transform3D in spots[m]:
+			var key := [m, Vector2i(floori(t.origin.x / TREE_CELL), floori(t.origin.z / TREE_CELL))]
+			if not cells.has(key):
+				cells[key] = [] as Array[Transform3D]
+			cells[key].append(t)
+	for key: Array in cells:
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
-		multimesh.mesh = TREE_MESHES[m]
-		multimesh.instance_count = spots[m].size()
-		for n in spots[m].size():
-			multimesh.set_instance_transform(n, spots[m][n])
+		multimesh.mesh = TREE_MESHES[key[0]]
+		multimesh.instance_count = cells[key].size()
+		for n in cells[key].size():
+			multimesh.set_instance_transform(n, cells[key][n])
 		var node := MultiMeshInstance3D.new()
 		node.multimesh = multimesh
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

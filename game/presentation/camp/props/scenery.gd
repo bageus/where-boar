@@ -52,6 +52,48 @@ func _ready() -> void:
 	_drop_off(rng)
 	_skirt(rng)
 	_palisade(rng)
+	_batch()
+
+
+## The trees, wall rocks and palisade logs above as a few draw calls (owner, 2026-10-30: about 18 FPS in
+## the web build; their 312 nodes cost ~1100 draw calls with shadows): shared meshes as one MultiMesh
+## each, the one-off log and beam meshes merged into one mesh per wood colour.
+func _batch() -> void:
+	var shared := {}  # mesh -> Array[Transform3D]
+	var merged := {}  # material -> SurfaceTool
+	var batched: Array[Node] = []
+	for node: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+		var xf := global_transform.affine_inverse() * node.global_transform
+		if node.mesh is CylinderMesh:
+			var material: Material = node.mesh.material
+			if not merged.has(material):
+				merged[material] = SurfaceTool.new()
+			merged[material].append_from(node.mesh, 0, xf)
+		elif node.mesh in TREES_MESHES or node.mesh in BIG_ROCK_MESHES:
+			if not shared.has(node.mesh):
+				shared[node.mesh] = [] as Array[Transform3D]
+			shared[node.mesh].append(xf)
+		else:
+			continue
+		batched.append(node)
+	batched.reverse()  # children (log caps) before their parents
+	for node in batched:
+		node.free()
+	for mesh: Mesh in shared:
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = shared[mesh].size()
+		for n in shared[mesh].size():
+			multimesh.set_instance_transform(n, shared[mesh][n])
+		var node := MultiMeshInstance3D.new()
+		node.multimesh = multimesh
+		add_child(node)
+	for material: Material in merged:
+		var node := MeshInstance3D.new()
+		node.mesh = merged[material].commit()
+		node.mesh.surface_set_material(0, material)
+		add_child(node)
 
 
 ## A point in the square band between two half-widths (the camp is a square).
