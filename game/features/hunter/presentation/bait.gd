@@ -32,4 +32,10 @@ func _ready() -> void:
 	var model: Node3D = load(MODELS_DIR + MODELS[item_id] + ".glb").instantiate()
 	model.scale = Vector3.ONE * 1.5
 	add_child(model)
+	# The glb colours live in vertex colours, which Godot ignores unless the material asks for them.
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D"):
+		var paint := StandardMaterial3D.new()
+		paint.vertex_color_use_as_albedo = true
+		paint.roughness = 0.82
+		mesh.material_override = paint
 	get_tree().create_timer(kind[1]).timeout.connect(queue_free)
