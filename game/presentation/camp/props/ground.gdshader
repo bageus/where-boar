@@ -29,6 +29,17 @@ float greenness(vec2 p) {
 	return max(g, edge_band(half_size - p.y, p.x + 3.0) * (1.0 - smoothstep(south_split - 4.0, south_split, p.x)));
 }
 
+// 1 on the stony strip along the drop-off (east side, south-east), 0 on dirt; the edge wanders so the
+// ground meets the rim rocks (scenery.gd) with no straight line.
+float stony(vec2 p) {
+	float east = half_size - p.x;
+	float south = (half_size - p.y) + 100.0 * (1.0 - smoothstep(south_split - 1.0, south_split, p.x));
+	float d = min(east, south);
+	float t = (east < south) ? p.y : p.x;
+	float w = 1.3 + 0.9 * sin(t * 0.8) + 0.5 * sin(t * 2.1 + 1.3);
+	return 1.0 - smoothstep(w - 0.9, w + 0.5, d);
+}
+
 float worn(vec2 p) {
 	float w = 0.0;
 	for (int i = 0; i < worn_count; i++) {
@@ -54,6 +65,10 @@ void fragment() {
 	vec3 grass = mix(vec3(0.19, 0.41, 0.1), vec3(0.33, 0.53, 0.16), big) * (0.85 + 0.3 * fine);
 	vec3 moss = mix(dirt, vec3(0.45, 0.47, 0.24), 0.6);
 	vec3 colour = mix(mix(dirt, moss, smoothstep(0.05, 0.4, g)), grass, smoothstep(0.35, 0.8, g));
+	// Stones scattered through the dirt thin out into bare rock at the rim; the box's sides are rock.
+	float rock = stony(p + (vec2(fine, big) - 0.5) * 3.0) * (1.0 - w);
+	rock = max(smoothstep(0.2, 0.7, rock + (fine - 0.5) * 0.8) * step(0.001, rock), step(world.y, -0.05));
+	colour = mix(colour, vec3(0.55, 0.55, 0.58) * (0.8 + 0.4 * fine), rock);
 	ALBEDO = pow(colour, vec3(2.2));  // the colours above are sRGB, as in a StandardMaterial3D
 	ROUGHNESS = 1.0;
 }

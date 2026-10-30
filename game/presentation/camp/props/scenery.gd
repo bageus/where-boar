@@ -30,6 +30,8 @@ const FOREST_Z := Vector2(-67.0, -20.0)
 const TREE_COUNT := 75
 const GRASS_INSIDE := 1800  # the camp shrank from 40 m to 34 m; same density
 const GRASS_FOREST := 2500  # mostly hidden behind the palisade
+## The wall's rocks reach down to the valley floor (vista.gd BASE_Y) so no sky or valley shows under them.
+const WALL_DEPTH := 44.0
 const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
 const WOOD: Array[Color] = [Color(0.42, 0.3, 0.19), Color(0.5, 0.37, 0.24), Color(0.36, 0.26, 0.17), Color(0.47, 0.4, 0.3)]
@@ -80,11 +82,11 @@ func _rock_wall(rng: RandomNumberGenerator) -> void:
 		var extra := row * 9.0  # the back row's rocks are taller
 		var out := 6.0 + row * 9.0
 		for z in range(int(FOREST_Z.x), int(HALF + out), int(step)):
-			_big_rock(rng, Vector3(-HALF - out, 0.0, z + rng.randf_range(-1.5, 1.5)), Vector2(14, 20) + Vector2.ONE * extra)
+			_big_rock(rng, Vector3(-HALF - out, 0.0, z + rng.randf_range(-1.5, 1.5)), Vector2(14, 20) + Vector2.ONE * extra, false, [], WALL_DEPTH)
 		# The south end of the wall sinks towards the drop-off instead of ending in a sheer face.
 		for x in range(int(-HALF - out), int(SOUTH_SPLIT) + 6, int(step)):
 			var low := lerpf(1.0, 0.25, smoothstep(-8.0, SOUTH_SPLIT + 4.0, x))
-			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), 0.0, HALF + out), (Vector2(14, 20) + Vector2.ONE * extra) * low)
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), 0.0, HALF + out), (Vector2(14, 20) + Vector2.ONE * extra) * low, false, [], WALL_DEPTH)
 
 
 ## Rocks stepping down from the camp's rim towards the valley along the east side and the east half
@@ -107,17 +109,20 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 	for mesh in BIG_ROCK_MESHES:
 		skirt.append([])
 	var rim: Array[Vector3] = []
-	for t in range(int(-HALF) - 2, int(HALF) + 3, 2):
+	for t in range(int(-HALF) - 2, int(HALF) + 3, 1):
 		rim.append(Vector3(-HALF, 0.0, t))  # west
 		rim.append(Vector3(HALF, 0.0, t))  # east
 		rim.append(Vector3(t, 0.0, HALF))  # south
 	for at in rim:
 		var inward := -Vector3(signf(at.x) if absf(at.x) >= HALF else 0.0, 0.0, signf(at.z) if absf(at.z) >= HALF else 0.0)
 		var spot := at + Vector3(rng.randf_range(-0.7, 0.7), 0.0, rng.randf_range(-0.7, 0.7)) * (Vector3.ONE - inward.abs())
+		# The rocks reach in and out along the rim in slow waves, so the ground's edge is no straight line.
+		var t := at.x + at.z
+		var reach := 0.9 + 1.0 * sin(t * 0.42) + 0.8 * sin(t * 1.1 + 2.0) + rng.randf_range(-0.4, 0.4)
 		if _by_drop(spot):
-			_big_rock(rng, spot - inward * rng.randf_range(-0.6, 1.2) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(2.6, 4.2), true, skirt)
+			_big_rock(rng, spot - inward * (reach + rng.randf_range(-0.6, 1.2)) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(2.6, 5.0), true, skirt)
 		else:
-			_big_rock(rng, spot + inward * rng.randf_range(-0.8, 0.9) + Vector3(0.0, 0.6, 0.0), Vector2(1.4, 4.0), false, skirt)
+			_big_rock(rng, spot + inward * (reach + rng.randf_range(-0.8, 0.9)) + Vector3(0.0, 0.6, 0.0), Vector2(1.4, 4.0), false, skirt)
 			if rng.randf() < 0.35:
 				_big_rock(rng, spot + inward * rng.randf_range(1.2, 2.6) + Vector3(0.0, 0.7, 0.0), Vector2(0.6, 1.4), false, skirt)
 	_skirt_collision(skirt)
@@ -152,7 +157,7 @@ func _skirt_collision(skirt: Array[Array]) -> void:
 
 ## A big rock of the given height range; by_top puts its top at `at.y` instead of its base. With
 ## `into`, the rock's transform goes to the list for its mesh instead of a node of its own.
-func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top := false, into: Array[Array] = []) -> void:
+func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top := false, into: Array[Array] = [], depth := 0.0) -> void:
 	var i := rng.randi() % BIG_ROCK_MESHES.size()
 	var box := BIG_ROCK_MESHES[i].get_aabb()
 	var k := rng.randf_range(height.x, height.y) / box.size.y
@@ -160,7 +165,8 @@ func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top 
 	node.mesh = BIG_ROCK_MESHES[i]
 	node.scale = Vector3(k * rng.randf_range(0.6, 0.8), k, k * rng.randf_range(0.6, 0.8))
 	node.rotation.y = rng.randf() * TAU
-	node.position = at - Vector3(0.0, box.end.y * k if by_top else 1.0, 0.0)
+	node.position = at - Vector3(0.0, box.end.y * k if by_top else 1.0 + depth, 0.0)
+	node.scale.y *= 1.0 + depth / (box.size.y * k)  # stretched downwards, the top stays put
 	if into.is_empty():
 		add_child(node)
 	else:
