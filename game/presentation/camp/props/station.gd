@@ -14,7 +14,20 @@ func _ready() -> void:
 	add_child(node)
 	if solid:
 		fit_collision($Body/Collision, node)
+		$Label.position = Vector3($Body/Collision.position.x, $Label.position.y, $Body/Collision.position.z)
 	$Label.text = "%s [E]" % title
+
+
+## How far the point is from the station on the ground plane: from the footprint's edge when solid
+## (the hunter stands beside it, anywhere along its perimeter), else from the station's origin.
+func distance_to(point: Vector3) -> float:
+	if not solid:
+		return global_position.distance_to(point)
+	var collision: CollisionShape3D = $Body/Collision
+	var local := collision.global_transform.affine_inverse() * point
+	var half := (collision.shape as BoxShape3D).size * 0.5
+	var outside := Vector2(maxf(absf(local.x) - half.x, 0.0), maxf(absf(local.z) - half.z, 0.0))
+	return outside.length() * collision.global_transform.basis.get_scale().x
 
 
 ## Sizes a box shape to the bounds of the model's meshes (in the model's own space).

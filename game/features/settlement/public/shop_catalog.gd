@@ -40,8 +40,8 @@ const ITEMS := {
 	"item_porter": {"name": "Porter (carries +2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
 	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true},
 	# Pick which helper animal goes on the next hunt (owner, 2026-10-27); free, needs one in the pen.
-	"item_take_rooster": {"name": "Take the rooster on the hunt", "shop": "pens", "price": 0, "unique": true, "companion": "rooster"},
-	"item_take_turkey": {"name": "Take the turkey on the hunt", "shop": "pens", "price": 0, "unique": true, "companion": "turkey"},
+	"item_take_rooster": {"name": "Take the rooster on the hunt", "shop": "cages", "price": 0, "unique": true, "companion": "rooster"},
+	"item_take_turkey": {"name": "Take the turkey on the hunt", "shop": "cages", "price": 0, "unique": true, "companion": "turkey"},
 	"item_saddle_runner_grey": {"name": "Saddle a Runner (fast)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "runner_grey"},
 	"item_saddle_aggressive_red": {"name": "Saddle an Angry boar (rams)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "aggressive_red"},
 	"item_saddle_armored_black": {"name": "Saddle an Armored boar (steady)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "armored_black"},

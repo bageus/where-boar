@@ -28,12 +28,12 @@ const RAIL_TOP := 1.0
 const Saddle = preload("res://assets/models/saddle.glb")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/caveman_helper.glb")
-const Station = preload("res://game/presentation/camp/props/station.gd")
 ## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
 ## lowered by his knee height (0.25 m) so he sits on the bench top (0.52).
 const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25, 0.37)
 
-const USE_RADIUS := 2.5
+const USE_RADIUS := 2.5  # from a point station
+const USE_RADIUS_SOLID := 1.5  # from the edge of a solid one
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 ## The tavern hearth's flames, local to the tavern model.
@@ -58,7 +58,6 @@ func _ready() -> void:
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
 	_show_progress()
-	_block_cages()
 	_fill_pen()
 	_seat_helper()
 	_ambience()
@@ -74,7 +73,7 @@ func _fill_pen() -> void:
 		for i in mini(progress.helpers.get(animal_id, 0), CAGE_Z.size()):
 			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
 			animal.process_mode = Node.PROCESS_MODE_DISABLED
-			$CageRack.add_child(animal)
+			$Stations/Cages.add_child(animal)
 			animal.scale = Vector3.ONE * CAGE_BIRD_SCALE
 			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
 			animal.rotation.y = -PI / 2  # faces out of the cage
@@ -94,15 +93,6 @@ func _fill_pen() -> void:
 		pens.add_child(saddle)
 		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
-
-
-## The cage rack is solid like the other buildings.
-func _block_cages() -> void:
-	var body := StaticBody3D.new()
-	var collision := CollisionShape3D.new()
-	body.add_child(collision)
-	$CageRack.add_child(body)
-	Station.fit_collision(collision, $CageRack)
 
 
 ## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by; the jungle
@@ -161,7 +151,7 @@ func _show_progress() -> void:
 	for animal_id in progress.helpers:
 		lines.append("%s: %d in pens" % [animal_id, progress.helpers[animal_id]])
 	if progress.hunts == 0:
-		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens (south-west), Well (water).")
+		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water).")
 	$Hud/Progress.text = "\n".join(lines)
 
 
@@ -169,7 +159,7 @@ func _on_interacted() -> void:
 	if _shop.visible:
 		return
 	for station: Node3D in $Stations.get_children():
-		if hunter.global_position.distance_to(station.global_position) <= USE_RADIUS:
+		if station.distance_to(hunter.global_position) <= (USE_RADIUS_SOLID if station.solid else USE_RADIUS):
 			_use(station)
 			return
 

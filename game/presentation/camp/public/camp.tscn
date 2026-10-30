@@ -158,9 +158,17 @@ station_id = "hunting_hut"
 title = "Hunting hut"
 model = ExtResource("12_hunter_stall")
 
+[node name="Cages" parent="Stations" instance=ExtResource("5_station")]
+transform = Transform3D(0.8872, 0, 0.4614, 0, 1, 0, -0.4614, 0, 0.8872, -16.1135, 0, 10.7572)
+station_id = "cages"
+title = "Cages (take a rooster or turkey on the hunt)"
+model = ExtResource("14_cage_rack")
+solid = true
+
 [node name="Campfire" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 station_id = "campfire"
+solid = true
 title = "Campfire (meal for the next hunt)"
 model = ExtResource("9_campfire")
 
@@ -175,7 +183,7 @@ model = ExtResource("15_tavern")
 transform = Transform3D(-0.8682, 0, 0.4961, 0, 1, 0, -0.4961, 0, -0.8682, -6, 0, 10.5)
 solid = true
 station_id = "pens"
-title = "Pens (saddle a boar, pick a helper)"
+title = "Pens (saddle a boar)"
 model = ExtResource("13_boar_pen")
 
 
@@ -185,8 +193,6 @@ station_id = "well"
 title = "Well (fill the water bag)"
 model = ExtResource("16_well")
 
-[node name="CageRack" parent="." instance=ExtResource("14_cage_rack")]
-transform = Transform3D(0.8872, 0, 0.4614, 0, 1, 0, -0.4614, 0, 0.8872, -16.1135, 0, 10.7572)
 
 [node name="Hunter" parent="." instance=ExtResource("6_hunter")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 6)
