@@ -119,6 +119,7 @@ func spear_hit(amount: int) -> void:
 	var was_charging := boar.state == Boar.State.CHARGE
 	boar.take_hit(amount)
 	$Sounds.squeal()
+	$Model.flash()
 	if boar.state == Boar.State.CHARGE:
 		# Mid-ram: the hit hurts but does not stop it.
 		_after_change()

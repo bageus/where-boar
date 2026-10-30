@@ -13,6 +13,8 @@ const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
 
 var _player: AnimationPlayer
 var _dead := false
+var _dust: CPUParticles3D
+var _flash := StandardMaterial3D.new()
 
 
 func show_type(boar_type: Resource) -> void:
@@ -24,6 +26,9 @@ func show_type(boar_type: Resource) -> void:
 	for anim in ["idle", "walk", "run", "eat"]:
 		_player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
 	_add_net_fall()
+	_add_dust()
+	_flash.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_flash.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_dead = false
 	_player.play("idle")
 
@@ -35,6 +40,46 @@ func move(speed: float, eating := false) -> void:
 	var anim := ("eat" if eating else "idle") if speed < 0.3 else ("walk" if speed < RUN_FROM else "run")
 	_player.play(anim, 0.4 if anim == "eat" else 0.2)
 	_player.speed_scale = 1.0 if anim == "idle" else speed / (WALK_SPEED if anim == "walk" else RUN_SPEED)
+	_dust.emitting = anim == "run"
+
+
+## Whole model flashes white and fades back (hurt).
+func flash() -> void:
+	_flash.albedo_color = Color.WHITE
+	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+		mesh.material_overlay = _flash
+	var tween := create_tween()
+	tween.tween_property(_flash, "albedo_color:a", 0.0, 0.25)
+	tween.tween_callback(func() -> void:
+		for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+			mesh.material_overlay = null)
+
+
+## A few tan low-poly cubes kicked up behind the feet while running; local space off, so they stay where they fell.
+func _add_dust() -> void:
+	_dust = CPUParticles3D.new()
+	_dust.amount = 8
+	_dust.lifetime = 0.5
+	_dust.local_coords = false
+	_dust.emitting = false
+	_dust.position = Vector3(0.0, 0.1, 0.4)
+	_dust.direction = Vector3(0.0, 1.0, 0.5)
+	_dust.spread = 30.0
+	_dust.initial_velocity_min = 0.5
+	_dust.initial_velocity_max = 1.2
+	_dust.gravity = Vector3(0.0, -1.0, 0.0)
+	_dust.scale_amount_min = 0.6
+	_dust.scale_amount_max = 1.0
+	_dust.scale_amount_curve = Curve.new()
+	_dust.scale_amount_curve.add_point(Vector2(0.0, 1.0))
+	_dust.scale_amount_curve.add_point(Vector2(1.0, 0.0))
+	var puff := BoxMesh.new()
+	puff.size = Vector3.ONE * 0.25
+	puff.material = StandardMaterial3D.new()
+	puff.material.albedo_color = Color(0.82, 0.72, 0.55)
+	puff.material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_dust.mesh = puff
+	add_child(_dust)
 
 
 func attack() -> void:
