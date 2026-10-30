@@ -138,7 +138,7 @@ func _plant_grass() -> void:
 					for k in GRASS_PER_METRE:
 						var x := i + rng.randf() - (w - 1) * 0.5
 						var z := j + rng.randf() - (d - 1) * 0.5
-						var size := rng.randf_range(0.65, 0.8) if tall else rng.randf_range(0.35, 0.45)
+						var size := rng.randf_range(0.65, 0.8) if tall else rng.randf_range(0.18, 0.23)
 						var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size),
 								Vector3(x, height_at(x, z) - 0.05, z) - centre)
 						spots.append(spot)

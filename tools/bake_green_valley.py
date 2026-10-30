@@ -46,14 +46,14 @@ def lookout(x: float, z: float) -> float:
     cx, cz, height, top = LOOKOUT
     d = math.hypot(x - cx, z - cz)
     east = max(0.0, (x - cx) / d) if d > 0 else 0.0
-    width = 2.5 + 13.0 * east ** 4  # 2.5 m is a cliff, 15.5 m a walkable slope
+    width = 6.0 + 10.0 * east ** 4  # 6 m is a steep rocky bluff (was a 2.5 m wall), 16 m a walkable slope
     return height * (1.0 - smooth(top, top + width, d))
 
 
 def river_cliff(x: float, z: float) -> float:
     """A 5 m ridge south of the river: gentle slope up from the south, cliff down to the north."""
     along = smooth(-12.0, -6.0, x) * (1.0 - smooth(16.0, 22.0, x))
-    across = smooth(2.0, -9.0, z) if z > -9.0 else 1.0 - smooth(-9.0, -11.5, z)
+    across = smooth(2.0, -9.0, z) if z > -9.0 else 1.0 - smooth(-9.0, -14.5, z)
     return 5.0 * along * across
 
 
