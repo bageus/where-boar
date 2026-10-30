@@ -59,13 +59,13 @@ func dress(fire: Vector3, gate_sign: Vector3, buildings: Array[Node3D]) -> void:
 			out += out.normalized() * rng.randf_range(0.1, 0.9)
 			var at := building.global_transform * ((centre + out) / building.scale)
 			if absf(at.x) < HALF - 0.4 and absf(at.z) < HALF - 0.4:
-				plants.append(_flat(rng, at, rng.randf_range(0.5, 1.2)))
+				plants.append(_flat(rng, at, rng.randf_range(1.0, 1.5)))  # as on the hunt: the mesh's own size times 1-1.5
 	var ferns: Array[Transform3D] = []
 	var bushes: Array[Transform3D] = []
 	for t in plants:
 		(bushes if rng.randf() < 0.4 else ferns).append(t)
-	_scatter(rng, FERN_MESHES, ferns, false)
-	_scatter(rng, [(BUSH_SCENE.instantiate().get_child(0) as MeshInstance3D).mesh], bushes, true)
+	_scatter(rng, FERN_MESHES, ferns, false, true)
+	_scatter(rng, [(BUSH_SCENE.instantiate().get_child(0) as MeshInstance3D).mesh], bushes, true, true)
 	GROUND_MATERIAL.set_shader_parameter("worn_count", worn.size())
 	GROUND_MATERIAL.set_shader_parameter("worn_from_to", worn)
 	GROUND_MATERIAL.set_shader_parameter("worn_radius", radii)
@@ -102,8 +102,9 @@ func _flat(rng: RandomNumberGenerator, at: Vector3, size: float) -> Transform3D:
 
 
 ## One MultiMesh per mesh: each transform goes to a random mesh of the pool, its scale read as the
-## wanted width. Pebbles and ferns cast no shadow (cheap); bushes do.
-func _scatter(rng: RandomNumberGenerator, pool: Array[Mesh], spots: Array[Transform3D], shadows: bool) -> void:
+## wanted width, or with `natural` as a plain scale of the mesh. Pebbles and ferns cast no shadow
+## (cheap); bushes do.
+func _scatter(rng: RandomNumberGenerator, pool: Array[Mesh], spots: Array[Transform3D], shadows: bool, natural := false) -> void:
 	var groups: Array[Array] = []
 	groups.resize(pool.size())
 	for t in spots:
@@ -116,7 +117,7 @@ func _scatter(rng: RandomNumberGenerator, pool: Array[Mesh], spots: Array[Transf
 		multimesh.instance_count = groups[i].size()
 		for n in groups[i].size():
 			var t: Transform3D = groups[i][n]
-			var k := t.basis.get_scale().x / maxf(box.size.x, box.size.z)
+			var k := t.basis.get_scale().x / (1.0 if natural else maxf(box.size.x, box.size.z))
 			multimesh.set_instance_transform(n, Transform3D(t.basis.orthonormalized().scaled(Vector3.ONE * k), t.origin - Vector3(0.0, box.position.y * k + 0.05, 0.0)))
 		var node := MultiMeshInstance3D.new()
 		node.multimesh = multimesh

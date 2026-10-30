@@ -8,6 +8,10 @@ extends SceneTree
 const MODELS := ["weapon_stall", "hunter_stall", "cage_rack", "campfire", "tavern", "aframe_hide_tent",
 		"large_hide_tent", "round_hide_tent", "boar_pen", "tribal_well", "direction_sign"]
 const OUT := "res://assets/models/merged/"
+## Greenery baked into the owner's models is left out (owner, 2026-10-30), and so is the sand blob under
+## the tavern, pens and cages: its top lies exactly on the camp ground and z-fights with it.
+const SKIPPED_MATERIALS := "Leaf green"
+const SKIPPED_NODES := "Sandy island"
 
 
 func _init() -> void:
@@ -21,6 +25,8 @@ func _merge(name: String) -> void:
 	var tools := {}  # material -> SurfaceTool
 	var before := 0
 	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		if mi.get_active_material(0).resource_name.begins_with(SKIPPED_MATERIALS) or mi.name.begins_with(SKIPPED_NODES):
+			continue
 		var xf := Transform3D.IDENTITY
 		var n: Node = mi
 		while n != root:

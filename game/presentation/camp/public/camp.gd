@@ -28,9 +28,10 @@ const RAIL_TOP := 1.0
 const Saddle = preload("res://assets/models/saddle.glb")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/caveman_helper.glb")
+const Station = preload("res://game/presentation/camp/props/station.gd")
 ## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
 ## lowered by his knee height (0.25 m) so he sits on the bench top (0.52).
-const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25 / 1.3, 0.37)
+const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25, 0.37)
 
 const USE_RADIUS := 2.5
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
@@ -57,6 +58,7 @@ func _ready() -> void:
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
 	_show_progress()
+	_block_cages()
 	_fill_pen()
 	_seat_helper()
 	_ambience()
@@ -75,7 +77,7 @@ func _fill_pen() -> void:
 			$CageRack.add_child(animal)
 			animal.scale = Vector3.ONE * CAGE_BIRD_SCALE
 			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
-			animal.rotation.y = PI / 2  # faces out of the cage
+			animal.rotation.y = -PI / 2  # faces out of the cage
 			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage
 	var penned: Array[Node3D] = []
 	for i in mini(progress.pen.size(), PEN_SPOTS.size()):
@@ -92,6 +94,15 @@ func _fill_pen() -> void:
 		pens.add_child(saddle)
 		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
+
+
+## The cage rack is solid like the other buildings.
+func _block_cages() -> void:
+	var body := StaticBody3D.new()
+	var collision := CollisionShape3D.new()
+	body.add_child(collision)
+	$CageRack.add_child(body)
+	Station.fit_collision(collision, $CageRack)
 
 
 ## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by; the jungle

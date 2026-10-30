@@ -4,7 +4,7 @@ extends Node3D
 ## drop-off on the east side and south-east corner (the vista lies below it), and a palisade with an
 ## ajar gate on the north side by the Start hunt sign, with forest beyond. Lower rocks skirt the rock
 ## wall and the drop-off so they meet the ground with no seam and spill a little into the camp. The
-## camp's StaticBody walls in camp.tscn keep the hunter in; nothing here collides.
+## camp's StaticBody walls in camp.tscn keep the hunter in; only the rim rocks collide (_skirt_collision).
 
 const Dressing = preload("res://game/presentation/camp/props/dressing.gd")
 
@@ -73,16 +73,18 @@ func _by_drop(p: Vector3) -> bool:
 
 
 ## Big rocks in two rows along the west side and the west half of the south side; the back row
-## stands higher, so the wall climbs away from the camp.
+## stands higher (all rocks stand on the ground, none hangs in the air), so the wall climbs away from the camp.
 func _rock_wall(rng: RandomNumberGenerator) -> void:
 	for row in 2:
 		var step := 7.0
-		var lift := row * 9.0
+		var extra := row * 9.0  # the back row's rocks are taller
 		var out := 6.0 + row * 9.0
 		for z in range(int(FOREST_Z.x), int(HALF + out), int(step)):
-			_big_rock(rng, Vector3(-HALF - out, lift, z + rng.randf_range(-1.5, 1.5)), Vector2(14, 20))
-		for x in range(int(-HALF - out), int(SOUTH_SPLIT), int(step)):
-			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), lift, HALF + out), Vector2(14, 20))
+			_big_rock(rng, Vector3(-HALF - out, 0.0, z + rng.randf_range(-1.5, 1.5)), Vector2(14, 20) + Vector2.ONE * extra)
+		# The south end of the wall sinks towards the drop-off instead of ending in a sheer face.
+		for x in range(int(-HALF - out), int(SOUTH_SPLIT) + 6, int(step)):
+			var low := lerpf(1.0, 0.25, smoothstep(-8.0, SOUTH_SPLIT + 4.0, x))
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), 0.0, HALF + out), (Vector2(14, 20) + Vector2.ONE * extra) * low)
 
 
 ## Rocks stepping down from the camp's rim towards the valley along the east side and the east half
@@ -118,6 +120,7 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 			_big_rock(rng, spot + inward * rng.randf_range(-0.8, 0.9) + Vector3(0.0, 0.6, 0.0), Vector2(1.4, 4.0), false, skirt)
 			if rng.randf() < 0.35:
 				_big_rock(rng, spot + inward * rng.randf_range(1.2, 2.6) + Vector3(0.0, 0.7, 0.0), Vector2(0.6, 1.4), false, skirt)
+	_skirt_collision(skirt)
 	# Low and many: one shadowless MultiMesh per rock mesh keeps them to a handful of draw calls.
 	for i in BIG_ROCK_MESHES.size():
 		var multimesh := MultiMesh.new()
@@ -130,6 +133,21 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 		node.multimesh = multimesh
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(node)
+
+
+## The rim rocks are solid: a convex hull per rock with its transform baked into the points, since
+## physics shapes do not like the rocks' uneven scale.
+func _skirt_collision(skirt: Array[Array]) -> void:
+	var body := StaticBody3D.new()
+	add_child(body)
+	for i in BIG_ROCK_MESHES.size():
+		var hull := BIG_ROCK_MESHES[i].create_convex_shape(true, true).points
+		for xf: Transform3D in skirt[i]:
+			var shape := ConvexPolygonShape3D.new()
+			shape.points = xf * hull
+			var node := CollisionShape3D.new()
+			node.shape = shape
+			body.add_child(node)
 
 
 ## A big rock of the given height range; by_top puts its top at `at.y` instead of its base. With
