@@ -23,6 +23,7 @@ func _init() -> void:
 	failures += _check(_sling_stones_run_out_and_refill(), "sling stones run out, piles refill them, a new hunt restores the pouch")
 	failures += _check(_meal_and_water(), "one of each meal kind stacks on max stamina; water sips restore it")
 	failures += _check(_porter_and_any_trap(), "porter adds nets and arrows; any trap in stock can be set")
+	failures += _check(_trap_carry_caps(), "one trap of each type alone, three with a helper")
 	failures += _check(_ride_by_mount_type(), "mount type sets speed and perk; only the stab works when riding")
 	failures += _check(_saddles_from_items(), "saddled mount types come from camp items")
 	failures += _check(_radial_choice(), "the ring menu picks the choice the mouse points at")
@@ -158,6 +159,15 @@ func _porter_and_any_trap() -> bool:
 	loadout.equip({"item_porter": 1, "item_cage": 1, "item_net": 9, "item_arrow": 30})
 	return loadout.nets == Loadout.NET_CAP + 2 and loadout.arrows == Loadout.ARROW_CAP + 6 \
 		and loadout.place_any_trap() == "item_cage" and loadout.place_any_trap() == ""
+
+
+func _trap_carry_caps() -> bool:
+	var alone := Loadout.new()
+	alone.equip({"item_snare": 5, "item_pit": 2})
+	var helped := Loadout.new()
+	helped.equip({"item_trap_setter": 1, "item_snare": 5, "item_pit": 2})
+	return alone.traps["item_snare"] == 1 and alone.traps["item_pit"] == 1 \
+		and helped.traps["item_snare"] == 3 and helped.traps["item_pit"] == 2
 
 
 func _ride_by_mount_type() -> bool:

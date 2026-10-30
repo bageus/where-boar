@@ -46,6 +46,12 @@ func squeal() -> void:
 	Sfx.play(self, "boar_panic", 0.0, 40.0)
 
 
+## Caught by a trap: a few panicked squeals in a row.
+func trapped() -> void:
+	for delay in [0.0, 0.4, 0.9]:
+		Sfx.play(self, "boar_panic", 0.0, 40.0, delay)
+
+
 ## Started to run: the call that warns the herd.
 func cry() -> void:
 	Sfx.play(self, "boar_cry", 0.0, CRY_DISTANCE, randf() * CRY_DELAY_SECONDS)

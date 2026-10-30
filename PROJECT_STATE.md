@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-040
-last_completed_task_id: P3-040
+active_task_id: P3-041
+last_completed_task_id: P3-041
 build_status: PASS
 updated: 2026-10-30
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-040 done.
+None. P3-001..P3-041 done.
 
 ## Last completed work
 

@@ -28,6 +28,10 @@ const BAIT_IDS := ["item_mixed_berries", "item_mango", "item_bananas", "item_man
 
 ## Trap item ids in the order the trap menu shows them (M015).
 const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]
+## Traps of each type carried: one alone, three with a hired helper (owner, 2026-10-30).
+const TRAP_CAP := 1
+const HELPER_TRAP_CAP := 3
+const TRAP_SETTER_ID := "item_trap_setter"
 
 ## Camp meals and their stamina bonus; one of each kind is eaten at hunt start (M012, ASSUMPTION).
 const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
@@ -80,8 +84,9 @@ func equip(items: Dictionary) -> void:
 	for item_id in BAIT_IDS:
 		baits[item_id] = items.get(item_id, 0)
 	traps.clear()
+	var helped: bool = items.get(PORTER_ID, 0) > 0 or items.get(TRAP_SETTER_ID, 0) > 0
 	for item_id in TRAP_IDS:
-		traps[item_id] = items.get(item_id, 0)
+		traps[item_id] = mini(items.get(item_id, 0), HELPER_TRAP_CAP if helped else TRAP_CAP)
 	bait_id = _first_in_stock(BAIT_IDS, baits)
 	trap_id = _first_in_stock(TRAP_IDS, traps)
 	_meals.clear()

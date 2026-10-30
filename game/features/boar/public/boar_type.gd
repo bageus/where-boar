@@ -20,7 +20,5 @@ extends Resource
 @export_range(0.0, 1.0) var aggression := 0.35
 ## Share of a ram's knockback this boar takes; armored boars barely move.
 @export_range(0.0, 1.0) var knock_scale := 1.0
-## Seconds until this boar tears out of a snare; 0 means it never does (D023).
-@export var snare_break_seconds := 0.0
 @export var reward_dead := 2
 @export var reward_captured := 4

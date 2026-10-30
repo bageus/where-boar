@@ -69,11 +69,16 @@ const CLEAR_RADIUS := 5.0
 ## Grid cells under stumps, logs and trees: no grass grows through them.
 var _blocked := {}
 var _taken: Array[Vector3] = []
+## Ground mesh arrays, kept so leaf pits can cut holes into it.
+var _arrays: Array
+## Leaf pit openings: x, z, radius (the grass shader takes up to 8).
+var _holes := PackedVector4Array()
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
 
 func _ready() -> void:
+	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)
 	$Mesh.mesh = _build_mesh()
 	for node in get_parent().find_children("*", "Node3D", true, false):
 		if node != self and not is_ancestor_of(node):
@@ -292,6 +297,41 @@ func _add_multimesh(mesh: Mesh, spots: Array[Transform3D], centre: Vector3, mate
 	add_child(node)
 
 
+func _exit_tree() -> void:
+	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)  # the camp shares the grass material
+
+
+## A leaf pit went in (owner, 2026-10-30): ground cells touching its opening and the grass over it go,
+## so the pit shows below; its rim covers the jagged edge.
+# shortcut: only the look changes; the collision height map still has no hole, so the hunter walks
+# over the opening. Cut the height map too if playtest shows it.
+func dig(center: Vector3, radius: float) -> void:
+	var c := to_local(center)
+	var w := _shape.map_width
+	var d := _shape.map_depth
+	var cut := radius + 0.71  # half a cell's diagonal
+	var indices: PackedInt32Array = _arrays[Mesh.ARRAY_INDEX]
+	var ci := int(c.x + (w - 1) * 0.5)
+	var cj := int(c.z + (d - 1) * 0.5)
+	var reach := int(cut) + 1
+	for j in range(maxi(cj - reach, 0), mini(cj + reach + 1, d - 1)):
+		for i in range(maxi(ci - reach, 0), mini(ci + reach + 1, w - 1)):
+			if Vector2(i - (w - 1) * 0.5 + 0.5 - c.x, j - (d - 1) * 0.5 + 0.5 - c.z).length() <= cut:
+				var q := (j * (w - 1) + i) * 6
+				for k in 6:
+					indices[q + k] = 0  # a degenerate triangle draws nothing
+	_arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh: ArrayMesh = $Mesh.mesh
+	var material := mesh.surface_get_material(0)
+	mesh.clear_surfaces()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _arrays)
+	mesh.surface_set_material(0, material)
+	if _holes.size() < 8:
+		_holes.append(Vector4(center.x, center.z, radius + 0.3, 0.0))
+		GRASS_MATERIAL.set_shader_parameter("holes", _holes)
+		GRASS_MATERIAL.set_shader_parameter("hole_count", _holes.size())
+
+
 func _build_mesh() -> ArrayMesh:
 	var w := _shape.map_width
 	var d := _shape.map_depth
@@ -313,14 +353,13 @@ func _build_mesh() -> ArrayMesh:
 		for i in w - 1:
 			var a := j * w + i
 			indices.append_array([a, a + 1, a + w, a + 1, a + w + 1, a + w])
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = verts
-	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_COLOR] = colors
-	arrays[Mesh.ARRAY_INDEX] = indices
+	_arrays.resize(Mesh.ARRAY_MAX)
+	_arrays[Mesh.ARRAY_VERTEX] = verts
+	_arrays[Mesh.ARRAY_NORMAL] = normals
+	_arrays[Mesh.ARRAY_COLOR] = colors
+	_arrays[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _arrays)
 	var material := StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
 	mesh.surface_set_material(0, material)

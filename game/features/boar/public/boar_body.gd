@@ -8,6 +8,7 @@ const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
+const StunStars = preload("res://game/features/boar/presentation/stun_stars.gd")
 
 # ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
 const WANDER_SPEED := 1.5
@@ -39,6 +40,8 @@ const RAM_DASH_SECONDS := 1.0
 const RAM_HIT_DISTANCE := 1.3
 ## How far a wall or fence turns a boar away from its normal, radians.
 const WALL_TURN_SPREAD := PI / 4.0
+## Physics layer 6: the boar's hitbox (weapons and the hunter's E look for it).
+const HITBOX_LAYER := 1 << 5
 ## Physics layer 5: bushes and other cover that block a boar's sight but not movement.
 const COVER_LAYER := 1 << 4
 ## Boar eye and hunter body heights for the line of sight, metres (ASSUMPTION).
@@ -56,6 +59,10 @@ const ALERT_MARKS := ["", "?", "!", "!!"]
 const ALERT_COLORS := [Color.WHITE, Color.YELLOW, Color.ORANGE, Color.RED]
 ## Hunter health lost per point of boar damage (hunter health 100, boar damage 1–2).
 const HP_PER_DAMAGE := 20
+## A free boar running this close to a snared one frees it (owner, 2026-10-30; distance ASSUMPTION).
+const RESCUE_RADIUS := 2.0
+const RESCUE_MIN_SPEED := 1.0
+const PIT_FALL_SECONDS := 0.3
 
 ## Fact: the boar's hunt ended (DEAD, CAPTURED or ESCAPED); kind is a BoarOutcome.Kind.
 ## wounded: the boar was hurt before it was caught (pays less).
@@ -99,8 +106,9 @@ var _charge_rolled := false
 var _forced_heading := Vector2.ZERO
 var _forced_left := 0.0
 var _stun_left := 0.0
-## Seconds until a snared boar breaks free; INF while it never will.
-var _snare_left := INF
+var _stars: Node3D
+## Held by a snare: another boar running past can free it.
+var _snared := false
 ## Standing at a bait and eating it.
 var _eating := false
 
@@ -169,22 +177,61 @@ func net_hit() -> void:
 	_after_change()
 
 
-## Pit with leaves: holds the boar until the hunt ends (D023).
-func fall_in_pit() -> void:
-	_hold(INF)
+## Pit with leaves: the boar drops to the bottom of the pit at center and stays until the hunt ends.
+func fall_in_pit(center: Vector3, depth: float) -> void:
+	if not boar.is_free():
+		return
+	_hold()
+	global_position = Vector3(center.x, global_position.y, center.z)
+	create_tween().tween_property($Model, "position:y", -depth, PIT_FALL_SECONDS) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
-## Snare: holds the boar; big types tear free after a while (D023).
+## Snare: holds the boar until another boar runs past it or the hunter takes it (owner, 2026-10-30).
 func snare() -> void:
-	var seconds := boar_type.snare_break_seconds
-	_hold(seconds if seconds > 0.0 else INF)
+	if boar.is_free():
+		_hold()
+		_snared = true
 
 
-## Tripwire: knocks the boar down and stuns it for a while (D023).
+## Tripwire: the boar falls and lies stunned for a while, stars circling over it (owner, 2026-10-30).
 func trip(seconds: float) -> void:
 	if boar.is_free():
 		_stun_left = seconds
 		_lie(true)
+		$Sounds.trapped()
+		_stars = StunStars.new()
+		_stars.position.y = 1.0
+		add_child(_stars)
+
+
+## Boars whose hitbox is within radius of point.
+static func near(world: World3D, point: Vector3, radius: float) -> Array[Node]:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = SphereShape3D.new()
+	query.shape.radius = radius
+	query.transform = Transform3D(Basis(), point)
+	query.collision_mask = HITBOX_LAYER  # hitboxes only; the terrain alone would fill the results
+	var boars: Array[Node] = []
+	for hit in world.direct_space_state.intersect_shape(query):
+		boars.append(hit.collider.get_parent())
+	return boars
+
+
+## The hunter's E: a boar held by a snare or a pit, or lying stunned, is caught for good. False if it is neither.
+func take_held() -> bool:
+	if boar.state != Boar.State.TRAPPED and not (_stun_left > 0.0 and boar.is_free()):
+		return false
+	net_hit()
+	return true
+
+
+func _end_stun() -> void:
+	_stun_left = 0.0
+	_lie(false)
+	if _stars:
+		_stars.queue_free()
+		_stars = null
 
 
 ## Lays only the model on its side, lifted by half its width so it rests on the ground; turning the physics
@@ -194,27 +241,38 @@ func _lie(down: bool) -> void:
 	$Model.position.y = LYING_LIFT if down else 0.0
 
 
-## Stake cage closes on the boar that walked in (D023).
+## The cage gate drops behind the boar: caught, it stands in the cage till the hunt ends.
 func cage_capture() -> void:
 	net_hit()
+	$Model.stand()
+	$Sounds.trapped()
 
 
-func _hold(seconds: float) -> void:
-	if not boar.is_free():
-		return
+func _hold() -> void:
 	boar.trap()
-	$Model.net_fall()
-	_snare_left = seconds
+	$Sounds.trapped()
 	_show_state()
 	held_changed.emit(true)
 
 
+## A snared boar is freed by a free boar running close by (owner, 2026-10-30).
+func _rescued() -> bool:
+	for other in get_parent().get_children():
+		if other != self and other.get_script() == get_script() and other.boar.is_free() \
+				and Vector2(other.velocity.x, other.velocity.z).length() >= RESCUE_MIN_SPEED \
+				and other.global_position.distance_to(global_position) <= RESCUE_RADIUS:
+			return true
+	return false
+
+
 ## Knocked by a ram or another boar: pushed along `impulse` for a moment.
-func knock(impulse: Vector3, _damage: int = 0) -> void:
+func knock(impulse: Vector3, _damage: int = 0, _rammer: Resource = null) -> void:
 	_knock = impulse * boar_type.knock_scale
 
 
 func _after_change() -> void:
+	if not boar.is_free() and _stun_left > 0.0:
+		_end_stun()
 	_show_state()
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
@@ -270,18 +328,16 @@ func saw_kill() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	if boar.state == Boar.State.TRAPPED:
-		_snare_left -= delta
-		if _snare_left <= 0.0:
-			boar.break_free()
-			$Model.stand()
-			_state_time = 0.0
-			_show_state()
-			held_changed.emit(false)
+	if _snared and boar.state == Boar.State.TRAPPED and _rescued():
+		_snared = false
+		boar.break_free()
+		_state_time = 0.0
+		_show_state()
+		held_changed.emit(false)
 	if _stun_left > 0.0:
 		_stun_left -= delta
-		if _stun_left <= 0.0 and boar.state != Boar.State.DEAD:
-			_lie(false)
+		if _stun_left <= 0.0:
+			_end_stun()
 	if not boar.is_free() or _stun_left > 0.0:
 		velocity.x = 0.0
 		velocity.z = 0.0

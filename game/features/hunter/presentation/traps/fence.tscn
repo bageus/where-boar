@@ -1,28 +1,22 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
+
 [ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
+[ext_resource type="PackedScene" path="res://assets/models/trap/03_branch_fence.glb" id="2_model"]
 
 [sub_resource type="BoxShape3D" id="Shape_fence"]
-size = Vector3(4, 1.2, 0.3)
-
-[sub_resource type="StandardMaterial3D" id="Mat_fence"]
-albedo_color = Color(0.5, 0.35, 0.2, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_fence"]
-material = SubResource("Mat_fence")
-size = Vector3(4, 1.2, 0.3)
+size = Vector3(4, 1.4, 0.4)
 
 [node name="Fence" type="StaticBody3D"]
 
 [node name="Collision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0.7, 0.2)
 shape = SubResource("Shape_fence")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-mesh = SubResource("Mesh_fence")
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.6, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Marker" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
 billboard = 1
 modulate = Color(0.55, 0.85, 1, 1)
 outline_size = 8

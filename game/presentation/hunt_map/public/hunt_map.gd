@@ -91,6 +91,7 @@ func _ready() -> void:
 			_add_wild(animal)
 	_hunter.equip(items)
 	_hunter.start_hunt()
+	_hunter.pit_dug.connect(_terrain.dig)  # before the trap setter digs any
 	if items.get("item_trap_setter", 0) > 0:
 		_set_traps_at_zones(zones)
 		_hunter.bring_trap_setter()

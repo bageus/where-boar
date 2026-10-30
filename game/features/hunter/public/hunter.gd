@@ -26,8 +26,8 @@ const TRAP_SCENES := {
 	"item_fence": preload("res://game/features/hunter/presentation/traps/fence.tscn"),
 }
 
-## Seconds of work to build each trap from its ghost (owner, 2026-10-28; numbers ASSUMPTION).
-const TRAP_BUILD_SECONDS := {"item_pit": 6.0, "item_snare": 3.0, "item_tripwire": 2.0, "item_cage": 5.0, "item_fence": 4.0}
+## Seconds of work to build each trap from its ghost (owner, 2026-10-30).
+const TRAP_BUILD_SECONDS := {"item_pit": 60.0, "item_snare": 15.0, "item_tripwire": 20.0, "item_cage": 70.0, "item_fence": 40.0}
 ## Holding E builds a ghost within this many metres.
 const BUILD_RADIUS := 2.5
 ## Holding F or T this long opens the bait or trap menu instead of placing.
@@ -99,6 +99,8 @@ signal downed
 signal shouted(at: Vector3)
 ## Fact: bait was put on the ground (M011); the map shows it to boars.
 signal bait_placed(bait: Node3D)
+## Fact: a leaf pit went into the ground here; the map cuts the ground away over its opening.
+signal pit_dug(center: Vector3, radius: float)
 
 var stamina := Stamina.new()
 var ride := Ride.new()
@@ -130,6 +132,8 @@ var _held_for := 0.0
 ## The bowstring, sling or spear wind-up sound while a shot is charged; stopped on release.
 var _draw_sound: AudioStreamPlayer3D
 var _pointed_at: Node3D
+## The tripwire whose second peg follows the aim until T is pressed again (owner, 2026-10-30).
+var _laying_wire: Node3D
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -190,6 +194,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_holding_attack = false
 		_attack()
 	elif event.is_action_pressed("interact"):
+		_take_held_boar()
 		_pick_up()
 		$Rider.toggle()
 		interacted.emit()
@@ -314,28 +319,53 @@ const PLACED_TRAPS_GROUP := "placed_traps"
 
 
 ## Puts a ghost of the active trap on the ground 2 m ahead, facing the hunter's way (M015); it works once built.
+## A tripwire goes down in two presses: the first peg, then the second where the hunter aims.
 func place_trap() -> void:
-	_set_trap(loadout.place_trap(), Transform3D(global_basis, global_position - global_basis.z * 2.0), true)
+	var ahead := Transform3D(global_basis, global_position - global_basis.z * 2.0)
+	if _laying_wire:
+		_laying_wire.remove_meta("laying")
+		_laying_wire = null
+		return
+	var trap := _set_trap(loadout.place_trap(), ahead, true)
+	if trap and trap.get_meta("item_id") == "item_tripwire":
+		_laying_wire = trap
+		trap.set_meta("laying", true)
+		trap.wire_start = trap.global_position
+		_hud.show_gain("T again: second peg")
 
 
 ## The hired trap setter puts any trap from stock at where before the hunt (M013); false when none is left.
 func set_trap_for_hunter(where: Transform3D) -> bool:
-	return _set_trap(loadout.place_any_trap(), where, false)
+	return _set_trap(loadout.place_any_trap(), where, false) != null
 
 
-func _set_trap(item_id: String, where: Transform3D, ghost: bool) -> bool:
+func _set_trap(item_id: String, where: Transform3D, ghost: bool) -> Node3D:
 	if item_id == "":
-		return false
+		return null
 	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
 	trap.top_level = true
 	trap.add_to_group(PLACED_TRAPS_GROUP)
 	trap.set_meta("item_id", item_id)
+	trap.transform = Transform3D(where.basis, ground_at(where.origin))  # before add_child, so _ready sees it
 	add_child(trap)
-	trap.global_transform = Transform3D(where.basis, ground_at(where.origin))
+	# The trap models are painted with vertex colours, which the glTF import leaves unused.
+	for mesh: MeshInstance3D in trap.find_children("*", "MeshInstance3D", true, false):
+		for i in mesh.mesh.get_surface_count():
+			(mesh.mesh.surface_get_material(i) as BaseMaterial3D).vertex_color_use_as_albedo = true
+	if item_id == "item_pit":
+		pit_dug.emit(trap.global_position, trap.hole_radius)
 	if ghost:
 		BuildSite.make_ghost(trap, TRAP_BUILD_SECONDS[item_id])
 	_update_hud()
-	return true
+	return trap
+
+
+## E next to a boar held by a snare or a pit, or stunned by a tripwire, takes it for good (owner, 2026-10-30).
+func _take_held_boar() -> void:
+	for boar in BoarBody.near(get_world_3d(), global_position, PICKUP_RADIUS):
+		if boar.take_held():
+			_hud.show_gain("Boar caught")
+			return
 
 
 ## The ground under point on the hilly map (owner, 2026-10-27), searched from 2 m above it to 4 m below;
@@ -357,6 +387,8 @@ func _physics_process(delta: float) -> void:
 		if _held_for >= MENU_HOLD_SECONDS and not _hud.menu_open():
 			_hud.open_menu(loadout, _held_key)
 	_build_nearby(delta)
+	if _laying_wire:
+		_laying_wire.stretch_to(ground_at(global_position - global_basis.z * 2.0))
 	if _stun > 0.0:
 		_stun -= delta
 		velocity += get_gravity() * delta

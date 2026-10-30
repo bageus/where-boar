@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 36
+const EXPECTED_CHECKS := 37
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -119,7 +119,7 @@ func _physics_process(_delta: float) -> bool:
 			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
 			_check_stuck_items(hunter, boars[2], boars[1])
 			_check(_map.hunt.remaining() == _map.hunt.total - 2 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
-			_check(boars[3].state_name() == "TRAPPED" and _map.hunt.held == 1, "pit holds a boar")
+			_check(_map.hunt.held == 1, "pit holds a boar")  # wide opening: a herd mate of the parked boar may drop in first
 			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
 			_check_relief(hunter, boars[4])
@@ -189,8 +189,18 @@ func _check_trap_setter() -> void:
 	var ghost: Node3D = hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)[-1]
 	var BuildSite = hunter.BuildSite
 	var was_ghost: bool = BuildSite.is_ghost(ghost) and hunter.loadout.traps["item_snare"] == 0
-	_check(was_ghost and BuildSite.build(ghost, 10.0) and not BuildSite.is_ghost(ghost) \
+	_check(was_ghost and BuildSite.build(ghost, hunter.TRAP_BUILD_SECONDS["item_snare"]) and not BuildSite.is_ghost(ghost) \
 			and hunter.get_children().any(func(n: Node) -> bool: return n.get_script() == hunter.TrapSetter), "a placed trap is a ghost until built; the setter comes along")
+	# A tripwire goes down in two presses: the rope runs from the first peg to the second, at most 10 m.
+	hunter.loadout.traps["item_tripwire"] = 1
+	hunter.loadout.trap_id = "item_tripwire"
+	hunter.place_trap()
+	var wire: Node3D = hunter._laying_wire
+	var laying: bool = wire != null and not BuildSite.is_ghost(wire)
+	wire.stretch_to(wire.wire_start + Vector3(30, 0, 0))
+	hunter.place_trap()
+	_check(laying and BuildSite.is_ghost(wire) and hunter._laying_wire == null \
+			and is_equal_approx(wire.get_node("Collision").shape.size.x, 10.0), "tripwire: second T sets the second peg, rope at most 10 m")
 	_check("Boars left: 47" in map.stats_text() and map.get_node("Hud/Goal").text.begins_with("Tusks:"), "boar stats for the pause menu; tusks under the minimap")
 	var mount: Node3D = hunter.get_node("Rider").mount
 	_check(mount != null and mount.boar_type.id == "runner_grey", "the saddled runner waits beside the hunter")

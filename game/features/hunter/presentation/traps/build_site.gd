@@ -13,8 +13,9 @@ static func make_ghost(trap: Node3D, seconds: float) -> void:
 	_set_working(trap, false)
 
 
+## A tripwire whose second peg is still being placed ("laying") is not ready to build yet.
 static func is_ghost(trap: Node3D) -> bool:
-	return trap.has_meta("build_progress")
+	return trap.has_meta("build_progress") and not trap.has_meta("laying")
 
 
 ## Built share 0..1; 1 for a trap that is not a ghost.
@@ -35,13 +36,18 @@ static func build(trap: Node3D, delta: float) -> bool:
 	return true
 
 
-## A ghost neither catches boars (Area3D) nor blocks them (the fence); its meshes are see-through.
+## A ghost neither catches boars (Area3D) nor blocks them (fence, cage walls); its meshes are see-through
+## except those marked "solid".
 static func _set_working(trap: Node3D, on: bool) -> void:
 	if trap is Area3D:
 		trap.set_deferred("monitoring", on)
-	elif trap is CollisionObject3D:
+	var bodies := trap.find_children("*", "StaticBody3D", true, false)
+	if trap is StaticBody3D:
+		bodies.append(trap)
+	for body: StaticBody3D in bodies:
 		if not on:
-			trap.set_meta("build_layer", trap.collision_layer)
-		trap.collision_layer = trap.get_meta("build_layer", trap.collision_layer) if on else 0
-	for mesh in trap.find_children("*", "GeometryInstance3D", true, false):
-		mesh.transparency = 0.0 if on else GHOST_TRANSPARENCY
+			body.set_meta("build_layer", body.collision_layer)
+		body.collision_layer = body.get_meta("build_layer", body.collision_layer) if on else 0
+	for mesh: GeometryInstance3D in trap.find_children("*", "GeometryInstance3D", true, false):
+		if not mesh.get_meta("solid", false):
+			mesh.transparency = 0.0 if on else GHOST_TRANSPARENCY

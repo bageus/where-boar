@@ -6,10 +6,19 @@ uniform vec3 color2 : source_color;
 uniform sampler2D noise;
 uniform float noiseScale = 20.0;
 
+// Leaf pits on the hunt map (x, z, radius): clumps standing in an opening are collapsed away.
+uniform vec4 holes[8];
+uniform int hole_count = 0;
+
 varying vec3 worldPos;
 
 void vertex() {
 	worldPos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	for (int i = 0; i < hole_count; i++) {
+		if (distance(MODEL_MATRIX[3].xz, holes[i].xy) < holes[i].z) {
+			VERTEX = vec3(0.0);
+		}
+	}
 }
 
 void fragment() {
