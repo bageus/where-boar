@@ -32,6 +32,9 @@ const GRASS_INSIDE := 1800  # the camp shrank from 40 m to 34 m; same density
 const GRASS_FOREST := 2500  # mostly hidden behind the palisade
 ## The wall's rocks reach down to the valley floor (vista.gd BASE_Y) so no sky or valley shows under them.
 const WALL_DEPTH := 44.0
+## Rocks scattered onto the dirt from the rim: how many per metre of rim and how far in (metres).
+const CREEPERS_PER_METRE := 3
+const CREEP_DEPTH := 3.6
 const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
 const WOOD: Array[Color] = [Color(0.42, 0.3, 0.19), Color(0.5, 0.37, 0.24), Color(0.36, 0.26, 0.17), Color(0.47, 0.4, 0.3)]
@@ -125,6 +128,15 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 			_big_rock(rng, spot + inward * (reach + rng.randf_range(-0.8, 0.9)) + Vector3(0.0, 0.6, 0.0), Vector2(1.4, 4.0), false, skirt)
 			if rng.randf() < 0.35:
 				_big_rock(rng, spot + inward * rng.randf_range(1.2, 2.6) + Vector3(0.0, 0.7, 0.0), Vector2(0.6, 1.4), false, skirt)
+	# Rocks creep onto the dirt along the whole join: many, thinning and shrinking inwards, so no line
+	# is left between the rim and the open ground.
+	for at in rim:
+		var inward := -Vector3(signf(at.x) if absf(at.x) >= HALF else 0.0, 0.0, signf(at.z) if absf(at.z) >= HALF else 0.0)
+		for n in CREEPERS_PER_METRE:
+			var depth := pow(rng.randf(), 1.7) * CREEP_DEPTH
+			var spot := at + inward * depth + (Vector3.ONE - inward.abs()) * Vector3(rng.randf_range(-0.6, 0.6), 0.0, rng.randf_range(-0.6, 0.6))
+			var size := lerpf(2.2, 0.35, depth / CREEP_DEPTH) * rng.randf_range(0.7, 1.3)
+			_big_rock(rng, spot + Vector3(0.0, 0.25 + size * 0.3, 0.0), Vector2(size * 0.8, size), false, skirt)
 	_skirt_collision(skirt)
 	# Low and many: one shadowless MultiMesh per rock mesh keeps them to a handful of draw calls.
 	for i in BIG_ROCK_MESHES.size():

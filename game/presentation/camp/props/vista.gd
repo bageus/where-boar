@@ -19,6 +19,11 @@ const TREES_X := 45.0
 const SIZE := Vector2(850.0, 900.0)
 const CELLS := Vector2i(170, 180)
 const TREE_COUNT := 1400
+## Extra trees in the near valley, in front of the camp's drop-off but beyond the rocks (to x, z = 58), with
+## no meadow patches left out, so the view below has no bare stretch.
+const NEAR_TREES := 450
+const NEAR_FROM := 58.0
+const NEAR_SPAN := Rect2(-40.0, -70.0, 150.0, 180.0)
 const CLOUD_COUNT := 14
 const CLOUD_DRIFT := 1.2  # metres per second, along +x
 const CLOUD_SPAN := 900.0
@@ -115,7 +120,15 @@ func _trees(rng: RandomNumberGenerator) -> void:
 	var spots: Array[Array] = []
 	for mesh in TREE_MESHES:
 		spots.append([])
-	while spots.reduce(func(sum, list): return sum + list.size(), 0) < TREE_COUNT:
+	var near := 0
+	while near < NEAR_TREES:
+		var x := rng.randf_range(NEAR_SPAN.position.x, NEAR_SPAN.end.x)
+		var z := rng.randf_range(NEAR_SPAN.position.y, NEAR_SPAN.end.y)
+		if (x < NEAR_FROM and z < NEAR_FROM) or height_at(x, z) < WATER_Y + 1.5:
+			continue
+		near += 1
+		spots[rng.randi() % spots.size()].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(1.0, 1.6)), Vector3(x, height_at(x, z) - 0.3, z)))
+	while spots.reduce(func(sum, list): return sum + list.size(), 0) < TREE_COUNT + NEAR_TREES:
 		var x := rng.randf_range(TREES_X, START_X + SIZE.x)
 		var z := rng.randf_range(-SIZE.y * 0.5, SIZE.y * 0.5)
 		if _noise.get_noise_2d(z * 2.0 + 500.0, x * 2.0) < 0.0 or height_at(x, z) < WATER_Y + 1.5:
