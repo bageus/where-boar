@@ -18,7 +18,7 @@ static func stream(group: String) -> AudioStreamRandomizer:
 		randomizer.random_pitch = PITCH_SPREAD
 		randomizer.random_volume_offset_db = VOLUME_SPREAD_DB
 		for file in ResourceLoader.list_directory(ROOT + group):
-			if file.get_extension() == "ogg":
+			if file.get_extension() == "wav":
 				randomizer.add_stream(-1, load(ROOT + group + "/" + file))
 		assert(randomizer.streams_count > 0, "no sounds in " + ROOT + group)
 		_groups[group] = randomizer
