@@ -91,3 +91,4 @@ Unapproved ideas and possible future features belong here.
 | P2-001..P2-003 | First-person hunt prototype: hunter, grey-box map, boars, spear, net | Hunter and smoke tests in CI |
 | P2-004..P2-005 | Knockback, hunt flow with results, health bar, minimap | Hunt and smoke tests in CI |
 | P3-038 | 3 | StoneTrail font as the default UI and 3D label font (project theme, Label3D nodes) | P3-036 | DONE |
+| P3-039 | 3 | Hunt map surroundings: grey wall gone (invisible collision), woods, grass, rocks and far mountains past the walls; escape zones on the map edge with natural gates of tall grass and rotten stumps | P3-038 | DONE |

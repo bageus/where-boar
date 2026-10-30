@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-038
-last_completed_task_id: P3-038
+active_task_id: P3-039
+last_completed_task_id: P3-039
 build_status: PASS
 updated: 2026-10-30
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-038 done.
+None. P3-001..P3-039 done.
 
 ## Last completed work
 
@@ -62,6 +62,7 @@ None. P3-001..P3-038 done.
 - P3-029: hireable helper (owner 2026-10-29) — the owner's tribesman (`tribal_character_04_12000.glb`) rigged by `tools/rig_cavemen.py helper` into `caveman_helper.glb` (1.5 m, 5000 triangles) with walk, run, sneak, crouch, hammer, sit and the owner's stone hammer in the right fist. He sits at the tavern's feast table (hammer hidden) and is still hired there as the trap setter; on the hunt he walks or runs after the hunter (boars sense only the hunter), and at each trap ghost squats and hammers the ground until it is built. The hunter's shadow body wears the owner's backpack on the hunt (`shadow_body.gd`, on the chest bone).
 - P3-032: owner's tribal characters (2026-10-29) — `tools/rig_cavemen.py` rigs `tribal_hunter_12000` → `caveman_hunter.glb` (1.8 m), `tribal_character_02_12000` → `caveman_skinny.glb` (1.8 m) and `tribal_character_05_12000` → `caveman_heavy.glb` (1.65 m): 25 bones, 5000 triangles, idle/walk/run/sneak/ride/attack/strong_attack/bow_shot; the old caveman models are gone. The hunter is the shadow-only body (`shadow_body.gd`, backpack moved back to his fatter back); the hunter kind also writes `hunter_arm.glb`, his right forearm and fist posed as a fist, which replaces the primitive `hand.glb` in first person (no shadow; the body casts it). Viewer lists Hunter, Skinny, Heavy. Sources: 12k triangles, one material, three 1024 maps each.
 - P3-036: camp fixes (2026-10-30) — stalls, tavern, pens back to scale 1 (tents stay 1.3); `merge_camp_models.gd` skips materials `Leaf green*` and the `Sandy island` mesh; `station.gd` `solid` fits a box collision to the model (armory, hunting hut, tavern, pens; cage rack in `camp.gd`); rim rocks have convex hulls (`scenery.gd`); the rock wall's rocks stand on the ground and its south end sinks towards the drop-off; camp ferns/bushes use the mesh's own size ×1–1.5 like the hunt; cage birds face `-PI/2`; `tools/fix_bird_legs.py` lowers the raised foot of `tribal_rooster_3000`/`tribal_turkey_3000`; `tools/fix_helper_hammer.py` turns the hammer a quarter about its handle. Follow-up: wall rocks are stretched down to the valley floor (`WALL_DEPTH`, no see-through gaps); rim rocks reach in and out in waves and `ground.gdshader` blends dirt into stone along the drop-off (`stony()`), so the edge is no straight line. Then: `station.gd` `distance_to()` — a solid station opens its E menu from 1.5 m off its footprint edge anywhere along the perimeter; the cage rack is now the "cages" station (take the rooster/turkey; those items moved from the pens shop); the campfire is solid. Then: rocks creep 3.6 m onto the dirt along the whole rim (`CREEPERS_PER_METRE`, `scenery.gd`); 450 extra trees in the near valley (`NEAR_TREES`, `vista.gd`).
+- P3-039: map surroundings (owner 2026-10-30) — grey boundary wall mesh removed (collision stays); `props/surroundings.gd` builds land past the walls: one ground mesh to 200 m with hills, the river carried out as a valley, woods (near mixed, far spruces), a grass and fern strip by the walls, rock outcrops and hazy mountains on three sectors only; all MultiMesh per model and side, no shadows. Escape zones moved onto the map edge, half outside; each opens into a natural gate of tall grass with wheat, solid rotten stumps along the way out and dead trees, with the path kept clear of trees.
 - P3-033: bait fruits (2026-10-30) — nine `assets/models/fruit/*.glb` replace the bait sphere (`bait.gd`; carrot dropped, no model); `Loadout.BAIT_IDS` and `shop_catalog.gd` list the nine, strongest first; the hunting hut shows icon + price only (`assets/icon/bait/*.png`, cut from the owner's atlas).
 - P3-034: rigged net (2026-10-30) — `net_model.gd` drives `boar_net_rigged.glb`: hangs from the fist, opens in flight, drapes over the caught boar's top-down shape and follows its non-leg bones through the forward fall; `net_bundle.glb` no longer used in game.
 - P3-031: ambience (owner 2026-10-29) — jungle bed always on (hunt and camp), river sound at the river point nearest the hunter (25 m), wind loop at the camp drop-off (one take, random in/out points); `sfx_loop.gd` blends overlapping takes with random entry, swell and fade. "Effects volume" slider in the pause menu (master bus, saved). `core.synth` removed (ram thud now silent).
