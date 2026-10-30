@@ -123,7 +123,7 @@ func _process(_delta: float) -> void:
 
 
 func _pen_voice(boars: Array[Node3D]) -> void:
-	Sfx.play(boars.pick_random(), "boar_voice", -14.0, 15.0)
+	Sfx.play(boars.pick_random(), "boar_voice", -6.0, 30.0)
 	get_tree().create_timer(randf_range(PEN_VOICE_SECONDS.x, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(boars))
 
 

@@ -8,6 +8,7 @@ const PauseScene = preload("res://game/presentation/menus/public/pause_menu.tscn
 const ViewerScene = preload("res://game/presentation/menus/public/animation_viewer.tscn")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const SaveStore = preload("res://game/infrastructure/save/public/save_store.gd")
 
@@ -35,6 +36,7 @@ func _ready() -> void:
 	for key in settings:
 		if saved.has(key) and typeof(saved[key]) in [TYPE_FLOAT, TYPE_INT, TYPE_BOOL]:
 			settings[key] = saved[key]
+	Sfx.preload_all()
 	_apply_volume()
 	_pause = PauseScene.instantiate()
 	add_child(_pause)

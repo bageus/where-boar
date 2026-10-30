@@ -116,3 +116,5 @@ Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in,
 Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD. After changing the Green Valley relief run `python tools/bake_green_valley.py`.
 
 - 2026-10-28 P3-023: езда верхом — покачивание камеры, нельзя красться в седле, кабаны замечают всадника раньше (радиус x1.5, тревога x2) и убегают без атаки, крупные кабаны (здоровье >= 4) сбивают из седла (броня-ездовой держится).
+
+- 2026-10-30: звуки предзагружаются при старте (против фризов); голоса кабанов громче и слышны дальше.

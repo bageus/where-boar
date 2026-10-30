@@ -25,6 +25,12 @@ static func stream(group: String) -> AudioStreamRandomizer:
 	return _groups[group]
 
 
+## Loads every group now, so the first sound of a kind in play doesn't stall the frame decoding its files.
+static func preload_all() -> void:
+	for group in ResourceLoader.list_directory(ROOT):
+		stream(group.trim_suffix("/"))
+
+
 ## One take of group heard at parent and moving with it, after delay seconds; heard up to max_distance metres.
 ## The player frees itself when done (or with parent).
 static func play(parent: Node3D, group: String, volume_db := 0.0, max_distance := 30.0, delay := 0.0) -> AudioStreamPlayer3D:

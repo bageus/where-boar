@@ -68,4 +68,4 @@ func _process(delta: float) -> void:
 		_voice_left -= delta
 		if _voice_left <= 0.0:
 			_voice_left = randf_range(VOICE_MIN_SECONDS, VOICE_MAX_SECONDS)
-			Sfx.play(self, "boar_voice", -12.0, 20.0)
+			Sfx.play(self, "boar_voice", -4.0, 40.0)
