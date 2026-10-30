@@ -40,7 +40,12 @@ func _refresh() -> void:
 		var count: String = "" if item["unique"] else "  (have %d)" % progress.items.get(item_id, 0)
 		var locked := "" if progress.unlocked(item_id) else "  (catch one first)"
 		var taken := "taken" if item.has("companion") else ("owned" if item["unique"] else "max")
-		button.text = "%s — %s%s%s" % [item["name"], taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id)), count, locked]
+		var price_text: String = taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id))
+		if item.has("icon"):
+			button.icon = load(item["icon"])
+			button.text = "%s%s" % [price_text, count]
+		else:
+			button.text = "%s — %s%s%s" % [item["name"], price_text, count, locked]
 		button.disabled = owned or progress.tusks < ShopCatalog.price(item_id) or locked != ""
 		button.pressed.connect(_buy.bind(item_id))
 		%Items.add_child(button)

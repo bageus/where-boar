@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-032
-last_completed_task_id: P3-032
+active_task_id: P3-033
+last_completed_task_id: P3-033
 build_status: PASS
 updated: 2026-10-29
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-032 done.
+None. P3-001..P3-033 done.
 
 ## Last completed work
 
@@ -61,6 +61,7 @@ None. P3-001..P3-032 done.
 - P3-024: owner's caveman models (skinny, heavy) cut to 5000 triangles, 1024 px textures, 25-bone skeleton with fingers (fists around the weapon) and automatic skin weights, animations idle, walk, run, sneak, ride, attack, strong_attack (wind-up held as a charge, then release), bow_shot (right fist solved onto the string and drawn to the chin; the viewer lays an arrow from it through the bow until release); built by `tools/rig_cavemen.py` (needs `pip install bpy`). "Character animations" on the start screen opens a viewer (pick model and animation, orbit camera, boar under the rider, always a weapon in hand: bow for the bow shot, club otherwise). Not yet used in gameplay (first-person game).
 - P3-029: hireable helper (owner 2026-10-29) — the owner's tribesman (`tribal_character_04_12000.glb`) rigged by `tools/rig_cavemen.py helper` into `caveman_helper.glb` (1.5 m, 5000 triangles) with walk, run, sneak, crouch, hammer, sit and the owner's stone hammer in the right fist. He sits at the tavern's feast table (hammer hidden) and is still hired there as the trap setter; on the hunt he walks or runs after the hunter (boars sense only the hunter), and at each trap ghost squats and hammers the ground until it is built. The hunter's shadow body wears the owner's backpack on the hunt (`shadow_body.gd`, on the chest bone).
 - P3-032: owner's tribal characters (2026-10-29) — `tools/rig_cavemen.py` rigs `tribal_hunter_12000` → `caveman_hunter.glb` (1.8 m), `tribal_character_02_12000` → `caveman_skinny.glb` (1.8 m) and `tribal_character_05_12000` → `caveman_heavy.glb` (1.65 m): 25 bones, 5000 triangles, idle/walk/run/sneak/ride/attack/strong_attack/bow_shot; the old caveman models are gone. The hunter is the shadow-only body (`shadow_body.gd`, backpack moved back to his fatter back); the hunter kind also writes `hunter_arm.glb`, his right forearm and fist posed as a fist, which replaces the primitive `hand.glb` in first person (no shadow; the body casts it). Viewer lists Hunter, Skinny, Heavy. Sources: 12k triangles, one material, three 1024 maps each.
+- P3-033: bait fruits (2026-10-30) — nine `assets/models/fruit/*.glb` replace the bait sphere (`bait.gd`; carrot dropped, no model); `Loadout.BAIT_IDS` and `shop_catalog.gd` list the nine, strongest first; the hunting hut shows icon + price only (`assets/icon/bait/*.png`, cut from the owner's atlas).
 - P3-031: ambience (owner 2026-10-29) — jungle bed always on (hunt and camp), river sound at the river point nearest the hunter (25 m), wind loop at the camp drop-off (one take, random in/out points); `sfx_loop.gd` blends overlapping takes with random entry, swell and fade. "Effects volume" slider in the pause menu (master bus, saved). `core.synth` removed (ram thud now silent).
 - P3-030: owner's recorded sounds (2026-10-29) — all of `assets/sfx/<group>/` as OGG `<group>_<n>.ogg`, played by `core.sfx` (random take, no repeat, random pitch and volume). Impacts (arrow, stone, spear, net, club) are 3D at the landing point (20 m); boars cry when they start to run (own take, up to 0.5 s late), panic in layers incl. reversed takes, squeal when hit, grunt at the ram, hooves while running, splash in the river, grunt now and then when calm and in the camp pen; hunter steps on ground/grass/river, bush rustle in and out of cover, roar on R, bow/sling draw and spear wind-up, shots and throws, a grunt on melee blows; helper steps; rooster and turkey calls and idles; crossfaded fire loop at the campfire/brazier and the tavern hearth (10 m). Rivers are physics layer 7. Jungle and river ambience: P3-031.
 - P3-028: camp polish (owner 2026-10-29) — camp square 40 → 34 m; huts and tents 30% larger, every entrance faces the campfire, cage rack to the right of the pen facing the centre (tavern now south-east, pens south-west). Ground shader (`props/ground.gdshader`): mottled dirt with reddish clay, wobbly grass border with soft edge (also under the forest), trodden patches at the fire, the doors and along the paths to them and to the gate. Lower rocks skirt the rock wall and the drop-off so no strip shows, some inside the camp. Pebbles round the perimeter, ferns and bushes beside the buildings (`props/dressing.gd`). Blue gradient sky with a visible sun (sky-only light). Hunter has a shadow-only caveman body (idle/walk/run/sneak/ride), so his shadow falls on buildings. Frame time held at the old level (skirt rocks and plants as shadowless MultiMesh, less hidden grass).

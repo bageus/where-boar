@@ -79,9 +79,9 @@ func _physics_process(_delta: float) -> bool:
 			_check(boars[14].state_name() != "WANDER", "fear spreads through the herd")
 			hunter.shout()
 			_check(boars[0]._forced_left > 0.0, "a shout steers the fleeing boar")
-			hunter.equip(_map.items.merged({"item_carrot": 1}))
+			hunter.equip(_map.items.merged({"item_pear": 1}))
 			hunter._place_bait()
-			_check(boars[3].baits.size() == 1 and hunter.loadout.used == {"item_carrot": 1}, "placed bait is shown to boars")
+			_check(boars[3].baits.size() == 1 and hunter.loadout.used == {"item_pear": 1}, "placed bait is shown to boars")
 		5:
 			# Park every boar far away so none wanders into the throws below.
 			for i in boars.size():

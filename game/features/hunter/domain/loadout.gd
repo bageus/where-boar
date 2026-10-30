@@ -24,7 +24,7 @@ const ITEM_IDS := {
 }
 
 ## Bait item ids, the strongest first; the first one in stock starts active (ASSUMPTION).
-const BAIT_IDS := ["item_apple", "item_carrot", "item_acorns"]
+const BAIT_IDS := ["item_mixed_berries", "item_mango", "item_bananas", "item_mandarin", "item_pear", "item_apple", "item_blueberries", "item_red_berries", "item_acorns"]
 
 ## Trap item ids in the order the trap menu shows them (M015).
 const TRAP_IDS := ["item_pit", "item_snare", "item_tripwire", "item_cage", "item_fence"]

@@ -66,6 +66,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-030 | 3 | Owner's sounds: WAV → OGG with short names; impacts heard where they land, boar cries/panic/steps/voices, hunter steps by surface, bushes, roar, weapon draws, shots and blows, birds, crossfaded fire loop at the campfire and tavern hearth | P3-029 | DONE |
 | P3-031 | 3 | Ambience: jungle always on (hunt and camp), river near the water, wind at the camp drop-off, overlapping takes blended; effects volume slider; synthesized sounds removed | P3-030 | DONE |
 | P3-032 | 3 | Owner's new tribal characters rigged and animated: hunter as the player's shadow body with his own arm in first person; skinny and heavy replaced; old caveman models and the primitive hand removed | P3-031 | DONE |
+| P3-033 | 3 | Bait fruit models in the hunt and atlas icons (no name, price only) in the hunting hut shop | P3-032 | DONE |
 
 ## Icebox
 
