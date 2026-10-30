@@ -90,3 +90,4 @@ Unapproved ideas and possible future features belong here.
 | DISC-001 | Game discovery completed and approved | GAME_SPEC.md READY, decision D009 |
 | P2-001..P2-003 | First-person hunt prototype: hunter, grey-box map, boars, spear, net | Hunter and smoke tests in CI |
 | P2-004..P2-005 | Knockback, hunt flow with results, health bar, minimap | Hunt and smoke tests in CI |
+| P3-038 | 3 | StoneTrail font as the default UI and 3D label font (project theme, Label3D nodes) | P3-036 | DONE |

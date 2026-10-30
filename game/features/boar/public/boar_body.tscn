@@ -1,9 +1,10 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://game/features/boar/public/boar_body.gd" id="1_boar"]
 [ext_resource type="Script" path="res://game/features/boar/presentation/boar_sounds.gd" id="2_sounds"]
 [ext_resource type="Script" path="res://game/features/boar/public/boar_hitbox.gd" id="3_hitbox"]
 [ext_resource type="PackedScene" path="res://game/features/boar/public/boar_model.tscn" id="4_model"]
+[ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 radius = 0.45
@@ -60,6 +61,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 billboard = 1
 font_size = 32
 text = "WANDER"
+font = ExtResource("stonetrail_font")
 
 [node name="Hitbox" type="StaticBody3D" parent="."]
 collision_layer = 32
@@ -78,6 +80,7 @@ pixel_size = 0.01
 font_size = 64
 outline_size = 12
 text = ""
+font = ExtResource("stonetrail_font")
 
 [node name="Sounds" type="Node3D" parent="."]
 script = ExtResource("2_sounds")

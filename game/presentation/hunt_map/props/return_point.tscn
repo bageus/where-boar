@@ -1,4 +1,5 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
+[ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_return"]
 transparency = 1
@@ -22,3 +23,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 billboard = 1
 font_size = 48
 text = "Camp: press E to end the hunt"
+font = ExtResource("stonetrail_font")

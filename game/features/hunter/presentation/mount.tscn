@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/mount.gd" id="1_mount"]
 [ext_resource type="PackedScene" path="res://game/features/boar/public/boar_model.tscn" id="2_model"]
+[ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_body"]
 radius = 0.45
@@ -20,3 +21,4 @@ shape = SubResource("Shape_body")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 billboard = 1
 font_size = 32
+font = ExtResource("stonetrail_font")

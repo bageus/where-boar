@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-036
-last_completed_task_id: P3-036
+active_task_id: P3-038
+last_completed_task_id: P3-038
 build_status: PASS
 updated: 2026-10-30
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-036 done.
+None. P3-001..P3-038 done.
 
 ## Last completed work
 
@@ -123,3 +123,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - 2026-10-30: звуки предзагружаются при старте (против фризов); голоса кабанов громче и слышны дальше.
 
 - P3-037 (2026-10-30): выделение станции и клавиша E над стаминой, подписи без [E], иконки лавки в 3 раза меньше, прокрутка в магазине и паузе.
+- P3-038: StoneTrail font (`assets/fonts/stonetrail/StoneTrail-Regular.ttf`) is the project theme font (`assets/ui/main_theme.tres`, `gui/theme/custom`) for all Controls, and on every `Label3D` (station names, boar state, traps, mount, return point). Cyrillic (incl. Ё/ё) and Latin are covered. Checked headless (theme, labels, station scene). Not checked: how it looks in the window.

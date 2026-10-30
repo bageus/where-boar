@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/presentation/camp/props/station.gd" id="1_station"]
+[ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
 
 [sub_resource type="BoxShape3D" id="Shape_station"]
 size = Vector3(2, 1, 1)
@@ -18,3 +19,4 @@ shape = SubResource("Shape_station")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
 billboard = 1
 font_size = 48
+font = ExtResource("stonetrail_font")
