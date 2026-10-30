@@ -8,6 +8,7 @@ const ROOT := "res://assets/sfx/"
 const PITCH_SPREAD := 1.12
 const VOLUME_SPREAD_DB := 2.0
 
+## Every take is stored as OGG and as WAV; the single-threaded web build plays the WAV so Vorbis is not decoded there.
 static var _groups: Dictionary = {}
 
 
@@ -18,7 +19,7 @@ static func stream(group: String) -> AudioStreamRandomizer:
 		randomizer.random_pitch = PITCH_SPREAD
 		randomizer.random_volume_offset_db = VOLUME_SPREAD_DB
 		for file in ResourceLoader.list_directory(ROOT + group):
-			if file.get_extension() == "wav":
+			if file.get_extension() == ("wav" if OS.has_feature("web") else "ogg"):
 				randomizer.add_stream(-1, load(ROOT + group + "/" + file))
 		assert(randomizer.streams_count > 0, "no sounds in " + ROOT + group)
 		_groups[group] = randomizer
