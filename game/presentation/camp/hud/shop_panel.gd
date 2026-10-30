@@ -9,6 +9,9 @@ const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.
 signal purchased(item_id: String)
 signal closed
 
+## Bait icons are 128 px wide; a third of that (owner, 2026-10-30).
+const ICON_WIDTH := 43
+
 var progress: Progress
 var _shop_id := ""
 
@@ -43,6 +46,7 @@ func _refresh() -> void:
 		var price_text: String = taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id))
 		if item.has("icon"):
 			button.icon = load(item["icon"])
+			button.add_theme_constant_override("icon_max_width", ICON_WIDTH)
 			button.text = "%s%s" % [price_text, count]
 		else:
 			button.text = "%s — %s%s%s" % [item["name"], price_text, count, locked]

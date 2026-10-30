@@ -72,6 +72,28 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text = "Stamina 100%"
 
+[node name="InteractPrompt" type="PanelContainer" parent="Hud"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -22.0
+offset_top = -146.0
+offset_right = 22.0
+offset_bottom = -98.0
+grow_horizontal = 2
+grow_vertical = 0
+pivot_offset = Vector2(22, 24)
+
+[node name="Key" type="Label" parent="Hud/InteractPrompt"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ThrowPower" type="ProgressBar" parent="Hud"]
 visible = false
 modulate = Color(1, 0.85, 0.3, 1)

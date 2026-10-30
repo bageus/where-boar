@@ -117,6 +117,7 @@ func _ambience() -> void:
 
 
 func _process(_delta: float) -> void:
+	hunter.point_at(null if _shop.visible else _station_in_reach())
 	var at := hunter.global_position
 	var east := Vector3(DROP_EAST, 0.0, clampf(at.z, -DROP_EAST, DROP_EAST))
 	var south := Vector3(clampf(at.x, DROP_SOUTH_FROM, DROP_EAST), 0.0, DROP_EAST)
@@ -156,12 +157,16 @@ func _show_progress() -> void:
 
 
 func _on_interacted() -> void:
-	if _shop.visible:
-		return
+	var station := _station_in_reach()
+	if station and not _shop.visible:
+		_use(station)
+
+
+func _station_in_reach() -> Node3D:
 	for station: Node3D in $Stations.get_children():
 		if station.distance_to(hunter.global_position) <= (USE_RADIUS_SOLID if station.solid else USE_RADIUS):
-			_use(station)
-			return
+			return station
+	return null
 
 
 func _use(station: Node3D) -> void:

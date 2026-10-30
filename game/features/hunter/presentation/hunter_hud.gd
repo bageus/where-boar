@@ -9,6 +9,7 @@ const BuildSite = preload("res://game/features/hunter/presentation/traps/build_s
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow", "Knife"]
 
 var _gain_fade: Tween
+var _prompt_pulse: Tween
 
 
 func _ready() -> void:
@@ -16,6 +17,18 @@ func _ready() -> void:
 		var slot := Label.new()
 		slot.add_theme_font_size_override("font_size", 22)
 		$Hotbar.add_child(slot)
+
+
+## The "E" keycap above the stamina bar pulses while something in reach can be used.
+func show_interact(on: bool) -> void:
+	var prompt: Control = $InteractPrompt
+	if _prompt_pulse:
+		_prompt_pulse.kill()
+	prompt.visible = on
+	if on:
+		_prompt_pulse = create_tween().set_loops()
+		_prompt_pulse.tween_property(prompt, "scale", Vector2.ONE * 1.18, 0.45).set_trans(Tween.TRANS_SINE)
+		_prompt_pulse.tween_property(prompt, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_SINE)
 
 
 func show_health(value: int) -> void:

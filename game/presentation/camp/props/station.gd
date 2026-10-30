@@ -15,7 +15,7 @@ func _ready() -> void:
 	if solid:
 		fit_collision($Body/Collision, node)
 		$Label.position = Vector3($Body/Collision.position.x, $Label.position.y, $Body/Collision.position.z)
-	$Label.text = "%s [E]" % title
+	$Label.text = title
 
 
 ## How far the point is from the station on the ground plane: from the footprint's edge when solid

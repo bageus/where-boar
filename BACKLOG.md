@@ -70,6 +70,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-034 | 3 | Owner's rigged net: hangs from the fist, opens in flight, drapes over the caught boar's shape and rides its forward fall | P3-033 | DONE |
 | P3-035 | 3 | Hunt map: mesa and river cliffs widened into steep rocky slopes (no flat walls); normal grass 50% lower, tall patches unchanged | P3-034 | DONE |
 | P3-036 | 3 | Camp fixes: stalls/tavern back to size (tents only +30%), greenery and tavern sand blob out of models, solid buildings/pens/rim rocks, rock wall grounded and sinking to the drop-off, hunt-size bushes and ferns, cage birds turned 180° with both feet down, helper's hammer grip | P3-032 | DONE |
+| P3-037 | 3 | Camp UI: station outline + pulsing E key above stamina, name-only building labels, bait shop icons 3x smaller, shop and pause menus scroll to fit any resolution | P3-036 | DONE |
 
 ## Icebox
 

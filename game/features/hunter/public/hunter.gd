@@ -129,6 +129,7 @@ var _held_key := ""
 var _held_for := 0.0
 ## The bowstring, sling or spear wind-up sound while a shot is charged; stopped on release.
 var _draw_sound: AudioStreamPlayer3D
+var _pointed_at: Node3D
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -141,6 +142,18 @@ func _ready() -> void:
 	_base_fov = _camera.fov
 	$Voice.stream = Sfx.stream("character_roar")
 	_update_hud()
+
+
+## The thing E would use now: it gets the outline and the key prompt shows above stamina (null clears).
+func point_at(target: Node3D) -> void:
+	if target == _pointed_at:
+		return
+	if _pointed_at:
+		Highlight.set_on(_pointed_at, false)
+	_pointed_at = target
+	if target:
+		Highlight.set_on(target, true)
+	_hud.show_interact(target != null)
 
 
 ## Applies player settings: {"fov", "mouse_sensitivity", "camera_motion"} (section 16).
