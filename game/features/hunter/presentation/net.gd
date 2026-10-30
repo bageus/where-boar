@@ -16,6 +16,7 @@ var _landed := false
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	$Model.open()
 
 
 func _on_body_entered(body: Node) -> void:
@@ -32,3 +33,6 @@ func _on_body_entered(body: Node) -> void:
 	if body.has_method("net_hit"):
 		body.net_hit()
 	Landing.land(self, body)
+	var boar: Node = body if body is BoarBody else body.get_parent()
+	if boar is BoarBody:
+		$Model.wrap(boar.get_node("Model"))

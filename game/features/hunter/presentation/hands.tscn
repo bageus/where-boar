@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hands.gd" id="1_hands"]
 [ext_resource type="PackedScene" path="res://assets/models/hunter_arm.glb" id="2_hand"]
 [ext_resource type="PackedScene" path="res://assets/models/spear.glb" id="3_spear"]
-[ext_resource type="PackedScene" path="res://assets/models/net_bundle.glb" id="4_net"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/presentation/net_model.tscn" id="4_net"]
 [ext_resource type="PackedScene" path="res://assets/models/club.glb" id="5_club"]
 [ext_resource type="PackedScene" path="res://assets/models/sling.glb" id="6_sling"]
 [ext_resource type="PackedScene" path="res://assets/models/bow.glb" id="7_bow"]
@@ -22,10 +22,11 @@ transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -0.3)
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.35, 0)
 
 [node name="Net" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.12, -0.1)
 visible = false
 
 [node name="Model" parent="Net" instance=ExtResource("4_net")]
+transform = Transform3D(0.45, 0, 0, 0, 0.45, 0, 0, 0, 0.45, 0.06, -0.33, 0.16)
 
 [node name="Hand" parent="Net" instance=ExtResource("2_hand")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, -0.04, 0.1)

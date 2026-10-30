@@ -1,17 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/net.gd" id="1_net"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/presentation/net_model.tscn" id="2_model"]
 
 [sub_resource type="SphereShape3D" id="Shape_net"]
 radius = 0.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_rope"]
-transparency = 1
-albedo_color = Color(0.85, 0.8, 0.6, 0.6)
-
-[sub_resource type="BoxMesh" id="Mesh_net"]
-material = SubResource("Mat_rope")
-size = Vector3(1.2, 0.05, 1.2)
 
 [node name="Net" type="RigidBody3D"]
 collision_mask = 33
@@ -25,5 +18,5 @@ script = ExtResource("1_net")
 [node name="Collision" type="CollisionShape3D" parent="."]
 shape = SubResource("Shape_net")
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-mesh = SubResource("Mesh_net")
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0.06, 0, 0.02)

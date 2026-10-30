@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/features/hunter/presentation/net_model.gd" id="1_model"]
+[ext_resource type="PackedScene" path="res://assets/models/boar_net_rigged.glb" id="2_net"]
+
+[node name="NetModel" type="Node3D"]
+script = ExtResource("1_model")
+
+[node name="Rig" parent="." instance=ExtResource("2_net")]

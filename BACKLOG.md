@@ -67,6 +67,7 @@ The backlog contains approved work that is not currently active. Only one item m
 | P3-031 | 3 | Ambience: jungle always on (hunt and camp), river near the water, wind at the camp drop-off, overlapping takes blended; effects volume slider; synthesized sounds removed | P3-030 | DONE |
 | P3-032 | 3 | Owner's new tribal characters rigged and animated: hunter as the player's shadow body with his own arm in first person; skinny and heavy replaced; old caveman models and the primitive hand removed | P3-031 | DONE |
 | P3-033 | 3 | Bait fruit models in the hunt and atlas icons (no name, price only) in the hunting hut shop | P3-032 | DONE |
+| P3-034 | 3 | Owner's rigged net: hangs from the fist, opens in flight, drapes over the caught boar's shape and rides its forward fall | P3-033 | DONE |
 
 ## Icebox
 
