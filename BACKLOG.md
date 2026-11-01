@@ -94,3 +94,4 @@ Unapproved ideas and possible future features belong here.
 | P3-039 | 3 | Hunt map surroundings: grey wall gone (invisible collision), woods, grass, rocks and far mountains past the walls; escape zones on the map edge with natural gates of tall grass and rotten stumps | P3-038 | DONE |
 | P3-040 | 3 | Camp FPS: batch scenery meshes, camp shadow range 40 m, valley trees culled by cell | P3-039 | DONE |
 | P3-041 | 3 | Owner's trap models with trigger animations and new trap rules (D040): snare rescue and E-take, leaf pit in the ground, two-peg tripwire with stun stars, half-inside cage, fence; build times and carry caps | P3-040 | DONE |
+| P3-042 | 3 | Bait shop icons: removed stray fragments of neighbouring atlas icons from 6 PNGs (`assets/icon/bait/`) | P3-041 | DONE |
