@@ -98,3 +98,4 @@ Unapproved ideas and possible future features belong here.
 | P3-043 | 3 | Sneaking hunter inside tall grass or a bush is unseen by boars, even by boars standing in the same patch (hearing unchanged) | P3-042 | DONE |
 | P3-044 | 3 | Bait is eaten up after 10 s at the bait, then gone; calm boars graze or stand most of the time, walk over to stand by a herd mate, and roam only sometimes | P3-043 | DONE |
 | P3-045 | 3 | A thrown net that misses lies on the ground instead of hanging above it | P3-044 | DONE |
+| P3-046 | 3 | Net throw distance capped at 15 m (`NET_MAX_SPEED` in hunter.gd) | P3-045 | DONE |

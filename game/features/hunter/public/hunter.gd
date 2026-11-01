@@ -63,7 +63,9 @@ const SLING_SPEED := 24.0
 const ARROW_SPEED := 40.0
 ## Throw speed caps (owner, 2026-10-28): range net < spear < sling < bow; charge cannot exceed them.
 const NET_SPEED := 10.0
-const NET_MAX_SPEED := 16.0
+## A net reaches at most 15 m on flat ground (owner, 2026-11-01). A throw at 45° lands v²/g away at gravity 9.8,
+## so the speed cap is sqrt(15 * 9.8) ≈ 12.12 m/s; shallower throws land nearer.
+const NET_MAX_SPEED := 12.12
 const SPEAR_MAX_SPEED := 22.0
 const SLING_MAX_SPEED := 30.0
 const PICKUP_RADIUS := 2.5
