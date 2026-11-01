@@ -105,3 +105,4 @@ Unapproved ideas and possible future features belong here.
 | P3-050 | 3 | Spear/net slot leaves the hotbar when out, knife auto-equipped; bow/sling with no ammo play a cancel sound (`assets/sfx/no_ammo/`, placeholder) | P3-049 | DONE |
 | P3-051 | 3 | Hunt FPS: half the grass clumps (wider), 2 sun shadow cascades in hunt and camp, boar health bar/label/dust drawn within 40 m only | P3-050 | DONE |
 | P3-052 | 3 | Baked shadows: static trees, rocks, bushes and buildings cast no live shadow; their shadows are rendered once into a ground texture (`core.baked_shadow`) | P3-051 | DONE |
+| P3-053 | 3 | Saddle scaled to boar size (length/height ratio) so it sits on the back of small and big boars | P3-052 | DONE |

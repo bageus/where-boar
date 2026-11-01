@@ -8,7 +8,8 @@ const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
 const Saddle = preload("res://assets/models/saddle.glb")
-const SADDLE_WIDTH := 0.8  # boar width the saddle was modelled for, m
+const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
+const SADDLE_HEIGHT := 1.1  # and its height, m
 const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
 
 var _player: AnimationPlayer
@@ -151,14 +152,14 @@ func top() -> float:
 	return height
 
 
-## Straps the saddle (assets/models/saddle.glb) on the middle of the back, scaled to the boar's width; it follows the spine bone.
+## Straps the saddle (assets/models/saddle.glb) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
 func put_saddle() -> void:
 	var skeleton: Skeleton3D = find_children("*", "Skeleton3D", true, false)[0]
 	var bone := skeleton.find_bone("spine_1")
 	var box := AABB()
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
-	var fit := clampf(box.size.x / SADDLE_WIDTH, 0.7, 1.2)
+	var fit := clampf(minf(box.size.z / SADDLE_LENGTH, top() / SADDLE_HEIGHT), 0.4, 1.3)
 	# Saddle front is +Z, the boar's is -Z. The y is a guess at the back below ears and bristles.
 	var on_back := Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * fit),
 			Vector3(0.0, top() * 0.85 - SADDLE_PAD * fit, box.get_center().z - 0.05))
