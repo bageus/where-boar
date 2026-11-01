@@ -47,11 +47,12 @@ func start(next: Activity, length_roll := randf()) -> void:
 
 
 ## Counts the current activity down and picks the next one when it runs out; true when it changed.
-func tick(delta: float, has_mate: bool, roll := randf()) -> bool:
+## A stray (mates in reach but away from it) always goes back to them (owner, 2026-11-01).
+func tick(delta: float, has_mate: bool, roll := randf(), stray := false) -> bool:
 	time_left -= delta
 	if time_left > 0.0:
 		return false
-	start(pick(roll, has_mate))
+	start(Activity.JOIN if stray else pick(roll, has_mate))
 	return true
 
 

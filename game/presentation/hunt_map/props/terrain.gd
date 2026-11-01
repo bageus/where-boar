@@ -120,6 +120,7 @@ func _plant_grass() -> void:
 	var cover := StaticBody3D.new()
 	cover.collision_layer = COVER_LAYER
 	cover.collision_mask = 0
+	cover.add_to_group("tall_grass")  # fleeing boars hide in these patches (boar_surroundings.gd)
 	add_child(cover)
 	for p in patches:
 		var shape := CollisionShape3D.new()

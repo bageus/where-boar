@@ -6,6 +6,7 @@ const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarIdle = preload("res://game/features/boar/domain/boar_idle.gd")
+const BoarHide = preload("res://game/features/boar/domain/boar_hide.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
@@ -84,6 +85,7 @@ var herd: Array[Node3D] = []
 var boar: Boar
 var alert := BoarAlert.new()
 var idle := BoarIdle.new()
+var hideout := BoarHide.new()
 var _heading := Vector2.ZERO
 ## Wander angle or panic deflection, re-rolled when _turn_left runs out.
 var _turn := 0.0
@@ -136,6 +138,7 @@ func spear_hit(amount: int) -> void:
 		return
 	_calm_left = FLIGHT_SECONDS * _flight_scale
 	alert.alarm()
+	hideout.stop()
 	if was_charging and boar.state == Boar.State.FLEE:
 		# Scared off: runs any way that leads away from the hunter.
 		var away := Vector2(global_position.x - hunter.global_position.x, global_position.z - hunter.global_position.z).normalized()
@@ -155,6 +158,7 @@ func hear_shout(shout_pos: Vector3) -> void:
 	var side := 1 if randf() < 0.5 else -1
 	_forced_heading = BoarSenses.shout_heading(boar, pos, Vector2(shout_pos.x, shout_pos.z), side)
 	_forced_left = SHOUT_SECONDS
+	hideout.stop()
 	_show_state()
 
 
@@ -165,6 +169,7 @@ func driven_from(pos: Vector3) -> void:
 	boar.flee()
 	_forced_heading = Vector2(global_position.x - pos.x, global_position.z - pos.z).normalized()
 	_forced_left = SHOUT_SECONDS
+	hideout.stop()
 	_show_state()
 
 
@@ -209,15 +214,7 @@ func trip(seconds: float) -> void:
 
 ## Boars whose hitbox is within radius of point.
 static func near(world: World3D, point: Vector3, radius: float) -> Array[Node]:
-	var query := PhysicsShapeQueryParameters3D.new()
-	query.shape = SphereShape3D.new()
-	query.shape.radius = radius
-	query.transform = Transform3D(Basis(), point)
-	query.collision_mask = HITBOX_LAYER  # hitboxes only; the terrain alone would fill the results
-	var boars: Array[Node] = []
-	for hit in world.direct_space_state.intersect_shape(query):
-		boars.append(hit.collider.get_parent())
-	return boars
+	return Surroundings.hitboxes_near(world, point, radius, HITBOX_LAYER)
 
 
 ## The hunter's E: a boar held by a snare or a pit, or lying stunned, is caught for good. False if it is neither.
@@ -257,16 +254,6 @@ func _hold() -> void:
 	held_changed.emit(true)
 
 
-## A snared boar is freed by a free boar running close by (owner, 2026-10-30).
-func _rescued() -> bool:
-	for other in get_parent().get_children():
-		if other != self and other.get_script() == get_script() and other.boar.is_free() \
-				and Vector2(other.velocity.x, other.velocity.z).length() >= RESCUE_MIN_SPEED \
-				and other.global_position.distance_to(global_position) <= RESCUE_RADIUS:
-			return true
-	return false
-
-
 ## Knocked by a ram or another boar: pushed along `impulse` for a moment.
 func knock(impulse: Vector3, _damage: int = 0, _rammer: Resource = null) -> void:
 	_knock = impulse * boar_type.knock_scale
@@ -280,7 +267,9 @@ func _after_change() -> void:
 	if boar.state == Boar.State.DEAD:
 		$Model.die()
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
-		_warn_witnesses()
+		# Boars that see this one die run in panic twice as long (playtest 2026-10-27).
+		for other in Surroundings.witnesses(self):
+			other.saw_kill()
 	elif boar.state == Boar.State.CAPTURED:
 		$Model.net_fall()
 
@@ -289,18 +278,6 @@ func _after_change() -> void:
 func _remove_corpse() -> void:
 	if not get_children().any(func(child: Node) -> bool: return child is RigidBody3D):
 		queue_free()
-
-
-## Boars that see this one die run in panic twice as long (playtest 2026-10-27).
-func _warn_witnesses() -> void:
-	var pos := Vector2(global_position.x, global_position.z)
-	for other in get_parent().get_children():
-		if other == self or not other.has_method("saw_kill"):
-			continue
-		var other_pos := Vector2(other.global_position.x, other.global_position.z)
-		var facing := Vector2(-other.global_basis.z.x, -other.global_basis.z.z)
-		if other_pos.distance_to(pos) <= other.boar_type.perception_radius and BoarSenses.in_view(other_pos, facing, pos):
-			other.saw_kill()
 
 
 ## Caught from ambush: nearby herd mates turn wary, or run if they already were (owner, 2026-10-27).
@@ -330,7 +307,7 @@ func saw_kill() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	if _snared and boar.state == Boar.State.TRAPPED and _rescued():
+	if _snared and boar.state == Boar.State.TRAPPED and Surroundings.rescued(self, RESCUE_RADIUS, RESCUE_MIN_SPEED):
 		_snared = false
 		boar.break_free()
 		_state_time = 0.0
@@ -361,7 +338,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_state_time += delta
 	_maybe_charge()
-	_track_flight(delta)
+	_track_flight(delta, pos, hunter_pos)
 	if boar.state != before:
 		_state_time = 0.0
 		if before == Boar.State.WANDER:
@@ -401,42 +378,61 @@ func _perceive(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 
 
 ## Flights end after a while (playtest 2026-10-27): the boar calms down but stays wary.
-func _track_flight(delta: float) -> void:
+## On the way it may hide in tall grass and calm down there instead (owner, 2026-11-01).
+func _track_flight(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	var fleeing := boar.state in [Boar.State.FLEE, Boar.State.PANIC]
 	if fleeing and not _was_fleeing:
 		_calm_left = FLIGHT_SECONDS * _flight_scale
 		alert.alarm()
+		hideout.start_flight()
 	_was_fleeing = fleeing
 	if not fleeing:
 		return
+	if hideout.active():
+		var was_hidden := hideout.hidden()
+		var result := hideout.tick(delta, pos, pos.distance_to(hunter_pos))
+		if hideout.hidden() != was_hidden:
+			_show_state()  # silent while hidden; calmed it comes out, flushed out it runs on for a full flight
+			_calm_left = 0.0 if result == BoarHide.Result.CALMED else FLIGHT_SECONDS * _flight_scale
+		if hideout.hidden():
+			return
+	elif hideout.wants() and Engine.get_physics_frames() % 15 == 0:
+		hideout.consider(pos, Surroundings.tall_grass_near(self, BoarHide.SEEK_RADIUS + 8.0, COVER_LAYER))
 	_calm_left -= delta
 	if _calm_left <= 0.0:
-		boar.calm()
-		alert.settle()
-		_flight_scale = 1.0
-		_charge_rolled = false
-		_was_fleeing = false
+		_calm_down()
+
+
+## The flight is over: the boar roams off out of the grass it hid in; a stray heads back to its herd (owner, 2026-11-01).
+func _calm_down() -> void:
+	boar.calm()
+	alert.settle()
+	_flight_scale = 1.0
+	_charge_rolled = false
+	_was_fleeing = false
+	idle.start(BoarIdle.Activity.ROAM, 1.0)
+	_turn = (Vector2(global_position.x, global_position.z) - hideout.spot).angle() if hideout.radius > 0.0 else randf() * TAU
+	_turn_left = idle.time_left
+	hideout.stop()
+	_show_state()
+
+
+func is_hiding() -> bool:
+	return hideout.hidden()
 
 
 ## Alert mark over the boar: ? heard something, ! wary, !! alarmed or running.
 func _show_alert() -> void:
 	var level := alert.level() if boar.state == Boar.State.WANDER else (BoarAlert.MAX_LEVEL if boar.is_free() else 0)
+	level = 0 if hideout.hidden() else level  # hidden in tall grass: no fear mark (owner, 2026-11-01)
 	if _alert_mark.text != ALERT_MARKS[level]:
 		_alert_mark.text = ALERT_MARKS[level]
 		_alert_mark.modulate = ALERT_COLORS[level]
 
 
+## A hunter sneaking inside tall grass or a bush is hidden even from a boar standing in the same patch.
 func _sight_clear() -> bool:
-	# A hunter sneaking inside tall grass or a bush is hidden even from a boar standing in the same patch
-	# (the ray below starts inside the cover then and would not hit it).
-	var point := PhysicsPointQueryParameters3D.new()
-	point.position = hunter.global_position + Vector3.UP * HUNTER_RISE
-	point.collision_mask = COVER_LAYER
-	if not get_world_3d().direct_space_state.intersect_point(point, 1).is_empty():
-		return false
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * EYE_RISE,
-			hunter.global_position + Vector3.UP * HUNTER_RISE, collision_mask | COVER_LAYER, [get_rid(), hunter.get_rid()])
-	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+	return Surroundings.sight_clear(self, hunter, EYE_RISE, HUNTER_RISE, COVER_LAYER)
 
 
 ## A river calls this when the boar steps in (true) or out (false).
@@ -446,7 +442,7 @@ func wade(entered: bool) -> void:
 
 ## A panicking boar rolls once whether to charge; a charge that hits nothing gives up.
 func _maybe_charge() -> void:
-	if boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled:
+	if boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled and not hideout.active():
 		_charge_rolled = true
 		if randf() < boar_type.aggression:
 			boar.charge()
@@ -485,6 +481,8 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 				_turn_left = PANIC_TURN_SECONDS
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn + _scatter)
 			speed = boar_type.panic_speed
+	if hideout.active() and boar.state in [Boar.State.FLEE, Boar.State.PANIC]:
+		_heading = hideout.heading(pos)
 	if _forced_left > 0.0 and boar.state != Boar.State.CHARGE:
 		_heading = _forced_heading
 	if _wading > 0:
@@ -498,10 +496,14 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 ## Calm routine without bait (owner 2026-11-01): graze or stand on the spot, walk over to a herd mate, sometimes roam.
 func _idle(delta: float, pos: Vector2) -> void:
 	var mate := Surroundings.nearest_mate(self, pos, HERD_REJOIN_RADIUS)
-	idle.tick(delta, mate != Vector2.INF)
+	# Away from the herd (scattered by an attack): it goes back to the herd centre once it finds it in reach.
+	var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD, HERD_REJOIN_RADIUS)
+	idle.tick(delta, mate != Vector2.INF, randf(), back != Vector2.ZERO)
 	match idle.activity:
 		BoarIdle.Activity.JOIN:
-			if mate == Vector2.INF or pos.distance_to(mate) <= BoarIdle.MATE_DISTANCE:
+			if back != Vector2.ZERO:
+				_heading = back
+			elif mate == Vector2.INF or pos.distance_to(mate) <= BoarIdle.MATE_DISTANCE:
 				idle.arrived()
 				_heading = Vector2.ZERO
 			else:
@@ -511,7 +513,6 @@ func _idle(delta: float, pos: Vector2) -> void:
 				_turn = randf() * TAU
 				_turn_left = WANDER_TURN_SECONDS
 			_heading = Vector2.from_angle(_turn)
-			var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD, HERD_REJOIN_RADIUS)
 			if back != Vector2.ZERO:
 				_heading = back
 		_:
@@ -591,8 +592,8 @@ func _report_outcome() -> void:
 
 func _show_state() -> void:
 	_label.text = state_name()
-	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE]
-	$Sounds.panicking = boar.state == Boar.State.PANIC
+	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE] and not hideout.hidden()
+	$Sounds.panicking = boar.state == Boar.State.PANIC and not hideout.hidden()
 	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
 	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)

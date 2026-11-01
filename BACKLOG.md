@@ -100,3 +100,4 @@ Unapproved ideas and possible future features belong here.
 | P3-045 | 3 | A thrown net that misses lies on the ground instead of hanging above it | P3-044 | DONE |
 | P3-046 | 3 | Net throw distance capped at 15 m (`NET_MAX_SPEED` in hunter.gd) | P3-045 | DONE |
 | P3-047 | 3 | Trap placement mode: T shows a ghost preview (green where free, red over trees, stumps, rocks), Q/R turn it, LMB puts it down; the helper builds from any side | P3-046 | DONE |
+| P3-048 | 3 | A fleeing boar may hide in tall grass, stand there without a fear mark, then calm down and walk out; boars scattered by an attack walk back to their herd once they find it | P3-047 | DONE |
