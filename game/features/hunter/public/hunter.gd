@@ -220,7 +220,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			stamina.drink(WATER_STAMINA)
 	else:
 		for i in Loadout.Weapon.size():
-			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.has(i):
+			if event.is_action_pressed("weapon_%d" % (i + 1)) and loadout.in_hotbar(i):
 				weapon = i
 	_update_hud()
 
@@ -506,6 +506,8 @@ func _attack() -> void:
 				$Camera/Hands.strike()
 				Sfx.play(self, "sling_shot")
 				_throw(StoneScene, minf(SLING_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), SLING_MAX_SPEED))
+			else:
+				Sfx.play(self, "no_ammo", -3.0)
 		Weapon.BOW:
 			if loadout.shoot_arrow():
 				$Camera/Hands.strike()
@@ -513,6 +515,8 @@ func _attack() -> void:
 				Sfx.play(self, "bow_attack", -3.0)
 				var arrow := _throw(ArrowScene, ARROW_SPEED)
 				arrow.damage = roundi(arrow.damage * lerpf(1.0, CHARGED_DAMAGE_SCALE, power))
+			else:
+				Sfx.play(self, "no_ammo", -3.0)
 
 
 ## A melee blow: the swing, plus the hunter's grunt as it lands (owner, 2026-10-29).
@@ -584,4 +588,6 @@ func _pick_up() -> void:
 
 
 func _update_hud() -> void:
+	if not loadout.in_hotbar(weapon):
+		weapon = Weapon.KNIFE
 	_hud.show_loadout(loadout, weapon)

@@ -60,7 +60,7 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 	]
 	for i in WEAPON_NAMES.size():
 		var slot: Label = $Hotbar.get_child(i)
-		slot.visible = loadout.has(i)
+		slot.visible = loadout.in_hotbar(i)
 		slot.text = "[%d] %s%s" % [i + 1, WEAPON_NAMES[i], extras[i]]
 		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE
 	$Bait.text = "[F] %s x%d" % [_name(loadout.bait_id), loadout.baits.get(loadout.bait_id, 0)]

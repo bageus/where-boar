@@ -111,6 +111,16 @@ func has(weapon: Weapon) -> bool:
 	return weapon in [Weapon.SPEAR, Weapon.NET, Weapon.KNIFE] or weapon in _bought
 
 
+## Spears and nets leave the hotbar when none are left; the knife takes their place (owner, 2026-11-01).
+## Bow and sling stay, and just fail without ammo.
+func in_hotbar(weapon: Weapon) -> bool:
+	if weapon == Weapon.SPEAR:
+		return spears > 0
+	if weapon == Weapon.NET:
+		return nets > 0
+	return has(weapon)
+
+
 func throw_spear() -> bool:
 	if spears == 0:
 		return false

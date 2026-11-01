@@ -102,3 +102,4 @@ Unapproved ideas and possible future features belong here.
 | P3-047 | 3 | Trap placement mode: T shows a ghost preview (green where free, red over trees, stumps, rocks), Q/R turn it, LMB puts it down; the helper builds from any side | P3-046 | DONE |
 | P3-048 | 3 | A fleeing boar may hide in tall grass, stand there without a fear mark, then calm down and walk out; boars scattered by an attack walk back to their herd once they find it | P3-047 | DONE |
 | P3-049 | 3 | Trees (and stumps, logs) on slopes sink to the lowest ground under their footprint so they never float | P3-048 | DONE |
+| P3-050 | 3 | Spear/net slot leaves the hotbar when out, knife auto-equipped; bow/sling with no ammo play a cancel sound (`assets/sfx/no_ammo/`, placeholder) | P3-049 | DONE |
