@@ -425,6 +425,13 @@ func _show_alert() -> void:
 
 
 func _sight_clear() -> bool:
+	# A hunter sneaking inside tall grass or a bush is hidden even from a boar standing in the same patch
+	# (the ray below starts inside the cover then and would not hit it).
+	var point := PhysicsPointQueryParameters3D.new()
+	point.position = hunter.global_position + Vector3.UP * HUNTER_RISE
+	point.collision_mask = COVER_LAYER
+	if not get_world_3d().direct_space_state.intersect_point(point, 1).is_empty():
+		return false
 	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * EYE_RISE,
 			hunter.global_position + Vector3.UP * HUNTER_RISE, collision_mask | COVER_LAYER, [get_rid(), hunter.get_rid()])
 	return get_world_3d().direct_space_state.intersect_ray(query).is_empty()
