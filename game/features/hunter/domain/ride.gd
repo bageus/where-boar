@@ -9,9 +9,6 @@ const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 ## Mount types that can be saddled (D021: three kinds).
 const MOUNT_TYPES := ["runner_grey", "aggressive_red", "armored_black"]
 
-## Boars with at least this much health knock a rider out of the saddle when they ram (owner, 2026-10-28).
-const UNSEAT_HEALTH := 4
-
 var type: BoarType = null
 
 
@@ -41,9 +38,9 @@ func shrugs_off_knock() -> bool:
 	return type != null and type.knock_scale < 0.5
 
 
-## A large boar's ram throws the rider off, unless the mount is armored.
+## Any boar's ram throws the rider off, the mount stays put (owner, 2026-11-01).
 func is_unseated_by(rammer: BoarType) -> bool:
-	return type != null and not shrugs_off_knock() and rammer.max_health >= UNSEAT_HEALTH
+	return type != null and rammer != null
 
 
 ## The angry mount rams boars it runs into.

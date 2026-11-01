@@ -228,7 +228,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Rammed by a boar (M005): thrown back, hurt by a charge, and out of control for a moment.
 func knock(impulse: Vector3, damage: int = 0, rammer: BoarType = null) -> void:
 	if rammer and ride.is_unseated_by(rammer):
-		$Rider.toggle()
+		$Rider.toggle(true)
 	if not ride.shrugs_off_knock():
 		velocity = impulse
 		_stun = STUN_SECONDS

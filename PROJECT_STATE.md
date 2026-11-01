@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-053
-last_completed_task_id: P3-053
+active_task_id: P3-054
+last_completed_task_id: P3-054
 build_status: PASS
 updated: 2026-11-01
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-053 done.
+None. P3-001..P3-054 done.
 
 ## Last completed work
 
@@ -129,3 +129,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-051 (2026-11-01): hunt FPS (owner: 10-16 FPS in the web build). Grass is half the clumps, each 1.41x wider at the same height (`terrain.gd` `GRASS_WIDEN`, also outside the walls); the sun in the hunt and the camp uses 2 shadow cascades instead of 4; each of the 47 boars' health bar, state label and run dust is drawn only within 40 m and the dust casts no shadow. Measured at the hunt start view (1280x720, xvfb, software GL): 793 -> 519 draw calls, 1.55M -> 1.18M triangles (not counting grass, ~130 triangles a clump, half as many now), frame 618 -> ~480 ms in software rendering. CPU per frame on this machine: ~2-5 ms scripts and animation, ~6-9 ms physics (59 moving bodies); not changed. Not checked: FPS in the browser.
 - P3-052 (2026-11-01): baked shadows (owner: the sun never moves, static things need no live shadows). `game/core/baked_shadow` copies the static meshes (hunt: Terrain, Surroundings, Props, Bridge; camp: Scenery, Dressing, tents, Stations) into a world of their own, renders their silhouettes once along the sun into a 2048 px texture and turns their live shadows off; ground shaders (`vertex_ground.gdshader` for the hunt terrain and the land outside, camp `ground.gdshader`) darken by it through global shader uniforms `baked_shadow*` (project.godot). Live shadows are left to the hunter, boars, birds and thrown gear. Shadows fall on the ground only, not on rocks or buildings. Measured at the start views (xvfb): camp 639 -> 248 draw calls, hunt 519 -> ~425. Not checked: FPS in the browser.
 - P3-053 (2026-11-01): saddle scaled to boar size (`boar_model.gd` `put_saddle`: smaller of length/1.9 and height/1.1, clamped 0.4-1.3). Not checked in game.
+- P3-054 (2026-11-01): riding: any ramming boar unseats the rider, mount stays in place; mount hoof steps and idle `boar_voice` while riding. Not checked in game.

@@ -106,3 +106,4 @@ Unapproved ideas and possible future features belong here.
 | P3-051 | 3 | Hunt FPS: half the grass clumps (wider), 2 sun shadow cascades in hunt and camp, boar health bar/label/dust drawn within 40 m only | P3-050 | DONE |
 | P3-052 | 3 | Baked shadows: static trees, rocks, bushes and buildings cast no live shadow; their shadows are rendered once into a ground texture (`core.baked_shadow`) | P3-051 | DONE |
 | P3-053 | 3 | Saddle scaled to boar size (length/height ratio) so it sits on the back of small and big boars | P3-052 | DONE |
+| P3-054 | 3 | Riding: any ramming boar throws the rider off and the mount stays put; mount hoof sounds and idle `boar_voice` while riding | P3-053 | DONE |
