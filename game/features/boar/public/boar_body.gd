@@ -263,6 +263,7 @@ func _after_change() -> void:
 	if not boar.is_free() and _stun_left > 0.0:
 		_end_stun()
 	_show_state()
+	_show_alert()
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
 		$Model.die()
@@ -421,10 +422,9 @@ func is_hiding() -> bool:
 	return hideout.hidden()
 
 
-## Alert mark over the boar: ? heard something, ! wary, !! alarmed or running.
+## Alert mark over the boar: ? heard something, ! wary, !! alarmed or running; none when hidden, dead or caught (owner, 2026-11-01).
 func _show_alert() -> void:
-	var level := alert.level() if boar.state == Boar.State.WANDER else (BoarAlert.MAX_LEVEL if boar.is_free() else 0)
-	level = 0 if hideout.hidden() else level  # hidden in tall grass: no fear mark (owner, 2026-11-01)
+	var level := 0 if hideout.hidden() else (alert.level() if boar.state == Boar.State.WANDER else (BoarAlert.MAX_LEVEL if boar.is_free() else 0))
 	if _alert_mark.text != ALERT_MARKS[level]:
 		_alert_mark.text = ALERT_MARKS[level]
 		_alert_mark.modulate = ALERT_COLORS[level]
