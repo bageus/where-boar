@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode specular_disabled;
 
+#include "res://game/core/baked_shadow/public/baked_shadow.gdshaderinc"
+
 // Camp ground (owner, 2026-10-29): mottled dirt with reddish clay, a wobbly grass border along the
 // rock wall, the palisade and the south-west, and trodden patches and paths (dressing.gd fills the
 // worn_* uniforms). edge_band() and greenness() mirror Dressing.greenness() in dressing.gd.
@@ -69,6 +71,6 @@ void fragment() {
 	float rock = stony(p + (vec2(fine, big) - 0.5) * 3.0) * (1.0 - w);
 	rock = max(smoothstep(0.2, 0.7, rock + (fine - 0.5) * 0.8) * step(0.001, rock), step(world.y, -0.05));
 	colour = mix(colour, vec3(0.55, 0.55, 0.58) * (0.8 + 0.4 * fine), rock);
-	ALBEDO = pow(colour, vec3(2.2));  // the colours above are sRGB, as in a StandardMaterial3D
+	ALBEDO = pow(colour, vec3(2.2)) * (1.0 - baked_shadow_at(world));  // the colours above are sRGB, as in a StandardMaterial3D
 	ROUGHNESS = 1.0;
 }

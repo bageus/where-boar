@@ -5,6 +5,7 @@ extends Node3D
 ## escape zone opens into a "natural gate" of tall grass and rotten stumps. Out of reach and cheap: one ground
 ## mesh, MultiMesh per model and side, no shadows; grass and ferns are drawn only near the camera.
 
+const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const TerrainScript = preload("res://game/presentation/hunt_map/props/terrain.gd")
 const HALF := 80.0
 ## The ground runs this far past the walls, one vertex every STEP metres.
@@ -99,10 +100,7 @@ func _ground() -> void:
 			for k in [a, a + 1, b, a + 1, b + 1, b]:
 				st.add_index(k)
 	st.generate_normals()
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 1.0
-	st.set_material(material)
+	st.set_material(BakedShadow.vertex_ground())
 	var land := MeshInstance3D.new()
 	land.mesh = st.commit()
 	land.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

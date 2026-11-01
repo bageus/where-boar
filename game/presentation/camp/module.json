@@ -8,6 +8,7 @@
     "public/camp.gd"
   ],
   "dependencies": [
+    "core.baked_shadow",
     "core.sfx",
     "features.boar",
     "features.hunter",

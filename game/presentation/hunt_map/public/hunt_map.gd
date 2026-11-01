@@ -2,6 +2,7 @@ extends Node3D
 
 ## Green Valley grey-box hunt map (section 11): spawns boars at random markers, counts their outcomes and ends the hunt (M007).
 
+const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
@@ -68,6 +69,7 @@ var _baits: Array[Node3D] = []
 
 func _ready() -> void:
 	_batch_props()
+	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()
 	var zones: Array[Vector2] = []
 	for zone: Node3D in $EscapeZones.get_children():

@@ -20,6 +20,7 @@ const SAND_TOP := 0.2
 const ROCK_NORMAL_Y := 0.75
 ## Stylized grass (assets/grass, MIT, StayAtHomeDev): clumps on grass-coloured ground, in square chunks
 ## that disappear beyond GRASS_RANGE metres, so far grass costs nothing.
+const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const GRASS_MESH := preload("res://assets/grass/grass.glb")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GRASS_CHUNK := 20
@@ -383,7 +384,5 @@ func _build_mesh() -> ArrayMesh:
 	_arrays[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _arrays)
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	mesh.surface_set_material(0, material)
+	mesh.surface_set_material(0, BakedShadow.vertex_ground())
 	return mesh

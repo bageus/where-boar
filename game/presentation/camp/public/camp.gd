@@ -7,6 +7,7 @@ signal hunt_requested
 ## Fact: something was bought; the game saves (section 18).
 signal purchased
 
+const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const PEN_ANIMALS := {
@@ -64,6 +65,9 @@ func _ready() -> void:
 	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
 			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
 	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
+	# The camp ground and the forest floor behind the palisade.
+	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $LargeTent, $AFrameTent, $RoundTent, $RoundTent2] as Array[Node],
+			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp
 
 
 ## Roosters and turkeys caught on hunts stand in the cages, the newest boars (up to five) in the pen.

@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-051
-last_completed_task_id: P3-051
+active_task_id: P3-052
+last_completed_task_id: P3-052
 build_status: PASS
 updated: 2026-11-01
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-051 done.
+None. P3-001..P3-052 done.
 
 ## Last completed work
 
@@ -127,3 +127,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-038: StoneTrail font (`assets/fonts/stonetrail/StoneTrail-Regular.ttf`) is the project theme font (`assets/ui/main_theme.tres`, `gui/theme/custom`) for all Controls, and on every `Label3D` (station names, boar state, traps, mount, return point). Cyrillic (incl. Ё/ё) and Latin are covered. Checked headless (theme, labels, station scene). Not checked: how it looks in the window.
 - P3-040 (2026-10-30): camp FPS (owner: about 18 FPS in the web build). The camp's trees, wall and drop-off rocks are one MultiMesh per model and the palisade logs one merged mesh per wood colour (`scenery.gd` `_batch`); camp sun shadows end at 40 m; valley trees are batched per 300 m cell so those out of view are culled (`vista.gd`). Measured at the camp start view (1280x720, xvfb): 1856 -> 639 draw calls, 2.98M -> 2.23M triangles per frame. The hunt start view is unchanged at ~730 draw calls, 1.08M triangles (no regression since the last fix). Left: the tents, hunting hut and armory models are 80-125k triangles each (~0.8M of the camp's triangles with shadows). Not checked: FPS in the browser.
 - P3-051 (2026-11-01): hunt FPS (owner: 10-16 FPS in the web build). Grass is half the clumps, each 1.41x wider at the same height (`terrain.gd` `GRASS_WIDEN`, also outside the walls); the sun in the hunt and the camp uses 2 shadow cascades instead of 4; each of the 47 boars' health bar, state label and run dust is drawn only within 40 m and the dust casts no shadow. Measured at the hunt start view (1280x720, xvfb, software GL): 793 -> 519 draw calls, 1.55M -> 1.18M triangles (not counting grass, ~130 triangles a clump, half as many now), frame 618 -> ~480 ms in software rendering. CPU per frame on this machine: ~2-5 ms scripts and animation, ~6-9 ms physics (59 moving bodies); not changed. Not checked: FPS in the browser.
+- P3-052 (2026-11-01): baked shadows (owner: the sun never moves, static things need no live shadows). `game/core/baked_shadow` copies the static meshes (hunt: Terrain, Surroundings, Props, Bridge; camp: Scenery, Dressing, tents, Stations) into a world of their own, renders their silhouettes once along the sun into a 2048 px texture and turns their live shadows off; ground shaders (`vertex_ground.gdshader` for the hunt terrain and the land outside, camp `ground.gdshader`) darken by it through global shader uniforms `baked_shadow*` (project.godot). Live shadows are left to the hunter, boars, birds and thrown gear. Shadows fall on the ground only, not on rocks or buildings. Measured at the start views (xvfb): camp 639 -> 248 draw calls, hunt 519 -> ~425. Not checked: FPS in the browser.

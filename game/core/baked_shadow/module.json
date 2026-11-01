@@ -1,0 +1,13 @@
+{
+  "id": "core.baked_shadow",
+  "layer": "core",
+  "purpose": "Baked sun shadows of static meshes: one render of their silhouettes along the fixed sun into a texture that ground shaders darken by, so only moving things cast live shadows.",
+  "state_owner": [],
+  "public_api": [
+    "public/baked_shadow.gd",
+    "public/baked_shadow.gdshaderinc",
+    "public/vertex_ground.gdshader",
+    "public/bake_silhouette.gdshader"
+  ],
+  "dependencies": []
+}
