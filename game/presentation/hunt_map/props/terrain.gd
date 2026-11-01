@@ -78,6 +78,7 @@ var _holes := PackedVector4Array()
 
 
 func _ready() -> void:
+	add_to_group("terrain")
 	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)
 	$Mesh.mesh = _build_mesh()
 	for node in get_parent().find_children("*", "Node3D", true, false):
@@ -103,6 +104,16 @@ func height_at(x: float, z: float) -> float:
 	var top := lerpf(data[j * w + i], data[j * w + i + 1], fx - i)
 	var bottom := lerpf(data[(j + 1) * w + i], data[(j + 1) * w + i + 1], fx - i)
 	return lerpf(top, bottom, fz - j)
+
+
+## Lowest ground height within radius of a map point (centre plus a ring): a tree or stump sunk to it stands
+## out of the ground on a slope instead of floating over the downhill side.
+func lowest_under(x: float, z: float, radius: float) -> float:
+	var low := height_at(x, z)
+	for n in 8:
+		var a := TAU * n / 8.0
+		low = minf(low, height_at(x + cos(a) * radius, z + sin(a) * radius))
+	return low
 
 
 func _plant_grass() -> void:
@@ -214,8 +225,16 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		var k := rng.randi() % meshes.size()
 		var box := meshes[k].get_aabb()
 		var size := rng.randf_range(size_range.x, size_range.y) / (box.size.y if fit_height else 1.0)
-		at.y = height_at(at.x, at.z) - 0.1
-		var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), at)
+		var foot := Vector3.ZERO  # the footprint centre (a tree: its trunk), model units
+		var foot_r := maxf(box.size.x, box.size.z) * size * 0.35
+		if fit_height:
+			var trunk0 := Trunk.base(meshes[k])
+			foot = Vector3(trunk0.x, 0.0, trunk0.z)
+			foot_r = maxf(0.35, trunk0.y * size)
+		var turn := Basis(Vector3.UP, rng.randf() * TAU)
+		var foot_at := at + turn * foot * size
+		at.y = lowest_under(foot_at.x, foot_at.z, foot_r) - 0.15
+		var spot := Transform3D(turn.scaled(Vector3.ONE * size), at)
 		spots[k].append(spot)
 		# No grass inside the footprint (a tree: its trunk), turned with the model.
 		var reach := ceili(maxf(box.size.x, box.size.z) * size * 0.5)

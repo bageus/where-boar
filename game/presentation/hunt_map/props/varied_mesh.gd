@@ -23,6 +23,13 @@ func _ready() -> void:
 	$Mesh.mesh = mesh
 	$Mesh.scale = Vector3.ONE * size / (box.y if fit_height else maxf(box.x, box.z))
 	$Mesh.rotation.y = rng.randf() * TAU
+	var terrain := get_tree().get_first_node_in_group("terrain")
+	if terrain and fit_height:  # sink a tree to the lowest ground under its trunk (slopes)
+		var trunk0 := Trunk.base(mesh)
+		var s0: float = $Mesh.scale.x
+		var foot := global_position + Basis(Vector3.UP, $Mesh.rotation.y) * Vector3(trunk0.x, 0.0, trunk0.z) * s0
+		var low: float = terrain.lowest_under(foot.x, foot.z, maxf(0.35, trunk0.y * s0))
+		$Mesh.position.y = minf(0.0, low - global_position.y) - 0.15
 	if has_node("Collision") and $Collision.shape is CylinderShape3D:  # a tree: its trunk
 		var trunk := Trunk.base(mesh)
 		var scale: float = $Mesh.scale.x
