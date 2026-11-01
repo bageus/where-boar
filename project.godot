@@ -123,3 +123,7 @@ renderer/rendering_method.mobile="gl_compatibility"
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[audio]
+
+driver/output_latency.web=120
