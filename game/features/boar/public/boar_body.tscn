@@ -48,16 +48,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 
 [node name="Back" type="MeshInstance3D" parent="HealthBar"]
 cast_shadow = 0
+visibility_range_end = 40.0
 mesh = SubResource("Mesh_bar")
 material_override = SubResource("Mat_bar_back")
 
 [node name="Fill" type="MeshInstance3D" parent="HealthBar"]
 cast_shadow = 0
+visibility_range_end = 40.0
 mesh = SubResource("Mesh_fill")
 material_override = SubResource("Mat_bar_fill")
 
 [node name="Label" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
+visibility_range_end = 40.0
 billboard = 1
 font_size = 32
 text = "WANDER"

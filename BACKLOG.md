@@ -103,3 +103,4 @@ Unapproved ideas and possible future features belong here.
 | P3-048 | 3 | A fleeing boar may hide in tall grass, stand there without a fear mark, then calm down and walk out; boars scattered by an attack walk back to their herd once they find it | P3-047 | DONE |
 | P3-049 | 3 | Trees (and stumps, logs) on slopes sink to the lowest ground under their footprint so they never float | P3-048 | DONE |
 | P3-050 | 3 | Spear/net slot leaves the hotbar when out, knife auto-equipped; bow/sling with no ammo play a cancel sound (`assets/sfx/no_ammo/`, placeholder) | P3-049 | DONE |
+| P3-051 | 3 | Hunt FPS: half the grass clumps (wider), 2 sun shadow cascades in hunt and camp, boar health bar/label/dust drawn within 40 m only | P3-050 | DONE |

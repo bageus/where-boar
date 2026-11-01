@@ -35,7 +35,7 @@ const MOUNTAINS := 9
 const MOUNTAIN_HAZE := Color(0.4, 0.47, 0.6)
 ## Grass and ferns in a strip this wide just outside the walls, like inside (terrain.gd).
 const GRASS_STRIP := 10.0
-const GRASS_PER_M2 := 4
+const GRASS_PER_M2 := 2  # widened clumps, as inside (TerrainScript.GRASS_WIDEN)
 const FERNS := 180
 ## Natural gates: tall grass this far around each zone; the path out stays clear of trees this wide and long.
 const GATE_GRASS := 6.5
@@ -188,7 +188,7 @@ func _grass(rng: RandomNumberGenerator) -> void:
 				var at := out * (HALF + rng.randf() * GRASS_STRIP) + out.orthogonal() * (c + rng.randf() * chunk)
 				if _past(at.x, at.y) < 0.0 or _terrain.height_at(at.x, at.y) < 0.3:
 					continue
-				var spot := _spot(at, rng.randf_range(0.18, 0.23), rng)
+				var spot := _spot(at, rng.randf_range(0.18, 0.23), rng).scaled_local(TerrainScript.GRASS_WIDEN)
 				spot.origin -= centre
 				spots.append(spot)
 			_add(clump, spots, TerrainScript.GRASS_MATERIAL, TerrainScript.GRASS_RANGE, centre)

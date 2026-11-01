@@ -23,7 +23,10 @@ const ROCK_NORMAL_Y := 0.75
 const GRASS_MESH := preload("res://assets/grass/grass.glb")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GRASS_CHUNK := 20
-const GRASS_PER_METRE := 6
+## Half the clumps of before, each this much wider (same height), so the cover looks the same at half the
+## triangles (owner, 2026-11-01: 10-16 FPS on the hunt; grass was a quarter of the frame).
+const GRASS_PER_METRE := 3
+const GRASS_WIDEN := Vector3(1.41, 1.0, 1.41)
 const GRASS_RANGE := 30.0
 ## Tall grass patches (owner, 2026-10-28): clumps about twice as tall, with some wheat; they hide the hunter
 ## from boars like a bush (cover layer, see boar_body.gd).
@@ -158,7 +161,7 @@ func _plant_grass() -> void:
 						var size := rng.randf_range(0.65, 0.8) if tall else rng.randf_range(0.18, 0.23)
 						var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size),
 								Vector3(x, height_at(x, z) - 0.05, z) - centre)
-						spots.append(spot)
+						spots.append(spot.scaled_local(GRASS_WIDEN))
 						if tall and k == 0 and rng.randf() < 0.5:
 							wheat.append(spot.scaled_local(Vector3.ONE * 1.4 / size))
 			_add_multimesh(clump, spots, centre, GRASS_MATERIAL, GRASS_RANGE)

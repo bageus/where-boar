@@ -62,6 +62,8 @@ func _add_dust() -> void:
 	_dust.lifetime = 0.5
 	_dust.local_coords = false
 	_dust.emitting = false
+	_dust.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_dust.visibility_range_end = 40.0  # 47 boars on the map: one draw call each otherwise
 	_dust.position = Vector3(0.0, 0.1, 0.4)
 	_dust.direction = Vector3(0.0, 1.0, 0.5)
 	_dust.spread = 30.0
