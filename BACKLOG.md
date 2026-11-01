@@ -96,3 +96,4 @@ Unapproved ideas and possible future features belong here.
 | P3-041 | 3 | Owner's trap models with trigger animations and new trap rules (D040): snare rescue and E-take, leaf pit in the ground, two-peg tripwire with stun stars, half-inside cage, fence; build times and carry caps | P3-040 | DONE |
 | P3-042 | 3 | Bait shop icons: removed stray fragments of neighbouring atlas icons from 6 PNGs (`assets/icon/bait/`) | P3-041 | DONE |
 | P3-043 | 3 | Sneaking hunter inside tall grass or a bush is unseen by boars, even by boars standing in the same patch (hearing unchanged) | P3-042 | DONE |
+| P3-044 | 3 | Bait is eaten up after 10 s at the bait, then gone; calm boars graze or stand most of the time, walk over to stand by a herd mate, and roam only sometimes | P3-043 | DONE |

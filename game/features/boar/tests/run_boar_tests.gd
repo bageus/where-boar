@@ -3,6 +3,7 @@ extends SceneTree
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
+const BoarIdle = preload("res://game/features/boar/domain/boar_idle.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 
 
@@ -21,6 +22,7 @@ func _init() -> void:
 	failures += _check(_flight_calms_and_alarmed_boar_attacks(), "a fleeing boar calms down; an alarmed calm boar can attack")
 	failures += _check(_types_pick_by_weight(), "five types, rarer types need higher rolls")
 	failures += _check(_trapped_boar_stays_until_freed(), "trapped boar stays when hurt, can be netted or break free")
+	failures += _check(_idle_mostly_stands_and_joins_mates(), "idle boar mostly grazes or stands, joins a mate, roams sometimes")
 	print("boar tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -152,3 +154,18 @@ func _trapped_boar_stays_until_freed() -> bool:
 	boar.trap()
 	boar.net_capture()
 	return held and loose and boar.state == Boar.State.CAPTURED
+
+
+func _idle_mostly_stands_and_joins_mates() -> bool:
+	var picks := {}
+	for i in 100:
+		var activity := BoarIdle.pick(i / 100.0, true)
+		picks[activity] = picks.get(activity, 0) + 1
+	var mostly_still: bool = picks[BoarIdle.Activity.GRAZE] + picks[BoarIdle.Activity.STAND] > picks[BoarIdle.Activity.ROAM] * 2
+	var loner_never_joins := BoarIdle.pick(0.7, false) == BoarIdle.Activity.STAND and BoarIdle.pick(0.7, true) == BoarIdle.Activity.JOIN
+	var idle := BoarIdle.new(0.0)
+	idle.start(BoarIdle.Activity.ROAM, 0.0)
+	var changed := not idle.tick(2.0, true, 0.0) and idle.tick(1.5, true, 0.0) and idle.activity == BoarIdle.Activity.GRAZE
+	idle.start(BoarIdle.Activity.JOIN)
+	idle.arrived(0.9)
+	return mostly_still and loner_never_joins and changed and idle.standing() and picks.has(BoarIdle.Activity.JOIN)

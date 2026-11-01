@@ -34,9 +34,18 @@ static func herd_cohesion(body: Node3D, pos: Vector2, spread: float, reach: floa
 
 
 ## Bait nodes still on the ground as Vector3(x, z, pull radius).
-static func bait_spots(baits: Array[Node3D]) -> Array[Vector3]:
+static func bait_spots(baits: Array) -> Array[Vector3]:
 	var spots: Array[Vector3] = []
 	for bait in baits:
 		if is_instance_valid(bait):
 			spots.append(Vector3(bait.global_position.x, bait.global_position.z, bait.attract_radius))
 	return spots
+
+
+## XZ position of the nearest living herd mate within reach, or Vector2.INF if there is none.
+static func nearest_mate(body: Node3D, pos: Vector2, reach: float) -> Vector2:
+	var best := Vector2.INF
+	for mate in herd_positions(body, false, reach):
+		if pos.distance_to(mate) < pos.distance_to(best):
+			best = mate
+	return best

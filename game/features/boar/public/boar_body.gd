@@ -5,6 +5,7 @@ extends CharacterBody3D
 const Boar = preload("res://game/features/boar/domain/boar.gd")
 const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
+const BoarIdle = preload("res://game/features/boar/domain/boar_idle.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
@@ -82,6 +83,7 @@ var herd: Array[Node3D] = []
 
 var boar: Boar
 var alert := BoarAlert.new()
+var idle := BoarIdle.new()
 var _heading := Vector2.ZERO
 ## Wander angle or panic deflection, re-rolled when _turn_left runs out.
 var _turn := 0.0
@@ -459,21 +461,18 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	_eating = false
 	match boar.state:
 		Boar.State.WANDER:
-			var spots := Surroundings.bait_spots(baits)
+			var live := baits.filter(is_instance_valid)
+			var spots := Surroundings.bait_spots(live)
 			var bait := BoarSenses.bait_target(pos, spots)
 			if bait != -1:
-				# Walk up to the bait, then stand and eat.
+				# Walk up to the bait, then stand and eat it up (owner 2026-11-01: 10 s, then it is gone).
 				var to_bait := Vector2(spots[bait].x, spots[bait].y) - pos
 				_eating = to_bait.length() <= BoarSenses.EAT_DISTANCE
 				_heading = Vector2.ZERO if _eating else to_bait.normalized()
+				if _eating and live[bait].has_method("eat"):
+					live[bait].eat(delta)
 			else:
-				if _turn_left <= 0.0:
-					_turn = randf() * TAU
-					_turn_left = WANDER_TURN_SECONDS
-				_heading = Vector2.from_angle(_turn)
-				var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD, HERD_REJOIN_RADIUS)
-				if back != Vector2.ZERO:
-					_heading = back
+				_idle(delta, pos)
 		Boar.State.FLEE:
 			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_scatter)
 			speed = boar_type.flee_speed
@@ -494,6 +493,30 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	velocity.z = _heading.y * speed
 	if _heading != Vector2.ZERO:
 		rotation.y = atan2(-_heading.x, -_heading.y)
+
+
+## Calm routine without bait (owner 2026-11-01): graze or stand on the spot, walk over to a herd mate, sometimes roam.
+func _idle(delta: float, pos: Vector2) -> void:
+	var mate := Surroundings.nearest_mate(self, pos, HERD_REJOIN_RADIUS)
+	idle.tick(delta, mate != Vector2.INF)
+	match idle.activity:
+		BoarIdle.Activity.JOIN:
+			if mate == Vector2.INF or pos.distance_to(mate) <= BoarIdle.MATE_DISTANCE:
+				idle.arrived()
+				_heading = Vector2.ZERO
+			else:
+				_heading = (mate - pos).normalized()
+		BoarIdle.Activity.ROAM:
+			if _turn_left <= 0.0:
+				_turn = randf() * TAU
+				_turn_left = WANDER_TURN_SECONDS
+			_heading = Vector2.from_angle(_turn)
+			var back := Surroundings.herd_cohesion(self, pos, HERD_SPREAD, HERD_REJOIN_RADIUS)
+			if back != Vector2.ZERO:
+				_heading = back
+		_:
+			_heading = Vector2.ZERO
+	_eating = idle.activity == BoarIdle.Activity.GRAZE
 
 
 ## Runs at the hunter; once close it locks its line and dashes through him (playtest 2026-10-27).

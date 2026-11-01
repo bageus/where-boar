@@ -1,6 +1,10 @@
 extends Node3D
 
-## Bait on the ground (M011): calm boars within attract_radius come to eat it until it is gone.
+## Bait on the ground (M011): calm boars within attract_radius come to eat it; it is gone after
+## EAT_SECONDS of eating (owner, 2026-11-01) or when it spoils.
+
+## Seconds of eating that finish a bait; two boars eating together finish it twice as fast.
+const EAT_SECONDS := 10.0
 
 ## item_id -> [pull radius m, seconds it lasts]; ASSUMPTION numbers (D013), better fruit pulls from further.
 const KINDS := {
@@ -24,6 +28,7 @@ const MODELS := {
 @export var item_id := "item_acorns"
 
 var attract_radius := 12.0
+var _eaten := 0.0
 
 
 func _ready() -> void:
@@ -39,3 +44,10 @@ func _ready() -> void:
 		paint.roughness = 0.82
 		mesh.material_override = paint
 	get_tree().create_timer(kind[1]).timeout.connect(queue_free)
+
+
+## A boar standing at the bait eats delta seconds of it.
+func eat(delta: float) -> void:
+	_eaten += delta
+	if _eaten >= EAT_SECONDS:
+		queue_free()
