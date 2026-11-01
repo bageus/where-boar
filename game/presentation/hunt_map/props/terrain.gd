@@ -114,9 +114,9 @@ func height_at(x: float, z: float) -> float:
 ## out of the ground on a slope instead of floating over the downhill side.
 func lowest_under(x: float, z: float, radius: float) -> float:
 	var low := height_at(x, z)
-	for n in 8:
-		var a := TAU * n / 8.0
-		low = minf(low, height_at(x + cos(a) * radius, z + sin(a) * radius))
+	for n in 16:
+		var a := TAU * n / 16.0
+		low = minf(low, height_at(x + cos(a) * radius * 1.3, z + sin(a) * radius * 1.3))
 	return low
 
 
@@ -237,7 +237,8 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 			foot_r = maxf(0.35, trunk0.y * size)
 		var turn := Basis(Vector3.UP, rng.randf() * TAU)
 		var foot_at := at + turn * foot * size
-		at.y = lowest_under(foot_at.x, foot_at.z, foot_r) - 0.15
+		# A model whose lowest vertex is above its origin (some oaks) is lowered by that much too.
+		at.y = lowest_under(foot_at.x, foot_at.z, foot_r) - 0.15 - (box.position.y * size if fit_height else 0.0)
 		var spot := Transform3D(turn.scaled(Vector3.ONE * size), at)
 		spots[k].append(spot)
 		# No grass inside the footprint (a tree: its trunk), turned with the model.

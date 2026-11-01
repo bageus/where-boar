@@ -3,8 +3,8 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-054
-last_completed_task_id: P3-054
+active_task_id: P3-055
+last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-01
 ---
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-054 done.
+None. P3-001..P3-055 done.
 
 ## Last completed work
 
@@ -130,3 +130,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-052 (2026-11-01): baked shadows (owner: the sun never moves, static things need no live shadows). `game/core/baked_shadow` copies the static meshes (hunt: Terrain, Surroundings, Props, Bridge; camp: Scenery, Dressing, tents, Stations) into a world of their own, renders their silhouettes once along the sun into a 2048 px texture and turns their live shadows off; ground shaders (`vertex_ground.gdshader` for the hunt terrain and the land outside, camp `ground.gdshader`) darken by it through global shader uniforms `baked_shadow*` (project.godot). Live shadows are left to the hunter, boars, birds and thrown gear. Shadows fall on the ground only, not on rocks or buildings. Measured at the start views (xvfb): camp 639 -> 248 draw calls, hunt 519 -> ~425. Not checked: FPS in the browser.
 - P3-053 (2026-11-01): saddle scaled to boar size (`boar_model.gd` `put_saddle`: smaller of length/1.9 and height/1.1, clamped 0.4-1.3). Not checked in game.
 - P3-054 (2026-11-01): riding: any ramming boar unseats the rider, mount stays in place; mount hoof steps and idle `boar_voice` while riding. Not checked in game.
+- P3-055 (2026-11-01): trees floated because OakTree3/DeadOak3 have their lowest vertex above the origin; `terrain.gd`/`varied_mesh.gd` now sink by that gap, probe ring 16 points at 1.3x radius. Not checked in game.

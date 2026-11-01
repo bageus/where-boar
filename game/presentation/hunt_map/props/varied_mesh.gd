@@ -29,7 +29,7 @@ func _ready() -> void:
 		var s0: float = $Mesh.scale.x
 		var foot := global_position + Basis(Vector3.UP, $Mesh.rotation.y) * Vector3(trunk0.x, 0.0, trunk0.z) * s0
 		var low: float = terrain.lowest_under(foot.x, foot.z, maxf(0.35, trunk0.y * s0))
-		$Mesh.position.y = minf(0.0, low - global_position.y) - 0.15
+		$Mesh.position.y = minf(0.0, low - global_position.y) - 0.15 - mesh.get_aabb().position.y * s0
 	if has_node("Collision") and $Collision.shape is CylinderShape3D:  # a tree: its trunk
 		var trunk := Trunk.base(mesh)
 		var scale: float = $Mesh.scale.x

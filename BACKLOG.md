@@ -107,3 +107,4 @@ Unapproved ideas and possible future features belong here.
 | P3-052 | 3 | Baked shadows: static trees, rocks, bushes and buildings cast no live shadow; their shadows are rendered once into a ground texture (`core.baked_shadow`) | P3-051 | DONE |
 | P3-053 | 3 | Saddle scaled to boar size (length/height ratio) so it sits on the back of small and big boars | P3-052 | DONE |
 | P3-054 | 3 | Riding: any ramming boar throws the rider off and the mount stays put; mount hoof sounds and idle `boar_voice` while riding | P3-053 | DONE |
+| P3-055 | 3 | Trees whose lowest vertex is above the model origin (OakTree3, DeadOak3) sink by that gap too; wider ground probe ring | P3-054 | DONE |
