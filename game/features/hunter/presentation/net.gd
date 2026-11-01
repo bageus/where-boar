@@ -28,6 +28,8 @@ func _on_body_entered(body: Node) -> void:
 	if not body.has_method("net_hit") and not body.get_parent() is BoarBody:
 		linear_velocity = Vector3.ZERO
 		set_deferred("collision_mask", 1)
+		# The sphere rests on the ground with the net at its centre: sink the sheet onto the terrain.
+		$Model.position.y -= $Collision.shape.radius
 		return
 	# Boars and wild roosters/turkeys both answer net_hit; the hunter does not know helper animals.
 	if body.has_method("net_hit"):
