@@ -275,10 +275,10 @@ func _after_change() -> void:
 		$Model.net_fall()
 
 
-## A corpse with spears, arrows or nets stuck in it stays until the hunt ends, so they can be taken back.
+## A corpse with spears, arrows or nets stuck in it stays until all of them are taken back, then disappears.
 func _remove_corpse() -> void:
-	if not get_children().any(func(child: Node) -> bool: return child is RigidBody3D):
-		queue_free()
+	var stuck := get_children().any(func(child: Node) -> bool: return child is RigidBody3D)
+	queue_free() if not stuck else get_tree().create_timer(1.0).timeout.connect(_remove_corpse)
 
 
 ## Caught from ambush: nearby herd mates turn wary, or run if they already were (owner, 2026-10-27).
