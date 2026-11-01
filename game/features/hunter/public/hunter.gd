@@ -13,11 +13,13 @@ const SpearScene = preload("res://game/features/hunter/presentation/spear.tscn")
 const NetScene = preload("res://game/features/hunter/presentation/net.tscn")
 const StoneScene = preload("res://game/features/hunter/presentation/stone.tscn")
 const ArrowScene = preload("res://game/features/hunter/presentation/arrow.tscn")
+const Pickup = preload("res://game/features/hunter/presentation/pickup.gd")
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 const Highlight = preload("res://game/features/hunter/presentation/highlight.gd")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 const TrapSetter = preload("res://game/features/hunter/presentation/trap_setter.gd")
+const TrapPlacement = preload("res://game/features/hunter/presentation/trap_placement.gd")
 const TRAP_SCENES := {
 	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
 	"item_snare": preload("res://game/features/hunter/presentation/traps/snare.tscn"),
@@ -136,6 +138,8 @@ var _draw_sound: AudioStreamPlayer3D
 var _pointed_at: Node3D
 ## The tripwire whose second peg follows the aim until T is pressed again (owner, 2026-10-30).
 var _laying_wire: Node3D
+## The see-through trap being aimed before it goes down; null when not placing.
+var _placement: TrapPlacement
 
 @onready var _camera: Camera3D = $Camera
 @onready var _reach: RayCast3D = $Camera/Reach
@@ -178,6 +182,8 @@ func equip(items: Dictionary) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and _hud.menu_open():
+		return
+	if _placement and _placement.handle_input(event):
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
@@ -268,6 +274,7 @@ func _release_held_key() -> void:
 			loadout.bait_id = picked
 		elif picked != "":
 			loadout.trap_id = picked
+			_end_placement()
 	elif key == "bait":
 		_place_bait()
 	else:
@@ -320,20 +327,34 @@ const GROUND_STONES_GROUP := "stone_piles"
 const PLACED_TRAPS_GROUP := "placed_traps"
 
 
-## Puts a ghost of the active trap on the ground 2 m ahead, facing the hunter's way (M015); it works once built.
-## A tripwire goes down in two presses: the first peg, then the second where the hunter aims.
+## T starts placing the active trap (see TrapPlacement) and T again cancels; a tripwire being laid takes
+## T as its second peg.
 func place_trap() -> void:
-	var ahead := Transform3D(global_basis, global_position - global_basis.z * 2.0)
 	if _laying_wire:
 		_laying_wire.remove_meta("laying")
 		_laying_wire = null
-		return
-	var trap := _set_trap(loadout.place_trap(), ahead, true)
+	elif _placement:
+		_end_placement()
+	elif loadout.active_trap() != "":
+		_placement = TrapPlacement.new()
+		_placement.begin(self, TRAP_SCENES[loadout.trap_id], loadout.trap_id)
+		_placement.confirmed.connect(_put_down_trap)
+
+
+func _put_down_trap(where: Transform3D) -> void:
+	_end_placement()
+	var trap := _set_trap(loadout.place_trap(), where, true)
 	if trap and trap.get_meta("item_id") == "item_tripwire":
 		_laying_wire = trap
 		trap.set_meta("laying", true)
 		trap.wire_start = trap.global_position
 		_hud.show_gain("T again: second peg")
+
+
+func _end_placement() -> void:
+	if _placement:
+		_placement.end()
+		_placement = null
 
 
 ## The hired trap setter puts any trap from stock at where before the hunt (M013); false when none is left.
@@ -344,20 +365,11 @@ func set_trap_for_hunter(where: Transform3D) -> bool:
 func _set_trap(item_id: String, where: Transform3D, ghost: bool) -> Node3D:
 	if item_id == "":
 		return null
-	var trap: Node3D = TRAP_SCENES[item_id].instantiate()
-	trap.top_level = true
-	trap.add_to_group(PLACED_TRAPS_GROUP)
-	trap.set_meta("item_id", item_id)
-	trap.transform = Transform3D(where.basis, ground_at(where.origin))  # before add_child, so _ready sees it
-	add_child(trap)
-	# The trap models are painted with vertex colours, which the glTF import leaves unused.
-	for mesh: MeshInstance3D in trap.find_children("*", "MeshInstance3D", true, false):
-		for i in mesh.mesh.get_surface_count():
-			(mesh.mesh.surface_get_material(i) as BaseMaterial3D).vertex_color_use_as_albedo = true
+	var trap := TrapPlacement.spawn(self, TRAP_SCENES[item_id], item_id, where)
 	if item_id == "item_pit":
 		pit_dug.emit(trap.global_position, trap.hole_radius)
 	if ghost:
-		BuildSite.make_ghost(trap, TRAP_BUILD_SECONDS[item_id])
+		BuildSite.make_ghost(trap, TRAP_BUILD_SECONDS[item_id], TrapPlacement.reach(item_id))
 	_update_hud()
 	return trap
 
@@ -389,6 +401,8 @@ func _physics_process(delta: float) -> void:
 		if _held_for >= MENU_HOLD_SECONDS and not _hud.menu_open():
 			_hud.open_menu(loadout, _held_key)
 	_build_nearby(delta)
+	if _placement:
+		_placement.update(self)
 	if _laying_wire:
 		_laying_wire.stretch_to(ground_at(global_position - global_basis.z * 2.0))
 	if _stun > 0.0:
@@ -554,7 +568,7 @@ func _update_highlights() -> void:
 func _build_nearby(delta: float) -> void:
 	var site: Node3D = null
 	for trap: Node3D in get_tree().get_nodes_in_group(PLACED_TRAPS_GROUP):
-		if BuildSite.is_ghost(trap) and trap.global_position.distance_to(global_position) <= BUILD_RADIUS:
+		if BuildSite.is_ghost(trap) and trap.global_position.distance_to(global_position) <= BUILD_RADIUS + BuildSite.reach(trap):
 			site = trap
 			break
 	if site and Input.is_action_pressed("interact") and BuildSite.build(site, delta):
@@ -563,35 +577,10 @@ func _build_nearby(delta: float) -> void:
 
 
 func _pick_up() -> void:
-	# Untyped: a typed lambda cannot take a freed item (one that left with an escaped boar).
 	_thrown = _thrown.filter(func(item) -> bool: return is_instance_valid(item))
-	var before := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
-	for item in _thrown.duplicate():
-		if item.global_position.distance_to(global_position) > PICKUP_RADIUS or not Landing.can_pick(item):
-			continue
-		match item.pickup_kind:
-			"spear":
-				loadout.pick_spear()
-			"net":
-				loadout.pick_net()
-			"arrow":
-				loadout.pick_arrow()
-			"stone":
-				loadout.pick_stones(1)
-		_thrown.erase(item)
-		item.queue_free()
-	# Stone piles lying around the map (owner, 2026-10-27).
-	for pile: Node3D in get_tree().get_nodes_in_group(GROUND_STONES_GROUP):
-		if pile.global_position.distance_to(global_position) <= PICKUP_RADIUS:
-			loadout.pick_stones(pile.get_meta("stones", 1))
-			pile.queue_free()
-	var gains := PackedStringArray()
-	var after := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
-	for i in after.size():
-		if after[i] > before[i]:
-			gains.append("+%d %s" % [after[i] - before[i], ["spear", "net", "arrow", "stone"][i] + ("s" if after[i] - before[i] > 1 else "")])
-	if not gains.is_empty():
-		_hud.show_gain(", ".join(gains))
+	var gains := Pickup.run(self, _thrown)
+	if gains != "":
+		_hud.show_gain(gains)
 
 
 func _update_hud() -> void:

@@ -186,15 +186,21 @@ func _check_trap_setter() -> void:
 			and traps.all(func(n: Node) -> bool: return n.is_in_group("placed_traps") and n.has_node("Marker")), "trap setter sets two marked traps")
 	# A trap the hunter sets is a ghost until built; the setter comes along to build it.
 	hunter.place_trap()
+	var placing: bool = hunter._placement != null and hunter.loadout.traps["item_snare"] == 1
+	hunter._placement.update(hunter)
+	hunter._placement.turn = 0.5
+	hunter._put_down_trap(hunter._placement.transform_for(hunter))
+	placing = placing and hunter._placement == null
 	var ghost: Node3D = hunter.get_children().filter(func(n: Node) -> bool: return n is Area3D)[-1]
 	var BuildSite = hunter.BuildSite
-	var was_ghost: bool = BuildSite.is_ghost(ghost) and hunter.loadout.traps["item_snare"] == 0
+	var was_ghost: bool = placing and BuildSite.is_ghost(ghost) and hunter.loadout.traps["item_snare"] == 0
 	_check(was_ghost and BuildSite.build(ghost, hunter.TRAP_BUILD_SECONDS["item_snare"]) and not BuildSite.is_ghost(ghost) \
 			and hunter.get_children().any(func(n: Node) -> bool: return n.get_script() == hunter.TrapSetter), "a placed trap is a ghost until built; the setter comes along")
 	# A tripwire goes down in two presses: the rope runs from the first peg to the second, at most 10 m.
 	hunter.loadout.traps["item_tripwire"] = 1
 	hunter.loadout.trap_id = "item_tripwire"
 	hunter.place_trap()
+	hunter._put_down_trap(hunter._placement.transform_for(hunter))
 	var wire: Node3D = hunter._laying_wire
 	var laying: bool = wire != null and not BuildSite.is_ghost(wire)
 	wire.stretch_to(wire.wire_start + Vector3(30, 0, 0))

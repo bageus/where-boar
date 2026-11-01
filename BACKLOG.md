@@ -99,3 +99,4 @@ Unapproved ideas and possible future features belong here.
 | P3-044 | 3 | Bait is eaten up after 10 s at the bait, then gone; calm boars graze or stand most of the time, walk over to stand by a herd mate, and roam only sometimes | P3-043 | DONE |
 | P3-045 | 3 | A thrown net that misses lies on the ground instead of hanging above it | P3-044 | DONE |
 | P3-046 | 3 | Net throw distance capped at 15 m (`NET_MAX_SPEED` in hunter.gd) | P3-045 | DONE |
+| P3-047 | 3 | Trap placement mode: T shows a ghost preview (green where free, red over trees, stumps, rocks), Q/R turn it, LMB puts it down; the helper builds from any side | P3-046 | DONE |

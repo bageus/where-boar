@@ -190,6 +190,13 @@ func place_bait() -> String:
 	return bait_id
 
 
+## The active trap, or the first one left when it ran out, without spending it; "" when none is left.
+func active_trap() -> String:
+	if traps.get(trap_id, 0) == 0:
+		trap_id = _first_in_stock(TRAP_IDS, traps)
+	return trap_id if traps.get(trap_id, 0) > 0 else ""
+
+
 ## Spends the active trap, or the first one left when it ran out; returns its item id, or "" when none is left.
 func place_trap() -> String:
 	if traps.get(trap_id, 0) == 0:

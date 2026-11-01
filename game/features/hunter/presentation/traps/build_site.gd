@@ -7,7 +7,9 @@ const GHOST_TRANSPARENCY := 0.6
 
 
 ## Turns a freshly placed trap into a ghost that takes seconds of work to build.
-static func make_ghost(trap: Node3D, seconds: float) -> void:
+## reach: how far from the trap's middle its builders may stand, so any side will do.
+static func make_ghost(trap: Node3D, seconds: float, reach: float) -> void:
+	trap.set_meta("build_reach", reach)
 	trap.set_meta("build_seconds", seconds)
 	trap.set_meta("build_progress", 0.0)
 	_set_working(trap, false)
@@ -16,6 +18,11 @@ static func make_ghost(trap: Node3D, seconds: float) -> void:
 ## A tripwire whose second peg is still being placed ("laying") is not ready to build yet.
 static func is_ghost(trap: Node3D) -> bool:
 	return trap.has_meta("build_progress") and not trap.has_meta("laying")
+
+
+## How far from the middle of a ghost the builder may stand.
+static func reach(trap: Node3D) -> float:
+	return trap.get_meta("build_reach", 0.0)
 
 
 ## Built share 0..1; 1 for a trap that is not a ghost.
