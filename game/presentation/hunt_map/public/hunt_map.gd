@@ -68,6 +68,7 @@ var _baits: Array[Node3D] = []
 
 
 func _ready() -> void:
+	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()

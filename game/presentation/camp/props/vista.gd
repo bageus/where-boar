@@ -3,6 +3,7 @@ extends Node3D
 ## The view from the camp's drop-off (owner, 2026-10-29): hills, a river and woods far below, out of reach,
 ## hinting at the hunting grounds; toy clouds drift over it and birds fly between perches (birds.gd).
 
+const CloudsScript = preload("res://game/core/clouds/public/clouds.gd")
 const BirdsScript = preload("res://game/presentation/camp/props/birds.gd")
 const TREE_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
@@ -25,15 +26,11 @@ const NEAR_TREES := 450
 const NEAR_FROM := 58.0
 const NEAR_SPAN := Rect2(-40.0, -70.0, 150.0, 180.0)
 const TREE_CELL := 300.0
-const CLOUD_COUNT := 14
-const CLOUD_DRIFT := 1.2  # metres per second, along +x
-const CLOUD_SPAN := 900.0
 const GRASS := Color(0.3, 0.55, 0.18)
 const MEADOW := Color(0.5, 0.62, 0.25)
 const SAND := Color(0.72, 0.66, 0.45)
 
 var _noise := FastNoiseLite.new()
-var _clouds: Array[Node3D] = []
 
 
 func _ready() -> void:
@@ -45,17 +42,10 @@ func _ready() -> void:
 	_land()
 	_water()
 	_trees(rng)
-	_make_clouds(rng)
+	add_child(CloudsScript.new())
 	var birds: Node3D = BirdsScript.new()
 	birds.height_at = height_at
 	add_child(birds)
-
-
-func _process(delta: float) -> void:
-	for cloud in _clouds:
-		cloud.position.x += CLOUD_DRIFT * delta
-		if cloud.position.x > CLOUD_SPAN * 0.5:
-			cloud.position.x -= CLOUD_SPAN
 
 
 ## The river winds north to south about 150 m east of the camp.
@@ -155,33 +145,3 @@ func _trees(rng: RandomNumberGenerator) -> void:
 		node.multimesh = multimesh
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(node)
-
-
-## Toy clouds: a few flattened white balls each, high above the valley and the camp.
-func _make_clouds(rng: RandomNumberGenerator) -> void:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(1, 1, 1)
-	material.emission_enabled = true
-	material.emission = Color(0.85, 0.88, 0.95)
-	material.emission_energy_multiplier = 0.45
-	material.roughness = 1.0
-	var ball := SphereMesh.new()
-	ball.radial_segments = 16
-	ball.rings = 8
-	ball.material = material
-	for n in CLOUD_COUNT:
-		var cloud := Node3D.new()
-		var angle := rng.randf() * TAU
-		var far := rng.randf_range(140.0, 380.0)
-		cloud.position = Vector3(cos(angle) * far, rng.randf_range(55.0, 95.0), sin(angle) * far)
-		var size := rng.randf_range(6.0, 11.0)
-		for b in rng.randi_range(4, 7):
-			var puff := MeshInstance3D.new()
-			puff.mesh = ball
-			puff.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			var r := size * rng.randf_range(0.7, 1.3) * (1.3 if b == 0 else 1.0)
-			puff.scale = Vector3(r * 2.0, r * 1.3, r * 1.6)
-			puff.position = Vector3(rng.randf_range(-1.6, 1.6) * size, rng.randf_range(0.0, 0.5) * size, rng.randf_range(-0.7, 0.7) * size)
-			cloud.add_child(puff)
-		add_child(cloud)
-		_clouds.append(cloud)

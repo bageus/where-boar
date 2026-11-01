@@ -9,6 +9,7 @@
   ],
   "dependencies": [
     "core.baked_shadow",
+    "core.clouds",
     "core.sfx",
     "features.boar",
     "features.hunter",

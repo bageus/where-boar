@@ -1,0 +1,10 @@
+{
+  "id": "core.clouds",
+  "layer": "core",
+  "purpose": "Toy clouds drifting high above a scene: shared by the camp vista and the hunt map.",
+  "state_owner": [],
+  "public_api": [
+    "public/clouds.gd"
+  ],
+  "dependencies": []
+}

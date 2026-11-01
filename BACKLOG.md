@@ -109,3 +109,4 @@ Unapproved ideas and possible future features belong here.
 | P3-054 | 3 | Riding: any ramming boar throws the rider off and the mount stays put; mount hoof sounds and idle `boar_voice` while riding | P3-053 | DONE |
 | P3-055 | 3 | Trees whose lowest vertex is above the model origin (OakTree3, DeadOak3) sink by that gap too; wider ground probe ring | P3-054 | DONE |
 | P3-056 | 3 | No ?/! alert mark over a dead or caught boar (label and health bar stay) | P3-055 | DONE |
+| P3-057 | 3 | Clouds on the hunt map (shared core.clouds, same as camp vista) | P3-056 | DONE |
