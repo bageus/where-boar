@@ -48,11 +48,11 @@ const CLIFF_ROCKS: Array[Mesh] = [
 ## join into one face (owner, 2026-11-02: no chaotic pile of boulders); each is solid.
 const CLIFF_STEP := 6
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
-const STUMP := preload("res://assets/nature/meshes/TreeStump_Moss.res")
+const STUMP := preload("res://assets/nature/meshes/peak/PeakStump1.res")
 ## Fallen trees and logs (owner, 2026-10-28).
 const LOGS: Array[Mesh] = [
-	preload("res://assets/nature/meshes/WoodLog.res"), preload("res://assets/nature/meshes/Log_1.res"),
-	preload("res://assets/nature/meshes/Log_2.res"), preload("res://assets/nature/meshes/Log_3.res"),
+	preload("res://assets/nature/meshes/peak/PeakLog1.res"), preload("res://assets/nature/meshes/peak/PeakLog2.res"),
+	preload("res://assets/nature/meshes/peak/PeakLog3.res"), preload("res://assets/nature/meshes/peak/PeakLog4.res"),
 ]
 const STUMPS := 30
 const LOG_COUNT := 36
