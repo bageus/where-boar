@@ -25,6 +25,7 @@ const ROPE := Color(0.88, 0.74, 0.46)
 const WATER := Color(0.32, 0.66, 0.84)
 const DARK := Color(0.14, 0.09, 0.07)
 const FRUIT: Array[Color] = [Color(0.9, 0.22, 0.18), Color(0.98, 0.78, 0.2), Color(0.55, 0.3, 0.75), Color(0.5, 0.78, 0.2)]
+const PAINT := Color(0.05, 0.04, 0.04)
 const FIRE := Color(1.0, 0.45, 0.08)
 const FIRE_CORE := Color(1.0, 0.86, 0.3)
 ## How far a log's normals lean from the facet to its round shape (as the tree trunks, softer).
@@ -280,41 +281,108 @@ func _weapon_stall() -> void:
 	_log(Vector3(0.9, 0, 0.93), Vector3(0.9, 0.3, 0.93), 0.22, STRAW, 0.28, 8)
 
 
-## The armory sign: a board of lashed sticks with a bow, an arrow and a few dots daubed on it in black like a
-## cave painting.
+## A sign board of lashed sticks centred on c (width w, height h), facing +z, two cross poles behind it.
+func _stick_board(c: Vector3, w: float, h: float) -> void:
+	var n := 9
+	for k in n:
+		var x := lerpf(-w / 2.0 + 0.05, w / 2.0 - 0.05, k / float(n - 1))
+		_log(c + Vector3(x, -h / 2.0 + _rng.randf_range(-0.03, 0.03), 0), c + Vector3(x, h / 2.0 + _rng.randf_range(-0.03, 0.03), 0),
+			0.05, WOOD_LIGHT if k % 2 == 0 else WOOD)
+	for y in [-h * 0.35, h * 0.35]:
+		_log(c + Vector3(-w / 2.0 - 0.05, y, -0.07), c + Vector3(w / 2.0 + 0.05, y, -0.07), 0.03, WOOD_DARK)
+		for x in [-w / 2.0 + 0.1, w / 2.0 - 0.1]:
+			_log(c + Vector3(x, y - 0.04, 0.0), c + Vector3(x, y + 0.04, 0.0), 0.06, ROPE, -1.0, 5)
+
+
+## One black daub stroke of a cave painting.
+func _stroke(a: Vector3, b: Vector3, w := 0.016) -> void:
+	_log(a, b, w, PAINT, -1.0, 4)
+
+
+func _blot(at: Vector3, r: float) -> void:
+	_ball(at, Vector3(r, r, 0.025), PAINT, 0.12)
+
+
+## The armory sign: a bow, an arrow and a few dots.
 func _emblem() -> void:
 	var c := Vector3(2.6, 2.28, 0.8)
-	for k in 9:
-		var x := lerpf(-0.4, 0.4, k / 8.0)
-		var wob := _rng.randf_range(-0.03, 0.03)
-		_log(c + Vector3(x, -0.34 + wob, 0), c + Vector3(x, 0.34 + _rng.randf_range(-0.03, 0.03), 0), 0.05, WOOD_LIGHT if k % 2 == 0 else WOOD)
-	for y in [-0.24, 0.24]:
-		_log(c + Vector3(-0.5, y, -0.07), c + Vector3(0.5, y, -0.07), 0.03, WOOD_DARK)
-		for x in [-0.4, 0.4]:
-			_log(c + Vector3(x, y - 0.04, 0.0), c + Vector3(x, y + 0.04, 0.0), 0.06, ROPE, -1.0, 5)
-	var paint := Color(0.05, 0.04, 0.04)
+	_stick_board(c, 0.9, 0.68)
 	var z := 0.06
 	var prev := Vector3.ZERO
 	for k in 8:
 		var a := lerpf(-1.25, 1.25, k / 7.0)
 		var p := c + Vector3(-0.15 + cos(a) * 0.12 + _rng.randf_range(-0.012, 0.012), sin(a) * 0.25, z)
 		if k > 0:
-			_log(prev, p, 0.02, paint, -1.0, 4)
+			_stroke(prev, p, 0.02)
 		prev = p
-	_log(c + Vector3(-0.15 + cos(-1.25) * 0.12, -0.24, z), c + Vector3(-0.15 + cos(1.25) * 0.12, 0.24, z), 0.01, paint, -1.0, 3)
-	# The arrow across the bow: shaft, a triangular head, two feather strokes.
-	_log(c + Vector3(-0.3, 0.0, z), c + Vector3(0.3, 0.02, z), 0.018, paint, -1.0, 4)
-	_log(c + Vector3(0.27, 0.0, z), c + Vector3(0.38, 0.02, z), 0.045, paint, 0.0, 3)
+	_stroke(c + Vector3(-0.15 + cos(-1.25) * 0.12, -0.24, z), c + Vector3(-0.15 + cos(1.25) * 0.12, 0.24, z), 0.01)
+	_stroke(c + Vector3(-0.3, 0.0, z), c + Vector3(0.3, 0.02, z), 0.018)
+	_log(c + Vector3(0.27, 0.0, z), c + Vector3(0.38, 0.02, z), 0.045, PAINT, 0.0, 3)
 	for sgn in [-1.0, 1.0]:
-		_log(c + Vector3(-0.28, 0.0, z), c + Vector3(-0.35, 0.06 * sgn, z), 0.012, paint, -1.0, 3)
+		_stroke(c + Vector3(-0.28, 0.0, z), c + Vector3(-0.35, 0.06 * sgn, z), 0.012)
 	for k in 3:
-		_ball(c + Vector3(0.0 + k * 0.1, -0.17 + _rng.randf_range(-0.02, 0.02), z), Vector3.ONE * 0.028, paint, 0.1)
+		_blot(c + Vector3(k * 0.1, -0.17 + _rng.randf_range(-0.02, 0.02), z), 0.028)
+
+
+## The hunting hut sign: a trapping net, a lattice of knotted cords.
+func _net_emblem() -> void:
+	var c := Vector3(2.6, 2.28, 0.8)
+	_stick_board(c, 0.9, 0.68)
+	var z := 0.06
+	var xs := [-0.27, -0.09, 0.09, 0.27]
+	var ys := [-0.2, -0.07, 0.07, 0.2]
+	for x: float in xs:
+		_stroke(c + Vector3(x + _rng.randf_range(-0.015, 0.015), -0.25, z), c + Vector3(x + _rng.randf_range(-0.015, 0.015), 0.25, z), 0.012)
+	for y: float in ys:
+		_stroke(c + Vector3(-0.34, y + _rng.randf_range(-0.015, 0.015), z), c + Vector3(0.34, y + _rng.randf_range(-0.015, 0.015), z), 0.012)
+	for x: float in xs:
+		for y: float in ys:
+			_blot(c + Vector3(x, y, z), 0.026)
+
+
+## The tavern sign: a hamster's head in silhouette, round face, two round ears, full cheeks.
+func _hamster_emblem(c: Vector3) -> void:
+	_stick_board(c, 0.8, 0.68)
+	var z := 0.07
+	_ball(c + Vector3(0, -0.04, z), Vector3(0.24, 0.2, 0.025), PAINT, 0.04)
+	_ball(c + Vector3(-0.2, -0.08, z), Vector3(0.12, 0.1, 0.025), PAINT, 0.05)
+	_ball(c + Vector3(0.2, -0.08, z), Vector3(0.12, 0.1, 0.025), PAINT, 0.05)
+	_ball(c + Vector3(-0.15, 0.2, z), Vector3(0.07, 0.07, 0.025), PAINT, 0.05)
+	_ball(c + Vector3(0.15, 0.2, z), Vector3(0.07, 0.07, 0.025), PAINT, 0.05)
+
+
+## Painted on an arrow of the signpost at (cx, y), facing +z.
+func _sign_pine(cx: float, y: float) -> void:
+	var z := 0.19
+	_stroke(Vector3(cx, y - 0.11, z), Vector3(cx, y + 0.12, z))
+	for k in 3:
+		var top := y + 0.12 - k * 0.07
+		var w := 0.05 + k * 0.035
+		_stroke(Vector3(cx, top, z), Vector3(cx - w, top - 0.08, z))
+		_stroke(Vector3(cx, top, z), Vector3(cx + w, top - 0.08, z))
+
+
+func _sign_palm(cx: float, y: float) -> void:
+	var z := 0.19
+	_stroke(Vector3(cx - 0.02, y - 0.12, z), Vector3(cx + 0.02, y, z), 0.02)
+	_stroke(Vector3(cx + 0.02, y, z), Vector3(cx + 0.03, y + 0.06, z), 0.02)
+	var top := Vector3(cx + 0.03, y + 0.06, z)
+	for e: Array in [[-0.16, -0.02], [-0.1, 0.07], [0.0, 0.1], [0.1, 0.07], [0.16, -0.02]]:
+		_stroke(top, top + Vector3(e[0] * 0.5, e[1], 0), 0.014)
+		_stroke(top + Vector3(e[0] * 0.5, e[1], 0), top + Vector3(e[0], e[1] - 0.06, 0), 0.014)
+
+
+func _sign_stones(cx: float, y: float) -> void:
+	var z := 0.19
+	_ball(Vector3(cx - 0.1, y - 0.06, z), Vector3(0.09, 0.06, 0.03), PAINT, 0.15)
+	_ball(Vector3(cx + 0.08, y - 0.07, z), Vector3(0.1, 0.055, 0.03), PAINT, 0.15)
+	_ball(Vector3(cx - 0.01, y + 0.03, z), Vector3(0.08, 0.06, 0.03), PAINT, 0.15)
 
 
 func _hunter_stall() -> void:
 	_stall_frame()
-	# Sign: a fruit. The baits on show are the game's own models, put on the counter by shop_display.gd.
-	_ball(Vector3(2.6, 2.28, 0.77), Vector3(0.15, 0.15, 0.04), FRUIT[0], 0.05)
+	# The baits on show are the game's own models, put on the counter by shop_display.gd.
+	_net_emblem()
 	# A net hanging from the left side.
 	for k in 5:
 		var z := lerpf(-0.9, 0.6, k / 4.0)
@@ -446,10 +514,8 @@ func _tavern() -> void:
 		_ball(at + Vector3(0, 0.1, 0), Vector3(0.11, 0.07, 0.11), FRUIT[k % FRUIT.size()] if k % 2 else STRAW, 0.15)
 	# The mug sign on an arm out of the front-right post.
 	_log(Vector3(2.4, 2.85, 1.25), Vector3(3.05, 2.85, 1.25), 0.07, WOOD_DARK)
-	_log(Vector3(2.78, 2.85, 1.25), Vector3(2.78, 2.62, 1.25), 0.02, ROPE)
-	_box(Vector3(2.78, 2.35, 1.25), Vector3(0.62, 0.52, 0.08), WOOD_LIGHT)
-	_box(Vector3(2.74, 2.35, 1.3), Vector3(0.2, 0.28, 0.03), HIDE)
-	_box(Vector3(2.89, 2.37, 1.3), Vector3(0.06, 0.18, 0.03), HIDE)
+	_log(Vector3(2.78, 2.85, 1.25), Vector3(2.78, 2.68, 1.25), 0.02, ROPE)
+	_hamster_emblem(Vector3(2.78, 2.36, 1.25))
 
 
 ## A ridge tent (A-frame): two striped hide sides from the ridge to the ground, a dark door in the front
@@ -620,6 +686,9 @@ func _direction_sign() -> void:
 		_hex([tip[0], tip[1], tip[2], tip[2], tip[0] + Vector3(0, 0, 0.08), tip[1] + Vector3(0, 0, 0.08),
 			tip[2] + Vector3(0, 0, 0.08), tip[2] + Vector3(0, 0, 0.08)], arrow[2])
 		_log(Vector3(-0.12, y, 0.17), Vector3(0.12, y, 0.17), 0.04, ROPE, -1.0, 4)
+	_sign_pine(0.5, 2.25)
+	_sign_palm(-0.5, 1.78)
+	_sign_stones(0.5, 1.3)
 
 
 # --- output --------------------------------------------------------------------------------------------------
