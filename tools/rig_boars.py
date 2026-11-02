@@ -6,7 +6,7 @@ triangles, flat shaded, snout towards -Y); each is turned to face the game's for
 its length, cut to TRIANGLES, given a quadruped skeleton whose joints are found from the mesh
 itself (feet, belly, back line, snout, tail), skinned with Blender's automatic weights and given
 the animations in ANIMATIONS. Run after a change, naming the source by the file stem in TYPES:
-    python tools/rig_boars.py common_brown path/to/boar_buddy.glb
+    python tools/rig_boars.py common_brown path/to/blocky_boar.glb
 Add `--preview DIR` to also render a contact sheet of every animation into DIR.
 """
 
@@ -26,7 +26,7 @@ FPS = 30
 
 # Boar type id -> owner's model, nose-to-tail length in metres, spine bones, triangles.
 TYPES = {
-    "common_brown": ("boar_buddy", 1.9, 3, 3000),
+    "common_brown": ("blocky_boar", 1.9, 3, 3000),  # tools/build_blocky_boar.py
     "runner_grey": ("neon_boar", 1.8, 3, 3000),
     "aggressive_red": ("tusker_totem", 2.0, 3, 3000),
     "armored_black": ("blocky_boar", 2.0, 3, 3000),

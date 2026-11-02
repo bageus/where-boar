@@ -8,6 +8,7 @@ script = ExtResource("1_type")
 id = "common_brown"
 display_name = "Forest boar"
 model = ExtResource("2_model")
+back_height = 1.0
 color = Color(0.42, 0.27, 0.16, 1)
 spawn_weight = 50.0
 max_health = 3

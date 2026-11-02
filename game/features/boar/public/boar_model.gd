@@ -13,6 +13,7 @@ const SADDLE_HEIGHT := 1.1  # and its height, m
 const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
 
 var _player: AnimationPlayer
+var _back_height := 0.85
 var _dead := false
 var _dust: CPUParticles3D
 var _flash := StandardMaterial3D.new()
@@ -21,6 +22,7 @@ var _flash := StandardMaterial3D.new()
 func show_type(boar_type: Resource) -> void:
 	for child in get_children():
 		child.free()
+	_back_height = boar_type.back_height
 	var model: Node3D = boar_type.model.instantiate()
 	add_child(model)
 	_player = model.find_child("AnimationPlayer") as AnimationPlayer
@@ -160,9 +162,9 @@ func put_saddle() -> void:
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
 	var fit := clampf(minf(box.size.z / SADDLE_LENGTH, top() / SADDLE_HEIGHT), 0.4, 1.3)
-	# Saddle front is +Z, the boar's is -Z. The y is a guess at the back below ears and bristles.
+	# Saddle front is +Z, the boar's is -Z. The back is a share of the top, below ears and bristles (BoarType.back_height).
 	var on_back := Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * fit),
-			Vector3(0.0, top() * 0.85 - SADDLE_PAD * fit, box.get_center().z - 0.05))
+			Vector3(0.0, top() * _back_height - SADDLE_PAD * fit, box.get_center().z - 0.05))
 	var attachment := BoneAttachment3D.new()
 	attachment.bone_name = "spine_1"
 	skeleton.add_child(attachment)

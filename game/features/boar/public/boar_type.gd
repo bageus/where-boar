@@ -9,6 +9,8 @@ extends Resource
 @export var color := Color(0.42, 0.27, 0.16)
 ## Rigged model with idle, walk, run, attack and death (tools/rig_boars.py).
 @export var model: PackedScene
+## Height of the back under the saddle as a share of the model's top; below 1 where ears or bristles stick above the back.
+@export_range(0.5, 1.0) var back_height := 0.85
 ## Relative spawn weight; rarer types have smaller weights.
 @export var spawn_weight := 1.0
 @export var max_health := 3
