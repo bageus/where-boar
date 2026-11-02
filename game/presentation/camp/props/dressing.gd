@@ -10,9 +10,9 @@ const FERN_MESHES: Array[Mesh] = [
 ]  # the pack's two lightest ferns (3-3.5k triangles each)
 const BUSH_SCENE := preload("res://assets/models/bush.glb")
 const PEBBLE_MESHES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/Rock1.res"), preload("res://assets/nature/meshes/Rock2.res"),
-	preload("res://assets/nature/meshes/Rock3.res"), preload("res://assets/nature/meshes/Rock_1.res"),
-	preload("res://assets/nature/meshes/Rock_10.res"),
+	preload("res://assets/nature/meshes/peak/PeakRock1.res"), preload("res://assets/nature/meshes/peak/PeakRock3.res"),
+	preload("res://assets/nature/meshes/peak/PeakRock4.res"), preload("res://assets/nature/meshes/peak/PeakRock6.res"),
+	preload("res://assets/nature/meshes/peak/PeakRock8.res"),
 ]
 const HALF := 17.0  # the camp's dirt square, as in ground.tscn and ground.gdshader
 const SOUTH_SPLIT := 2.0

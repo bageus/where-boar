@@ -3,10 +3,10 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-058
+active_task_id: P3-059
 last_completed_task_id: P3-055
 build_status: PASS
-updated: 2026-11-01
+updated: 2026-11-02
 ---
 
 # Project State
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-055 done.
+None. P3-001..P3-059 done.
 
 ## Last completed work
 
@@ -131,3 +131,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-053 (2026-11-01): saddle scaled to boar size (`boar_model.gd` `put_saddle`: smaller of length/1.9 and height/1.1, clamped 0.4-1.3). Not checked in game.
 - P3-054 (2026-11-01): riding: any ramming boar unseats the rider, mount stays in place; mount hoof steps and idle `boar_voice` while riding. Not checked in game.
 - P3-055 (2026-11-01): trees floated because OakTree3/DeadOak3 have their lowest vertex above the origin; `terrain.gd`/`varied_mesh.gd` now sink by that gap, probe ring 16 points at 1.3x radius. Not checked in game.
+- P3-059 (2026-11-02): rocks, cliffs and grass restyled after PEAK (owner), with our own procedural shapes. `tools/bake_peak_rocks.gd` bakes `assets/nature/meshes/peak/`: 8 boulders (`PeakRock*`, hunt rocks and camp pebbles), 5 layered cliff chunks (`PeakCliff*`, hunt cliffs and outcrops, camp rock wall, drop-off and rim) and 3 horizon peaks (`PeakSpire*`, hazy mountains); each is a convex cut of a dozen-plus planes, flat shaded, light stone, moss on faces turned up (cliffs: flat ledges only), darker at the foot. Grass is a 13-blade clump (`assets/grass/peak_grass.res`, 39 triangles, one 3-blade LOD for far chunks) with `peak_grass.gdshader`: dark root to bright tip, yellow-green patches, wind sway, darkened by baked shadows. Hunt ground colours brighter (`terrain.gd` GRASS, ROCK). Measured (xvfb): hunt start view 917-921k -> ~923k triangles, draw calls about the same (noisy 410-490 both); camp ~1.01M -> ~1.03-1.06M. Hunt smoke test: the same one turkey failure as on main. Not checked: look and FPS in the browser.

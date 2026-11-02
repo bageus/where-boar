@@ -13,12 +13,13 @@ const TREES_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/OakTree3.res"), preload("res://assets/nature/meshes/SpruceTree1.res"),
 	preload("res://assets/nature/meshes/SpruceTree2.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
 ]
+## Layered, faceted cliff chunks (owner, 2026-11-02: rocks like in PEAK), tools/bake_peak_rocks.gd.
 const BIG_ROCK_MESHES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/BigRock1.res"), preload("res://assets/nature/meshes/BigRock2.res"),
-	preload("res://assets/nature/meshes/BigRock3.res"), preload("res://assets/nature/meshes/BigRock4.res"),
-	preload("res://assets/nature/meshes/BigRock5.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff1.res"), preload("res://assets/nature/meshes/peak/PeakCliff2.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff3.res"), preload("res://assets/nature/meshes/peak/PeakCliff4.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff5.res"),
 ]
-const GRASS_MESH := preload("res://assets/grass/grass.glb")
+const GRASS_CLUMP: Mesh = preload("res://assets/grass/peak_grass.res")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GROUND_MATERIAL := preload("res://game/presentation/camp/props/ground_material.tres")
 const HALF := Dressing.HALF  # the camp's dirt square
@@ -331,7 +332,7 @@ func _forest_floor() -> void:
 func _grass(rng: RandomNumberGenerator, count: int, spot: Callable) -> void:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.mesh = (GRASS_MESH.instantiate().get_child(0) as MeshInstance3D).mesh
+	multimesh.mesh = GRASS_CLUMP
 	multimesh.instance_count = count
 	for n in count:
 		var size := rng.randf_range(0.4, 0.9)

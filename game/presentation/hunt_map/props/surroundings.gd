@@ -34,6 +34,11 @@ const ROCK_SECTORS := [Vector2(-1.9, 0.5), Vector2(0.4, 0.35), Vector2(2.6, 0.45
 const OUTCROPS := 14
 const MOUNTAINS := 9
 const MOUNTAIN_HAZE := Color(0.4, 0.47, 0.6)
+## Tall faceted peaks for the horizon (owner, 2026-11-02: rocks like in PEAK), tools/bake_peak_rocks.gd.
+const SPIRES: Array[Mesh] = [
+	preload("res://assets/nature/meshes/peak/PeakSpire1.res"), preload("res://assets/nature/meshes/peak/PeakSpire2.res"),
+	preload("res://assets/nature/meshes/peak/PeakSpire3.res"),
+]
 ## Grass and ferns in a strip this wide just outside the walls, like inside (terrain.gd).
 const GRASS_STRIP := 10.0
 const GRASS_PER_M2 := 2  # widened clumps, as inside (TerrainScript.GRASS_WIDEN)
@@ -151,7 +156,7 @@ func _trees(rng: RandomNumberGenerator) -> void:
 func _rocks(rng: RandomNumberGenerator) -> void:
 	var meshes: Array[Mesh] = TerrainScript.CLIFF_ROCKS
 	var spots := _spots(meshes.size())
-	var peaks := _spots(meshes.size())
+	var peaks := _spots(SPIRES.size())
 	for n in OUTCROPS + MOUNTAINS:
 		var mountain := n >= OUTCROPS
 		var sector: Vector2 = ROCK_SECTORS[n % ROCK_SECTORS.size()]
@@ -160,8 +165,10 @@ func _rocks(rng: RandomNumberGenerator) -> void:
 		var at := Vector2.from_angle(angle) * far
 		var size := rng.randf_range(9.0, 16.0) if mountain else rng.randf_range(1.6, 3.2)
 		var spot := _spot(at, size, rng)
-		spot.origin.y = (0.0 if mountain else height_at(at.x, at.y)) - 0.25 * size * meshes[0].get_aabb().size.y
-		(peaks if mountain else spots)[_side(at)][rng.randi() % meshes.size()].append(spot)
+		var pool: Array[Mesh] = SPIRES if mountain else meshes
+		var k := rng.randi() % pool.size()
+		spot.origin.y = (0.0 if mountain else height_at(at.x, at.y)) - 0.25 * size * pool[k].get_aabb().size.y
+		(peaks if mountain else spots)[_side(at)][k].append(spot)
 	# Hazy blue-grey, so the mountains read as far away rather than as big rocks nearby.
 	var haze := StandardMaterial3D.new()
 	haze.albedo_color = MOUNTAIN_HAZE
@@ -169,12 +176,13 @@ func _rocks(rng: RandomNumberGenerator) -> void:
 	for side in 4:
 		for k in meshes.size():
 			_add(meshes[k], spots[side][k])
-			_add(meshes[k], peaks[side][k], haze)
+		for k in SPIRES.size():
+			_add(SPIRES[k], peaks[side][k], haze)
 
 
 ## The hunt map's short grass and ferns in a strip outside the walls, in chunks drawn only nearby.
 func _grass(rng: RandomNumberGenerator) -> void:
-	var clump: Mesh = (TerrainScript.GRASS_MESH.instantiate().get_child(0) as MeshInstance3D).mesh
+	var clump := TerrainScript.GRASS_CLUMP
 	var chunk := float(TerrainScript.GRASS_CHUNK)
 	for side in 4:
 		var out := Vector2.from_angle(side * PI * 0.5).round()
@@ -204,7 +212,7 @@ func _grass(rng: RandomNumberGenerator) -> void:
 func _gate(gate: Vector2, rng: RandomNumberGenerator) -> void:
 	var out := gate.normalized()
 	var across := out.orthogonal()
-	var clump: Mesh = (TerrainScript.GRASS_MESH.instantiate().get_child(0) as MeshInstance3D).mesh
+	var clump := TerrainScript.GRASS_CLUMP
 	var centre := Vector3(gate.x, 0.0, gate.y)
 	var tall: Array[Transform3D] = []
 	var wheat: Array[Transform3D] = []

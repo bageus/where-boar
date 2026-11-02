@@ -6,8 +6,8 @@ extends StaticBody3D
 ## It also dresses itself: grass and tall-grass patches, massive rocks on the cliffs, stumps, logs, more trees
 ## and sandy river banks.
 
-const GRASS := Color(0.16, 0.4, 0.1)
-const ROCK := Color(0.42, 0.42, 0.44)
+const GRASS := Color(0.2, 0.44, 0.1)
+const ROCK := Color(0.47, 0.46, 0.47)
 const MUD := Color(0.5, 0.36, 0.2)
 const SAND := Color(0.74, 0.64, 0.42)
 const WET_SAND := Color(0.6, 0.52, 0.34)
@@ -18,10 +18,11 @@ const RIVER_BAND := Vector2(-38.0, -2.0)
 const SAND_TOP := 0.2
 ## Slopes steeper than this (normal.y below it, about 40 degrees) look like bare rock.
 const ROCK_NORMAL_Y := 0.75
-## Stylized grass (assets/grass, MIT, StayAtHomeDev): clumps on grass-coloured ground, in square chunks
+## Stylized grass (owner, 2026-11-02: like in PEAK): a clump of 13 bent blades (tools/bake_peak_rocks.gd,
+## 39 triangles, the old clump had 130) with a swaying shader, on grass-coloured ground, in square chunks
 ## that disappear beyond GRASS_RANGE metres, so far grass costs nothing.
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
-const GRASS_MESH := preload("res://assets/grass/grass.glb")
+const GRASS_CLUMP: Mesh = preload("res://assets/grass/peak_grass.res")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GRASS_CHUNK := 20
 ## Half the clumps of before, each this much wider (same height), so the cover looks the same at half the
@@ -34,11 +35,11 @@ const GRASS_RANGE := 30.0
 const TALL_PATCHES := 12
 const COVER_LAYER := 1 << 4
 const WHEAT := preload("res://assets/nature/meshes/Wheat.res")
-## Owner's models baked by tools/bake_nature_meshes.gd.
+## Layered, faceted cliff chunks (owner, 2026-11-02: rocks like in PEAK), baked by tools/bake_peak_rocks.gd.
 const CLIFF_ROCKS: Array[Mesh] = [
-	preload("res://assets/nature/meshes/BigRock1.res"), preload("res://assets/nature/meshes/BigRock2.res"),
-	preload("res://assets/nature/meshes/BigRock3.res"), preload("res://assets/nature/meshes/BigRock4.res"),
-	preload("res://assets/nature/meshes/BigRock5.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff1.res"), preload("res://assets/nature/meshes/peak/PeakCliff2.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff3.res"), preload("res://assets/nature/meshes/peak/PeakCliff4.res"),
+	preload("res://assets/nature/meshes/peak/PeakCliff5.res"),
 ]
 ## One massive rock per CLIFF_STEP x CLIFF_STEP metres of cliff; each is solid.
 const CLIFF_STEP := 3
@@ -121,7 +122,7 @@ func lowest_under(x: float, z: float, radius: float) -> float:
 
 
 func _plant_grass() -> void:
-	var clump: Mesh = (GRASS_MESH.instantiate().get_child(0) as MeshInstance3D).mesh
+	var clump := GRASS_CLUMP
 	var w := _shape.map_width
 	var d := _shape.map_depth
 	var rng := RandomNumberGenerator.new()
