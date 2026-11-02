@@ -7,7 +7,7 @@ const WALK_SPEED := 1.5  # ground speed the walk cycle was keyed for, m/s (ASSUM
 const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
-const Saddle = preload("res://assets/models/saddle.glb")
+const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
 const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
 const SADDLE_HEIGHT := 1.1  # and its height, m
 const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
@@ -152,7 +152,7 @@ func top() -> float:
 	return height
 
 
-## Straps the saddle (assets/models/saddle.glb) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
+## Straps the saddle (assets/models/peak_gear/saddle.tscn) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
 func put_saddle() -> void:
 	var skeleton: Skeleton3D = find_children("*", "Skeleton3D", true, false)[0]
 	var bone := skeleton.find_bone("spine_1")

@@ -6,7 +6,7 @@ extends Node3D
 ## shows only its right arm (hunter_arm.glb in hands.tscn).
 
 const Caveman = preload("res://assets/models/caveman_hunter.glb")
-const Backpack = preload("res://assets/models/primitive_backpack_optimized.glb")
+const Backpack = preload("res://assets/models/peak_gear/backpack.tscn")
 ## Where the backpack sits on the caveman, in the model's space (it faces +z, the back is -z).
 const BACKPACK_PLACE := Transform3D(Basis.IDENTITY * 0.6, Vector3(0.0, 0.9, -0.48))
 const RUN_SPEED := 5.0  # between the hunter's walk and sprint speeds

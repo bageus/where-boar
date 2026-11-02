@@ -6,6 +6,7 @@ extends Node3D
 
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 const Helper = preload("res://assets/models/caveman_helper.glb")
+const HammerMesh = preload("res://assets/models/peak_gear/hammer.res")
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
 
 const WALK_SPEED := 3.5
@@ -25,6 +26,7 @@ func _ready() -> void:
 	var body: Node3D = Helper.instantiate()
 	body.rotation.y = PI  # the model faces +z, look_at points -z at the goal
 	add_child(body)
+	(body.find_child("hammer") as MeshInstance3D).mesh = HammerMesh  # PEAK-style stone hammer, same hand mount
 	_player = body.find_child("AnimationPlayer") as AnimationPlayer
 	_player.animation_finished.connect(func(anim: StringName) -> void: _player.play(anim))
 	var steps := Footsteps.new()

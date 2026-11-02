@@ -26,7 +26,7 @@ const PEN_SPOTS: Array[Vector3] = [Vector3(-2.0, 0.6, 0.5), Vector3(1.0, 0.2, 2.
 const RAIL_SADDLES := [Vector2(-3.2, 0.0), Vector2(2.2, 0.1), Vector2(3.6, -0.1)]
 const RAIL_Z := 3.38
 const RAIL_TOP := 1.0
-const Saddle = preload("res://assets/models/saddle.glb")
+const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/caveman_helper.glb")
 ## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
