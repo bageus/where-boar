@@ -7,6 +7,7 @@ extends SceneTree
 ## of the footing, base on y=0, logs lie along Z.
 ## Run: godot --headless --path . -s res://tools/bake_peak_stumps.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/nature/meshes/peak/"
 const BARK := Color(0.47, 0.31, 0.18)
 const BARK_DARK := Color(0.25, 0.16, 0.09)
@@ -147,10 +148,11 @@ func _log(radius: float, length: float, moss: int) -> void:
 func _save(path: String) -> void:
 	_tool.index()
 	var mesh := _tool.commit()
-	var mat := StandardMaterial3D.new()
+	var mat := PeakSmooth.soften(StandardMaterial3D.new())
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	mesh.surface_set_material(0, mat)
+	mesh = PeakSmooth.smooth(mesh)
 	ResourceSaver.save(mesh, path)
 	print("%s: %d triangles, %s" % [path.get_file(), mesh.surface_get_array_index_len(0) / 3, mesh.get_aabb()])

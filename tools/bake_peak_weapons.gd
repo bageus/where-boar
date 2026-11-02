@@ -9,6 +9,7 @@ extends SceneTree
 ## rotation (model +Y -> body -Z, along the capsule) flies them tip first. Held things have the grip at the origin.
 ## Run: godot --headless --path . -s res://tools/bake_peak_weapons.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/models/peak_weapons/"
 const WOOD := Color(0.8, 0.5, 0.24)
 const WOOD_DARK := Color(0.6, 0.35, 0.16)
@@ -177,7 +178,7 @@ func _prism(t: SurfaceTool, a: Vector3, b: Vector3, ra: float, rb: float, sides:
 	var dark := colour.darkened(0.06)
 	for k in sides:
 		var j := (k + 1) % sides
-		var shade := colour if k % 2 == 0 else dark  # alternate faces a touch, like the rocks' facets
+		var shade := colour  # one colour all round, so the smoothed prism reads as one round piece
 		_tri(t, ring_a[k], ring_b[k], ring_b[j], shade)
 		_tri(t, ring_a[k], ring_b[j], ring_a[j], shade)
 	for k in range(1, sides - 1):
@@ -242,13 +243,14 @@ func _material() -> StandardMaterial3D:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	return mat
+	return PeakSmooth.soften(mat)
 
 
 func _save(t: SurfaceTool, weapon: String) -> void:
 	t.index()
 	var mesh := t.commit()
 	mesh.surface_set_material(0, _material())
+	mesh = PeakSmooth.smooth(mesh)
 	var mesh_path := OUT + weapon + ".res"
 	ResourceSaver.save(mesh, mesh_path)
 	mesh.take_over_path(mesh_path)

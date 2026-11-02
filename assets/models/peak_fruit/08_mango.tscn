@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/models/peak_fruit/08_mango.res" id="1_3us6l"]
 
-[node name="PeakMango" type="Node3D" unique_id=1962986881]
+[node name="PeakMango" type="Node3D" unique_id=509742472]
 
-[node name="Model" type="MeshInstance3D" parent="." unique_id=513970616]
+[node name="Model" type="MeshInstance3D" parent="." unique_id=1736789195]
 mesh = ExtResource("1_3us6l")

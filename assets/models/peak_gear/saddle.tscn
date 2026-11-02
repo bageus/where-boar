@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/models/peak_gear/saddle.res" id="1_1rp77"]
 
-[node name="Saddle" type="Node3D" unique_id=446064950]
+[node name="Saddle" type="Node3D" unique_id=1477282116]
 
-[node name="Model" type="MeshInstance3D" parent="." unique_id=907713875]
+[node name="Model" type="MeshInstance3D" parent="." unique_id=2005169065]
 mesh = ExtResource("1_1rp77")

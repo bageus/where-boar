@@ -58,19 +58,19 @@ _data = {
 &"Cage_Open": SubResource("Animation_83uot")
 }
 
-[node name="PeakCage" type="Node3D" unique_id=908354013]
+[node name="PeakCage" type="Node3D" unique_id=1892603705]
 
-[node name="TrapRoot" type="Node3D" parent="." unique_id=1998995381]
+[node name="TrapRoot" type="Node3D" parent="." unique_id=1074755058]
 
-[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=729480364]
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=8006083]
 mesh = ExtResource("1_mehjx")
 
-[node name="CageGate" type="MeshInstance3D" parent="TrapRoot" unique_id=1633802564]
+[node name="CageGate" type="MeshInstance3D" parent="TrapRoot" unique_id=696364781]
 mesh = ExtResource("2_n3tns")
 
-[node name="TriggerPlate" type="MeshInstance3D" parent="TrapRoot" unique_id=2041453778]
+[node name="TriggerPlate" type="MeshInstance3D" parent="TrapRoot" unique_id=1389759100]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.05)
 mesh = ExtResource("3_xmmew")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=379217808]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1053734911]
 libraries/ = SubResource("AnimationLibrary_su1ug")

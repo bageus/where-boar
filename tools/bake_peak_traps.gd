@@ -9,6 +9,7 @@ extends SceneTree
 ## x = +-0.45, which is what Trap.stretch_to() relies on.
 ## Run: godot --headless --path . -s res://tools/bake_peak_traps.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/models/peak_traps/"
 const FRUIT_OUT := "res://assets/models/peak_fruit/"
 const WOOD := Color(0.8, 0.5, 0.24)
@@ -548,13 +549,14 @@ func _material() -> StandardMaterial3D:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	return mat
+	return PeakSmooth.soften(mat)
 
 
 func _mesh_of(t: SurfaceTool, path: String) -> ArrayMesh:
 	t.index()
 	var mesh := t.commit()
 	mesh.surface_set_material(0, _material())
+	mesh = PeakSmooth.smooth(mesh)
 	ResourceSaver.save(mesh, path)
 	mesh.take_over_path(path)
 	return mesh

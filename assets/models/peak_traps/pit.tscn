@@ -132,50 +132,50 @@ _data = {
 &"Pit_Break": SubResource("Animation_nt53i")
 }
 
-[node name="PeakPit" type="Node3D" unique_id=708766704]
+[node name="PeakPit" type="Node3D" unique_id=409990387]
 
-[node name="TrapRoot" type="Node3D" parent="." unique_id=1591899777]
+[node name="TrapRoot" type="Node3D" parent="." unique_id=866444562]
 
-[node name="PitWalls" type="MeshInstance3D" parent="TrapRoot" unique_id=264344357]
+[node name="PitWalls" type="MeshInstance3D" parent="TrapRoot" unique_id=206770381]
 mesh = ExtResource("1_fd8ll")
 
-[node name="PitFloor" type="MeshInstance3D" parent="TrapRoot" unique_id=126537917]
+[node name="PitFloor" type="MeshInstance3D" parent="TrapRoot" unique_id=498711882]
 mesh = ExtResource("2_rqcux")
 
-[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1208509909]
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=608944596]
 mesh = ExtResource("3_lxyw0")
 
-[node name="PitCover_00" type="MeshInstance3D" parent="TrapRoot" unique_id=1349407776]
+[node name="PitCover_00" type="MeshInstance3D" parent="TrapRoot" unique_id=1104210707]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.14, 0)
 mesh = ExtResource("4_5an45")
 
-[node name="PitCover_01" type="MeshInstance3D" parent="TrapRoot" unique_id=841297856]
+[node name="PitCover_01" type="MeshInstance3D" parent="TrapRoot" unique_id=1685279408]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56568545, 0.14, 0.56568545)
 mesh = ExtResource("5_gr4va")
 
-[node name="PitCover_02" type="MeshInstance3D" parent="TrapRoot" unique_id=202565657]
+[node name="PitCover_02" type="MeshInstance3D" parent="TrapRoot" unique_id=675867090]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8985874e-17, 0.14, 0.8)
 mesh = ExtResource("6_mopea")
 
-[node name="PitCover_03" type="MeshInstance3D" parent="TrapRoot" unique_id=1497850961]
+[node name="PitCover_03" type="MeshInstance3D" parent="TrapRoot" unique_id=1086800701]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56568545, 0.14, 0.56568545)
 mesh = ExtResource("7_a8ae1")
 
-[node name="PitCover_04" type="MeshInstance3D" parent="TrapRoot" unique_id=1336736660]
+[node name="PitCover_04" type="MeshInstance3D" parent="TrapRoot" unique_id=1839626779]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.14, 9.797175e-17)
 mesh = ExtResource("8_qu0b6")
 
-[node name="PitCover_05" type="MeshInstance3D" parent="TrapRoot" unique_id=443761542]
+[node name="PitCover_05" type="MeshInstance3D" parent="TrapRoot" unique_id=2077044444]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56568545, 0.14, -0.56568545)
 mesh = ExtResource("9_isgd6")
 
-[node name="PitCover_06" type="MeshInstance3D" parent="TrapRoot" unique_id=367831547]
+[node name="PitCover_06" type="MeshInstance3D" parent="TrapRoot" unique_id=603435417]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4695761e-16, 0.14, -0.8)
 mesh = ExtResource("10_yicpi")
 
-[node name="PitCover_07" type="MeshInstance3D" parent="TrapRoot" unique_id=1741076902]
+[node name="PitCover_07" type="MeshInstance3D" parent="TrapRoot" unique_id=1713153575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56568545, 0.14, -0.56568545)
 mesh = ExtResource("11_0h0nj")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=468681719]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1948041236]
 libraries/ = SubResource("AnimationLibrary_fkgw6")

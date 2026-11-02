@@ -9,6 +9,7 @@ extends SceneTree
 ## pen spots and rail, the tavern bench and hearth), so collisions and interaction distances stay the same.
 ## Writes assets/models/peak/<name>.scn. Run: godot --headless --path . -s res://tools/bake_peak_buildings.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/models/peak/"
 const WOOD := Color(0.6, 0.36, 0.18)
 const WOOD_DARK := Color(0.42, 0.24, 0.13)
@@ -69,6 +70,7 @@ func _materials() -> void:
 	_body_material.vertex_color_is_srgb = true
 	_body_material.roughness = 1.0
 	_body_material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	PeakSmooth.soften(_body_material)
 	ResourceSaver.save(_body_material, OUT + "building.tres", ResourceSaver.FLAG_CHANGE_PATH)
 	_glow_material = StandardMaterial3D.new()
 	_glow_material.vertex_color_use_as_albedo = true
@@ -79,12 +81,13 @@ func _materials() -> void:
 
 # --- primitives --------------------------------------------------------------------------------------------
 
-## One triangle facing `out`; normals per corner (flat when all three are the facet). Corners near the
-## ground get darker (soft contact shade), each face a slight random tint so the facets read.
+## One triangle facing `out`; normals per corner (PeakSmooth rounds them on save). Corners near the
+## ground get darker (soft contact shade); no per-face tint, so a part reads as one piece, not facets.
 func _tri(p: Array, n: Array, col: Color, out: Vector3, glow := false) -> void:
 	var facet: Vector3 = (p[1] - p[0]).cross(p[2] - p[0])
 	var order := [0, 1, 2] if facet.dot(out) < 0.0 else [0, 2, 1]
-	var tint := 1.0 + _rng.randf_range(-0.04, 0.04)
+	_rng.randf()  # was a per-face tint; still drawn so every shape keeps its random layout
+	var tint := 1.0
 	var st := _glow if glow else _tool
 	_glowing = _glowing or glow
 	for k: int in order:
@@ -115,7 +118,7 @@ func _sheet(p: Array, col: Color) -> void:
 	_flat(p, col * 0.85, -n)
 
 
-## A six-faced solid from eight corners (bottom 0-3, top 4-7), flat shaded.
+## A six-faced solid from eight corners (bottom 0-3, top 4-7), sharp edged (planks, sign arrows).
 func _hex(p: Array, col: Color) -> void:
 	var centre := Vector3.ZERO
 	for q: Vector3 in p:
@@ -125,14 +128,52 @@ func _hex(p: Array, col: Color) -> void:
 		_quad(p[f[0]], p[f[1]], p[f[2]], p[f[3]], col, mid - centre)
 
 
+## A box with bevelled edges and corners: once smoothed its edges shade round, like a carved block.
 func _box(centre: Vector3, size: Vector3, col: Color, yaw := 0.0, roll := 0.0) -> void:
 	var b := Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, roll)
 	var h := size * 0.5
-	var p := []
-	for y in [-h.y, h.y]:
-		for c: Vector2 in [Vector2(-h.x, -h.z), Vector2(h.x, -h.z), Vector2(h.x, h.z), Vector2(-h.x, h.z)]:
-			p.append(centre + b * Vector3(c.x, y, c.y))
-	_hex(p, col)
+	var bevel := minf(minf(h.x, minf(h.y, h.z)) * 0.45, 0.07)
+	var inner := h - Vector3.ONE * bevel
+	# q(s, i): the corner s (signs) pushed out along axis i only; the face i of the box uses these.
+	var q := func(s: Vector3, i: int) -> Vector3:
+		var p := s * inner
+		p[i] += s[i] * bevel
+		return centre + b * p
+	var signs: Array[Vector3] = []
+	for x in [-1.0, 1.0]:
+		for y in [-1.0, 1.0]:
+			for z in [-1.0, 1.0]:
+				signs.append(Vector3(x, y, z))
+	for i in 3:
+		var j := (i + 1) % 3
+		var k := (i + 2) % 3
+		for side in [-1.0, 1.0]:
+			# The face: four corners round axis i, in order.
+			var ring := []
+			for c: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+				var s := Vector3.ZERO
+				s[i] = side
+				s[j] = c.x
+				s[k] = c.y
+				ring.append(q.call(s, i))
+			var out: Vector3 = b * (_axis(i) * side)
+			_quad(ring[0], ring[1], ring[2], ring[3], col, out)
+		# The four bevels along axis i, between faces j and k.
+		for c: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+			var s0 := Vector3.ZERO
+			s0[j] = c.x
+			s0[k] = c.y
+			s0[i] = -1.0
+			var s1 := s0
+			s1[i] = 1.0
+			_quad(q.call(s0, j), q.call(s1, j), q.call(s1, k), q.call(s0, k), col, b * (_axis(j) * c.x + _axis(k) * c.y))
+	for s: Vector3 in signs:
+		_flat([q.call(s, 0), q.call(s, 1), q.call(s, 2)], col, b * s)
+
+
+func _axis(i: int) -> Vector3:
+	var axes: Array[Vector3] = [Vector3.RIGHT, Vector3.UP, Vector3.BACK]
+	return axes[i]
 
 
 ## A slab hanging from four top corners (a roof), `thick` deep.
@@ -645,13 +686,20 @@ func _boar_pen() -> void:
 ## The well: a ring of stone blocks round dark water, two posts with a gable hide roof, a winch with a
 ## crank and a bucket on its rope.
 func _tribal_well() -> void:
-	var blocks := 10
-	for k in blocks:
-		var a := TAU * (k + 0.5) / blocks
-		_box(Vector3(cos(a) * 0.78, 0.3, sin(a) * 0.78), Vector3(0.28, 0.6, 0.5), STONE if k % 2 else STONE_DARK, -a)
-		_box(Vector3(cos(a) * 0.78, 0.64, sin(a) * 0.78), Vector3(0.34, 0.1, 0.52), STONE, -a + 0.05)
-	_disc(Vector3(0, 0.3, 0), 0.68, 10, DARK)
-	_disc(Vector3(0, 0.32, 0), 0.6, 10, WATER * 0.75)
+	# One round stone wall (smoothed to a drum) with a lip and a flat top, open in the middle.
+	var sides := 14
+	_band(Vector3.ZERO, 1.0, 0.94, 0.0, 0.58, sides, [STONE], 0.0)
+	_band(Vector3.ZERO, 0.94, 1.0, 0.58, 0.62, sides, [STONE], 0.0)
+	_band(Vector3.ZERO, 1.0, 0.98, 0.62, 0.7, sides, [STONE], 0.0)
+	for k in sides:
+		var a0 := Vector3(cos(TAU * k / sides), 0, sin(TAU * k / sides))
+		var a1 := Vector3(cos(TAU * (k + 1) / sides), 0, sin(TAU * (k + 1) / sides))
+		var top := Vector3(0, 0.7, 0)
+		_quad(a0 * 0.98 + top, a1 * 0.98 + top, a1 * 0.62 + top, a0 * 0.62 + top, STONE * 1.05, Vector3.UP)
+		var mid := (a0 + a1) * 0.5
+		_quad(a0 * 0.62 + top, a1 * 0.62 + top, a1 * 0.62 + Vector3(0, 0.25, 0), a0 * 0.62 + Vector3(0, 0.25, 0),
+			STONE_DARK, -mid)
+	_disc(Vector3(0, 0.25, 0), 0.64, 14, WATER * 0.75)
 	for x in [-1.0, 1.0]:
 		_post(Vector3(x, 0, 0), 2.15, 0.1)
 	_log(Vector3(0, 2.3, -0.05), Vector3(0, 2.3, 0.05), 0.01, WOOD)
@@ -697,12 +745,14 @@ func _save(name: String) -> void:
 	_tool.index()
 	var mesh := _tool.commit()
 	mesh.surface_set_material(0, _body_material)
-	var tris := mesh.surface_get_array_index_len(0) / 3
 	if _glowing:
 		_glow.index()
 		_glow.commit(mesh)
 		mesh.surface_set_material(1, _glow_material)
-		tris += mesh.surface_get_array_index_len(1) / 3
+	mesh = PeakSmooth.smooth(mesh)
+	var tris := 0
+	for s in mesh.get_surface_count():
+		tris += mesh.surface_get_array_index_len(s) / 3
 	var root := Node3D.new()
 	root.name = name.to_pascal_case()
 	var node := MeshInstance3D.new()

@@ -5,10 +5,11 @@ extends SceneTree
 ## a leafy crown is a cluster of chunky jittered icosahedra ("puffs"), a pine is a stack of jagged cones,
 ## trunks and branches are six-sided tapered prisms; palms and undergrowth have folded leaf strips.
 ## Everything is one surface with vertex colours: bright, saturated greens, lit tops and dark, cool undersides.
-## Normals are half way between the facet and the puff's own round shape, so the crowns read as soft,
-## fluffy blobs that still keep their big facets. Origin at the foot of the trunk (bushes: their centre).
+## Normals lean almost fully to the puff's own round shape (SOFT), so the crowns read as soft, fluffy
+## blobs; lighting wraps softly round them (peak_smooth.gd soften). Origin at the foot of the trunk (bushes: their centre).
 ## Run: godot --headless --path . -s res://tools/bake_peak_trees.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/nature/meshes/peak/"
 const LEAF_DARK := Color(0.07, 0.24, 0.1)
 const LEAF: Array[Color] = [Color(0.24, 0.52, 0.12), Color(0.3, 0.56, 0.1), Color(0.2, 0.48, 0.15)]
@@ -22,7 +23,7 @@ const BIRCH := Color(0.72, 0.69, 0.6)
 const DEAD := Color(0.42, 0.35, 0.28)
 const PALM_BARK := Color(0.6, 0.45, 0.28)
 ## How far a puff's normals lean from the facet to its round shape: 0 flat facets, 1 a smooth ball.
-const SOFT := 0.6
+const SOFT := 0.9  # owner 2026-11-02: crowns read as soft lumps, not as facets glued together
 const PHI := 1.618034
 const ICO_FACES := [
 	[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2], [10, 7, 6],
@@ -98,7 +99,8 @@ func _puff(centre: Vector3, r: Vector3, core: Vector3, base: Color) -> void:
 		var facet: Vector3 = (p[1] - p[0]).cross(p[2] - p[0]).normalized()
 		if facet.dot(mid - centre) < 0.0:
 			facet = -facet
-		var tint := 1.0 + _rng.randf_range(-0.05, 0.05)
+		_rng.randf()  # was a per-face tint; still drawn so the crowns keep their random layout
+		var tint := 1.0
 		var cols := []
 		var normals := []
 		for q: Vector3 in p:
@@ -288,6 +290,7 @@ func _save(path: String, two_sided := false) -> void:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	PeakSmooth.soften(mat)
 	if two_sided:
 		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_set_material(0, mat)

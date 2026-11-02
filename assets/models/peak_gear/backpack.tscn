@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/models/peak_gear/backpack.res" id="1_h8ni1"]
 
-[node name="Backpack" type="Node3D" unique_id=505199601]
+[node name="Backpack" type="Node3D" unique_id=385654144]
 
-[node name="Model" type="MeshInstance3D" parent="." unique_id=2113619665]
+[node name="Model" type="MeshInstance3D" parent="." unique_id=1406393582]
 mesh = ExtResource("1_h8ni1")

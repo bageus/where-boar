@@ -10,6 +10,9 @@ const WEAPONS := "res://assets/models/peak_weapons/"
 const FRUIT := "res://assets/models/peak_fruit/"
 const TRAPS := "res://assets/models/peak_traps/"
 const COUNTER_Y := 1.1
+## The quiver's floor centre at the left post (bake_peak_buildings.gd _weapon_stall) and half an arrow's length.
+const QUIVER := Vector3(-1.6, 0.0, 1.1)
+const ARROW_HALF := 0.42
 ## Baits as bait.gd lists them, two rows on the counter: [file, x, z].
 const BAITS := [
 	["01_acorns", -1.3, 0.36], ["02_red_berries", -0.45, 0.36], ["03_blueberries", 0.4, 0.36], ["04_apple", 1.25, 0.36],
@@ -44,8 +47,11 @@ func _weapons() -> void:
 	# A bow hung on the back wall, bending towards the viewer.
 	_put(WEAPONS + "bow.tscn", Vector3(0.0, 1.9, -0.8), Vector3(0.0, PI / 2, 0.0), 1.2)
 	# Arrows in the quiver at the left post, stones in the basket in front of the counter.
+	# Each arrow stands on the quiver floor and fans out a little, so no shaft pokes through its wall.
 	for i in 5:
-		_put(WEAPONS + "arrow.tscn", Vector3(-1.6 + (i - 2) * 0.04, 0.8, 1.1 + (i % 2) * 0.05), Vector3((i - 2) * 0.12, 0.0, (i % 3 - 1) * 0.15))
+		var arrow := _put(WEAPONS + "arrow.tscn", Vector3.ZERO, Vector3((i - 2) * 0.07, 0.0, (i % 3 - 1) * 0.08))
+		var foot := QUIVER + Vector3((i - 2) * 0.025, 0.3, (i % 2) * 0.05 - 0.025)
+		arrow.position = foot + arrow.basis.y * ARROW_HALF
 	for i in 5:
 		_put(WEAPONS + "stone.tscn", Vector3(0.9 + (i % 3 - 1) * 0.1, 0.26 + (i / 3) * 0.1, 0.93 + (i % 2) * 0.06 - 0.03), Vector3(0.0, i * 1.1, 0.0), 1.5)
 	# On the counter: a club, a knife, a sling, a heap of stones, arrows.

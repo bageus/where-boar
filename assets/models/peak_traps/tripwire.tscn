@@ -2,9 +2,9 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/tripwire_static.res" id="1_t8gp3"]
 
-[node name="PeakTripwire" type="Node3D" unique_id=211698140]
+[node name="PeakTripwire" type="Node3D" unique_id=343558497]
 
-[node name="TrapRoot" type="Node3D" parent="." unique_id=209519985]
+[node name="TrapRoot" type="Node3D" parent="." unique_id=1439255381]
 
-[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1256529870]
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1465486163]
 mesh = ExtResource("1_t8gp3")

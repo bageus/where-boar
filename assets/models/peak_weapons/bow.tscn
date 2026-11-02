@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/models/peak_weapons/bow.res" id="1_eq73b"]
 
-[node name="Bow" type="Node3D" unique_id=1639850434]
+[node name="Bow" type="Node3D" unique_id=1502342641]
 
-[node name="Model" type="MeshInstance3D" parent="." unique_id=1947231206]
+[node name="Model" type="MeshInstance3D" parent="." unique_id=841943555]
 mesh = ExtResource("1_eq73b")

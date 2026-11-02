@@ -128,3 +128,4 @@ Unapproved ideas and possible future features belong here.
 | P3-074 | 3 | Arrows/spears embed at the exact hit point on boars and rocks (`landing.gd`, `missile.gd`, `spear.gd`) | P3-073 | DONE |
 | P3-075 | 3 | Camp: no overlapping bushes, rocks, traps and buildings; clearance test (`dressing.gd`, `scenery.gd`, `shop_display.gd`) | P3-074 | DONE |
 | P3-076 | 3 | Boars dodge the chaser by approach side; cornered may ram (by size), cunning types charge head-on (`boar_dodge.gd`) | P3-075 | DONE |
+| P3-077 | 3 | PEAK models solid and smooth: shared normal smoothing and soft light, one-piece saddle and well, quiver arrows inside (`tools/peak_smooth.gd`) | P3-076 | DONE |

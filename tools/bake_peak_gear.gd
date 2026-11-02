@@ -2,13 +2,14 @@ extends SceneTree
 
 ## Bakes the saddle, the hunter's backpack and the helper's hammer in the style of the game PEAK (owner,
 ## 2026-11-02), to match the weapons, rocks and trees (bake_peak_weapons.gd and others). Our own procedural
-## shapes: chunky prisms and lumps, flat shaded, one surface with bright vertex colours.
+## shapes: chunky prisms and lumps, smoothed by peak_smooth.gd, one surface with bright vertex colours.
 ## Axes are those of the old glb files, so the fitting code does not change:
 ## - saddle: spine along Z (front +Z), pad underside at y 0.3, stirrups hanging down to y -0.45;
 ## - backpack: top at y 0, hanging down to y -1 (parent of the old node_0 rotated it upright);
 ## - hammer: handle along +Y from -0.09 to 0.4, the head at the top, wide along X (a child of hand_r).
 ## Run: godot --headless --path . -s res://tools/bake_peak_gear.gd
 
+const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/models/peak_gear/"
 const FUR := Color(0.93, 0.78, 0.5)
 const FUR_DARK := Color(0.74, 0.52, 0.3)
@@ -32,28 +33,73 @@ func _init() -> void:
 
 func _saddle() -> SurfaceTool:
 	var t := _tool()
-	# Fur blanket: two fat lobes either side of the spine, striped trim along the rim.
+	_saddle_pad(t)
+	# Girth strap and stirrup leathers start inside the pad's rim and hang down both sides, wooden stirrups.
 	for side in [-1.0, 1.0]:
-		_box(t, Vector3(side * 0.18, 0.4, 0.0), Vector3(0.2, 0.2, 0.52), 0.85, FUR, FUR_DARK)
-		_lump(t, Vector3(side * 0.2, 0.31, 0.0), Vector3(0.09, 0.05, 0.27), FUR_DARK, FUR_DARK, 11 + int(side))
-		_box(t, Vector3(side * 0.275, 0.4, 0.0), Vector3(0.03, 0.12, 0.5), 1.0, WRAP, WRAP)
-	# Leather seat with a raised cantle behind and a knob in front (the old pommel).
-	_box(t, Vector3(0, 0.535, 0.0), Vector3(0.46, 0.08, 0.46), 0.8, LEATHER_LIGHT, LEATHER)
-	_box(t, Vector3(0, 0.6, -0.21), Vector3(0.4, 0.1, 0.07), 0.8, LEATHER, LEATHER)
-	_lump(t, Vector3(0, 0.63, 0.2), Vector3(0.05, 0.05, 0.05), LEATHER, LEATHER_LIGHT, 5)
-	_prism(t, Vector3(0, 0.57, 0.2), Vector3(0, 0.63, 0.2), 0.02, 0.02, 5, WOOD_DARK)
-	# Girth strap hanging down both sides, and the stirrup leathers with wooden loops.
-	for side in [-1.0, 1.0]:
-		_box(t, Vector3(side * 0.31, 0.12, -0.07), Vector3(0.05, 0.66, 0.08), 1.0, WRAP, WRAP)
-		_box(t, Vector3(side * 0.34, 0.1, 0.1), Vector3(0.045, 0.78, 0.055), 1.0, LEATHER, LEATHER)
+		_prism(t, Vector3(side * 0.27, 0.22, -0.07), Vector3(side * 0.3, -0.21, -0.07), 0.035, 0.03, 6, WRAP)
+		_prism(t, Vector3(side * 0.27, 0.22, 0.1), Vector3(side * 0.34, -0.29, 0.1), 0.028, 0.025, 6, LEATHER)
 		var hang := Vector3(side * 0.34, -0.3, 0.1)
-		_prism(t, hang, hang + Vector3(0, -0.07, 0), 0.04, 0.04, 6, ROPE)  # rope lashing
+		_prism(t, hang + Vector3(0, 0.02, 0), hang + Vector3(0, -0.07, 0), 0.04, 0.04, 6, ROPE)  # rope lashing
 		var loop := hang + Vector3(0, -0.1, 0)
-		_prism(t, loop + Vector3(-0.07, 0, 0), loop + Vector3(0.07, 0, 0), 0.028, 0.028, 5, WOOD)
-		_prism(t, loop + Vector3(-0.07, 0, 0), loop + Vector3(-0.07, -0.13, 0), 0.028, 0.028, 5, WOOD)
-		_prism(t, loop + Vector3(0.07, 0, 0), loop + Vector3(0.07, -0.13, 0), 0.028, 0.028, 5, WOOD)
-		_prism(t, loop + Vector3(-0.07, -0.13, 0), loop + Vector3(0.07, -0.13, 0), 0.03, 0.03, 5, WOOD_DARK)
+		_prism(t, loop + Vector3(-0.07, 0, 0), loop + Vector3(0.07, 0, 0), 0.028, 0.028, 6, WOOD)
+		_prism(t, loop + Vector3(-0.07, 0.01, 0), loop + Vector3(-0.07, -0.14, 0), 0.028, 0.028, 6, WOOD)
+		_prism(t, loop + Vector3(0.07, 0.01, 0), loop + Vector3(0.07, -0.14, 0), 0.028, 0.028, 6, WOOD)
+		_prism(t, loop + Vector3(-0.09, -0.13, 0), loop + Vector3(0.09, -0.13, 0), 0.03, 0.03, 6, WOOD_DARK)
 	return t
+
+
+## The saddle as one moulded piece (owner: it looked like separate chunks): a thick fur pad draped over the
+## back, its underside along the spine at y 0.3 (SADDLE_PAD), drooping at the sides, the leather seat
+## sunk into it with the cantle and the pommel rising out of the same surface, a red trim round the rim.
+## Top and underside meet at the rim, so there are no seams or boxes.
+func _saddle_pad(t: SurfaceTool) -> void:
+	var n := 14
+	var top := []
+	var bottom := []
+	var tint := []
+	for i in n + 1:
+		for j in n + 1:
+			var u := lerpf(-1.0, 1.0, float(i) / n)
+			var v := lerpf(-1.0, 1.0, float(j) / n)
+			# Square grid -> rounded outline; m is 1 on the rim.
+			var x := 0.31 * u * sqrt(1.0 - v * v * 0.5)
+			var z := 0.28 * v * sqrt(1.0 - u * u * 0.5)
+			var m := maxf(absf(u), absf(v))
+			var edge := sqrt(maxf(1.0 - pow(m, 4.0), 0.0))
+			var low := 0.3 - 0.15 * u * u
+			var middle := clampf(1.0 - u * u / 0.4, 0.0, 1.0)
+			var cantle := 0.07 * smoothstep(-0.08, -0.24, z) * middle
+			var pommel := 0.05 * smoothstep(0.1, 0.24, z) * clampf(1.0 - u * u / 0.2, 0.0, 1.0)
+			var seat := -0.03 * middle * clampf(1.0 - absf(z) / 0.15, 0.0, 1.0)
+			top.append(Vector3(x, low + (0.14 - 0.05 * u * u + cantle + pommel + seat) * edge, z))
+			bottom.append(Vector3(x, low - 0.015 * edge, z))
+			var colour := FUR.lerp(FUR_DARK, clampf(absf(u) * 0.8 - 0.1, 0.0, 1.0))
+			if absf(u) < 0.45 and absf(v) < 0.8:
+				colour = LEATHER_LIGHT
+			if m > 0.92:
+				colour = WRAP
+			tint.append(colour)
+	for i in n:
+		for j in n:
+			var a := i * (n + 1) + j
+			var quad := [a, a + 1, a + n + 2, a + n + 1]
+			_face(t, [top[quad[0]], top[quad[1]], top[quad[2]]], [tint[quad[0]], tint[quad[1]], tint[quad[2]]], Vector3.UP)
+			_face(t, [top[quad[0]], top[quad[2]], top[quad[3]]], [tint[quad[0]], tint[quad[2]], tint[quad[3]]], Vector3.UP)
+			_face(t, [bottom[quad[0]], bottom[quad[1]], bottom[quad[2]]], [FUR_DARK, FUR_DARK, FUR_DARK], Vector3.DOWN)
+			_face(t, [bottom[quad[0]], bottom[quad[2]], bottom[quad[3]]], [FUR_DARK, FUR_DARK, FUR_DARK], Vector3.DOWN)
+
+
+## One triangle with a colour per corner, wound to face `out`.
+func _face(t: SurfaceTool, p: Array, colours: Array, out: Vector3) -> void:
+	var normal: Vector3 = (p[2] - p[0]).cross(p[1] - p[0])
+	if normal.length_squared() < 1e-12:
+		return
+	var order := [0, 1, 2] if normal.dot(out) > 0.0 else [0, 2, 1]
+	normal = normal.normalized() * (1.0 if normal.dot(out) > 0.0 else -1.0)
+	for k: int in order:
+		t.set_color(colours[k])
+		t.set_normal(normal)
+		t.add_vertex(p[k])
 
 
 func _backpack() -> SurfaceTool:
@@ -141,7 +187,7 @@ func _prism(t: SurfaceTool, a: Vector3, b: Vector3, ra: float, rb: float, sides:
 	var dark := colour.darkened(0.06)
 	for k in sides:
 		var j := (k + 1) % sides
-		var shade := colour if k % 2 == 0 else dark  # alternate faces a touch, like the rocks' facets
+		var shade := colour  # one colour all round, so the smoothed prism reads as one round piece
 		_tri(t, ring_a[k], ring_b[k], ring_b[j], shade)
 		_tri(t, ring_a[k], ring_b[j], ring_a[j], shade)
 	for k in range(1, sides - 1):
@@ -206,13 +252,14 @@ func _material() -> StandardMaterial3D:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	return mat
+	return PeakSmooth.soften(mat)
 
 
 func _save(t: SurfaceTool, item: String, as_scene: bool) -> void:
 	t.index()
 	var mesh := t.commit()
 	mesh.surface_set_material(0, _material())
+	mesh = PeakSmooth.smooth(mesh)
 	var mesh_path := OUT + item + ".res"
 	ResourceSaver.save(mesh, mesh_path)
 	mesh.take_over_path(mesh_path)
