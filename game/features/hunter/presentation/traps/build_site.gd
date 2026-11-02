@@ -3,6 +3,7 @@ extends RefCounted
 ## A trap goes down as a see-through ghost that does nothing until it is built (owner, 2026-10-28):
 ## the hunter holds E next to it, or the hired trap setter walks over and builds it.
 
+const TrapPlacement = preload("res://game/features/hunter/presentation/trap_placement.gd")
 const GHOST_TRANSPARENCY := 0.6
 
 
@@ -23,6 +24,17 @@ static func is_ghost(trap: Node3D) -> bool:
 ## How far from the middle of a ghost the builder may stand.
 static func reach(trap: Node3D) -> float:
 	return trap.get_meta("build_reach", 0.0)
+
+
+## Ground distance from point p to the edge of the trap's footprint (0 inside), from any side.
+static func edge_distance(trap: Node3D, p: Vector3) -> float:
+	var fp: Dictionary = TrapPlacement.FOOTPRINTS.get(trap.get_meta("item_id", ""), {})
+	var local := trap.global_transform.affine_inverse() * p
+	var size: Vector3 = fp.get("size", Vector3.ZERO)
+	if fp.get("shape", "") == "box":
+		var out := Vector2(maxf(absf(local.x) - size.x * 0.5, 0.0), maxf(absf(local.z) - size.z * 0.5, 0.0))
+		return out.length()
+	return maxf(Vector2(local.x, local.z).length() - size.x, 0.0)
 
 
 ## Built share 0..1; 1 for a trap that is not a ghost.

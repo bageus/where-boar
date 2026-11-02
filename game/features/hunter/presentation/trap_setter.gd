@@ -41,8 +41,12 @@ func _physics_process(delta: float) -> void:
 	var site := _nearest_ghost()
 	var goal := site.global_position if site else hunter.global_position
 	# At a ghost he stops at its nearest edge, whichever side he comes from, not at the middle.
-	var stop := BUILD_REACH + BuildSite.reach(site) if site else FOLLOW_DISTANCE
 	var to_goal := Vector3(goal.x - global_position.x, 0.0, goal.z - global_position.z)
+	var stop := FOLLOW_DISTANCE
+	if site:
+		# Measured to the trap's footprint edge, so every side (the snare's loop too) is a build spot.
+		var edge := BuildSite.edge_distance(site, global_position)
+		stop = maxf(to_goal.length() - edge + BUILD_REACH * 0.8, 0.0)
 	var anim := "idle"
 	if to_goal.length() > stop:
 		var running := to_goal.length() > RUN_DISTANCE

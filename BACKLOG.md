@@ -124,3 +124,4 @@ Unapproved ideas and possible future features belong here.
 | P3-070 | 3 | Bone and wooden spears: kinds in Loadout, models, armory stock and rack | Done |
 | P3-071 | 3 | Saddle, backpack and helper hammer in a simplified PEAK-like style (`tools/bake_peak_gear.gd`) | P3-066 | DONE |
 | P3-072 | 3 | Cliffs not boxy: tilted, bevelled layer tops; camp rim and drop-off rocks fewer and larger (`tools/bake_peak_rocks.gd`, `scenery.gd`) | P3-064 | DONE |
+| P3-073 | 3 | Helper builds traps from any side (`trap_setter.gd`, `build_site.gd`) | P3-072 | DONE |
