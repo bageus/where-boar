@@ -27,6 +27,12 @@ const SCENES := {"flint": "spear", "bone": "spear_bone", "wood": "spear_wood"}
 ## The boar this spear is stuck in, if any.
 var holder: Node3D
 var _landed := false
+var _fly_velocity := Vector3.ZERO
+
+
+func _physics_process(_delta: float) -> void:
+	if not _landed:
+		_fly_velocity = linear_velocity
 
 
 func _ready() -> void:
@@ -41,4 +47,4 @@ func _on_body_entered(body: Node) -> void:
 	# A boar or its larger hitbox (playtest 2026-10-27).
 	if body is BoarBody or body.has_method("spear_hit"):
 		body.spear_hit(Loadout.SPEAR_DAMAGE[kind])
-	Landing.land(self, body)
+	Landing.land(self, body, _fly_velocity)

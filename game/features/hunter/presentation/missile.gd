@@ -16,6 +16,12 @@ var holder: Node3D
 
 var _landed := false
 var _hurt := false
+var _fly_velocity := Vector3.ZERO
+
+
+func _physics_process(_delta: float) -> void:
+	if not _landed:
+		_fly_velocity = linear_velocity
 
 
 func _ready() -> void:
@@ -40,4 +46,4 @@ func _on_body_entered(body: Node) -> void:
 	if pickup_kind == "":
 		queue_free()
 	else:
-		Landing.land(self, body)
+		Landing.land(self, body, _fly_velocity)
