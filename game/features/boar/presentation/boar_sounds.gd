@@ -23,8 +23,14 @@ var running := false:
 	set(value):
 		running = value
 		if _steps:
-			_steps.active = value
+			_steps.active = value and not silent
 var panicking := false
+## Set on death: a dead boar makes no more idle voice, panic squeals or steps.
+var silent := false:
+	set(value):
+		silent = value
+		if silent and _steps:
+			_steps.active = false
 
 var _voice_left := randf_range(0.0, VOICE_MAX_SECONDS)
 var _panic_left := 0.0
@@ -63,6 +69,8 @@ func attack() -> void:
 
 
 func _process(delta: float) -> void:
+	if silent:
+		return
 	if panicking:
 		_panic_left -= delta
 		if _panic_left <= 0.0:
