@@ -117,3 +117,4 @@ Unapproved ideas and possible future features belong here.
 | P3-063 | 3 | Denser short grass with noise height variation, soft range fade, grass-style hunt ground with a normal map for turf and sand (`peak_ground.gdshader`) | P3-059 | DONE |
 | P3-064 | 3 | Cliffs as solid stepped walls facing downhill instead of a chaotic boulder pile (`tools/bake_peak_rocks.gd`, `terrain.gd` `_place_cliff_rocks`) | P3-059 | DONE |
 | P3-065 | 3 | Camp buildings in a simplified PEAK-like style: procedural stalls, tavern, tents, pens, cages, campfire, well and signpost with the same footprints and anchor points; brighter faceted palisade (`tools/bake_peak_buildings.gd`) | P3-061 | DONE |
+| P3-066 | 3 | Weapons in a simplified PEAK-like style: procedural spear, arrow, club, knife, sling, bow and sling stone (`tools/bake_peak_weapons.gd`), flat rope material on the net | P3-059 | DONE |

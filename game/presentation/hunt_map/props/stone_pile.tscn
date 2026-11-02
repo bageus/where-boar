@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/stone.glb" id="1_stone"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/stone.tscn" id="1_stone"]
 
 [node name="StonePile" type="Node3D" groups=["stone_piles"]]
 metadata/stones = 3

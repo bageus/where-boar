@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_weapons/sling.res" id="1_ay06t"]
+
+[node name="Sling" type="Node3D" unique_id=1279163375]
+
+[node name="Model" type="MeshInstance3D" parent="." unique_id=1960900306]
+mesh = ExtResource("1_ay06t")

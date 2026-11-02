@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/missile.gd" id="1_missile"]
-[ext_resource type="PackedScene" path="res://assets/models/arrow.glb" id="9_model"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/arrow.tscn" id="9_model"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_m"]
 radius = 0.03

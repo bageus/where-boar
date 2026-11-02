@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/spear.gd" id="1_spear"]
-[ext_resource type="PackedScene" path="res://assets/models/spear.glb" id="9_model"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/spear.tscn" id="9_model"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_spear"]
 radius = 0.06

@@ -2,12 +2,12 @@
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hands.gd" id="1_hands"]
 [ext_resource type="PackedScene" path="res://assets/models/hunter_arm.glb" id="2_hand"]
-[ext_resource type="PackedScene" path="res://assets/models/spear.glb" id="3_spear"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/spear.tscn" id="3_spear"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/presentation/net_model.tscn" id="4_net"]
-[ext_resource type="PackedScene" path="res://assets/models/club.glb" id="5_club"]
-[ext_resource type="PackedScene" path="res://assets/models/sling.glb" id="6_sling"]
-[ext_resource type="PackedScene" path="res://assets/models/bow.glb" id="7_bow"]
-[ext_resource type="PackedScene" path="res://assets/models/knife.glb" id="8_knife"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/club.tscn" id="5_club"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/sling.tscn" id="6_sling"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/bow.tscn" id="7_bow"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/knife.tscn" id="8_knife"]
 
 [node name="Hands" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.35, -0.5)
@@ -45,6 +45,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.3, 0)
 visible = false
 
 [node name="Model" parent="Sling" instance=ExtResource("6_sling")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
 
 [node name="Hand" parent="Sling" instance=ExtResource("2_hand")]
 transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0, 0.2, 0)
@@ -54,6 +55,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.1, -0.1)
 visible = false
 
 [node name="Model" parent="Bow" instance=ExtResource("7_bow")]
+transform = Transform3D(0.6428, 0, -0.766, 0, 1, 0, 0.766, 0, 0.6428, 0, 0, 0)
 
 [node name="Hand" parent="Bow" instance=ExtResource("2_hand")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

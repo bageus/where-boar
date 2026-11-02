@@ -9,6 +9,8 @@ const OPEN_SECONDS := 0.4
 const CLEARANCE := 0.06  # net above the fur, boar model units: the mesh sags between bones
 const CELLS := 24  # resolution of the boar's top-down silhouette along its length
 const CREASE_CELLS := 3  # dips narrower than this many cells (between the hams, behind the head) are bridged
+## PEAK-like look, matching the baked weapons (tools/bake_peak_weapons.gd): plain bright rope, no texture, no shine.
+const ROPE := Color(0.95, 0.8, 0.48)
 
 ## Top-down silhouettes of boar meshes, by mesh: built once from the vertices.
 static var _silhouettes := {}
@@ -25,6 +27,12 @@ var _offsets := PackedVector3Array()
 func _ready() -> void:
 	_skeleton = find_children("*", "Skeleton3D", true, false)[0]
 	_player = find_children("*", "AnimationPlayer", true, false)[0]
+	var rope := StandardMaterial3D.new()
+	rope.albedo_color = ROPE
+	rope.roughness = 1.0
+	rope.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+		mesh.material_override = rope
 	for z in ROWS:
 		for x in COLUMNS:
 			_bones.append(_skeleton.find_bone("N_%d_%d" % [x, z]))
