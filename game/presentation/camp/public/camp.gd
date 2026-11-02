@@ -64,7 +64,7 @@ func _ready() -> void:
 	_ambience()
 	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
 			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
-	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings)
+	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings, $Scenery.rim_rocks)
 	# The camp ground and the forest floor behind the palisade.
 	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $LargeTent, $AFrameTent, $RoundTent, $RoundTent2] as Array[Node],
 			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp

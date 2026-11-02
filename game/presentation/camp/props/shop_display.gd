@@ -19,9 +19,11 @@ const BAITS := [
 ## Traps around the hunting hut, in camp (world) coordinates so they clear the tents, the tavern and each
 ## other: [file, x, z, yaw, scale]. East and south of the hut, nowhere near the way from the campfire.
 const TRAP_SPOTS := [
-	["pit", 14.5, -0.8, 0.0, 0.6], ["snare", 15.1, 8.0, 0.3, 1.0], ["fence", 14.5, 4.6, PI / 2, 0.8],
-	["tripwire", 11.0, 6.3, PI / 2, 1.0], ["cage", 12.0, 9.8, 0.0, 0.7],
+	["pit", 14.0, -1.0, 0.0, 0.6], ["snare", 13.8, 6.4, 0.3, 1.0], ["fence", 13.9, 2.6, PI / 2, 0.8],
+	["tripwire", 11.7, 5.6, PI / 2, 1.0], ["cage", 13.8, 10.2, 0.0, 0.7],
 ]
+## The strip they stand in, kept free of rim rocks (scenery.gd) and of plants (dressing.gd): x, z, width, depth.
+const TRAP_ZONE := Rect2(11.2, -2.6, 4.1, 14.6)
 
 @export var kind := Kind.WEAPONS
 

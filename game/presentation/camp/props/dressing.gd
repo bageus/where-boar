@@ -4,6 +4,7 @@ extends Node3D
 ## entrance and along the paths to them and to the gate; ferns and bushes along the sides and backs of
 ## the buildings; pebbles scattered round the perimeter. The ground colours live in ground.gdshader.
 
+const ShopDisplay = preload("res://game/presentation/camp/props/shop_display.gd")
 const GROUND_MATERIAL := preload("res://game/presentation/camp/props/ground_material.tres")
 const FERN_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/peak/PeakShrub1.res"), preload("res://assets/nature/meshes/peak/PeakShrub2.res"),
@@ -29,6 +30,10 @@ const PATH_WORN_RADIUS := 1.3
 const MAX_WORN := 16  # the shader's array size
 
 
+## World XZ boxes of every plant placed by dress(), for tests/run_camp_clearance_test.gd.
+var plant_boxes: Array[Rect2] = []
+
+
 func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
@@ -38,17 +43,25 @@ func _ready() -> void:
 		var inset := HALF - maxf(absf(p.x), absf(p.z))
 		if inset < rng.randf_range(0.2, 3.0) and not (p.z < -HALF + 3.0 and absf(p.x) < 2.5):
 			pebbles.append(_flat(rng, p, rng.randf_range(0.12, 0.5)))
-	_scatter(rng, PEBBLE_MESHES, pebbles, false)
+	var groups: Array[Array] = [[], [], [], [], []]
+	for t in pebbles:
+		groups[rng.randi() % groups.size()].append(t)
+	_scatter(PEBBLE_MESHES, groups, false)
 
 
 ## Wears the ground at the fire, the entrances and the gate, and plants greenery round each building.
 ## Each building's entrance faces its local +z.
-func dress(fire: Vector3, gate_sign: Vector3, buildings: Array[Node3D]) -> void:
+func dress(fire: Vector3, gate_sign: Vector3, buildings: Array[Node3D], rocks: Array[Rect2] = []) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 13
 	var worn := PackedVector4Array([_strip(fire, fire), _strip(gate_sign, Vector3(GATE.x, 0.0, GATE.y))])
 	var radii := PackedFloat32Array([FIRE_WORN_RADIUS, PATH_WORN_RADIUS * 1.4])
-	var plants: Array[Transform3D] = []
+	var ferns: Array[Array] = [[], [], []]
+	var bushes: Array[Array] = [[], [], []]
+	var solids: Array[Rect2] = []
+	for building in buildings:
+		solids.append(_world_footprint(building))
+	solids.append(ShopDisplay.TRAP_ZONE)
 	for building in buildings:
 		var box := _footprint(building)
 		var centre := box.get_center() * Vector3(1, 0, 1)
@@ -60,16 +73,24 @@ func dress(fire: Vector3, gate_sign: Vector3, buildings: Array[Node3D]) -> void:
 			# Round the sides and the back only: angle 0 is straight out of the door.
 			var angle := rng.randf_range(0.8, TAU - 0.8)
 			var out := Vector3(sin(angle) * box.size.x, 0.0, cos(angle) * box.size.z) * 0.5
-			out += out.normalized() * rng.randf_range(0.1, 0.9)
-			var at := building.global_transform * ((centre + out) / building.scale)
-			if absf(at.x) < HALF - 0.4 and absf(at.z) < HALF - 0.4:
-				plants.append(_flat(rng, at, rng.randf_range(1.0, 1.5)))  # as on the hunt: the mesh's own size times 1-1.5
-	var ferns: Array[Transform3D] = []
-	var bushes: Array[Transform3D] = []
-	for t in plants:
-		(bushes if rng.randf() < 0.4 else ferns).append(t)
-	_scatter(rng, FERN_MESHES, ferns, false, true)
-	_scatter(rng, BUSH_MESHES, bushes, true, true)
+			var is_bush := rng.randf() < 0.4
+			var index := rng.randi() % (BUSH_MESHES if is_bush else FERN_MESHES).size()
+			var size := rng.randf_range(1.0, 1.5)  # as on the hunt: the mesh's own size times 1-1.5
+			var mesh: Mesh = (BUSH_MESHES if is_bush else FERN_MESHES)[index]
+			var radius := maxf(mesh.get_aabb().size.x, mesh.get_aabb().size.z) * size * 0.5
+			# Stand clear of every building (and rock and display trap), pushing outwards until it fits.
+			var pushed := 0.0
+			var at := Vector3.ZERO
+			var clear := false
+			while pushed < 6.0 and not clear:
+				var spot := out + out.normalized() * (radius * 0.6 + pushed)
+				at = building.global_transform * ((centre + spot) / building.scale)
+				var patch := Rect2(at.x - radius * 0.6, at.z - radius * 0.6, radius * 1.2, radius * 1.2)
+				clear = absf(at.x) < HALF - 0.4 and absf(at.z) < HALF - 0.4 and _is_clear(patch, solids, rocks)
+				pushed += 0.4
+			if clear:
+				plant_boxes.append(Rect2(at.x - radius * 0.6, at.z - radius * 0.6, radius * 1.2, radius * 1.2))
+				(bushes if is_bush else ferns)[index].append(_flat(rng, at, size))
 	GROUND_MATERIAL.set_shader_parameter("worn_count", worn.size())
 	GROUND_MATERIAL.set_shader_parameter("worn_from_to", worn)
 	GROUND_MATERIAL.set_shader_parameter("worn_radius", radii)
@@ -101,18 +122,46 @@ func _footprint(building: Node3D) -> AABB:
 	return AABB(box.position * building.scale, box.size * building.scale)
 
 
+## The building's mesh bounds on the ground in world space; the goods of a shop display do not count.
+func _world_footprint(building: Node3D) -> Rect2:
+	var box := Rect2()
+	var first := true
+	for mesh: MeshInstance3D in building.find_children("*", "MeshInstance3D", true, false):
+		if _in_display(mesh, building):
+			continue
+		var world := mesh.global_transform * mesh.get_aabb()
+		var rect := Rect2(world.position.x, world.position.z, world.size.x, world.size.z)
+		box = rect if first else box.merge(rect)
+		first = false
+	return box
+
+
+static func _in_display(node: Node, root: Node) -> bool:
+	while node != root and node != null:
+		if node.get_script() == ShopDisplay:
+			return true
+		node = node.get_parent()
+	return false
+
+
+func _is_clear(patch: Rect2, solids: Array[Rect2], rocks: Array[Rect2]) -> bool:
+	for rect in solids:
+		if rect.intersects(patch):
+			return false
+	for rect in rocks:
+		if rect.intersects(patch):
+			return false
+	return true
+
+
 func _flat(rng: RandomNumberGenerator, at: Vector3, size: float) -> Transform3D:
 	return Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size), at)
 
 
-## One MultiMesh per mesh: each transform goes to a random mesh of the pool, its scale read as the
+## One MultiMesh per mesh: `groups` holds each mesh's transforms, a transform's scale read as the
 ## wanted width, or with `natural` as a plain scale of the mesh. Pebbles and ferns cast no shadow
 ## (cheap); bushes do.
-func _scatter(rng: RandomNumberGenerator, pool: Array[Mesh], spots: Array[Transform3D], shadows: bool, natural := false) -> void:
-	var groups: Array[Array] = []
-	groups.resize(pool.size())
-	for t in spots:
-		groups[rng.randi() % pool.size()].append(t)
+func _scatter(pool: Array[Mesh], groups: Array[Array], shadows: bool, natural := false) -> void:
 	for i in pool.size():
 		var box := pool[i].get_aabb()
 		var multimesh := MultiMesh.new()

@@ -7,6 +7,7 @@ extends Node3D
 ## camp's StaticBody walls in camp.tscn keep the hunter in; only the rim rocks collide (_skirt_collision).
 
 const Dressing = preload("res://game/presentation/camp/props/dressing.gd")
+const ShopDisplay = preload("res://game/presentation/camp/props/shop_display.gd")
 
 ## Stylized broadleaves and pines like in PEAK (owner, 2026-11-02), tools/bake_peak_trees.gd.
 const TREES_MESHES: Array[Mesh] = [
@@ -43,6 +44,11 @@ const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
 ## Warm, bright logs in the colours of the camp buildings (tools/bake_peak_buildings.gd, owner 2026-11-02: PEAK style).
 const WOOD: Array[Color] = [Color(0.56, 0.36, 0.2), Color(0.62, 0.42, 0.25), Color(0.48, 0.31, 0.18), Color(0.6, 0.44, 0.3)]
+
+## Ground footprints (world XZ) of the rim rocks that stand on the camp's dirt, for the clearance checks of
+## the plants (dressing.gd), the display traps and tests/run_camp_clearance_test.gd.
+var rim_rocks: Array[Rect2] = []
+
 
 func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -229,6 +235,12 @@ func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top 
 	if into.is_empty():
 		add_child(node)
 	else:
+		var half := box.size * node.scale * 0.4  # the rock's body, a little inside its bounds
+		var ground := Rect2(at.x - half.x, at.z - half.z, half.x * 2.0, half.z * 2.0)
+		if ground.intersects(ShopDisplay.TRAP_ZONE):
+			node.free()  # no rim rock in the display traps (tests/run_camp_clearance_test.gd)
+			return
+		rim_rocks.append(ground)
 		into[i].append(node.transform)
 		node.free()
 
