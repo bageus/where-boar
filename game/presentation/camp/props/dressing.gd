@@ -6,9 +6,13 @@ extends Node3D
 
 const GROUND_MATERIAL := preload("res://game/presentation/camp/props/ground_material.tres")
 const FERN_MESHES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/06_upright_fern.res"), preload("res://assets/nature/meshes/07_small_fern.res"),
-]  # the pack's two lightest ferns (3-3.5k triangles each)
-const BUSH_SCENE := preload("res://assets/models/bush.glb")
+	preload("res://assets/nature/meshes/peak/PeakShrub1.res"), preload("res://assets/nature/meshes/peak/PeakShrub2.res"),
+	preload("res://assets/nature/meshes/peak/PeakShrub3.res"),
+]  # undergrowth like in PEAK (owner, 2026-11-02), tools/bake_peak_trees.gd, 60-100 triangles each
+const BUSH_MESHES: Array[Mesh] = [
+	preload("res://assets/nature/meshes/peak/PeakBush1.res"), preload("res://assets/nature/meshes/peak/PeakBush2.res"),
+	preload("res://assets/nature/meshes/peak/PeakBush3.res"),
+]
 const PEBBLE_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/peak/PeakRock1.res"), preload("res://assets/nature/meshes/peak/PeakRock3.res"),
 	preload("res://assets/nature/meshes/peak/PeakRock4.res"), preload("res://assets/nature/meshes/peak/PeakRock6.res"),
@@ -65,7 +69,7 @@ func dress(fire: Vector3, gate_sign: Vector3, buildings: Array[Node3D]) -> void:
 	for t in plants:
 		(bushes if rng.randf() < 0.4 else ferns).append(t)
 	_scatter(rng, FERN_MESHES, ferns, false, true)
-	_scatter(rng, [(BUSH_SCENE.instantiate().get_child(0) as MeshInstance3D).mesh], bushes, true, true)
+	_scatter(rng, BUSH_MESHES, bushes, true, true)
 	GROUND_MATERIAL.set_shader_parameter("worn_count", worn.size())
 	GROUND_MATERIAL.set_shader_parameter("worn_from_to", worn)
 	GROUND_MATERIAL.set_shader_parameter("worn_radius", radii)

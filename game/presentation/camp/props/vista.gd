@@ -5,10 +5,12 @@ extends Node3D
 
 const CloudsScript = preload("res://game/core/clouds/public/clouds.gd")
 const BirdsScript = preload("res://game/presentation/camp/props/birds.gd")
+## Stylized broadleaves and pines like in PEAK (owner, 2026-11-02), tools/bake_peak_trees.gd.
 const TREE_MESHES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
-	preload("res://assets/nature/meshes/OakTree3.res"), preload("res://assets/nature/meshes/SpruceTree1.res"),
-	preload("res://assets/nature/meshes/SpruceTree2.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree1.res"), preload("res://assets/nature/meshes/peak/PeakTree2.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree3.res"), preload("res://assets/nature/meshes/peak/PeakTree4.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine1.res"), preload("res://assets/nature/meshes/peak/PeakPine2.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine3.res"),
 ]
 ## The valley floor, below the camp; the river cuts under WATER_Y.
 const BASE_Y := -42.0

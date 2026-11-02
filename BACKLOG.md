@@ -112,3 +112,4 @@ Unapproved ideas and possible future features belong here.
 | P3-057 | 3 | Clouds on the hunt map (shared core.clouds, same as camp vista) | P3-056 | DONE |
 | P3-058 | 3 | Missed arrows/spears stick into the ground; corpse stays until its projectiles are taken | P3-057 | DONE |
 | P3-059 | 3 | Rocks, cliffs and grass in a PEAK-like style: procedural faceted boulders, layered cliff chunks, horizon peaks, swaying bright grass (`tools/bake_peak_rocks.gd`) | P3-058 | DONE |
+| P3-061 | 3 | Trees and bushes in a PEAK-like style to match P3-059: puffy faceted broadleaves, jagged pines, dead trees, palms, bushes, low leafy undergrowth instead of ferns (`tools/bake_peak_trees.gd`) | P3-059 | DONE |

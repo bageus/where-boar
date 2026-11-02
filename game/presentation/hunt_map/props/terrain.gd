@@ -52,20 +52,19 @@ const LOGS: Array[Mesh] = [
 ]
 const STUMPS := 30
 const LOG_COUNT := 36
-## Ferns: decoration only, a few thousand triangles each, so drawn within FERN_RANGE metres.
+## Undergrowth (owner, 2026-11-02: like in PEAK; tools/bake_peak_trees.gd): decoration only, drawn within FERN_RANGE metres.
 const FERNS: Array[Mesh] = [
-	preload("res://assets/nature/meshes/05_spreading_fern.res"), preload("res://assets/nature/meshes/06_upright_fern.res"),
-	preload("res://assets/nature/meshes/07_small_fern.res"), preload("res://assets/nature/meshes/08_dense_fern.res"),
+	preload("res://assets/nature/meshes/peak/PeakShrub1.res"), preload("res://assets/nature/meshes/peak/PeakShrub2.res"),
+	preload("res://assets/nature/meshes/peak/PeakShrub3.res"),
 ]
 const FERN_COUNT := 260
 const FERN_RANGE := 35.0
-## Trees added on top of the authored ones (owner, 2026-10-28: more trees).
+## Trees added on top of the authored ones (owner, 2026-10-28: more trees), PEAK-like (tools/bake_peak_trees.gd).
 const TREES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
-	preload("res://assets/nature/meshes/OakTree3.res"), preload("res://assets/nature/meshes/SpruceTree1.res"),
-	preload("res://assets/nature/meshes/SpruceTree2.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
-	preload("res://assets/nature/meshes/Tree_1.res"), preload("res://assets/nature/meshes/Tree_2.res"),
-	preload("res://assets/nature/meshes/Tree_3.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree1.res"), preload("res://assets/nature/meshes/peak/PeakTree2.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree3.res"), preload("res://assets/nature/meshes/peak/PeakTree4.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine1.res"), preload("res://assets/nature/meshes/peak/PeakPine2.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine3.res"),
 ]
 const EXTRA_TREES := 70
 ## Scattered things keep this far from props, zones, spawns and each other.

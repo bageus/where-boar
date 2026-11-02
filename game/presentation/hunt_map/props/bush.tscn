@@ -1,13 +1,20 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://assets/models/bush.glb" id="1_bush"]
+[ext_resource type="Script" path="res://game/presentation/hunt_map/props/varied_mesh.gd" id="1_varied"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/peak/PeakBush1.res" id="2_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/peak/PeakBush2.res" id="3_m"]
+[ext_resource type="ArrayMesh" path="res://assets/nature/meshes/peak/PeakBush3.res" id="4_m"]
 
 [sub_resource type="SphereShape3D" id="Shape_cover"]
 radius = 0.9
 
 [node name="Bush" type="Node3D"]
+script = ExtResource("1_varied")
+meshes = Array[Mesh]([ExtResource("2_m"), ExtResource("3_m"), ExtResource("4_m")])
+size_range = Vector2(1.9, 2.5)
+fit_height = false
 
-[node name="Mesh" parent="." instance=ExtResource("1_bush")]
+[node name="Mesh" type="MeshInstance3D" parent="."]
 
 [node name="Cover" type="StaticBody3D" parent="."]
 collision_layer = 16

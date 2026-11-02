@@ -13,21 +13,20 @@ const REACH := 200.0
 const STEP := 2.0
 const FOREST := Color(0.12, 0.33, 0.08)
 const NEAR_TREES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
-	preload("res://assets/nature/meshes/SpruceTree1.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
-	preload("res://assets/nature/meshes/Tree_1.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree1.res"), preload("res://assets/nature/meshes/peak/PeakTree2.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree3.res"), preload("res://assets/nature/meshes/peak/PeakPine1.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine3.res"),
 ]
-## Spruces are the cheapest trees (130-190 triangles): the far woods are only these.
+## Pines are the cheapest trees (106-162 triangles, tools/bake_peak_trees.gd): the far woods are mostly these.
 const FAR_TREES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/SpruceTree1.res"), preload("res://assets/nature/meshes/SpruceTree2.res"),
-	preload("res://assets/nature/meshes/SpruceTree3.res"), preload("res://assets/nature/meshes/OakTree2.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine1.res"), preload("res://assets/nature/meshes/peak/PeakPine2.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine3.res"), preload("res://assets/nature/meshes/peak/PeakTree2.res"),
 ]
 const NEAR_COUNT := 500
 const NEAR_BAND := 40.0
 const FAR_COUNT := 900
 const DEAD_TREES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/DeadOak1.res"), preload("res://assets/nature/meshes/DeadOak2.res"),
-	preload("res://assets/nature/meshes/DeadSpruce1.res"),
+	preload("res://assets/nature/meshes/peak/PeakDead1.res"), preload("res://assets/nature/meshes/peak/PeakDead2.res"),
 ]
 ## Rocky outcrops and mountains, only on these compass sectors (angle from +x towards +z, half-width), radians.
 const ROCK_SECTORS := [Vector2(-1.9, 0.5), Vector2(0.4, 0.35), Vector2(2.6, 0.45)]

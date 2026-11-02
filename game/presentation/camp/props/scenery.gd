@@ -8,10 +8,12 @@ extends Node3D
 
 const Dressing = preload("res://game/presentation/camp/props/dressing.gd")
 
+## Stylized broadleaves and pines like in PEAK (owner, 2026-11-02), tools/bake_peak_trees.gd.
 const TREES_MESHES: Array[Mesh] = [
-	preload("res://assets/nature/meshes/OakTree1.res"), preload("res://assets/nature/meshes/OakTree2.res"),
-	preload("res://assets/nature/meshes/OakTree3.res"), preload("res://assets/nature/meshes/SpruceTree1.res"),
-	preload("res://assets/nature/meshes/SpruceTree2.res"), preload("res://assets/nature/meshes/SpruceTree3.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree1.res"), preload("res://assets/nature/meshes/peak/PeakTree2.res"),
+	preload("res://assets/nature/meshes/peak/PeakTree3.res"), preload("res://assets/nature/meshes/peak/PeakTree4.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine1.res"), preload("res://assets/nature/meshes/peak/PeakPine2.res"),
+	preload("res://assets/nature/meshes/peak/PeakPine3.res"),
 ]
 ## Layered, faceted cliff chunks (owner, 2026-11-02: rocks like in PEAK), tools/bake_peak_rocks.gd.
 const BIG_ROCK_MESHES: Array[Mesh] = [
