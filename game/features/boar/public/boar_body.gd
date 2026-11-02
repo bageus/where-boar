@@ -266,8 +266,7 @@ func _after_change() -> void:
 	_show_alert()
 	_report_outcome()
 	if boar.state == Boar.State.DEAD:
-		$Model.die()
-		$Sounds.silent = true
+		$Model.die(); $Sounds.silent = true
 		get_tree().create_timer(CORPSE_SECONDS).timeout.connect(_remove_corpse)
 		# Boars that see this one die run in panic twice as long (playtest 2026-10-27).
 		for other in Surroundings.witnesses(self):
