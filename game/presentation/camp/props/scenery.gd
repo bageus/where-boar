@@ -35,8 +35,9 @@ const GRASS_INSIDE := 1800  # the camp shrank from 40 m to 34 m; same density
 const GRASS_FOREST := 2500  # mostly hidden behind the palisade
 ## The wall's rocks reach down to the valley floor (vista.gd BASE_Y) so no sky or valley shows under them.
 const WALL_DEPTH := 44.0
-## Rocks scattered onto the dirt from the rim: how many per metre of rim and how far in (metres).
-const CREEPERS_PER_METRE := 3
+## Rocks scattered onto the dirt from the rim: how many per rim spot (one every RIM_STEP metres) and how far in (metres).
+const CREEPERS_PER_RIM_SPOT := 1
+const RIM_STEP := 3
 const CREEP_DEPTH := 3.6
 const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
@@ -144,10 +145,10 @@ func _drop_off(rng: RandomNumberGenerator) -> void:
 	for row in 5:
 		var top := 0.4 - row * row * 2.2 - row * 2.0
 		var out := 3.0 + row * 5.5
-		for z in range(int(FOREST_Z.x), int(HALF + out), 5):
-			_big_rock(rng, Vector3(HALF + out, top, z + rng.randf_range(-1.0, 1.0)), Vector2(6, 9) + Vector2.ONE * row * 4.0, true)
-		for x in range(int(SOUTH_SPLIT), int(HALF + out), 5):
-			_big_rock(rng, Vector3(x + rng.randf_range(-1.0, 1.0), top, HALF + out), Vector2(6, 9) + Vector2.ONE * row * 4.0, true)
+		for z in range(int(FOREST_Z.x), int(HALF + out), 8):
+			_big_rock(rng, Vector3(HALF + out, top, z + rng.randf_range(-1.5, 1.5)), Vector2(8, 12) + Vector2.ONE * row * 4.0, true)
+		for x in range(int(SOUTH_SPLIT), int(HALF + out), 8):
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), top, HALF + out), Vector2(8, 12) + Vector2.ONE * row * 4.0, true)
 
 
 ## Lower rocks along the camp's rim, some well inside it: on the rock wall side they stand on the
@@ -158,30 +159,29 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 	for mesh in BIG_ROCK_MESHES:
 		skirt.append([])
 	var rim: Array[Vector3] = []
-	for t in range(int(-HALF) - 2, int(HALF) + 3, 1):
+	# Every RIM_STEP metres, few and big (owner, 2026-11-02: fewer, larger rocks, no chaotic pile).
+	for t in range(int(-HALF) - 2, int(HALF) + 3, RIM_STEP):
 		rim.append(Vector3(-HALF, 0.0, t))  # west
 		rim.append(Vector3(HALF, 0.0, t))  # east
 		rim.append(Vector3(t, 0.0, HALF))  # south
 	for at in rim:
 		var inward := -Vector3(signf(at.x) if absf(at.x) >= HALF else 0.0, 0.0, signf(at.z) if absf(at.z) >= HALF else 0.0)
-		var spot := at + Vector3(rng.randf_range(-0.7, 0.7), 0.0, rng.randf_range(-0.7, 0.7)) * (Vector3.ONE - inward.abs())
+		var spot := at + Vector3(rng.randf_range(-1.2, 1.2), 0.0, rng.randf_range(-1.2, 1.2)) * (Vector3.ONE - inward.abs())
 		# The rocks reach in and out along the rim in slow waves, so the ground's edge is no straight line.
 		var t := at.x + at.z
 		var reach := 0.9 + 1.0 * sin(t * 0.42) + 0.8 * sin(t * 1.1 + 2.0) + rng.randf_range(-0.4, 0.4)
 		if _by_drop(spot):
-			_big_rock(rng, spot - inward * (reach + rng.randf_range(-0.6, 1.2)) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(2.6, 5.0), true, skirt)
+			_big_rock(rng, spot - inward * (reach + rng.randf_range(-0.6, 1.2)) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(4.5, 8.0), true, skirt)
 		else:
-			_big_rock(rng, spot + inward * (reach + rng.randf_range(-0.8, 0.9)) + Vector3(0.0, 0.6, 0.0), Vector2(1.4, 4.0), false, skirt)
-			if rng.randf() < 0.35:
-				_big_rock(rng, spot + inward * rng.randf_range(1.2, 2.6) + Vector3(0.0, 0.7, 0.0), Vector2(0.6, 1.4), false, skirt)
-	# Rocks creep onto the dirt along the whole join: many, thinning and shrinking inwards, so no line
+			_big_rock(rng, spot + inward * (reach + rng.randf_range(-0.8, 0.9)) + Vector3(0.0, 0.6, 0.0), Vector2(2.5, 6.0), false, skirt)
+	# Rocks creep onto the dirt along the whole join: thinning and shrinking inwards, so no line
 	# is left between the rim and the open ground.
 	for at in rim:
 		var inward := -Vector3(signf(at.x) if absf(at.x) >= HALF else 0.0, 0.0, signf(at.z) if absf(at.z) >= HALF else 0.0)
-		for n in CREEPERS_PER_METRE:
+		for n in CREEPERS_PER_RIM_SPOT:
 			var depth := pow(rng.randf(), 1.7) * CREEP_DEPTH
-			var spot := at + inward * depth + (Vector3.ONE - inward.abs()) * Vector3(rng.randf_range(-0.6, 0.6), 0.0, rng.randf_range(-0.6, 0.6))
-			var size := lerpf(2.2, 0.35, depth / CREEP_DEPTH) * rng.randf_range(0.7, 1.3)
+			var spot := at + inward * depth + (Vector3.ONE - inward.abs()) * Vector3(rng.randf_range(-1.5, 1.5), 0.0, rng.randf_range(-1.5, 1.5))
+			var size := lerpf(3.2, 1.0, depth / CREEP_DEPTH) * rng.randf_range(0.7, 1.3)
 			_big_rock(rng, spot + Vector3(0.0, 0.25 + size * 0.3, 0.0), Vector2(size * 0.8, size), false, skirt)
 	_skirt_collision(skirt)
 	# Low and many: one shadowless MultiMesh per rock mesh keeps them to a handful of draw calls.
@@ -221,7 +221,8 @@ func _big_rock(rng: RandomNumberGenerator, at: Vector3, height: Vector2, by_top 
 	var k := rng.randf_range(height.x, height.y) / box.size.y
 	var node := MeshInstance3D.new()
 	node.mesh = BIG_ROCK_MESHES[i]
-	node.scale = Vector3(k * rng.randf_range(0.6, 0.8), k, k * rng.randf_range(0.6, 0.8))
+	# As broad as tall (owner, 2026-11-02): squeezed sideways, the stepped cliff meshes turned into towers.
+	node.scale = Vector3(k * rng.randf_range(0.95, 1.2), k, k * rng.randf_range(0.95, 1.2))
 	node.rotation.y = rng.randf() * TAU
 	node.position = at - Vector3(0.0, box.end.y * k if by_top else 1.0 + depth, 0.0)
 	node.scale.y *= 1.0 + depth / (box.size.y * k)  # stretched downwards, the top stays put

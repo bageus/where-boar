@@ -43,8 +43,8 @@ func _init() -> void:
 		var width := cliff_rng.randf_range(9.0, 11.0)
 		for k in layers:
 			var h := cliff_rng.randf_range(3.0, 4.2)
-			var r := Vector3(width * 0.5, h * 0.5, width * cliff_rng.randf_range(0.24, 0.3))
-			_slab(tool, cliff_rng, Vector3(cliff_rng.randf_range(-0.4, 0.4), y, z), r, 7 + cliff_rng.randi() % 3, true, true, 0.9)
+			var r := Vector3(width * 0.5, h * 0.5, width * cliff_rng.randf_range(0.36, 0.42))  # deep enough not to read as a tower from the side
+			_slab(tool, cliff_rng, Vector3(cliff_rng.randf_range(-0.4, 0.4), y, z), r, 9 + cliff_rng.randi() % 4, true, true, 0.9)
 			y += h * cliff_rng.randf_range(0.82, 0.92)  # each layer sinks a little into the one below
 			z -= r.z * cliff_rng.randf_range(0.25, 0.4)
 			width *= cliff_rng.randf_range(0.82, 0.92)
@@ -78,10 +78,14 @@ func _slab(tool: SurfaceTool, rng: RandomNumberGenerator, base: Vector3, r: Vect
 		planes.append(Plane(axis, axis.dot(centre) + (axis.abs() * r).length() * rng.randf_range(0.9, 1.0)))
 	planes.append(Plane(Vector3.DOWN, -base.y))
 	var top := r.y * (rng.randf_range(0.92, 1.0) if flat_top else 1.0)
-	planes.append(Plane(Vector3.UP, centre.y + top))
+	# Cliff layers get a tilted top (owner, 2026-11-02: slanted, not flat cubes), so ledges lean and differ.
+	var up := Vector3.UP
+	if flat_top:
+		up = (up + Vector3(rng.randf_range(-0.35, 0.35), 0.0, rng.randf_range(-0.35, 0.35))).normalized()
+	planes.append(Plane(up, up.dot(centre) + top))
 	for n in cuts:
 		# Mostly sideways and upward cuts: the bevels and chamfers that make the big facets.
-		var dir := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-0.3, 1.0) * (0.25 if flat_top else 1.0), rng.randf_range(-1.0, 1.0)).normalized()
+		var dir := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-0.3, 1.0) * (0.8 if flat_top else 1.0), rng.randf_range(-1.0, 1.0)).normalized()
 		var reach := (dir * r).length() * (rng.randf_range(0.8, 0.92) if flat_top else rng.randf_range(0.72, 0.9))
 		planes.append(Plane(dir, dir.dot(centre) + reach))
 	var points := Geometry3D.compute_convex_mesh_points(planes)
@@ -105,7 +109,7 @@ func _slab(tool: SurfaceTool, rng: RandomNumberGenerator, base: Vector3, r: Vect
 			return atan2((a - mid).dot(v), (a - mid).dot(u)) < atan2((b - mid).dot(v), (b - mid).dot(u)))
 		var tint := 1.0 + rng.randf_range(-0.06, 0.06)
 		# Cliff layers keep moss to their flat ledges: the camp stretches them tall, which tilts the bevels.
-		var color := (green if moss and plane.normal.y > (0.9 if flat_top else MOSS_UP) else stone) * tint
+		var color := (green if moss and plane.normal.y > (0.8 if flat_top else MOSS_UP) else stone) * tint
 		for k in range(1, face.size() - 1):
 			var tri := [face[0], face[k + 1], face[k]]  # clockwise seen from outside: Godot's front face
 			for p: Vector3 in tri:

@@ -123,3 +123,4 @@ Unapproved ideas and possible future features belong here.
 | P3-069 | 3 | Camp shops show the game's real weapon and bait models; decorative traps around the hunting hut; black armory emblem with a cave-painting bow (`game/presentation/camp/props/shop_display.gd`) | P3-068 | DONE |
 | P3-070 | 3 | Bone and wooden spears: kinds in Loadout, models, armory stock and rack | Done |
 | P3-071 | 3 | Saddle, backpack and helper hammer in a simplified PEAK-like style (`tools/bake_peak_gear.gd`) | P3-066 | DONE |
+| P3-072 | 3 | Cliffs not boxy: tilted, bevelled layer tops; camp rim and drop-off rocks fewer and larger (`tools/bake_peak_rocks.gd`, `scenery.gd`) | P3-064 | DONE |
