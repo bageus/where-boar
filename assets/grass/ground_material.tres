@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=3]
+
+[ext_resource type="Shader" path="res://assets/grass/peak_ground.gdshader" id="1_shader"]
+
+[sub_resource type="FastNoiseLite" id="Noise"]
+frequency = 0.05
+
+[sub_resource type="NoiseTexture2D" id="NoiseTex"]
+seamless = true
+noise = SubResource("Noise")
+
+[sub_resource type="FastNoiseLite" id="BumpNoise"]
+seed = 5
+frequency = 0.04
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="BumpTex"]
+seamless = true
+as_normal_map = true
+bump_strength = 6.0
+noise = SubResource("BumpNoise")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/noise = SubResource("NoiseTex")
+shader_parameter/bump = SubResource("BumpTex")

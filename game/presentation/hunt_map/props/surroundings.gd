@@ -5,7 +5,6 @@ extends Node3D
 ## escape zone opens into a "natural gate" of tall grass and rotten stumps. Out of reach and cheap: one ground
 ## mesh, MultiMesh per model and side, no shadows; grass and ferns are drawn only near the camera.
 
-const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const TerrainScript = preload("res://game/presentation/hunt_map/props/terrain.gd")
 const HALF := 80.0
 ## The ground runs this far past the walls, one vertex every STEP metres.
@@ -40,7 +39,7 @@ const SPIRES: Array[Mesh] = [
 ]
 ## Grass and ferns in a strip this wide just outside the walls, like inside (terrain.gd).
 const GRASS_STRIP := 10.0
-const GRASS_PER_M2 := 2  # widened clumps, as inside (TerrainScript.GRASS_WIDEN)
+const GRASS_PER_M2 := TerrainScript.GRASS_PER_METRE  # short grass, as inside
 const FERNS := 180
 ## Natural gates: tall grass this far around each zone; the path out stays clear of trees this wide and long.
 const GATE_GRASS := 6.5
@@ -104,7 +103,7 @@ func _ground() -> void:
 			for k in [a, a + 1, b, a + 1, b + 1, b]:
 				st.add_index(k)
 	st.generate_normals()
-	st.set_material(BakedShadow.vertex_ground())
+	st.set_material(TerrainScript.GROUND_MATERIAL)
 	var land := MeshInstance3D.new()
 	land.mesh = st.commit()
 	land.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -193,10 +192,10 @@ func _grass(rng: RandomNumberGenerator) -> void:
 				var at := out * (HALF + rng.randf() * GRASS_STRIP) + out.orthogonal() * (c + rng.randf() * chunk)
 				if _past(at.x, at.y) < 0.0 or _terrain.height_at(at.x, at.y) < 0.3:
 					continue
-				var spot := _spot(at, rng.randf_range(0.18, 0.23), rng).scaled_local(TerrainScript.GRASS_WIDEN)
-				spot.origin -= centre
+				var spot := _spot(at, 1.0, rng).scaled_local(TerrainScript.short_grass_scale(at.x, at.y, rng))
+				spot.origin -= centre - Vector3(0.0, 0.07, 0.0)  # short clumps sink only 3 cm
 				spots.append(spot)
-			_add(clump, spots, TerrainScript.GRASS_MATERIAL, TerrainScript.GRASS_RANGE, centre)
+			_add(clump, spots, TerrainScript.GRASS_MATERIAL, TerrainScript.GRASS_RANGE + chunk * 0.71, centre)
 	var ferns := _spots(TerrainScript.FERNS.size())
 	for n in FERNS:
 		var at := _outside(rng, 0.5, GRASS_STRIP)

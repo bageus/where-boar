@@ -19,17 +19,20 @@ const SAND_TOP := 0.2
 ## Slopes steeper than this (normal.y below it, about 40 degrees) look like bare rock.
 const ROCK_NORMAL_Y := 0.75
 ## Stylized grass (owner, 2026-11-02: like in PEAK): a clump of 13 bent blades (tools/bake_peak_rocks.gd,
-## 39 triangles, the old clump had 130) with a swaying shader, on grass-coloured ground, in square chunks
-## that disappear beyond GRASS_RANGE metres, so far grass costs nothing.
-const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
+## 39 triangles) with a swaying shader, in square chunks drawn only near the camera. The ground under it is
+## painted in the grass's colours (assets/grass/ground_material.tres), so grass and ground read as one carpet.
 const GRASS_CLUMP: Mesh = preload("res://assets/grass/peak_grass.res")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
+const GROUND_MATERIAL := preload("res://assets/grass/ground_material.tres")
 const GRASS_CHUNK := 20
-## Half the clumps of before, each this much wider (same height), so the cover looks the same at half the
-## triangles (owner, 2026-11-01: 10-16 FPS on the hunt; grass was a quarter of the frame).
-const GRASS_PER_METRE := 3
-const GRASS_WIDEN := Vector3(1.41, 1.0, 1.41)
-const GRASS_RANGE := 30.0
+## Short grass (owner, 2026-11-02: denser, very short, a little taller and shorter by turns): 2.7 times the
+## clumps of before, each narrower and much lower; the height follows a noise field over the map
+## (short_grass_scale). Clumps shrink into the ground towards GRASS_RANGE metres (peak_grass.gdshader
+## fade_end), so the cut-off is soft and the range can be shorter than before (30 m) at about the same cost.
+const GRASS_PER_METRE := 8
+const GRASS_WIDTH := Vector2(0.18, 0.24)
+const GRASS_HEIGHT := Vector2(0.06, 0.15)
+const GRASS_RANGE := 24.0
 ## Tall grass patches (owner, 2026-10-28): clumps about twice as tall, with some wheat; they hide the hunter
 ## from boars like a bush (cover layer, see boar_body.gd).
 const TALL_PATCHES := 12
@@ -80,10 +83,26 @@ var _holes := PackedVector4Array()
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
+static var _grass_noise: FastNoiseLite
+
+
+## Short-grass clump scale at a map point: width jittered per clump, height from patches of very short,
+## middling and slightly taller grass a few metres across, jittered too. Also used outside the walls.
+static func short_grass_scale(x: float, z: float, rng: RandomNumberGenerator) -> Vector3:
+	if _grass_noise == null:
+		_grass_noise = FastNoiseLite.new()
+		_grass_noise.seed = 21
+		_grass_noise.frequency = 0.12
+	var band := smoothstep(-0.45, 0.45, _grass_noise.get_noise_2d(x, z))
+	var width := rng.randf_range(GRASS_WIDTH.x, GRASS_WIDTH.y)
+	var height := lerpf(GRASS_HEIGHT.x, GRASS_HEIGHT.y, band) * rng.randf_range(0.8, 1.2)
+	return Vector3(width, height, width)
+
 
 func _ready() -> void:
 	add_to_group("terrain")
 	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)
+	GRASS_MATERIAL.set_shader_parameter("fade_end", GRASS_RANGE)
 	$Mesh.mesh = _build_mesh()
 	for node in get_parent().find_children("*", "Node3D", true, false):
 		if node != self and not is_ancestor_of(node):
@@ -159,14 +178,18 @@ func _plant_grass() -> void:
 					for k in GRASS_PER_METRE:
 						var x := i + rng.randf() - (w - 1) * 0.5
 						var z := j + rng.randf() - (d - 1) * 0.5
-						var size := rng.randf_range(0.65, 0.8) if tall else rng.randf_range(0.18, 0.23)
-						var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size),
-								Vector3(x, height_at(x, z) - 0.05, z) - centre)
-						spots.append(spot.scaled_local(GRASS_WIDEN))
+						if tall and k % 3 != 0:
+							continue  # tall clumps are big enough at the old density
+						var tall_size := rng.randf_range(0.65, 0.8)
+						var size := Vector3(tall_size * 1.41, tall_size, tall_size * 1.41) if tall else short_grass_scale(x, z, rng)
+						var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(size),
+								Vector3(x, height_at(x, z) - 0.03, z) - centre)
+						spots.append(spot)
 						if tall and k == 0 and rng.randf() < 0.5:
-							wheat.append(spot.scaled_local(Vector3.ONE * 1.4 / size))
-			_add_multimesh(clump, spots, centre, GRASS_MATERIAL, GRASS_RANGE)
-			_add_multimesh(WHEAT, wheat, centre, null, GRASS_RANGE)
+							wheat.append(spot.scaled_local(Vector3.ONE * 1.4 / size.y))
+			# A chunk counts its range from its centre; its corners stand up to 0.71 chunk further out.
+			_add_multimesh(clump, spots, centre, GRASS_MATERIAL, GRASS_RANGE + GRASS_CHUNK * 0.71)
+			_add_multimesh(WHEAT, wheat, centre, null, GRASS_RANGE + GRASS_CHUNK * 0.71)
 
 
 ## Massive rocks half sunk into every steep stretch, so cliffs read as a rocky bluff.
@@ -324,6 +347,7 @@ func _add_multimesh(mesh: Mesh, spots: Array[Transform3D], centre: Vector3, mate
 
 func _exit_tree() -> void:
 	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)  # the camp shares the grass material
+	GRASS_MATERIAL.set_shader_parameter("fade_end", 0.0)
 
 
 ## A leaf pit went in (owner, 2026-10-30): ground cells touching its opening and the grass over it go,
@@ -385,5 +409,5 @@ func _build_mesh() -> ArrayMesh:
 	_arrays[Mesh.ARRAY_INDEX] = indices
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, _arrays)
-	mesh.surface_set_material(0, BakedShadow.vertex_ground())
+	mesh.surface_set_material(0, GROUND_MATERIAL)
 	return mesh
