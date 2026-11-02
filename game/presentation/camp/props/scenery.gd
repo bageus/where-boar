@@ -40,7 +40,8 @@ const CREEPERS_PER_METRE := 3
 const CREEP_DEPTH := 3.6
 const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
-const WOOD: Array[Color] = [Color(0.42, 0.3, 0.19), Color(0.5, 0.37, 0.24), Color(0.36, 0.26, 0.17), Color(0.47, 0.4, 0.3)]
+## Warm, bright logs in the colours of the camp buildings (tools/bake_peak_buildings.gd, owner 2026-11-02: PEAK style).
+const WOOD: Array[Color] = [Color(0.56, 0.36, 0.2), Color(0.62, 0.42, 0.25), Color(0.48, 0.31, 0.18), Color(0.6, 0.44, 0.3)]
 
 func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -275,13 +276,13 @@ func _log(rng: RandomNumberGenerator, materials: Array[StandardMaterial3D], at: 
 	trunk.top_radius = radius
 	trunk.bottom_radius = radius * rng.randf_range(1.0, 1.15)
 	trunk.height = height
-	trunk.radial_segments = 8
+	trunk.radial_segments = 6  # chunky, faceted logs
 	trunk.material = material
 	var tip := CylinderMesh.new()
 	tip.top_radius = 0.02
 	tip.bottom_radius = radius
 	tip.height = radius * rng.randf_range(2.0, 3.5)
-	tip.radial_segments = 8
+	tip.radial_segments = 6
 	tip.material = material
 	var node := MeshInstance3D.new()
 	node.mesh = trunk
