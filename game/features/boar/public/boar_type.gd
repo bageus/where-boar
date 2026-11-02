@@ -18,6 +18,8 @@ extends Resource
 @export var perception_radius := 12.0
 ## Chance that a panicking boar turns and charges (D018).
 @export_range(0.0, 1.0) var aggression := 0.35
+## Chance a cunning rare boar met head-on by a running hunter charges straight at him (owner, 2026-11-02).
+@export_range(0.0, 1.0) var cunning := 0.0
 ## Share of a ram's knockback this boar takes; armored boars barely move.
 @export_range(0.0, 1.0) var knock_scale := 1.0
 @export var reward_dead := 2

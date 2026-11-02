@@ -85,6 +85,12 @@ func attack() -> void:
 		state = State.CHARGE
 
 
+## A fleeing boar pressed into a corner (or a cunning one met head-on) turns on the hunter (owner, 2026-11-02).
+func turn_on() -> void:
+	if state in [State.FLEE, State.PANIC]:
+		state = State.CHARGE
+
+
 ## The flight is over: a fleeing or panicking boar calms down and roams again.
 func calm() -> void:
 	if state in [State.FLEE, State.PANIC]:

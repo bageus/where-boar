@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-075
+active_task_id: P3-076
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-02
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-075 done.
+None. P3-001..P3-076 done.
 
 ## Last completed work
 
@@ -139,6 +139,7 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-068 (2026-11-02): traps and bait restyled after PEAK (owner), own procedural models (`tools/bake_peak_traps.gd`); same node layout, animations and colliders; bait icons re-rendered.
 - P3-071 (2026-11-02): saddle, backpack and helper hammer restyled after PEAK (owner), own procedural models (`tools/bake_peak_gear.gd`, `assets/models/peak_gear/`); same axes and fit code.
 - P3-075 (2026-11-02): camp placement clearance (owner). Plants keep off building footprints, rim rocks and the display-trap strip (`dressing.gd`, `Scenery.rim_rocks`); display traps moved into free strip x 11-15 (`shop_display.gd` TRAP_ZONE); rim rocks skip the strip. Test `game/presentation/camp/tests/run_camp_clearance_test.gd`.
+- P3-076 (2026-11-02): boars dodge a pursuer by the side he comes from (owner); cornered they may ram, bigger/angrier more often, cunning rare types charge head-on (`boar_dodge.gd`, `boar_flight.gd`).
 - P3-072 (2026-11-02): cliffs no longer boxy (owner). `PeakCliff1-5` layers get tilted tops and more edge bevels, deeper walls. Camp `scenery.gd`: rim rocks every 3 m (was 1 m) and larger, creepers 1 per 3 m (was 3/m), drop-off rows every 8 m (was 5) and larger, rocks no longer squeezed sideways (xz 0.95-1.2). Camp ~-35K triangles.
 - P3-073 (2026-11-02): helper builds a trap from any side (owner). `trap_setter.gd` stops by distance to the trap footprint edge (`BuildSite.edge_distance`: circle or rotated box), not radially from the centre; snare loop side now works.
 - P3-074 (2026-11-02): missiles stick exactly (owner). `landing.gd` gets the pre-impact velocity; arrows/spears enter a boar 0.18 m under the skin where the flight line meets the body capsule (not the wider hitbox); on rocks/cliffs they stand tip-in at the ray hit point instead of falling aside. Hunter tests 0 failures.

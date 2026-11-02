@@ -16,6 +16,7 @@ flee_speed = 9.0
 panic_speed = 11.0
 perception_radius = 14.0
 aggression = 0.9
+cunning = 0.3
 knock_scale = 1.0
 reward_dead = 8
 reward_captured = 14

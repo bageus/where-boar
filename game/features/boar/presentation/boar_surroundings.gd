@@ -130,3 +130,13 @@ static func witnesses(body: Node3D) -> Array[Node]:
 		if other_pos.distance_to(pos) <= other.boar_type.perception_radius and BoarSenses.in_view(other_pos, facing, pos):
 			seen.append(other)
 	return seen
+
+
+## Whether a wall, fence or cliff face stands within reach of the boar along dir (XZ plane);
+## other creatures and gentle slopes do not count.
+static func wall_toward(body: CharacterBody3D, dir: Vector2, reach: float, rise: float) -> bool:
+	var from := body.global_position + Vector3.UP * rise
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3(dir.x, 0.0, dir.y) * reach,
+			body.collision_mask, [body.get_rid()])
+	var hit := body.get_world_3d().direct_space_state.intersect_ray(query)
+	return not hit.is_empty() and absf(hit.normal.y) < 0.5 and not hit.collider.has_method("knock")

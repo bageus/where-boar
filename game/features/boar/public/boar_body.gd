@@ -11,6 +11,7 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 const StunStars = preload("res://game/features/boar/presentation/stun_stars.gd")
+const BoarFlight = preload("res://game/features/boar/presentation/boar_flight.gd")
 
 # ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
 const WANDER_SPEED := 1.5
@@ -86,6 +87,7 @@ var boar: Boar
 var alert := BoarAlert.new()
 var idle := BoarIdle.new()
 var hideout := BoarHide.new()
+var flight := BoarFlight.new()
 var _heading := Vector2.ZERO
 ## Wander angle or panic deflection, re-rolled when _turn_left runs out.
 var _turn := 0.0
@@ -154,9 +156,8 @@ func spear_hit(amount: int) -> void:
 func hear_shout(shout_pos: Vector3) -> void:
 	if boar.state not in [Boar.State.WANDER, Boar.State.FLEE]:
 		return
-	var pos := Vector2(global_position.x, global_position.z)
-	var side := 1 if randf() < 0.5 else -1
-	_forced_heading = BoarSenses.shout_heading(boar, pos, Vector2(shout_pos.x, shout_pos.z), side)
+	_forced_heading = BoarSenses.shout_heading(boar, Vector2(global_position.x, global_position.z),
+			Vector2(shout_pos.x, shout_pos.z), 1 if randf() < 0.5 else -1)
 	_forced_left = SHOUT_SECONDS
 	hideout.stop()
 	_show_state()
@@ -366,7 +367,7 @@ func _perceive(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	var distance := pos.distance_to(hunter_pos)
 	var clear := true
 	if sneaking and distance <= radius and BoarSenses.in_view(pos, facing, hunter_pos):
-		clear = _sight_clear()
+		clear = Surroundings.sight_clear(self, hunter, EYE_RISE, HUNTER_RISE, COVER_LAYER)  # cover hides even in the same patch
 	var noticed := BoarSenses.notices(pos, hunter_pos, radius, facing, sneaking, clear, hunter.global_position.y - global_position.y)
 	alert.tick(delta, noticed, radius / maxf(distance, 0.1) * (BoarSenses.MOUNTED_ALARM_RATE_SCALE if mounted else 1.0))
 	if alert.alarmed():
@@ -430,19 +431,19 @@ func _show_alert() -> void:
 		_alert_mark.modulate = ALERT_COLORS[level]
 
 
-## A hunter sneaking inside tall grass or a bush is hidden even from a boar standing in the same patch.
-func _sight_clear() -> bool:
-	return Surroundings.sight_clear(self, hunter, EYE_RISE, HUNTER_RISE, COVER_LAYER)
-
-
 ## A river calls this when the boar steps in (true) or out (false).
 func wade(entered: bool) -> void:
 	_wading += 1 if entered else -1
 
 
 ## A panicking boar rolls once whether to charge; a charge that hits nothing gives up.
+## Cornered (or cunning, met head-on) a fleeing boar turns on the hunter (owner, 2026-11-02).
 func _maybe_charge() -> void:
-	if boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled and not hideout.active():
+	if flight.turned_on and boar.state in [Boar.State.FLEE, Boar.State.PANIC]:
+		boar.turn_on()
+		_charge_rolled = true
+		flight.turned_on = false
+	elif boar.state == Boar.State.PANIC and _state_time >= PANIC_SECONDS and not _charge_rolled and not hideout.active():
 		_charge_rolled = true
 		if randf() < boar_type.aggression:
 			boar.charge()
@@ -469,18 +470,17 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 					live[bait].eat(delta)
 			else:
 				_idle(delta, pos)
-		Boar.State.FLEE:
-			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_scatter)
-			speed = boar_type.flee_speed
 		Boar.State.CHARGE:
 			_charge_heading(delta, pos, hunter_pos)
 			speed = boar_type.flee_speed
 		_:
-			if _turn_left <= 0.0:
+			var panic := boar.state == Boar.State.PANIC
+			if panic and _turn_left <= 0.0:
 				_turn = randf_range(-PANIC_TURN_MAX, PANIC_TURN_MAX)
 				_turn_left = PANIC_TURN_SECONDS
-			_heading = BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated(_turn + _scatter)
-			speed = boar_type.panic_speed
+			var away := BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated((_turn if panic else 0.0) + _scatter)
+			_heading = flight.heading(self, delta, _heading, pos, hunter_pos, away, EYE_RISE)
+			speed = boar_type.panic_speed if panic else boar_type.flee_speed
 	if hideout.active() and boar.state in [Boar.State.FLEE, Boar.State.PANIC]:
 		_heading = hideout.heading(pos)
 	if _forced_left > 0.0 and boar.state != Boar.State.CHARGE:
