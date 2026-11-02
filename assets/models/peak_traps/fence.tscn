@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/fence_static.res" id="1_k2x8i"]
+
+[node name="PeakFence" type="Node3D" unique_id=1926407204]
+
+[node name="TrapRoot" type="Node3D" parent="." unique_id=1289438403]
+
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1654307056]
+mesh = ExtResource("1_k2x8i")

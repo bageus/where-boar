@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_fruit/02_red_berries.res" id="1_00y6l"]
+
+[node name="PeakRedBerries" type="Node3D" unique_id=1359994128]
+
+[node name="Model" type="MeshInstance3D" parent="." unique_id=845084552]
+mesh = ExtResource("1_00y6l")

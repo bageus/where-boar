@@ -119,3 +119,4 @@ Unapproved ideas and possible future features belong here.
 | P3-065 | 3 | Camp buildings in a simplified PEAK-like style: procedural stalls, tavern, tents, pens, cages, campfire, well and signpost with the same footprints and anchor points; brighter faceted palisade (`tools/bake_peak_buildings.gd`) | P3-061 | DONE |
 | P3-066 | 3 | Weapons in a simplified PEAK-like style: procedural spear, arrow, club, knife, sling, bow and sling stone (`tools/bake_peak_weapons.gd`), flat rope material on the net | P3-059 | DONE |
 | P3-067 | 3 | Stumps and logs in a simplified PEAK-like style (`tools/bake_peak_stumps.gd`: `PeakStump1`, `PeakLog1-4`) | P3-061 | DONE |
+| P3-068 | 3 | Traps and bait in a simplified PEAK-like style: procedural pit, snare, tripwire, cage, fence and nine fruits (`tools/bake_peak_traps.gd`), bait icons re-rendered | P3-059 | DONE |

@@ -18,7 +18,7 @@ const KINDS := {
 	"item_mango": [22.0, 35.0],
 	"item_mixed_berries": [24.0, 40.0],
 }
-const MODELS_DIR := "res://assets/models/fruit/"
+const MODELS_DIR := "res://assets/models/peak_fruit/"
 const MODELS := {
 	"item_acorns": "01_acorns", "item_red_berries": "02_red_berries", "item_blueberries": "03_blueberries",
 	"item_apple": "04_apple", "item_pear": "05_pear", "item_bananas": "06_bananas",
@@ -34,7 +34,7 @@ var _eaten := 0.0
 func _ready() -> void:
 	var kind: Array = KINDS[item_id]
 	attract_radius = kind[0]
-	var model: Node3D = load(MODELS_DIR + MODELS[item_id] + ".glb").instantiate()
+	var model: Node3D = load(MODELS_DIR + MODELS[item_id] + ".tscn").instantiate()
 	model.scale = Vector3.ONE * 1.5
 	add_child(model)
 	# The glb colours live in vertex colours, which Godot ignores unless the material asks for them.

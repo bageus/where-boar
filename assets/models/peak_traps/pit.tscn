@@ -1,0 +1,181 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitwalls.res" id="1_fd8ll"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitfloor.res" id="2_rqcux"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_static.res" id="3_lxyw0"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_00.res" id="4_5an45"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_01.res" id="5_gr4va"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_02.res" id="6_mopea"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_03.res" id="7_a8ae1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_04.res" id="8_qu0b6"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_05.res" id="9_isgd6"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_06.res" id="10_yicpi"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/pit_pitcover_07.res" id="11_0h0nj"]
+
+[sub_resource type="Animation" id="Animation_nt53i"]
+length = 1.05
+tracks/0/type = "position_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TrapRoot/PitCover_00")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.8, 0.14, 0, 0.15, 1, 0.8, 0.18, 0, 0.4, 1, 0.746, 0.1175, 0, 0.7, 1, 0.602, -0.16250001, 0, 1.05, 1, 0.44, -0.86, 0)
+tracks/1/type = "rotation_3d"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TrapRoot/PitCover_00")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, 0, 0, 0.100622185, 0.99492466, 0.7, 1, 0, 0, 0.36121774, 0.9324815, 1.05, 1, 0, 0, 0.4617486, 0.8870108)
+tracks/2/type = "position_3d"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TrapRoot/PitCover_01")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, 0.56568545, 0.14, 0.56568545, 0.15, 1, 0.56568545, 0.18, 0.56568545, 0.4, 1, 0.5275017, 0.1175, 0.5275017, 0.7, 1, 0.4256783, -0.16250001, 0.4256783, 1.05, 1, 0.311127, -0.86, 0.311127)
+tracks/3/type = "rotation_3d"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TrapRoot/PitCover_01")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, 0.090460286, 0, -0.090460286, 0.99178314, 0.7, 1, 0.32046986, 0, -0.32046986, 0.89140236, 1.05, 1, 0.40557984, 0, -0.40557984, 0.81915206)
+tracks/4/type = "position_3d"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TrapRoot/PitCover_02")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = PackedFloat32Array(0, 1, 4.8985874e-17, 0.14, 0.8, 0.15, 1, 4.8985874e-17, 0.18, 0.8, 0.4, 1, 4.567933e-17, 0.1175, 0.746, 0.7, 1, 3.686187e-17, -0.16250001, 0.602, 1.05, 1, 2.694223e-17, -0.86, 0.44)
+tracks/5/type = "rotation_3d"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("TrapRoot/PitCover_02")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, -0.100622185, 0, 6.1613325e-18, 0.99492466, 0.7, 1, -0.36121774, 0, 2.2118209e-17, 0.9324815, 1.05, 1, -0.4617486, 0, 2.827395e-17, 0.8870108)
+tracks/6/type = "position_3d"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TrapRoot/PitCover_03")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = PackedFloat32Array(0, 1, -0.56568545, 0.14, 0.56568545, 0.15, 1, -0.56568545, 0.18, 0.56568545, 0.4, 1, -0.5275017, 0.1175, 0.5275017, 0.7, 1, -0.4256783, -0.16250001, 0.4256783, 1.05, 1, -0.311127, -0.86, 0.311127)
+tracks/7/type = "rotation_3d"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("TrapRoot/PitCover_03")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, 0.090460286, 0, 0.090460286, 0.99178314, 0.7, 1, 0.32046986, 0, 0.32046986, 0.89140236, 1.05, 1, 0.40557984, 0, 0.40557984, 0.81915206)
+tracks/8/type = "position_3d"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("TrapRoot/PitCover_04")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = PackedFloat32Array(0, 1, -0.8, 0.14, 9.797175e-17, 0.15, 1, -0.8, 0.18, 9.797175e-17, 0.4, 1, -0.746, 0.1175, 9.135866e-17, 0.7, 1, -0.602, -0.16250001, 7.372374e-17, 1.05, 1, -0.44, -0.86, 5.388446e-17)
+tracks/9/type = "rotation_3d"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("TrapRoot/PitCover_04")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, -1.2322665e-17, 0, -0.100622185, 0.99492466, 0.7, 1, -4.4236418e-17, 0, -0.36121774, 0.9324815, 1.05, 1, -5.65479e-17, 0, -0.4617486, 0.8870108)
+tracks/10/type = "position_3d"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("TrapRoot/PitCover_05")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = PackedFloat32Array(0, 1, -0.56568545, 0.14, -0.56568545, 0.15, 1, -0.56568545, 0.18, -0.56568545, 0.4, 1, -0.5275017, 0.1175, -0.5275017, 0.7, 1, -0.4256783, -0.16250001, -0.4256783, 1.05, 1, -0.311127, -0.86, -0.311127)
+tracks/11/type = "rotation_3d"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("TrapRoot/PitCover_05")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, -0.090460286, 0, 0.090460286, 0.99178314, 0.7, 1, -0.32046986, 0, 0.32046986, 0.89140236, 1.05, 1, -0.40557984, 0, 0.40557984, 0.81915206)
+tracks/12/type = "position_3d"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("TrapRoot/PitCover_06")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = PackedFloat32Array(0, 1, -1.4695761e-16, 0.14, -0.8, 0.15, 1, -1.4695761e-16, 0.18, -0.8, 0.4, 1, -1.3703797e-16, 0.1175, -0.746, 0.7, 1, -1.10585604e-16, -0.16250001, -0.602, 1.05, 1, -8.082668e-17, -0.86, -0.44)
+tracks/13/type = "rotation_3d"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("TrapRoot/PitCover_06")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, 0.100622185, 0, -1.8483996e-17, 0.99492466, 0.7, 1, 0.36121774, 0, -6.6354616e-17, 0.9324815, 1.05, 1, 0.4617486, 0, -8.482184e-17, 0.8870108)
+tracks/14/type = "position_3d"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("TrapRoot/PitCover_07")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = PackedFloat32Array(0, 1, 0.56568545, 0.14, -0.56568545, 0.15, 1, 0.56568545, 0.18, -0.56568545, 0.4, 1, 0.5275017, 0.1175, -0.5275017, 0.7, 1, 0.4256783, -0.16250001, -0.4256783, 1.05, 1, 0.311127, -0.86, -0.311127)
+tracks/15/type = "rotation_3d"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("TrapRoot/PitCover_07")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/keys = PackedFloat32Array(0, 1, 0, 0, 0, 1, 0.15, 1, 0, 0, 0, 1, 0.4, 1, -0.090460286, 0, -0.090460286, 0.99178314, 0.7, 1, -0.32046986, 0, -0.32046986, 0.89140236, 1.05, 1, -0.40557984, 0, -0.40557984, 0.81915206)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_fkgw6"]
+_data = {
+&"Pit_Break": SubResource("Animation_nt53i")
+}
+
+[node name="PeakPit" type="Node3D" unique_id=708766704]
+
+[node name="TrapRoot" type="Node3D" parent="." unique_id=1591899777]
+
+[node name="PitWalls" type="MeshInstance3D" parent="TrapRoot" unique_id=264344357]
+mesh = ExtResource("1_fd8ll")
+
+[node name="PitFloor" type="MeshInstance3D" parent="TrapRoot" unique_id=126537917]
+mesh = ExtResource("2_rqcux")
+
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1208509909]
+mesh = ExtResource("3_lxyw0")
+
+[node name="PitCover_00" type="MeshInstance3D" parent="TrapRoot" unique_id=1349407776]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.14, 0)
+mesh = ExtResource("4_5an45")
+
+[node name="PitCover_01" type="MeshInstance3D" parent="TrapRoot" unique_id=841297856]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56568545, 0.14, 0.56568545)
+mesh = ExtResource("5_gr4va")
+
+[node name="PitCover_02" type="MeshInstance3D" parent="TrapRoot" unique_id=202565657]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8985874e-17, 0.14, 0.8)
+mesh = ExtResource("6_mopea")
+
+[node name="PitCover_03" type="MeshInstance3D" parent="TrapRoot" unique_id=1497850961]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56568545, 0.14, 0.56568545)
+mesh = ExtResource("7_a8ae1")
+
+[node name="PitCover_04" type="MeshInstance3D" parent="TrapRoot" unique_id=1336736660]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.14, 9.797175e-17)
+mesh = ExtResource("8_qu0b6")
+
+[node name="PitCover_05" type="MeshInstance3D" parent="TrapRoot" unique_id=443761542]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.56568545, 0.14, -0.56568545)
+mesh = ExtResource("9_isgd6")
+
+[node name="PitCover_06" type="MeshInstance3D" parent="TrapRoot" unique_id=367831547]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4695761e-16, 0.14, -0.8)
+mesh = ExtResource("10_yicpi")
+
+[node name="PitCover_07" type="MeshInstance3D" parent="TrapRoot" unique_id=1741076902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56568545, 0.14, -0.56568545)
+mesh = ExtResource("11_0h0nj")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=468681719]
+libraries/ = SubResource("AnimationLibrary_fkgw6")

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/traps/trap.gd" id="1_trap"]
 [ext_resource type="FontFile" path="res://assets/fonts/stonetrail/StoneTrail-Regular.ttf" id="stonetrail_font"]
-[ext_resource type="PackedScene" path="res://assets/models/trap/05_rope_tripline.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_traps/tripwire.tscn" id="2_model"]
 
 [sub_resource type="BoxShape3D" id="Shape_trap"]
 resource_local_to_scene = true

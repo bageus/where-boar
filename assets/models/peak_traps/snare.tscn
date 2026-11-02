@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/snare_static.res" id="1_sciaw"]
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_traps/snare_snareloop.res" id="2_244js"]
+
+[sub_resource type="Animation" id="Animation_cgvov"]
+length = 1.35
+tracks/0/type = "scale_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TrapRoot/SnareLoop")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 1, 1, 1, 0.3, 1, 1, 1, 1, 1, 1, 0.3, 1, 0.3, 1.35, 1, 0.24, 1, 0.24)
+
+[sub_resource type="Animation" id="Animation_h62ut"]
+length = 0.8
+tracks/0/type = "scale_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TrapRoot/SnareLoop")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.24, 1, 0.24, 0.8, 1, 1, 1, 1)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_oq2fq"]
+_data = {
+&"Snare_Close": SubResource("Animation_cgvov"),
+&"Snare_Reset": SubResource("Animation_h62ut")
+}
+
+[node name="PeakSnare" type="Node3D" unique_id=1444415918]
+
+[node name="TrapRoot" type="Node3D" parent="." unique_id=2039905736]
+
+[node name="Static" type="MeshInstance3D" parent="TrapRoot" unique_id=1230999736]
+mesh = ExtResource("1_sciaw")
+
+[node name="SnareLoop" type="MeshInstance3D" parent="TrapRoot" unique_id=1088254899]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.045, 0)
+mesh = ExtResource("2_244js")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1624081696]
+libraries/ = SubResource("AnimationLibrary_oq2fq")
