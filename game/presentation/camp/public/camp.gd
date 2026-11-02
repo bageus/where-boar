@@ -28,7 +28,7 @@ const RAIL_Z := 3.38
 const RAIL_TOP := 1.0
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
-const Helper = preload("res://assets/models/caveman_helper.glb")
+const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
 ## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
 ## lowered by his knee height (0.25 m) so he sits on the bench top (0.52).
 const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25, 0.37)

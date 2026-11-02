@@ -5,9 +5,9 @@ extends Node3D
 signal closed
 
 const MODELS := {
-	"Hunter": preload("res://assets/models/caveman_hunter.glb"),
-	"Skinny": preload("res://assets/models/caveman_skinny.glb"),
-	"Heavy": preload("res://assets/models/caveman_heavy.glb"),
+	"Bearded": preload("res://assets/models/peak_cavemen/bearded.glb"),
+	"Plump": preload("res://assets/models/peak_cavemen/plump.glb"),
+	"Lanky": preload("res://assets/models/peak_cavemen/lanky.glb"),
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
 const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]

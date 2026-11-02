@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-078
+active_task_id: P3-079
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-02
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-078 done.
+None. P3-001..P3-079 done.
 
 ## Last completed work
 
@@ -145,6 +145,7 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-074 (2026-11-02): missiles stick exactly (owner). `landing.gd` gets the pre-impact velocity; arrows/spears enter a boar 0.18 m under the skin where the flight line meets the body capsule (not the wider hitbox); on rocks/cliffs they stand tip-in at the ray hit point instead of falling aside. Hunter tests 0 failures.
 - P3-077 (2026-11-02): PEAK models read as solid, smooth pieces (owner). Shared `tools/peak_smooth.gd` (normals smoothed across edges under 65°, wrap lighting) used by the building, gear, weapon, trap and stump bakes; no per-face tint or alternating dark facets; bevelled boxes; the well is one round stone drum; the saddle one moulded pad (underside on the spine at y 0.3); softer tree crowns; quiver arrows stand on its floor (`shop_display.gd`). Rocks unchanged.
 - P3-078 (2026-11-02): forest boar (`common_brown`) remodelled after the owner's reference image (owner). `tools/build_blocky_boar.py` builds the source (chamfered block body, head block, light square snout with nostril slots, eyes, ears, cream tusks, legs with dark hooves; 580 triangles, flat colours), `rig_boars.py common_brown` rigs and animates it as before (same bones and animations, length 1.9 m, height ~1.1 m). `BoarType.back_height` (default 0.85, forest boar 1.0) sets the saddle height on the back. Other boar types unchanged.
+- P3-079 (2026-11-02): three playable hunters (bearded, plump, lanky) and the helper rebuilt as low-poly models after the owner's references (`tools/build_peak_cavemen.py`, rigged and animated by `rig_cavemen.py`, `assets/models/peak_cavemen/`). The pause menu has a Character option saved in settings (`character`); it swaps the shadow body and the first-person arm (`hunter_looks.gd`). Old Meshy `caveman_*.glb` files are unused.
 - P3-066 (2026-11-02): weapons restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_weapons.gd` bakes `assets/models/peak_weapons/<name>.res` + `<name>.tscn` (Node3D + MeshInstance3D `Model`) for spear, arrow, club, knife, sling, bow and sling stone: chunky flat-shaded prisms, one vertex-colour surface, 56-252 triangles (old textured glbs 220-830). Replace the glbs in `hands.tscn`, `spear.tscn`, `arrow.tscn`, `stone.tscn`, `stone_pile.tscn`. Thrown ones lie along +Y, tip up, so they fly tip first along the capsule; `landing.gd` unchanged. In hand: sling raised 0.17, bow turned 50 degrees. Net keeps its rig, gets a flat rope material (`net_model.gd` `ROPE`). Animation viewer still uses the old glbs. Not checked: look in the browser.
 - P3-067 (2026-11-02): stumps and logs restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_stumps.gd` bakes `PeakStump1` and `PeakLog1-4` into `assets/nature/meshes/peak/` (73-116 triangles instead of 232-464, same AABBs); `terrain.gd` and `log_bridge.tscn` point at them, collisions and placement unchanged. Not checked: look and FPS in the browser.
 - P3-061 (2026-11-02): trees and bushes restyled after PEAK (owner) to match P3-059, own procedural shapes. `tools/bake_peak_trees.gd` bakes `assets/nature/meshes/peak/`: `PeakTree1-4` (crowns of jittered icosahedron puffs, half-smoothed normals, dark undersides), `PeakPine1-3` (jagged cone tiers), `PeakDead1-2`, `PeakPalm1-3` (jungle), `PeakBush1-3` (hunt `bush.tscn` now uses `varied_mesh.gd`, camp bushes) and `PeakShrub1-3` (undergrowth replacing the 3k-triangle ferns). One vertex-coloured surface each, 60-190 triangles. Used by `tree.tscn`, `terrain.gd`, `surroundings.gd`, `scenery.gd`, `vista.gd`, `dressing.gd`. xvfb: hunt start 1.33M -> 0.86M triangles, 438 -> 417 draw calls; camp 1.07M -> 0.78M, 277 -> 248. Old nature-pack tree/fern meshes stay on disk (stumps, logs still use the pack).

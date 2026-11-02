@@ -1,12 +1,16 @@
 extends CanvasLayer
 
-## Pause menu (section 16): hunt stats, continue, settings (FOV, mouse sensitivity, camera motion, effects volume), quit to the start screen.
+## Pause menu (section 16): hunt stats, continue, settings (character, FOV, mouse sensitivity, camera motion, effects volume),
+## quit to the start screen.
 ## Runs while the tree is paused.
 
 signal resumed
 signal quit_requested
 ## Fact: the player changed a setting; settings is the whole dictionary.
 signal settings_changed(settings: Dictionary)
+
+## The hunters the player can be, in the order of the Character list (owner's references, 2026-11-02).
+const CHARACTERS: Array[String] = ["bearded", "plump", "lanky"]
 
 var _settings: Dictionary = {}
 
@@ -15,6 +19,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	%Continue.pressed.connect(resumed.emit)
 	%Quit.pressed.connect(quit_requested.emit)
+	%Character.item_selected.connect(func(index: int) -> void: _change("character", CHARACTERS[index]))
 	%Fov.value_changed.connect(func(value: float) -> void: _change("fov", value))
 	%Sensitivity.value_changed.connect(func(value: float) -> void: _change("mouse_sensitivity", value / 1000.0))
 	%CameraMotion.toggled.connect(func(on: bool) -> void: _change("camera_motion", on))
@@ -26,6 +31,7 @@ func open(settings: Dictionary, stats := "") -> void:
 	_settings = settings.duplicate()
 	%Stats.text = stats
 	%Stats.visible = stats != ""
+	%Character.select(maxi(0, CHARACTERS.find(settings["character"])))
 	%Fov.set_value_no_signal(settings["fov"])
 	%Sensitivity.set_value_no_signal(settings["mouse_sensitivity"] * 1000.0)
 	%CameraMotion.set_pressed_no_signal(settings["camera_motion"])

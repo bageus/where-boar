@@ -3,6 +3,7 @@ extends Node3D
 ## First-person view of what the hunter holds (playtest 2026-10-27): one simple model per weapon,
 ## a quick strike, and the spear raised over the shoulder while aiming a throw.
 
+const Looks = preload("res://game/features/hunter/presentation/hunter_looks.gd")
 const REST := Vector3(0.3, -0.35, -0.5)
 ## Aiming: raised as for a swing; pulled further back the stronger the throw.
 const RAISED := Vector3(0.3, -0.05, -0.3)
@@ -14,6 +15,7 @@ const FOLLOW_RATE := 14.0
 
 var _striking := false
 var _spear_kind := "flint"
+var _kind := Looks.DEFAULT
 
 ## Children in Loadout.Weapon order: spear, net, club, sling, bow, knife.
 @onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow, $Knife]
@@ -22,8 +24,32 @@ var _spear_kind := "flint"
 ## The shadow body already casts the arm's shadow.
 func _ready() -> void:
 	for hand in find_children("Hand", "", true, false):
-		for mesh: GeometryInstance3D in hand.find_children("*", "GeometryInstance3D", true, false):
-			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_no_shadow(hand)
+
+
+## The forearm of this kind of hunter (bearded, plump, lanky) on every weapon, same grip.
+func set_kind(kind: String) -> void:
+	kind = Looks.known(kind)
+	if kind == _kind:
+		return
+	_kind = kind
+	var arm := Looks.arm(kind)
+	for old: Node3D in find_children("Hand", "", true, false):
+		var hand: Node3D = arm.instantiate()
+		hand.transform = old.transform
+		var parent := old.get_parent()
+		var index := old.get_index()
+		parent.remove_child(old)
+		old.free()
+		parent.add_child(hand)
+		parent.move_child(hand, index)
+		hand.name = "Hand"
+		_no_shadow(hand)
+
+
+func _no_shadow(hand: Node) -> void:
+	for mesh: GeometryInstance3D in hand.find_children("*", "GeometryInstance3D", true, false):
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Swaps the spear model in hand to the kind carried (flint, bone, wood).

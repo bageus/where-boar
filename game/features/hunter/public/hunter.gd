@@ -166,8 +166,10 @@ func point_at(target: Node3D) -> void:
 	_hud.show_interact(target != null)
 
 
-## Applies player settings: {"fov", "mouse_sensitivity", "camera_motion"} (section 16).
+## Applies player settings: {"fov", "mouse_sensitivity", "camera_motion", "character"} (section 16).
 func apply_settings(settings: Dictionary) -> void:
+	$ShadowBody.set_kind(settings.get("character", ""))
+	$Camera/Hands.set_kind(settings.get("character", ""))
 	_base_fov = settings["fov"]
 	_camera.fov = _base_fov
 	mouse_sensitivity = settings["mouse_sensitivity"]

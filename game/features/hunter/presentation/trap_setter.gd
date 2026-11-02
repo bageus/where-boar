@@ -5,7 +5,7 @@ extends Node3D
 ## Boars sense only the hunter, so they never notice him.
 
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
-const Helper = preload("res://assets/models/caveman_helper.glb")
+const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
 const HammerMesh = preload("res://assets/models/peak_gear/hammer.res")
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
 

@@ -18,7 +18,7 @@ var save_store := SaveStore.new()
 var progress: Progress
 ## Settings live in their own file, apart from progress (section 18).
 var settings_store := _settings_store()
-var settings := {"fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0}
+var settings := {"fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded"}
 var _pause: CanvasLayer
 
 
@@ -34,7 +34,7 @@ func _ready() -> void:
 	progress = Progress.from_dict(save_store.load_data())
 	var saved := settings_store.load_data()
 	for key in settings:
-		if saved.has(key) and typeof(saved[key]) in [TYPE_FLOAT, TYPE_INT, TYPE_BOOL]:
+		if saved.has(key) and typeof(saved[key]) == typeof(settings[key]):  # JSON numbers load as floats
 			settings[key] = saved[key]
 	Sfx.preload_all()
 	_apply_volume()

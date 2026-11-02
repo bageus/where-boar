@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hands.gd" id="1_hands"]
-[ext_resource type="PackedScene" path="res://assets/models/hunter_arm.glb" id="2_hand"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_cavemen/arm_bearded.glb" id="2_hand"]
 [ext_resource type="PackedScene" path="res://assets/models/peak_weapons/spear.tscn" id="3_spear"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/presentation/net_model.tscn" id="4_net"]
 [ext_resource type="PackedScene" path="res://assets/models/peak_weapons/club.tscn" id="5_club"]

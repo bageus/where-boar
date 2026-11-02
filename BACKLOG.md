@@ -130,3 +130,4 @@ Unapproved ideas and possible future features belong here.
 | P3-076 | 3 | Boars dodge the chaser by approach side; cornered may ram (by size), cunning types charge head-on (`boar_dodge.gd`) | P3-075 | DONE |
 | P3-077 | 3 | PEAK models solid and smooth: shared normal smoothing and soft light, one-piece saddle and well, quiver arrows inside (`tools/peak_smooth.gd`) | P3-076 | DONE |
 | P3-078 | 3 | Forest boar remodelled after the owner's reference: blocky brown body, square snout, cream tusks, dark hooves (`tools/build_blocky_boar.py` + `rig_boars.py`) | P3-077 | DONE |
+| P3-079 | 3 | Hunter (bearded, plump, lanky) and helper models after the owner's references; character choice in the pause menu settings (`tools/build_peak_cavemen.py`, `hunter_looks.gd`) | P3-078 | DONE |
