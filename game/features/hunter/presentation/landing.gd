@@ -5,6 +5,9 @@ extends RefCounted
 
 const BoarBody = preload("res://game/features/boar/public/boar_body.gd")
 
+## How far a missile that hit a boar is pushed into it, in metres.
+const STICK_DEPTH := 0.45
+
 
 ## Stops item and, when body is a boar or its hitbox, sticks it into that boar (item.holder).
 static func land(item: RigidBody3D, body: Node) -> void:
@@ -44,6 +47,11 @@ static func _stick_in_ground(item: RigidBody3D) -> void:
 static func _stick(item: RigidBody3D, boar: Node3D) -> void:
 	if not is_instance_valid(item) or not is_instance_valid(boar):
 		return
+	# The hitbox is wider than the body: sink the missile toward the boar's middle so it sticks into the flesh, not beside it
+	# (owner, 2026-11-02).
+	var centre := boar.global_position + Vector3.UP * 0.5
+	var to_centre := centre - item.global_position
+	item.global_position += to_centre.normalized() * minf(STICK_DEPTH, to_centre.length())
 	item.reparent(boar)
 	item.top_level = false
 
