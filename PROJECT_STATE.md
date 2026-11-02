@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-063
+active_task_id: P3-064
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-02
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-063 done.
+None. P3-001..P3-064 done.
 
 ## Last completed work
 
@@ -132,5 +132,6 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-054 (2026-11-01): riding: any ramming boar unseats the rider, mount stays in place; mount hoof steps and idle `boar_voice` while riding. Not checked in game.
 - P3-055 (2026-11-01): trees floated because OakTree3/DeadOak3 have their lowest vertex above the origin; `terrain.gd`/`varied_mesh.gd` now sink by that gap, probe ring 16 points at 1.3x radius. Not checked in game.
 - P3-063 (2026-11-02): denser, shorter grass and a grass-style ground (owner). 8 clumps/m2 (was 3), narrower and much lower, height in noise patches (`terrain.gd` `short_grass_scale`, also outside the walls); clumps sink into the ground towards 24 m (`peak_grass.gdshader` `fade_end`, hunt only). Hunt ground uses `assets/grass/peak_ground.gdshader` (`ground_material.tres`): grass-coloured mottled lawn under the clumps, brighter far away, noise normal map for lumpy turf and sand/mud ripples with highlights. xvfb same view: 251 -> 240 draw calls, 692K -> 640K triangles. FPS in the browser not checked.
+- P3-064 (2026-11-02): cliffs as solid stepped walls instead of a boulder pile (owner). `PeakCliff1-5` (`tools/bake_peak_rocks.gd`, own rng) are 9-10 m wide walls of 2-3 layers stepping back, few big near-vertical facets, moss on ledges. Hunt `terrain.gd`: one wall per 6x6 m of cliff (was 3x3), 11-15 m long, face turned downhill, so neighbours merge into one face; same convex-hull collision. Camp wall and rim reuse the meshes. Draw calls/triangles within xvfb noise.
 - P3-061 (2026-11-02): trees and bushes restyled after PEAK (owner) to match P3-059, own procedural shapes. `tools/bake_peak_trees.gd` bakes `assets/nature/meshes/peak/`: `PeakTree1-4` (crowns of jittered icosahedron puffs, half-smoothed normals, dark undersides), `PeakPine1-3` (jagged cone tiers), `PeakDead1-2`, `PeakPalm1-3` (jungle), `PeakBush1-3` (hunt `bush.tscn` now uses `varied_mesh.gd`, camp bushes) and `PeakShrub1-3` (undergrowth replacing the 3k-triangle ferns). One vertex-coloured surface each, 60-190 triangles. Used by `tree.tscn`, `terrain.gd`, `surroundings.gd`, `scenery.gd`, `vista.gd`, `dressing.gd`. xvfb: hunt start 1.33M -> 0.86M triangles, 438 -> 417 draw calls; camp 1.07M -> 0.78M, 277 -> 248. Old nature-pack tree/fern meshes stay on disk (stumps, logs still use the pack).
 - P3-059 (2026-11-02): rocks, cliffs and grass restyled after PEAK (owner), with our own procedural shapes. `tools/bake_peak_rocks.gd` bakes `assets/nature/meshes/peak/`: 8 boulders (`PeakRock*`, hunt rocks and camp pebbles), 5 layered cliff chunks (`PeakCliff*`, hunt cliffs and outcrops, camp rock wall, drop-off and rim) and 3 horizon peaks (`PeakSpire*`, hazy mountains); each is a convex cut of a dozen-plus planes, flat shaded, light stone, moss on faces turned up (cliffs: flat ledges only), darker at the foot. Grass is a 13-blade clump (`assets/grass/peak_grass.res`, 39 triangles, one 3-blade LOD for far chunks) with `peak_grass.gdshader`: dark root to bright tip, yellow-green patches, wind sway, darkened by baked shadows. Hunt ground colours brighter (`terrain.gd` GRASS, ROCK). Measured (xvfb): hunt start view 917-921k -> ~923k triangles, draw calls about the same (noisy 410-490 both); camp ~1.01M -> ~1.03-1.06M. Hunt smoke test: the same one turkey failure as on main. Not checked: look and FPS in the browser.

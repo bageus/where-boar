@@ -44,8 +44,9 @@ const CLIFF_ROCKS: Array[Mesh] = [
 	preload("res://assets/nature/meshes/peak/PeakCliff3.res"), preload("res://assets/nature/meshes/peak/PeakCliff4.res"),
 	preload("res://assets/nature/meshes/peak/PeakCliff5.res"),
 ]
-## One massive rock per CLIFF_STEP x CLIFF_STEP metres of cliff; each is solid.
-const CLIFF_STEP := 3
+## One broad cliff wall per CLIFF_STEP x CLIFF_STEP metres of cliff, its face turned downhill so neighbours
+## join into one face (owner, 2026-11-02: no chaotic pile of boulders); each is solid.
+const CLIFF_STEP := 6
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
 const STUMP := preload("res://assets/nature/meshes/TreeStump_Moss.res")
 ## Fallen trees and logs (owner, 2026-10-28).
@@ -192,7 +193,7 @@ func _plant_grass() -> void:
 			_add_multimesh(WHEAT, wheat, centre, null, GRASS_RANGE + GRASS_CHUNK * 0.71)
 
 
-## Massive rocks half sunk into every steep stretch, so cliffs read as a rocky bluff.
+## Broad cliff walls half sunk into every steep stretch, so cliffs read as one rocky face.
 func _place_cliff_rocks() -> void:
 	var w := _shape.map_width
 	var d := _shape.map_depth
@@ -214,10 +215,11 @@ func _place_cliff_rocks() -> void:
 				continue
 			var k := rng.randi() % CLIFF_ROCKS.size()
 			var box := CLIFF_ROCKS[k].get_aabb()
-			var size := rng.randf_range(6.0, 9.0) / maxf(box.size.x, box.size.z)
+			var size := rng.randf_range(11.0, 15.0) / box.size.x
 			var x := best.x - (w - 1) * 0.5
 			var z := best.y - (d - 1) * 0.5
-			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * size)
+			var down := _normal(best.x, best.y)  # the wall's face (+z) looks down the slope
+			var basis := Basis(Vector3.UP, atan2(down.x, down.z) + rng.randf_range(-0.2, 0.2)).scaled(Vector3.ONE * size)
 			var spot := Transform3D(basis, Vector3(x, height_at(x, z) - box.size.y * size * 0.45, z))
 			spots[k].append(spot)
 			var shape := CollisionShape3D.new()

@@ -115,3 +115,4 @@ Unapproved ideas and possible future features belong here.
 | P3-061 | 3 | Trees and bushes in a PEAK-like style to match P3-059: puffy faceted broadleaves, jagged pines, dead trees, palms, bushes, low leafy undergrowth instead of ferns (`tools/bake_peak_trees.gd`) | P3-059 | DONE |
 | P3-062 | 3 | Dead boars make no sound: no idle voice, panic squeals or steps after death (`boar_sounds.gd` `silent`) | P3-061 | DONE |
 | P3-063 | 3 | Denser short grass with noise height variation, soft range fade, grass-style hunt ground with a normal map for turf and sand (`peak_ground.gdshader`) | P3-059 | DONE |
+| P3-064 | 3 | Cliffs as solid stepped walls facing downhill instead of a chaotic boulder pile (`tools/bake_peak_rocks.gd`, `terrain.gd` `_place_cliff_rocks`) | P3-059 | DONE |

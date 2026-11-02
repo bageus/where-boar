@@ -3,7 +3,7 @@ extends SceneTree
 ## Bakes the stylized rocks, cliff chunks and grass clump (owner, 2026-11-02: rocks, cliffs and grass in the
 ## style of the game PEAK). Our own procedural shapes, nothing taken from that game: every rock is the
 ## intersection of a dozen planes cut around a squashed ellipsoid, so it has few, big, flat facets; a cliff
-## chunk is two to four such slabs stacked and offset, so it reads as layered rock with ledges. Faces are
+## chunk is a broad wall of two or three such slabs, each stepped back, so it reads as terraced rock with ledges. Faces are
 ## flat shaded with a light, slightly warm stone colour, green moss on faces turned up and darker towards
 ## the foot; horizon peaks are tall ones with a summit block. Origin at the bottom centre, like the nature pack (bake_nature_meshes.gd).
 ## Run: godot --headless --path . -s res://tools/bake_peak_rocks.gd
@@ -29,18 +29,25 @@ func _init() -> void:
 		var r := Vector3(rng.randf_range(0.8, 1.3), rng.randf_range(0.5, 0.9), rng.randf_range(0.7, 1.1))
 		_slab(tool, rng, Vector3.ZERO, r, 11 + rng.randi() % 5, n % 3 != 2)
 		_save(tool, OUT + "PeakRock%d.res" % (n + 1))
+	var cliff_rng := RandomNumberGenerator.new()
+	cliff_rng.seed = 2611
 	for n in CLIFFS:
+		# A broad wall (owner, 2026-11-02: cliffs as solid faces, not a pile of boulders): long along x, face
+		# towards +z; each layer steps back and in a little, so the face reads as terraces with mossy ledges.
+		# shortcut: own rng, so the committed spires and grass (baked after the old cliffs) no longer match a
+		# rebake of them exactly; same style, fine to rebake them whenever they change.
 		var tool := _tool()
 		var y := 0.0
-		var layers := 2 + rng.randi() % 3
-		var width := rng.randf_range(6.5, 8.0)
+		var z := 0.0
+		var layers := 2 + cliff_rng.randi() % 2
+		var width := cliff_rng.randf_range(9.0, 11.0)
 		for k in layers:
-			var h := rng.randf_range(2.4, 3.6)
-			var r := Vector3(width * rng.randf_range(0.85, 1.05), h * 0.5, width * rng.randf_range(0.75, 1.0))
-			var shift := Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0)) * width * 0.15
-			_slab(tool, rng, Vector3(shift.x, y, shift.z), r, 18 + rng.randi() % 6, true, true, 0.9)
-			y += h * rng.randf_range(0.78, 0.9)  # each layer sinks a little into the one below
-			width *= rng.randf_range(0.8, 0.92)
+			var h := cliff_rng.randf_range(3.0, 4.2)
+			var r := Vector3(width * 0.5, h * 0.5, width * cliff_rng.randf_range(0.24, 0.3))
+			_slab(tool, cliff_rng, Vector3(cliff_rng.randf_range(-0.4, 0.4), y, z), r, 7 + cliff_rng.randi() % 3, true, true, 0.9)
+			y += h * cliff_rng.randf_range(0.82, 0.92)  # each layer sinks a little into the one below
+			z -= r.z * cliff_rng.randf_range(0.25, 0.4)
+			width *= cliff_rng.randf_range(0.82, 0.92)
 		_save(tool, OUT + "PeakCliff%d.res" % (n + 1))
 	for n in SPIRES:
 		var tool := _tool()
@@ -74,8 +81,8 @@ func _slab(tool: SurfaceTool, rng: RandomNumberGenerator, base: Vector3, r: Vect
 	planes.append(Plane(Vector3.UP, centre.y + top))
 	for n in cuts:
 		# Mostly sideways and upward cuts: the bevels and chamfers that make the big facets.
-		var dir := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-0.3, 1.0) * (0.45 if flat_top else 1.0), rng.randf_range(-1.0, 1.0)).normalized()
-		var reach := (dir * r).length() * rng.randf_range(0.72, 0.9)
+		var dir := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(-0.3, 1.0) * (0.25 if flat_top else 1.0), rng.randf_range(-1.0, 1.0)).normalized()
+		var reach := (dir * r).length() * (rng.randf_range(0.8, 0.92) if flat_top else rng.randf_range(0.72, 0.9))
 		planes.append(Plane(dir, dir.dot(centre) + reach))
 	var points := Geometry3D.compute_convex_mesh_points(planes)
 	var stone: Color = STONE[rng.randi() % STONE.size()] * shade
