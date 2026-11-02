@@ -262,64 +262,48 @@ func _stall_frame() -> void:
 	_box(Vector3(2.6, 2.28, 0.7), Vector3(0.75, 0.55, 0.09), WOOD_LIGHT)
 
 
+## The armory: only the stall itself and a black emblem with a cave-painting bow. The weapons on show are
+## the game's own models, put on the counter, the rack and the back wall by shop_display.gd.
 func _weapon_stall() -> void:
 	_stall_frame()
-	# Sign: two crossed spears.
-	_box(Vector3(2.6, 2.28, 0.75), Vector3(0.6, 0.06, 0.02), WOOD_DARK, 0.0, 0.6)
-	_box(Vector3(2.6, 2.28, 0.75), Vector3(0.6, 0.06, 0.02), WOOD_DARK, 0.0, -0.6)
-	# Spear rack to the right of the counter.
+	_emblem()
+	# Spear rack to the right of the counter (the spears stand in it), pegs on the back wall for the bow.
 	for x in [2.15, 2.75]:
 		_log(Vector3(x, 0, 0.2), Vector3(x, 1.35, 0.2), 0.06, WOOD)
 	_log(Vector3(2.05, 1.2, 0.2), Vector3(2.85, 1.2, 0.2), 0.05, WOOD_DARK)
 	_log(Vector3(2.05, 0.25, 0.2), Vector3(2.85, 0.25, 0.2), 0.05, WOOD_DARK)
-	for x in [2.3, 2.48, 2.66]:
-		var top := Vector3(x + _rng.randf_range(-0.05, 0.05), 2.3, 0.08)
-		_log(Vector3(x, 0.05, 0.3), top, 0.035, WOOD_LIGHT)
-		_log(top, top + Vector3(0, 0.3, -0.01), 0.07, STONE_DARK, 0.0, 4)
-	# A bow leaning on the left post, a quiver of arrows at its foot.
+	for x in [-0.4, 0.4]:
+		_log(Vector3(x, 1.75, -0.92), Vector3(x, 1.75, -0.78), 0.04, WOOD_LIGHT)
+
+
+## The armory sign: a black board with a bow, an arrow and a few dots daubed on it like a cave painting.
+func _emblem() -> void:
+	var c := Vector3(2.6, 2.28, 0.76)
+	_box(c, Vector3(0.9, 0.72, 0.09), Color(0.04, 0.035, 0.035))
+	var paint := Color(0.93, 0.8, 0.55)
 	var prev := Vector3.ZERO
-	for k in 7:
-		var a := lerpf(-1.1, 1.1, k / 6.0)
-		var p := Vector3(-2.05 - cos(a) * 0.32, 1.1 + sin(a) * 0.95, 0.75)
+	for k in 8:
+		var a := lerpf(-1.25, 1.25, k / 7.0)
+		var p := c + Vector3(-0.2 + cos(a) * 0.12 + _rng.randf_range(-0.012, 0.012), sin(a) * 0.27, 0.055)
 		if k > 0:
-			_log(prev, p, 0.035, WOOD_DARK)
+			_log(prev, p, 0.016, paint, -1.0, 4)
 		prev = p
-	_log(Vector3(-1.87, 0.25, 0.75), Vector3(-1.87, 1.95, 0.75), 0.008, ROPE, -1.0, 3)
-	_log(Vector3(-1.6, 0, 1.1), Vector3(-1.6, 0.6, 1.1), 0.15, HIDE_DARK, 0.17, 7)
-	for k in 4:
-		_log(Vector3(-1.6, 0.4, 1.1), Vector3(-1.6 + _rng.randf_range(-0.12, 0.12), 1.0, 1.1 + _rng.randf_range(-0.1, 0.1)), 0.015, WOOD_LIGHT, -1.0, 4)
-	# On the counter: a club, two stone axes, knives; on the back wall a bow and spears.
-	_log(Vector3(-1.2, 1.13, 0.5), Vector3(-0.4, 1.17, 0.45), 0.05, WOOD_DARK, 0.11)
-	for x in [0.1, 0.7]:
-		_log(Vector3(x, 1.12, 0.35), Vector3(x + 0.1, 1.12, 0.75), 0.03, WOOD_LIGHT, -1.0, 4)
-		_box(Vector3(x + 0.1, 1.15, 0.7), Vector3(0.22, 0.08, 0.14), STONE_DARK, 0.3)
-	_box(Vector3(1.2, 1.12, 0.5), Vector3(0.28, 0.04, 0.08), STONE, 0.4)
-	_box(Vector3(1.4, 1.12, 0.6), Vector3(0.28, 0.04, 0.08), STONE, -0.3)
-	_log(Vector3(-1.2, 1.9, -0.92), Vector3(1.2, 1.95, -0.92), 0.03, WOOD_LIGHT)
-	_log(Vector3(-1.2, 2.25, -0.92), Vector3(1.2, 2.2, -0.92), 0.03, WOOD_LIGHT)
-	_log(Vector3(1.2, 1.95, -0.92), Vector3(1.45, 1.95, -0.92), 0.06, STONE_DARK, 0.0, 4)
-	_log(Vector3(1.2, 2.2, -0.92), Vector3(1.45, 2.2, -0.92), 0.06, STONE_DARK, 0.0, 4)
+	_log(c + Vector3(-0.2 + cos(-1.25) * 0.12, -0.26, 0.055), c + Vector3(-0.2 + cos(1.25) * 0.12, 0.26, 0.055), 0.008, paint, -1.0, 3)
+	# The arrow across the bow: shaft, a triangular head, two feather strokes.
+	_log(c + Vector3(-0.3, 0.0, 0.055), c + Vector3(0.3, 0.02, 0.055), 0.014, paint, -1.0, 4)
+	_log(c + Vector3(0.27, 0.0, 0.055), c + Vector3(0.38, 0.02, 0.055), 0.04, paint, 0.0, 3)
+	for s in [-1.0, 1.0]:
+		_log(c + Vector3(-0.28, 0.0, 0.055), c + Vector3(-0.35, 0.06 * s, 0.055), 0.01, paint, -1.0, 3)
+	# Dots of game, painted in a row above the arrow.
+	for k in 3:
+		_ball(c + Vector3(0.1 + k * 0.1, -0.2 + _rng.randf_range(-0.02, 0.02), 0.055), Vector3.ONE * 0.025, paint, 0.1)
 
 
 func _hunter_stall() -> void:
 	_stall_frame()
-	# Sign: a fruit.
+	# Sign: a fruit. The baits on show are the game's own models, put on the counter by shop_display.gd.
 	_ball(Vector3(2.6, 2.28, 0.77), Vector3(0.15, 0.15, 0.04), FRUIT[0], 0.05)
-	# Baskets of fruit on the counter and in front of it.
-	for at in [Vector3(-1.0, 1.09, 0.5), Vector3(-0.2, 1.09, 0.5), Vector3(0.6, 1.09, 0.5),
-			Vector3(-0.8, 0.0, 1.1), Vector3(0.6, 0.0, 1.15)]:
-		_basket(at)
-	for x in [1.2, 1.45]:
-		_log(Vector3(x, 1.09, 0.5), Vector3(x, 1.38, 0.5), 0.1, CLAY, 0.07, 7)
-	# Snares on the back wall, a net hanging from the left side.
-	for x in [-0.8, 0.0, 0.8]:
-		var prev := Vector3.ZERO
-		for k in 9:
-			var a := TAU * k / 8.0
-			var p := Vector3(x + cos(a) * 0.25, 2.1 + sin(a) * 0.32, -0.93)
-			if k > 0:
-				_log(prev, p, 0.02, ROPE, -1.0, 4)
-			prev = p
+	# A net hanging from the left side.
 	for k in 5:
 		var z := lerpf(-0.9, 0.6, k / 4.0)
 		_log(Vector3(-1.95, 2.8, z), Vector3(-1.95, 1.0, z + 0.05), 0.012, ROPE, -1.0, 3)
@@ -327,13 +311,6 @@ func _hunter_stall() -> void:
 	for k in 6:
 		var y := lerpf(1.1, 2.7, k / 5.0)
 		_log(Vector3(-1.95, y, -0.9), Vector3(-1.95, y, 0.65), 0.012, ROPE, -1.0, 3)
-
-
-func _basket(at: Vector3) -> void:
-	_log(at, at + Vector3(0, 0.16, 0), 0.22, STRAW, 0.27, 7)
-	for k in 4:
-		var a := TAU * k / 4.0 + _rng.randf()
-		_ball(at + Vector3(cos(a) * 0.11, 0.2, sin(a) * 0.11), Vector3.ONE * 0.09, FRUIT[_rng.randi() % FRUIT.size()], 0.1)
 
 
 ## The cage rack (its cages open towards +x): two shelves of three wicker cages under a hide roof.
