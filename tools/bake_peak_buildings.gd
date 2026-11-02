@@ -274,29 +274,41 @@ func _weapon_stall() -> void:
 	_log(Vector3(2.05, 0.25, 0.2), Vector3(2.85, 0.25, 0.2), 0.05, WOOD_DARK)
 	for x in [-0.4, 0.4]:
 		_log(Vector3(x, 1.75, -0.92), Vector3(x, 1.75, -0.78), 0.04, WOOD_LIGHT)
+	# A back plank for the spears, the quiver (its arrows are the game's) and a basket for the stones.
+	_box(Vector3(2.45, 0.7, 0.1), Vector3(0.9, 1.3, 0.04), WOOD_DARK)
+	_log(Vector3(-1.6, 0, 1.1), Vector3(-1.6, 0.6, 1.1), 0.15, HIDE_DARK, 0.17, 7)
+	_log(Vector3(0.9, 0, 0.93), Vector3(0.9, 0.3, 0.93), 0.22, STRAW, 0.28, 8)
 
 
-## The armory sign: a black board with a bow, an arrow and a few dots daubed on it like a cave painting.
+## The armory sign: a board of lashed sticks with a bow, an arrow and a few dots daubed on it in black like a
+## cave painting.
 func _emblem() -> void:
-	var c := Vector3(2.6, 2.28, 0.76)
-	_box(c, Vector3(0.9, 0.72, 0.09), Color(0.04, 0.035, 0.035))
-	var paint := Color(0.93, 0.8, 0.55)
+	var c := Vector3(2.6, 2.28, 0.8)
+	for k in 9:
+		var x := lerpf(-0.4, 0.4, k / 8.0)
+		var wob := _rng.randf_range(-0.03, 0.03)
+		_log(c + Vector3(x, -0.34 + wob, 0), c + Vector3(x, 0.34 + _rng.randf_range(-0.03, 0.03), 0), 0.05, WOOD_LIGHT if k % 2 == 0 else WOOD)
+	for y in [-0.24, 0.24]:
+		_log(c + Vector3(-0.5, y, -0.07), c + Vector3(0.5, y, -0.07), 0.03, WOOD_DARK)
+		for x in [-0.4, 0.4]:
+			_log(c + Vector3(x, y - 0.04, 0.0), c + Vector3(x, y + 0.04, 0.0), 0.06, ROPE, -1.0, 5)
+	var paint := Color(0.05, 0.04, 0.04)
+	var z := 0.06
 	var prev := Vector3.ZERO
 	for k in 8:
 		var a := lerpf(-1.25, 1.25, k / 7.0)
-		var p := c + Vector3(-0.2 + cos(a) * 0.12 + _rng.randf_range(-0.012, 0.012), sin(a) * 0.27, 0.055)
+		var p := c + Vector3(-0.15 + cos(a) * 0.12 + _rng.randf_range(-0.012, 0.012), sin(a) * 0.25, z)
 		if k > 0:
-			_log(prev, p, 0.016, paint, -1.0, 4)
+			_log(prev, p, 0.02, paint, -1.0, 4)
 		prev = p
-	_log(c + Vector3(-0.2 + cos(-1.25) * 0.12, -0.26, 0.055), c + Vector3(-0.2 + cos(1.25) * 0.12, 0.26, 0.055), 0.008, paint, -1.0, 3)
+	_log(c + Vector3(-0.15 + cos(-1.25) * 0.12, -0.24, z), c + Vector3(-0.15 + cos(1.25) * 0.12, 0.24, z), 0.01, paint, -1.0, 3)
 	# The arrow across the bow: shaft, a triangular head, two feather strokes.
-	_log(c + Vector3(-0.3, 0.0, 0.055), c + Vector3(0.3, 0.02, 0.055), 0.014, paint, -1.0, 4)
-	_log(c + Vector3(0.27, 0.0, 0.055), c + Vector3(0.38, 0.02, 0.055), 0.04, paint, 0.0, 3)
-	for s in [-1.0, 1.0]:
-		_log(c + Vector3(-0.28, 0.0, 0.055), c + Vector3(-0.35, 0.06 * s, 0.055), 0.01, paint, -1.0, 3)
-	# Dots of game, painted in a row above the arrow.
+	_log(c + Vector3(-0.3, 0.0, z), c + Vector3(0.3, 0.02, z), 0.018, paint, -1.0, 4)
+	_log(c + Vector3(0.27, 0.0, z), c + Vector3(0.38, 0.02, z), 0.045, paint, 0.0, 3)
+	for sgn in [-1.0, 1.0]:
+		_log(c + Vector3(-0.28, 0.0, z), c + Vector3(-0.35, 0.06 * sgn, z), 0.012, paint, -1.0, 3)
 	for k in 3:
-		_ball(c + Vector3(0.1 + k * 0.1, -0.2 + _rng.randf_range(-0.02, 0.02), 0.055), Vector3.ONE * 0.025, paint, 0.1)
+		_ball(c + Vector3(0.0 + k * 0.1, -0.17 + _rng.randf_range(-0.02, 0.02), z), Vector3.ONE * 0.028, paint, 0.1)
 
 
 func _hunter_stall() -> void:

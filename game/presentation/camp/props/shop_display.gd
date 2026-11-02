@@ -2,7 +2,7 @@ extends Node3D
 
 ## The goods on show at a camp shop: the game's own weapon, bait and trap models, purely decorative (no
 ## collision, no trigger logic). A child of the shop's station, so everything is in the stall's local space
-## (front +z, counter at y 1.1). The traps stand beside and behind the hunting hut, off the walking paths.
+## (front +z, counter at y 1.1). The traps stand east and south of the hunting hut, off the walking paths.
 
 enum Kind { WEAPONS, BAITS }
 
@@ -16,10 +16,11 @@ const BAITS := [
 	["05_pear", -1.4, 0.66], ["06_bananas", -0.7, 0.66], ["07_mandarin", 0.0, 0.66], ["08_mango", 0.7, 0.66],
 	["09_mixed_berries", 1.4, 0.66],
 ]
-## Traps around the hunting hut: [file, x, z, yaw, scale].
+## Traps around the hunting hut, in camp (world) coordinates so they clear the tents, the tavern and each
+## other: [file, x, z, yaw, scale]. East and south of the hut, nowhere near the way from the campfire.
 const TRAP_SPOTS := [
-	["pit", -3.8, 2.6, 0.0, 0.6], ["snare", -5.2, 0.6, 0.4, 1.0], ["tripwire", 4.6, 2.4, 0.2, 1.0],
-	["cage", 5.0, -0.4, 0.5, 0.7], ["fence", -0.6, -2.8, 0.0, 0.8],
+	["pit", 14.5, -0.8, 0.0, 0.6], ["snare", 15.1, 8.0, 0.3, 1.0], ["fence", 14.5, 4.6, PI / 2, 0.8],
+	["tripwire", 11.0, 6.3, PI / 2, 1.0], ["cage", 12.0, 9.8, 0.0, 0.7],
 ]
 
 @export var kind := Kind.WEAPONS
@@ -31,7 +32,7 @@ func _ready() -> void:
 	else:
 		_baits()
 		for t: Array in TRAP_SPOTS:
-			_put(TRAPS + t[0] + ".tscn", Vector3(t[1], 0.0, t[2]), Vector3(0.0, t[3], 0.0), t[4])
+			_put(TRAPS + t[0] + ".tscn", to_local(Vector3(t[1], 0.0, t[2])), Vector3(0.0, t[3] - global_rotation.y, 0.0), t[4])
 
 
 func _weapons() -> void:
@@ -40,6 +41,11 @@ func _weapons() -> void:
 		_put(WEAPONS + s[0] + ".tscn", Vector3(s[1], 1.0, 0.18), Vector3(-0.08, 0.0, 0.0))
 	# A bow hung on the back wall, bending towards the viewer.
 	_put(WEAPONS + "bow.tscn", Vector3(0.0, 1.9, -0.8), Vector3(0.0, PI / 2, 0.0), 1.2)
+	# Arrows in the quiver at the left post, stones in the basket in front of the counter.
+	for i in 5:
+		_put(WEAPONS + "arrow.tscn", Vector3(-1.6 + (i - 2) * 0.04, 0.8, 1.1 + (i % 2) * 0.05), Vector3((i - 2) * 0.12, 0.0, (i % 3 - 1) * 0.15))
+	for i in 5:
+		_put(WEAPONS + "stone.tscn", Vector3(0.9 + (i % 3 - 1) * 0.1, 0.26 + (i / 3) * 0.1, 0.93 + (i % 2) * 0.06 - 0.03), Vector3(0.0, i * 1.1, 0.0), 1.5)
 	# On the counter: a club, a knife, a sling, a heap of stones, arrows.
 	_put(WEAPONS + "club.tscn", Vector3(-1.1, COUNTER_Y + 0.1, 0.5), Vector3(PI / 2, 0.0, 1.2))
 	_put(WEAPONS + "knife.tscn", Vector3(-0.35, COUNTER_Y + 0.03, 0.55), Vector3(PI / 2, 0.0, 0.5), 1.5)
