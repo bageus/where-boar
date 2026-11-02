@@ -14,6 +14,8 @@ const WOOD := Color(0.8, 0.5, 0.24)
 const WOOD_DARK := Color(0.6, 0.35, 0.16)
 const FLINT := Color(0.52, 0.58, 0.7)
 const FLINT_LIGHT := Color(0.7, 0.76, 0.86)
+const BONE := Color(0.9, 0.86, 0.74)
+const BONE_LIGHT := Color(0.99, 0.97, 0.9)
 const WRAP := Color(0.86, 0.24, 0.18)
 const ROPE := Color(0.95, 0.86, 0.6)
 const LEATHER := Color(0.55, 0.31, 0.15)
@@ -25,6 +27,8 @@ const STONE_LIGHT := Color(0.74, 0.73, 0.72)
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(OUT)
 	_save(_spear(), "spear")
+	_save(_spear_bone(), "spear_bone")
+	_save(_spear_wood(), "spear_wood")
 	_save(_arrow(), "arrow")
 	_save(_club(), "club")
 	_save(_knife(), "knife")
@@ -41,6 +45,30 @@ func _spear() -> SurfaceTool:
 	_prism(t, Vector3(0, -0.12, 0), Vector3(0, 0.12, 0), 0.045, 0.045, 6, LEATHER)  # grip
 	_prism(t, Vector3(0, 0.56, 0), Vector3(0, 0.66, 0), 0.048, 0.042, 6, WRAP)  # binding
 	_blade(t, Vector3(0, 0.6, 0), Vector3(0, 0.92, 0), 0.075, 0.035, FLINT, FLINT_LIGHT)
+	return t
+
+
+## Bone spear: a pale shaft, a long splintered bone point lashed on with rope.
+func _spear_bone() -> SurfaceTool:
+	var t := _tool()
+	_prism(t, Vector3(0, -0.9, 0), Vector3(0, 0.62, 0), 0.034, 0.03, 6, WOOD)
+	_prism(t, Vector3(0, -0.94, 0), Vector3(0, -0.88, 0), 0.03, 0.04, 6, WOOD_DARK)  # butt
+	_prism(t, Vector3(0, -0.12, 0), Vector3(0, 0.12, 0), 0.045, 0.045, 6, LEATHER)  # grip
+	_prism(t, Vector3(0, 0.5, 0), Vector3(0, 0.7, 0), 0.046, 0.044, 6, ROPE)  # lashing
+	_prism(t, Vector3(0, 0.6, 0), Vector3(0, 0.66, 0), 0.05, 0.05, 6, WRAP)
+	_prism(t, Vector3(0, 0.6, 0), Vector3(0, 0.86, 0), 0.036, 0.028, 5, BONE)  # socket of the bone
+	_blade(t, Vector3(0, 0.82, 0), Vector3(0, 1.0, 0), 0.04, 0.03, BONE, BONE_LIGHT)
+	_blade(t, Vector3(0.0, 0.7, 0), Vector3(0.07, 0.82, 0), 0.03, 0.02, BONE, BONE_LIGHT)  # barb
+	return t
+
+
+## Plain sharpened wooden spear: one long shaft, fire-darkened point, a little rope grip.
+func _spear_wood() -> SurfaceTool:
+	var t := _tool()
+	_prism(t, Vector3(0, -0.9, 0), Vector3(0, 0.62, 0), 0.034, 0.03, 6, WOOD)
+	_prism(t, Vector3(0, -0.94, 0), Vector3(0, -0.88, 0), 0.03, 0.04, 6, WOOD_DARK)  # butt
+	_prism(t, Vector3(0, -0.12, 0), Vector3(0, 0.12, 0), 0.042, 0.042, 6, ROPE)  # grip
+	_prism(t, Vector3(0, 0.6, 0), Vector3(0, 0.98, 0), 0.03, 0.004, 6, WOOD_DARK)  # sharpened point
 	return t
 
 

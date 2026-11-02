@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-069
+active_task_id: P3-070
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-02
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-069 done.
+None. P3-001..P3-070 done.
 
 ## Last completed work
 
@@ -134,6 +134,7 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-063 (2026-11-02): denser, shorter grass and a grass-style ground (owner). 8 clumps/m2 (was 3), narrower and much lower, height in noise patches (`terrain.gd` `short_grass_scale`, also outside the walls); clumps sink into the ground towards 24 m (`peak_grass.gdshader` `fade_end`, hunt only). Hunt ground uses `assets/grass/peak_ground.gdshader` (`ground_material.tres`): grass-coloured mottled lawn under the clumps, brighter far away, noise normal map for lumpy turf and sand/mud ripples with highlights. xvfb same view: 251 -> 240 draw calls, 692K -> 640K triangles. FPS in the browser not checked.
 - P3-064 (2026-11-02): cliffs as solid stepped walls instead of a boulder pile (owner). `PeakCliff1-5` (`tools/bake_peak_rocks.gd`, own rng) are 9-10 m wide walls of 2-3 layers stepping back, few big near-vertical facets, moss on ledges. Hunt `terrain.gd`: one wall per 6x6 m of cliff (was 3x3), 11-15 m long, face turned downhill, so neighbours merge into one face; same convex-hull collision. Camp wall and rim reuse the meshes. Draw calls/triangles within xvfb noise.
 - P3-065 (2026-11-02): camp buildings in a simplified PEAK-like style (owner). `tools/bake_peak_buildings.gd` writes `assets/models/peak/<name>.scn` (one vertex-colour surface `building.tres` plus unshaded `glow.tres` for flames): stalls, tavern, A-frame/yurt/teepee tents, boar pen, cage rack, campfire with brazier, well, Start hunt signpost. Chunky six-sided logs, striped hide roofs with zigzag edges, faceted stones. Same footprints and anchors as before (cage slots, pen spots and rail top, tavern bench and hearth), so collisions and use distances are unchanged. `camp.tscn` points at them; `assets/models/merged/` and `tools/merge_camp_models.gd` removed (source glbs kept). Palisade logs six-sided, warmer wood (`scenery.gd`). Was 0.2-63K triangles per building, now 0.2-3K. xvfb camp overview: 288 -> 205 draw calls, 757K -> 349K triangles. Weapons are another task.
+- P3-070 (2026-11-02): костяное и деревянное копья (владелец). Три вида в `Loadout` (`SPEAR_KINDS`: кремнёвое, костяное, деревянное; до 3 штук суммарно, в руке лучшее, брошенное возвращается своим видом через `pick_spear(kind)`). Урон удара и броска: кремень 2, кость 2, дерево 1 (ASSUMPTION D013; кость дешевле кремня). Оружейная: `item_spear_bone` 10, `item_spear_wood` 4 (макс. 3), стартовый набор прежний. Модели `spear_bone`/`spear_wood` печёт `tools/bake_peak_weapons.gd`; `spear.gd` меняет модель по `kind`, `hands.gd` — в руке, HUD показывает название; стойка в оружейной (`shop_display.gd`) показывает все три. Проверено: тесты охотника 0 failures, `validate_project.py`, скриншот. Не проверено: вид в руке в игре.
 - P3-069 (2026-11-02): camp shops show the game's real weapon/bait models and decorative traps around the hunting hut; armory emblem black with a cave-painting bow (`shop_display.gd`, `tools/bake_peak_buildings.gd`).
 - P3-068 (2026-11-02): traps and bait restyled after PEAK (owner), own procedural models (`tools/bake_peak_traps.gd`); same node layout, animations and colliders; bait icons re-rendered.
 - P3-066 (2026-11-02): weapons restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_weapons.gd` bakes `assets/models/peak_weapons/<name>.res` + `<name>.tscn` (Node3D + MeshInstance3D `Model`) for spear, arrow, club, knife, sling, bow and sling stone: chunky flat-shaded prisms, one vertex-colour surface, 56-252 triangles (old textured glbs 220-830). Replace the glbs in `hands.tscn`, `spear.tscn`, `arrow.tscn`, `stone.tscn`, `stone_pile.tscn`. Thrown ones lie along +Y, tip up, so they fly tip first along the capsule; `landing.gd` unchanged. In hand: sling raised 0.17, bow turned 50 degrees. Net keeps its rig, gets a flat rope material (`net_model.gd` `ROPE`). Animation viewer still uses the old glbs. Not checked: look in the browser.

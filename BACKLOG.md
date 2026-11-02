@@ -121,3 +121,4 @@ Unapproved ideas and possible future features belong here.
 | P3-067 | 3 | Stumps and logs in a simplified PEAK-like style (`tools/bake_peak_stumps.gd`: `PeakStump1`, `PeakLog1-4`) | P3-061 | DONE |
 | P3-068 | 3 | Traps and bait in a simplified PEAK-like style: procedural pit, snare, tripwire, cage, fence and nine fruits (`tools/bake_peak_traps.gd`), bait icons re-rendered | P3-059 | DONE |
 | P3-069 | 3 | Camp shops show the game's real weapon and bait models; decorative traps around the hunting hut; black armory emblem with a cave-painting bow (`game/presentation/camp/props/shop_display.gd`) | P3-068 | DONE |
+| P3-070 | 3 | Bone and wooden spears: kinds in Loadout, models, armory stock and rack | Done |

@@ -12,6 +12,11 @@ const ARROW_ID := "item_arrow"
 const STONE_ID := "item_stone"
 const WATER_ID := "item_water"
 const MAX_SPEARS := 3
+## Spear kinds, the best first; the front one is in hand. Camp item id and stab/throw damage of each
+## (owner, 2026-11-02; ASSUMPTION D013: damage 1 wooden, 2 bone and flint, they differ in price).
+const SPEAR_KINDS := ["flint", "bone", "wood"]
+const SPEAR_ITEMS := {"flint": SPEAR_ID, "bone": "item_spear_bone", "wood": "item_spear_wood"}
+const SPEAR_DAMAGE := {"flint": 2, "bone": 2, "wood": 1}
 const NET_CAP := 3
 const ARROW_CAP := 12
 const STONE_CAP := 10
@@ -46,11 +51,18 @@ const PORTER_ARROWS := 6
 const SADDLE_PREFIX := "item_saddle_"
 
 ## Spears carried right now; thrown ones are picked up again.
-var spears := 1
+var spear_kinds: Array[String] = ["flint"]
 var max_spears := MAX_SPEARS
+var spears: int:
+	get:
+		return spear_kinds.size()
 var spear_in_hand: bool:
 	get:
-		return spears > 0
+		return not spear_kinds.is_empty()
+## Kind of the spear in hand ("" when none).
+var spear_kind: String:
+	get:
+		return spear_kinds[0] if not spear_kinds.is_empty() else ""
 var nets := 0
 var arrows := 0
 var stones := 0
@@ -100,7 +112,11 @@ func equip(items: Dictionary) -> void:
 	var porter: bool = items.get(PORTER_ID, 0) > 0
 	net_cap = NET_CAP + (PORTER_NETS if porter else 0)
 	arrow_cap = ARROW_CAP + (PORTER_ARROWS if porter else 0)
-	spears = mini(items.get(SPEAR_ID, 0), MAX_SPEARS)
+	spear_kinds.clear()
+	for kind in SPEAR_KINDS:
+		for i in items.get(SPEAR_ITEMS[kind], 0):
+			if spear_kinds.size() < MAX_SPEARS:
+				spear_kinds.append(kind)
 	nets = mini(items.get(NET_ID, 0), net_cap)
 	arrows = mini(items.get(ARROW_ID, 0), arrow_cap)
 	stones = mini(items.get(STONE_ID, 0), stone_cap)
@@ -121,18 +137,24 @@ func in_hotbar(weapon: Weapon) -> bool:
 	return has(weapon)
 
 
+## Throws the spear in hand; thrown_kind says which one it was.
+var thrown_kind := ""
+
 func throw_spear() -> bool:
-	if spears == 0:
+	if spear_kinds.is_empty():
 		return false
-	spears -= 1
-	_count(SPEAR_ID, 1)
+	thrown_kind = spear_kinds.pop_front()
+	_count(SPEAR_ITEMS[thrown_kind], 1)
 	return true
 
 
-func pick_spear() -> void:
-	var gain := mini(1, MAX_SPEARS - spears)
-	spears += gain
-	_count(SPEAR_ID, -gain)
+## Takes a landed spear back; it goes behind the better ones.
+func pick_spear(kind: String = "flint") -> void:
+	if spear_kinds.size() >= MAX_SPEARS:
+		return
+	spear_kinds.append(kind)
+	spear_kinds.sort_custom(func(a: String, b: String) -> bool: return SPEAR_KINDS.find(a) < SPEAR_KINDS.find(b))
+	_count(SPEAR_ITEMS[kind], -1)
 
 
 func throw_net() -> bool:

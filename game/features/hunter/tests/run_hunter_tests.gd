@@ -78,7 +78,16 @@ func _spear_throw_and_pick() -> bool:
 	var empty := not armed.throw_spear()
 	for i in 4:
 		armed.pick_spear()
-	return single and three and empty and armed.spears == 3 and lost_none and armed.used.is_empty()
+	var mixed := Loadout.new()
+	mixed.equip({"item_spear": 1, "item_spear_bone": 1, "item_spear_wood": 2})
+	var order: bool = mixed.spear_kinds == ["flint", "bone", "wood"]
+	mixed.throw_spear()
+	mixed.throw_spear()
+	var bone_gone: bool = mixed.thrown_kind == "bone" and mixed.used == {"item_spear": 1, "item_spear_bone": 1}
+	mixed.pick_spear("bone")
+	mixed.pick_spear("flint")
+	return single and three and empty and armed.spears == 3 and lost_none and armed.used.is_empty() \
+			and order and bone_gone and mixed.spear_kinds == ["flint", "bone", "wood"] and mixed.used.is_empty()
 
 
 func _nets_run_out() -> bool:

@@ -35,9 +35,9 @@ func _ready() -> void:
 
 
 func _weapons() -> void:
-	# Three spears in the rack to the right of the counter, leaning back a little.
-	for x in [2.3, 2.48, 2.66]:
-		_put(WEAPONS + "spear.tscn", Vector3(x, 1.0, 0.18), Vector3(-0.08, 0.0, 0.0))
+	# Spears in the rack to the right of the counter, leaning back a little: flint, bone, wooden.
+	for s: Array in [["spear", 2.3], ["spear_bone", 2.48], ["spear_wood", 2.66]]:
+		_put(WEAPONS + s[0] + ".tscn", Vector3(s[1], 1.0, 0.18), Vector3(-0.08, 0.0, 0.0))
 	# A bow hung on the back wall, bending towards the viewer.
 	_put(WEAPONS + "bow.tscn", Vector3(0.0, 1.9, -0.8), Vector3(0.0, PI / 2, 0.0), 1.2)
 	# On the counter: a club, a knife, a sling, a heap of stones, arrows.

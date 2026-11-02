@@ -13,6 +13,7 @@ const STAB_SECONDS := 0.18
 const FOLLOW_RATE := 14.0
 
 var _striking := false
+var _spear_kind := "flint"
 
 ## Children in Loadout.Weapon order: spear, net, club, sling, bow, knife.
 @onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow, $Knife]
@@ -23,6 +24,22 @@ func _ready() -> void:
 	for hand in find_children("Hand", "", true, false):
 		for mesh: GeometryInstance3D in hand.find_children("*", "GeometryInstance3D", true, false):
 			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+
+## Swaps the spear model in hand to the kind carried (flint, bone, wood).
+func set_spear_kind(kind: String) -> void:
+	if kind == "" or kind == _spear_kind:
+		return
+	_spear_kind = kind
+	var old: Node = $Spear/Model
+	var model: Node3D = load("res://assets/models/peak_weapons/%s.tscn" % {"flint": "spear", "bone": "spear_bone", "wood": "spear_wood"}[kind]).instantiate()
+	var parent := old.get_parent()
+	var index := old.get_index()
+	parent.remove_child(old)
+	old.free()
+	parent.add_child(model)
+	parent.move_child(model, index)
+	model.name = "Model"
 
 
 ## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets or arrows).

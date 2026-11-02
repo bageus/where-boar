@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/models/peak_weapons/spear_bone.res" id="1_mfjr4"]
+
+[node name="Spear Bone" type="Node3D" unique_id=2008458882]
+
+[node name="Model" type="MeshInstance3D" parent="." unique_id=1190671385]
+mesh = ExtResource("1_mfjr4")

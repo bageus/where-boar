@@ -15,6 +15,8 @@ const ITEMS := {
 	"item_bow": {"name": "Bow", "shop": "weapon_shop", "price": 50, "unique": true},
 	# Ammo is stock that is lost when left on the map (owner, 2026-10-27); prices ASSUMPTION (D013).
 	"item_spear": {"name": "Spear", "shop": "weapon_shop", "price": 15, "unique": false, "max": 3},
+	"item_spear_bone": {"name": "Bone spear", "shop": "weapon_shop", "price": 10, "unique": false, "max": 3},
+	"item_spear_wood": {"name": "Wooden spear", "shop": "weapon_shop", "price": 4, "unique": false, "max": 3},
 	"item_net": {"name": "Net", "shop": "weapon_shop", "price": 10, "unique": false, "max": 5},
 	"item_arrow": {"name": "Arrows (x6)", "shop": "weapon_shop", "price": 6, "unique": false, "max": 24, "pack": 6},
 	"item_stone": {"name": "Sling stones (x5)", "shop": "weapon_shop", "price": 2, "unique": false, "max": 20, "pack": 5},

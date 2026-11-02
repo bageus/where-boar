@@ -6,6 +6,7 @@ extends CanvasLayer
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 
+const SPEAR_NAMES := {"flint": "Flint spear", "bone": "Bone spear", "wood": "Wooden spear"}
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow", "Knife"]
 
 var _gain_fade: Tween
@@ -61,7 +62,7 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 	for i in WEAPON_NAMES.size():
 		var slot: Label = $Hotbar.get_child(i)
 		slot.visible = loadout.in_hotbar(i)
-		slot.text = "[%d] %s%s" % [i + 1, WEAPON_NAMES[i], extras[i]]
+		slot.text = "[%d] %s%s" % [i + 1, SPEAR_NAMES.get(loadout.spear_kind, "Spear") if i == 0 else WEAPON_NAMES[i], extras[i]]
 		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE
 	$Bait.text = "[F] %s x%d" % [_name(loadout.bait_id), loadout.baits.get(loadout.bait_id, 0)]
 	$Trap.text = "[T] %s x%d" % [_name(loadout.trap_id), loadout.traps.get(loadout.trap_id, 0)]

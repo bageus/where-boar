@@ -15,7 +15,7 @@ static func run(hunter: CharacterBody3D, thrown: Array[RigidBody3D]) -> String:
 			continue
 		match item.pickup_kind:
 			"spear":
-				loadout.pick_spear()
+				loadout.pick_spear(item.kind)
 			"net":
 				loadout.pick_net()
 			"arrow":

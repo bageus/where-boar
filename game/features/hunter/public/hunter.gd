@@ -427,6 +427,7 @@ func _physics_process(delta: float) -> void:
 	_hud.show_throw_power(aiming, _aim_power)
 	var armed: bool = {Weapon.SPEAR: loadout.spear_in_hand, Weapon.NET: loadout.nets > 0,
 			Weapon.SLING: loadout.stones > 0, Weapon.BOW: loadout.arrows > 0}.get(weapon, true)
+	$Camera/Hands.set_spear_kind(loadout.spear_kind)
 	$Camera/Hands.pose(weapon, armed, aiming, _aim_power, delta)
 	var direction := transform.basis * Vector3(input.x, 0.0, input.y)
 	if is_on_floor():
@@ -478,11 +479,12 @@ func _attack() -> void:
 			if Input.is_action_pressed("aim"):
 				if loadout.throw_spear():
 					Sfx.play(self, "spear_shot")
-					_throw(SpearScene, minf(THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power), SPEAR_MAX_SPEED))
+					var spear := _throw(SpearScene, minf(THROW_SPEED * lerpf(WEAK_THROW_SCALE, STRONG_THROW_SCALE, power), SPEAR_MAX_SPEED))
+					spear.kind = loadout.thrown_kind
 			elif loadout.spear_in_hand:
 				_strike("spear_attack")
 				if _hits_boar(_reach.get_collider()):
-					_reach.get_collider().spear_hit(STAB_DAMAGE)
+					_reach.get_collider().spear_hit(Loadout.SPEAR_DAMAGE[loadout.spear_kind])
 		Weapon.NET:
 			if loadout.throw_net():
 				$Camera/Hands.strike()
