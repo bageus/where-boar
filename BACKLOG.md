@@ -131,3 +131,4 @@ Unapproved ideas and possible future features belong here.
 | P3-077 | 3 | PEAK models solid and smooth: shared normal smoothing and soft light, one-piece saddle and well, quiver arrows inside (`tools/peak_smooth.gd`) | P3-076 | DONE |
 | P3-078 | 3 | Forest boar remodelled after the owner's reference: blocky brown body, square snout, cream tusks, dark hooves (`tools/build_blocky_boar.py` + `rig_boars.py`) | P3-077 | DONE |
 | P3-079 | 3 | Hunter (bearded, plump, lanky) and helper models after the owner's references; character choice in the pause menu settings (`tools/build_peak_cavemen.py`, `hunter_looks.gd`) | P3-078 | DONE |
+| P3-080 | 3 | Fix ripple (shadow acne) on ground and walls: ground meshes stop casting live shadows (`baked_shadow.gd`) | P3-079 | DONE |

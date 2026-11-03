@@ -28,7 +28,10 @@ static func bake(host: Node, sun: DirectionalLight3D, roots: Array[Node], centre
 	var copies: Array[GeometryInstance3D] = []
 	for root in roots:
 		for node: GeometryInstance3D in root.find_children("*", "GeometryInstance3D", true, false):
-			if node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF or _receives(node):
+			if node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				continue
+			if _receives(node):
+				node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF  # ground shadowing itself = ripple (acne)
 				continue
 			var copy: GeometryInstance3D
 			if node is MeshInstance3D:
