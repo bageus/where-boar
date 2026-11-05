@@ -11,6 +11,7 @@ extends SceneTree
 
 const PeakSmooth := preload("res://tools/peak_smooth.gd")
 const OUT := "res://assets/models/peak/"
+const EMBERS := preload("res://assets/fire/embers.tres")
 const WOOD := Color(0.6, 0.36, 0.18)
 const WOOD_DARK := Color(0.42, 0.24, 0.13)
 const WOOD_LIGHT := Color(0.8, 0.56, 0.3)
@@ -463,8 +464,8 @@ func _cage(base: Vector3) -> void:
 	_ball(base + Vector3(0, top + 0.17, 0), Vector3.ONE * 0.04, ROPE, 0.1)
 
 
-## The camp fire: a ring of stones, crossed logs and flames under a tripod with a pot; a clay brazier with
-## glowing coals and a grate to its east.
+## The camp fire: a ring of stones, crossed logs and coals under a tripod with a pot; a clay brazier with
+## coals and a grate to its east. Its coals glow with the embers shader (assets/fire/embers.tres).
 func _campfire() -> void:
 	var c := Vector3(-0.08, 0, -0.38)
 	_stone_ring(c, 0.78, 11, 0.22)
@@ -475,10 +476,16 @@ func _campfire() -> void:
 	for k in 6:
 		var a := TAU * k / 6.0
 		_ball(c + Vector3(cos(a) * 0.3, 0.06, sin(a) * 0.3), Vector3(0.1, 0.06, 0.1), FIRE, 0.2, true)
+	# No flames in the model (owner, 2026-11-05): camp.tscn sets the shader flame (assets/fire) on the pit.
+	# The old flame logs still go into a scratch surface, so every later shape keeps its random layout.
+	var glow := _glow
+	_glow = SurfaceTool.new()
+	_glow.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_log(c + Vector3(0, 0.08, 0), c + Vector3(0, 0.85, 0), 0.26, FIRE, 0.0, 5, true)
 	_log(c + Vector3(0.12, 0.08, 0.1), c + Vector3(0.15, 0.6, 0.12), 0.16, FIRE, 0.0, 5, true)
 	_log(c + Vector3(-0.14, 0.08, -0.08), c + Vector3(-0.18, 0.55, -0.1), 0.15, FIRE, 0.0, 5, true)
 	_log(c + Vector3(0, 0.08, 0.02), c + Vector3(0, 0.6, 0.02), 0.16, FIRE_CORE, 0.0, 5, true)
+	_glow = glow
 	var apex := c + Vector3(0.05, 2.3, 0.05)
 	for k in 3:
 		var a := TAU * k / 3.0 + 0.5
@@ -748,7 +755,7 @@ func _save(name: String) -> void:
 	if _glowing:
 		_glow.index()
 		_glow.commit(mesh)
-		mesh.surface_set_material(1, _glow_material)
+		mesh.surface_set_material(1, EMBERS if name == "campfire" else _glow_material)
 	mesh = PeakSmooth.smooth(mesh)
 	var tris := 0
 	for s in mesh.get_surface_count():

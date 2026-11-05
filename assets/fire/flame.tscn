@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://assets/fire/flame.gdshader" id="1_flame"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flame"]
+shader = ExtResource("1_flame")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tongue"]
+material = SubResource("ShaderMaterial_flame")
+top_radius = 0.0
+bottom_radius = 0.5
+height = 1.0
+radial_segments = 6
+rings = 2
+cap_top = false
+
+[node name="Flame" type="Node3D"]
+
+[node name="Tongue" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.95, 0, 0, 0, 0.5, 0, 0.47, 0)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_tongue")
+
+[node name="Tongue2" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.3, 0, 0, 0, 0.6, 0, 0, 0, 0.3, 0.14, 0.3, 0.1)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_tongue")
+
+[node name="Tongue3" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.28, 0, 0, 0, 0.55, 0, 0, 0, 0.28, -0.15, 0.27, -0.08)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_tongue")
+
+[node name="Tongue4" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.24, 0, 0, 0, 0.45, 0, 0, 0, 0.24, 0.02, 0.22, -0.17)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_tongue")

@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/peak/cage_rack.scn" id="14_cage_rack"]
 [ext_resource type="Script" path="res://game/presentation/camp/props/scenery.gd" id="11_scenery"]
 [ext_resource type="Script" path="res://game/presentation/camp/props/dressing.gd" id="18_dressing"]
+[ext_resource type="PackedScene" path="res://assets/fire/flame.tscn" id="40_flame"]
 
 [sub_resource type="ProceduralSkyMaterial" id="Sky_mat"]
 sky_top_color = Color(0.16, 0.4, 0.84, 1)
@@ -181,6 +182,9 @@ station_id = "campfire"
 solid = true
 title = "Campfire (meal for the next hunt)"
 model = ExtResource("9_campfire")
+
+[node name="Flame" parent="Stations/Campfire" instance=ExtResource("40_flame")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0.06, -0.38)
 
 [node name="Tavern" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(-0.8, 0, -0.6, 0, 1, 0, 0.6, 0, -0.8, 7.5, 0, 10)

@@ -6,7 +6,7 @@ current_milestone: P3_VERTICAL_SLICE
 active_task_id: P3-080
 last_completed_task_id: P3-055
 build_status: PASS
-updated: 2026-11-02
+updated: 2026-11-05
 ---
 
 # Project State
@@ -96,6 +96,7 @@ None. P3-001..P3-080 done.
 
 ## Latest
 
+- 2026-11-05 campfire fire: the baked flame logs are gone from `campfire.scn`; a cartoon low-poly flame (`assets/fire/flame.tscn` + `flame.gdshader`: faceted cones, choppy sway, yellow/orange/red bands) sits on the pit (camp.tscn `Stations/Campfire/Flame`), and the coals of the pit and the brazier use `assets/fire/embers.tres` (stepped breathing glow). Tavern hearth unchanged.
 - 2026-10-28: pickups (stone piles, landed spears/arrows/stones/nets) get a pulsing outline within 8 m (`highlight.gd`); a net that hits a tree or rock now drops to the ground instead of freezing in the air.
 
 - 2026-10-28 playtest fixes: tree collision now sits on the real trunk (many models keep it off the origin), corpses lie by turning only the model (no sinking), sling stones bounce off boars and lie as pickups.
