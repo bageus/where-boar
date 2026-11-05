@@ -12,6 +12,7 @@ const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 const StunStars = preload("res://game/features/boar/presentation/stun_stars.gd")
 const BoarFlight = preload("res://game/features/boar/presentation/boar_flight.gd")
+const BoarBump = preload("res://game/features/boar/public/boar_bump.gd")
 
 # ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
 const WANDER_SPEED := 1.5
@@ -207,7 +208,7 @@ func trip(seconds: float) -> void:
 	if boar.is_free():
 		_stun_left = seconds
 		_lie(true)
-		$Sounds.trapped()
+		$Sounds.trapped(seconds)
 		_stars = StunStars.new()
 		_stars.position.y = 1.0
 		add_child(_stars)
@@ -230,8 +231,7 @@ func _end_stun() -> void:
 	_stun_left = 0.0
 	_lie(false)
 	if _stars:
-		_stars.queue_free()
-		_stars = null
+		_stars.queue_free(); _stars = null
 
 
 ## Lays only the model on its side, lifted by half its width so it rests on the ground; turning the physics
@@ -245,12 +245,10 @@ func _lie(down: bool) -> void:
 func cage_capture() -> void:
 	net_hit()
 	$Model.stand()
-	$Sounds.trapped()
 
 
 func _hold() -> void:
 	boar.trap()
-	$Sounds.trapped()
 	_show_state()
 	held_changed.emit(true)
 
@@ -458,7 +456,7 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 	_eating = false
 	match boar.state:
 		Boar.State.WANDER:
-			var live := baits.filter(is_instance_valid)
+			var live := baits.filter(is_instance_valid) + get_tree().get_nodes_in_group("baits")  # bait and baited cages
 			var spots := Surroundings.bait_spots(live)
 			var bait := BoarSenses.bait_target(pos, spots)
 			if bait != -1:
@@ -563,6 +561,7 @@ func _ram(delta: float) -> void:
 			var charging := boar.state == Boar.State.CHARGE
 			other.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE if charging else 0, boar_type)
 			_ram_cooldown = RAM_COOLDOWN
+			BoarBump.thud(self, other)
 			if charging:
 				boar.end_charge()
 				_state_time = 0.0
@@ -571,6 +570,7 @@ func _ram(delta: float) -> void:
 			# Fence (D024) or wall (playtest 2026-10-27): turn round and run off roughly along its normal.
 			var normal := Vector2(hit.get_normal().x, hit.get_normal().z).normalized()
 			if _forced_left <= 0.0 or _forced_heading.dot(normal) < 0.0:
+				if $Sounds.running: BoarBump.into_object(self, hit)
 				_forced_heading = normal.rotated(randf_range(-WALL_TURN_SPREAD, WALL_TURN_SPREAD))
 				_forced_left = FENCE_TURN_SECONDS
 				if boar.state == Boar.State.WANDER:
@@ -593,7 +593,7 @@ func _report_outcome() -> void:
 func _show_state() -> void:
 	_label.text = state_name()
 	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE] and not hideout.hidden()
-	$Sounds.panicking = boar.state == Boar.State.PANIC and not hideout.hidden()
+	$Sounds.panicking = (boar.state == Boar.State.PANIC and not hideout.hidden()) or boar.state in [Boar.State.TRAPPED, Boar.State.CAPTURED]
 	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
 	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)

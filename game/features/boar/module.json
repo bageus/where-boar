@@ -13,7 +13,8 @@
     "public/boar_model.gd",
     "public/boar_type.gd",
     "public/boar_types.gd",
-    "public/boar_hitbox.gd"
+    "public/boar_hitbox.gd",
+    "public/boar_bump.gd"
   ],
   "dependencies": [
     "core.sfx"

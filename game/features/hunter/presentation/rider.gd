@@ -9,6 +9,7 @@ const MountScene = preload("res://game/features/hunter/presentation/mount.tscn")
 
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
+const BoarBump = preload("res://game/features/boar/public/boar_bump.gd")
 
 const MOUNT_REACH := 2.5
 # The angry mount's ram, ASSUMPTION numbers (D013).
@@ -23,6 +24,8 @@ var mount: StaticBody3D
 var _ram_cooldown := 0.0
 var _steps: Footsteps
 var _voice_left := 0.0
+## The saddle-and-gallop take playing over the hooves while the mount moves (owner, 2026-11-05).
+var _ride_sound: AudioStreamPlayer3D
 
 @onready var _hunter: CharacterBody3D = get_parent()
 
@@ -55,6 +58,8 @@ func _physics_process(delta: float) -> void:
 	var moving: bool = Vector2(_hunter.velocity.x, _hunter.velocity.z).length() > 0.5
 	if moving:
 		_voice_left = randf_range(VOICE_MIN_SECONDS, VOICE_MAX_SECONDS)
+		if not is_instance_valid(_ride_sound):
+			_ride_sound = Sfx.play(_hunter, "riding", -4.0)
 		return
 	_voice_left -= delta
 	if _voice_left <= 0.0:
@@ -86,6 +91,7 @@ func ram(delta: float) -> void:
 		var other := _hunter.get_slide_collision(i).get_collider()
 		if other is BoarBody:
 			other.knock(-_hunter.global_basis.z * RAM_IMPULSE)
+			BoarBump.thud(other, null)
 			other.spear_hit(RAM_DAMAGE)
 			_ram_cooldown = RAM_COOLDOWN
 			return

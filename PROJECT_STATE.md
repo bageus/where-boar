@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-080
+active_task_id: P3-091
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-05
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-080 done.
+None. P3-001..P3-080 and P3-091 done.
 
 ## Last completed work
 
@@ -148,6 +148,7 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-077 (2026-11-02): PEAK models read as solid, smooth pieces (owner). Shared `tools/peak_smooth.gd` (normals smoothed across edges under 65°, wrap lighting) used by the building, gear, weapon, trap and stump bakes; no per-face tint or alternating dark facets; bevelled boxes; the well is one round stone drum; the saddle one moulded pad (underside on the spine at y 0.3); softer tree crowns; quiver arrows stand on its floor (`shop_display.gd`). Rocks unchanged.
 - P3-078 (2026-11-02): forest boar (`common_brown`) remodelled after the owner's reference image (owner). `tools/build_blocky_boar.py` builds the source (chamfered block body, head block, light square snout with nostril slots, eyes, ears, cream tusks, legs with dark hooves; 580 triangles, flat colours), `rig_boars.py common_brown` rigs and animates it as before (same bones and animations, length 1.9 m, height ~1.1 m). `BoarType.back_height` (default 0.85, forest boar 1.0) sets the saddle height on the back. Other boar types unchanged.
 - P3-080 (2026-11-03): ripple on ground and walls: ground/terrain meshes skipped by the shadow bake now also stop casting live shadows (`baked_shadow.gd`), so they no longer shadow themselves.
+- P3-091 (2026-11-05): owner's new sounds wired, WAV removed (OGG only); hunt music loops after the first hit until boars calm down, results tune; baited cage, bump thud and shake, held boars panic, birds louder in pause.
 - P3-079 (2026-11-02): three playable hunters (bearded, plump, lanky) and the helper rebuilt as low-poly models after the owner's references (`tools/build_peak_cavemen.py`, rigged and animated by `rig_cavemen.py`, `assets/models/peak_cavemen/`). The pause menu has a Character option saved in settings (`character`); it swaps the shadow body and the first-person arm (`hunter_looks.gd`). Old Meshy `caveman_*.glb` files are unused.
 - P3-066 (2026-11-02): weapons restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_weapons.gd` bakes `assets/models/peak_weapons/<name>.res` + `<name>.tscn` (Node3D + MeshInstance3D `Model`) for spear, arrow, club, knife, sling, bow and sling stone: chunky flat-shaded prisms, one vertex-colour surface, 56-252 triangles (old textured glbs 220-830). Replace the glbs in `hands.tscn`, `spear.tscn`, `arrow.tscn`, `stone.tscn`, `stone_pile.tscn`. Thrown ones lie along +Y, tip up, so they fly tip first along the capsule; `landing.gd` unchanged. In hand: sling raised 0.17, bow turned 50 degrees. Net keeps its rig, gets a flat rope material (`net_model.gd` `ROPE`). Animation viewer still uses the old glbs. Not checked: look in the browser.
 - P3-067 (2026-11-02): stumps and logs restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_stumps.gd` bakes `PeakStump1` and `PeakLog1-4` into `assets/nature/meshes/peak/` (73-116 triangles instead of 232-464, same AABBs); `terrain.gd` and `log_bridge.tscn` point at them, collisions and placement unchanged. Not checked: look and FPS in the browser.

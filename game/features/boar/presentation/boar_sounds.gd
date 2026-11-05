@@ -4,6 +4,7 @@ extends Node3D
 ## to run so the others know (each boar picks another take, a little later than the last), squeals
 ## layered and some reversed while it panics, a squeal when hit, a grunt at the ram, hooves while it runs
 ## (splashes in a river, also at a walk), and quiet grunts now and then while it roams or eats.
+## Held by a trap or a net, or lying stunned, it squeals in panic all along (owner, 2026-11-05); dying, a death cry.
 
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
@@ -18,6 +19,9 @@ const PANIC_LAYER_CHANCE := 0.4
 const CRY_DELAY_SECONDS := 0.5
 const CRY_DISTANCE := 50.0
 
+## Fact: a weapon (or a ram) hit this boar; the hunt map starts its music.
+signal hit
+
 ## Set by the boar: true while fleeing, panicking or charging; panicking only in panic.
 var running := false:
 	set(value):
@@ -25,15 +29,19 @@ var running := false:
 		if _steps:
 			_steps.active = value and not silent
 var panicking := false
-## Set on death: a dead boar makes no more idle voice, panic squeals or steps.
+## Set on death: a dead boar makes no more idle voice, panic squeals or steps, only its death cry.
 var silent := false:
 	set(value):
+		if value and not silent:
+			Sfx.play(self, "boar_death", 0.0, 40.0)
 		silent = value
 		if silent and _steps:
 			_steps.active = false
 
 var _voice_left := randf_range(0.0, VOICE_MAX_SECONDS)
 var _panic_left := 0.0
+## Seconds left of squealing while it lies stunned by a tripwire.
+var _stunned_left := 0.0
 var _steps: Footsteps
 
 
@@ -50,12 +58,12 @@ func _ready() -> void:
 ## Hit by a weapon.
 func squeal() -> void:
 	Sfx.play(self, "boar_panic", 0.0, 40.0)
+	hit.emit()
 
 
-## Caught by a trap: a few panicked squeals in a row.
-func trapped() -> void:
-	for delay in [0.0, 0.4, 0.9]:
-		Sfx.play(self, "boar_panic", 0.0, 40.0, delay)
+## Tripped: panicked squeals for the seconds it lies stunned.
+func trapped(seconds: float) -> void:
+	_stunned_left = seconds
 
 
 ## Started to run: the call that warns the herd.
@@ -71,7 +79,8 @@ func attack() -> void:
 func _process(delta: float) -> void:
 	if silent:
 		return
-	if panicking:
+	_stunned_left -= delta
+	if panicking or _stunned_left > 0.0:
 		_panic_left -= delta
 		if _panic_left <= 0.0:
 			_panic_left = randf_range(PANIC_MIN_SECONDS, PANIC_MAX_SECONDS)

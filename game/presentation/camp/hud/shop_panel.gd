@@ -4,6 +4,7 @@ extends PanelContainer
 
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 ## Fact: an item was bought; the camp passes it on so the game saves.
 signal purchased(item_id: String)
@@ -58,5 +59,6 @@ func _refresh() -> void:
 
 func _buy(item_id: String) -> void:
 	if progress.buy(item_id):
+		Sfx.ui(self, "buying")
 		purchased.emit(item_id)
 	_refresh()

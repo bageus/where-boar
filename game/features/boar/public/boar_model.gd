@@ -8,6 +8,9 @@ const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
+## Seconds between chomps while eating (owner, 2026-11-05: chomping, takes in turn).
+const CHOMP_SECONDS := Vector2(0.9, 1.6)
 const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
 const SADDLE_HEIGHT := 1.1  # and its height, m
 const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
@@ -17,6 +20,7 @@ var _back_height := 0.85
 var _dead := false
 var _dust: CPUParticles3D
 var _flash := StandardMaterial3D.new()
+var _next_chomp := 0
 
 
 func show_type(boar_type: Resource) -> void:
@@ -44,6 +48,9 @@ func move(speed: float, eating := false) -> void:
 	_player.play(anim, 0.4 if anim == "eat" else 0.2)
 	_player.speed_scale = 1.0 if anim == "idle" else speed / (WALK_SPEED if anim == "walk" else RUN_SPEED)
 	_dust.emitting = anim == "run"
+	if anim == "eat" and Time.get_ticks_msec() >= _next_chomp:
+		_next_chomp = Time.get_ticks_msec() + roundi(randf_range(CHOMP_SECONDS.x, CHOMP_SECONDS.y) * 1000.0)
+		Sfx.play(self, "chomping", -6.0, 15.0)
 
 
 ## Whole model flashes white and fades back (hurt).

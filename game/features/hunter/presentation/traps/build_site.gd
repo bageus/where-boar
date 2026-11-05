@@ -4,6 +4,7 @@ extends RefCounted
 ## the hunter holds E next to it, or the hired trap setter walks over and builds it.
 
 const TrapPlacement = preload("res://game/features/hunter/presentation/trap_placement.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const GHOST_TRANSPARENCY := 0.6
 
 
@@ -43,9 +44,12 @@ static func progress(trap: Node3D) -> float:
 
 
 ## Adds delta seconds of work; the trap starts working once done. True when this call finished it.
+## While anyone builds, building takes follow one another at the trap (owner, 2026-11-05: mixed and looped).
 static func build(trap: Node3D, delta: float) -> bool:
 	if not is_ghost(trap):
 		return false
+	if not (trap.has_meta("build_sound") and is_instance_valid(trap.get_meta("build_sound"))):
+		trap.set_meta("build_sound", Sfx.play(trap, "building", -4.0, 25.0))
 	var done := progress(trap) + delta / float(trap.get_meta("build_seconds"))
 	if done < 1.0:
 		trap.set_meta("build_progress", done)

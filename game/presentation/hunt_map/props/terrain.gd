@@ -240,6 +240,7 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = rng_seed
 	var spots: Array = meshes.map(func(_m: Mesh) -> Array[Transform3D]: return [] as Array[Transform3D])
+	var batches: Array = meshes.map(func(_m: Mesh) -> MultiMesh: return MultiMesh.new())
 	var placed := 0
 	var tries := 0
 	while placed < count and tries < 3000:
@@ -286,9 +287,10 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 			shape.shape = BoxShape3D.new()
 			(shape.shape as BoxShape3D).size = box.size * size * Vector3(0.7, 1.0, 0.9)
 			shape.transform = Transform3D(spot.basis.orthonormalized(), spot * box.get_center())
+		shape.set_meta("shake", [batches[k], spots[k].size() - 1])  # a boar running into it shakes it (boar_bump.gd)
 		add_child(shape)
 	for k in meshes.size():
-		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE)
+		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE, batches[k])
 
 
 ## True where grass grows at a map point; footsteps there rustle (core/sfx footsteps.gd).
@@ -328,10 +330,10 @@ func _normal(i: int, j: int) -> Vector3:
 
 
 ## One draw call for many copies; spots are relative to centre. draw_range 0 = always drawn.
-func _add_multimesh(mesh: Mesh, spots: Array[Transform3D], centre: Vector3, material: Material, draw_range: float) -> void:
+func _add_multimesh(mesh: Mesh, spots: Array[Transform3D], centre: Vector3, material: Material, draw_range: float,
+		multimesh := MultiMesh.new()) -> void:
 	if spots.is_empty():
 		return
-	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = mesh
 	multimesh.instance_count = spots.size()

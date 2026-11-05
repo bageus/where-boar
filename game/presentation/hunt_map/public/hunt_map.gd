@@ -9,7 +9,9 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
+const HuntMusic = preload("res://game/presentation/hunt_map/props/hunt_music.gd")
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
@@ -61,6 +63,7 @@ var _tip := 0
 var _tip_left := 0.0
 ## Bait on the ground; the same array is shared with every boar.
 var _baits: Array[Node3D] = []
+var _music: HuntMusic
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _terrain: StaticBody3D = $Terrain
@@ -72,6 +75,9 @@ func _ready() -> void:
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()
+	_music = HuntMusic.new()
+	_music.boars = $Boars
+	add_child(_music)
 	var zones: Array[Vector2] = []
 	for zone: Node3D in $EscapeZones.get_children():
 		zones.append(Vector2(zone.position.x, zone.position.z))
@@ -112,6 +118,7 @@ func _ready() -> void:
 
 func _batch_props() -> void:
 	var batches := {}  # [mesh, cell, cast_shadow] -> Array[Transform3D]
+	var trees := []  # [tree, key, index]: a boar running into a tree shakes its copy (boar_bump.gd)
 	for prop in $Props.get_children():
 		var piles: bool = prop.is_in_group("stone_piles")
 		for mesh_node: MeshInstance3D in prop.find_children("*", "MeshInstance3D", true, false):
@@ -123,9 +130,13 @@ func _batch_props() -> void:
 			if not batches.has(key):
 				batches[key] = [] as Array[Transform3D]
 			batches[key].append($Props.global_transform.affine_inverse() * mesh_node.global_transform)
+			if prop.scene_file_path.ends_with("tree.tscn"):
+				trees.append([prop, key, batches[key].size() - 1])
 			mesh_node.queue_free()
+	var made := {}
 	for key: Array in batches:
 		var multimesh := MultiMesh.new()
+		made[key] = multimesh
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.mesh = key[0]
 		multimesh.instance_count = batches[key].size()
@@ -135,6 +146,8 @@ func _batch_props() -> void:
 		node.multimesh = multimesh
 		node.cast_shadow = key[2]
 		$Props.add_child(node)
+	for tree: Array in trees:
+		tree[0].set_meta("shake", [made[tree[1]], tree[2]])
 
 
 func _add_wild(animal: CharacterBody3D) -> void:
@@ -150,6 +163,7 @@ func _ambience() -> void:
 	jungle.group = "jungle_sound"
 	jungle.max_distance = 0.0
 	jungle.volume_db = -8.0
+	jungle.paused_boost_db = 8.0
 	add_child(jungle)
 	var river := SfxLoop.new()
 	river.name = "RiverSound"
@@ -202,6 +216,7 @@ func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
 		boar.position.y = _terrain.height_at(boar.position.x, boar.position.z) + 0.5
 		boar.outcome_reached.connect(_on_outcome)
 		boar.held_changed.connect(_on_held_changed)
+		boar.get_node("Sounds").hit.connect(_music.engage)
 		$Boars.add_child(boar)
 
 
@@ -266,6 +281,9 @@ func _on_outcome(type_id: String, kind: int, wounded: bool) -> void:
 	hunt.record(type_id, kind, wounded)
 	if hunt.tusks() > tusks_before:
 		_hunter.show_gain("+%d tusks" % (hunt.tusks() - tusks_before))
+		Sfx.ui(self, "tusk")
+	if kind == BoarOutcome.Kind.ESCAPED:
+		Sfx.ui(self, "boar_escaped", -4.0)
 	var type := BoarTypes.find(type_id)
 	var verb: String = {BoarOutcome.Kind.DEAD: "killed", BoarOutcome.Kind.CAPTURED: "caught", BoarOutcome.Kind.ESCAPED: "escaped!"}[kind]
 	if wounded and kind == BoarOutcome.Kind.CAPTURED:
@@ -289,6 +307,7 @@ func _on_interacted() -> void:
 	# A wild rooster or turkey within reach is grabbed by hand (playtest 2026-10-27).
 	for animal in $Wild.get_children():
 		if animal.try_grab(_hunter.global_position):
+			Sfx.play(_hunter, "pickup_bird")
 			return
 	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
 		return

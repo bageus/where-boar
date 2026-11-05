@@ -35,7 +35,7 @@ func _on_body_entered(body: Node) -> void:
 	if hits and _hurt:
 		return
 	# Heard where it lands, only by whoever is near (owner, 2026-10-29).
-	Sfx.play(self, "rock_fell" if pickup_kind == "stone" else "arrow_fell", 0.0, 20.0)
+	Sfx.play(self, "rock_fell" if pickup_kind == "stone" else ("arrow_hit" if hits else "arrow_fell"), 0.0, 20.0)
 	if hits:
 		_hurt = true
 		body.spear_hit(damage)

@@ -13,6 +13,7 @@
     "public/animation_viewer.gd"
   ],
   "dependencies": [
+    "core.sfx",
     "features.boar",
     "features.companions",
     "features.hunt"

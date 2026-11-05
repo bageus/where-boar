@@ -3,10 +3,11 @@ extends RefCounted
 ## E takes back the thrown spears, nets, arrows and stones that landed within reach, and stones from piles.
 
 const Landing = preload("res://game/features/hunter/presentation/landing.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 
 ## Takes everything in reach (thrown is the hunter's list, emptied of what was taken); returns the
-## "+N ..." text to show, "" when nothing was taken.
+## "+N ..." text to show, "" when nothing was taken. One pickup sound plays for the first kind taken (owner, 2026-11-05).
 static func run(hunter: CharacterBody3D, thrown: Array[RigidBody3D]) -> String:
 	var loadout = hunter.loadout
 	var before := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
@@ -32,6 +33,8 @@ static func run(hunter: CharacterBody3D, thrown: Array[RigidBody3D]) -> String:
 	var gains := PackedStringArray()
 	var after := [loadout.spears, loadout.nets, loadout.arrows, loadout.stones]
 	for i in after.size():
+		if after[i] > before[i] and gains.is_empty():
+			Sfx.play(hunter, ["pickup_spear", "pickup_spear", "pickup_arrow", "pickup_stone"][i])
 		if after[i] > before[i]:
 			gains.append("+%d %s" % [after[i] - before[i], ["spear", "net", "arrow", "stone"][i] + ("s" if after[i] - before[i] > 1 else "")])
 	return ", ".join(gains)

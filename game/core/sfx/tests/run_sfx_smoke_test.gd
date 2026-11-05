@@ -13,10 +13,14 @@ func _init() -> void:
 	failures += _check(groups.all(func(g: String) -> bool: return Sfx.stream(g).streams_count > 0), "every group has takes")
 	failures += _check(Sfx.stream("boar_cry") == Sfx.stream("boar_cry"), "a group is loaded once and shared")
 	failures += _check(Sfx.stream("boar_panic").streams_count == 10, "panic has 5 takes and 5 reversed")
+	var tunes := Sfx.stream("music_hunt")
+	failures += _check(range(tunes.streams_count).all(func(i: int) -> bool: return is_equal_approx(tunes.get_stream(i).get_length(), 8.0)),
+			"hunt music loops are 8 s each")
+	failures += _check(not DirAccess.get_files_at(Sfx.ROOT + "boar_cry").has("boar_cry_1.wav"), "no WAV copies left")
 	var scene := Node3D.new()
 	root.add_child(scene)
 	await process_frame  # root children enter the tree after _init
-	var one := Sfx.play(scene, "club", 0.0, 20.0)
+	var one := Sfx.play(scene, "club_hit", 0.0, 20.0)
 	var loop := SfxLoop.new()
 	scene.add_child(loop)
 	await process_frame

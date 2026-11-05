@@ -5,12 +5,15 @@ extends CanvasLayer
 
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 const SPEAR_NAMES := {"flint": "Flint spear", "bone": "Bone spear", "wood": "Wooden spear"}
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow", "Knife"]
 
 var _gain_fade: Tween
 var _prompt_pulse: Tween
+## "bait" or "trap": which ring is open, for its pick sound.
+var _menu_key := ""
 
 
 func _ready() -> void:
@@ -71,6 +74,8 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 
 ## Opens the bait ("bait") or trap ("trap") ring with what is carried of each.
 func open_menu(loadout: Loadout, key: String) -> void:
+	_menu_key = key
+	Sfx.ui(self, "inventory_" + key)
 	var ids: Array = Loadout.BAIT_IDS if key == "bait" else Loadout.TRAP_IDS
 	var stock: Dictionary = loadout.baits if key == "bait" else loadout.traps
 	$Menu.open(ids, ids.map(func(item_id: String) -> String: return "%s x%d" % [_name(item_id), stock.get(item_id, 0)]))
@@ -82,7 +87,10 @@ func menu_open() -> bool:
 
 ## Closes the ring; the picked item id or "".
 func close_menu() -> String:
-	return $Menu.close()
+	var picked: String = $Menu.close()
+	if picked != "":
+		Sfx.ui(self, "select_" + _menu_key)
+	return picked
 
 
 ## Build bar for the trap ghost in reach (null hides it).

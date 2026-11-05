@@ -5,9 +5,12 @@ extends CenterContainer
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 
+## One of the hunt's closing tunes plays while the results are counted (owner, 2026-11-05).
 func show_results(hunt: Hunt, total_tusks: int) -> void:
+	Sfx.ui(self, "music_hunt_end", -6.0)
 	var lines: PackedStringArray = []
 	for type_id in hunt.type_ids():
 		var type := BoarTypes.find(type_id)

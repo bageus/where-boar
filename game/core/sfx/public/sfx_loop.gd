@@ -21,6 +21,10 @@ const ACCENT_SECONDS := Vector2(4.0, 10.0)
 @export var max_distance := 10.0
 ## Loop one take picked at random instead of all of them (the cliff wind).
 @export var single_take := false
+## Louder by this much while the game is paused, and kept playing then (owner, 2026-11-05: birds heard in the pause).
+@export var paused_boost_db := 0.0
+
+const PAUSE_BUS := "PausedAmbience"
 
 var _long: Array[AudioStream] = []
 var _short: Array[AudioStream] = []
@@ -29,6 +33,11 @@ var _accent_left := 0.0
 
 
 func _ready() -> void:
+	if paused_boost_db != 0.0:
+		process_mode = Node.PROCESS_MODE_ALWAYS
+		if AudioServer.get_bus_index(PAUSE_BUS) == -1:
+			AudioServer.add_bus()
+			AudioServer.set_bus_name(AudioServer.bus_count - 1, PAUSE_BUS)
 	var takes := Sfx.stream(group)
 	for i in takes.streams_count:
 		var take := takes.get_stream(i)
@@ -39,6 +48,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if paused_boost_db != 0.0:
+		var bus := AudioServer.get_bus_index(PAUSE_BUS)
+		var target := paused_boost_db if get_tree().paused else 0.0
+		AudioServer.set_bus_volume_db(bus, move_toward(AudioServer.get_bus_volume_db(bus), target, 12.0 * delta))
 	_next_left -= delta
 	if _next_left <= 0.0:
 		_next_left = _play_take()
@@ -82,5 +95,7 @@ func _player(take: AudioStream) -> Node:
 	else:
 		player = AudioStreamPlayer.new()
 	player.stream = take
+	if paused_boost_db != 0.0:
+		player.bus = PAUSE_BUS
 	add_child(player)
 	return player

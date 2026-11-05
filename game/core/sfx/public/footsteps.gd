@@ -11,7 +11,7 @@ const COVER_LAYER := 1 << 4
 ## Physics layer 7: river water areas (river_segment.tscn).
 const WATER_LAYER := 1 << 6
 
-@export var ground := "character_step"
+@export var ground := "steps_sand"
 ## "" uses ground on grass too.
 @export var grass := ""
 @export var water := "river_steps"

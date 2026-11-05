@@ -8,7 +8,7 @@ const ROOT := "res://assets/sfx/"
 const PITCH_SPREAD := 1.12
 const VOLUME_SPREAD_DB := 2.0
 
-## Every take is stored as OGG and as WAV; the single-threaded web build plays the WAV so Vorbis is not decoded there.
+## Every take is OGG (owner, 2026-11-05: WAV did not cure the web stutter, so the WAV copies are gone).
 static var _groups: Dictionary = {}
 
 
@@ -19,7 +19,7 @@ static func stream(group: String) -> AudioStreamRandomizer:
 		randomizer.random_pitch = PITCH_SPREAD
 		randomizer.random_volume_offset_db = VOLUME_SPREAD_DB
 		for file in ResourceLoader.list_directory(ROOT + group):
-			if file.get_extension() == ("wav" if OS.has_feature("web") else "ogg"):
+			if file.get_extension() == "ogg":
 				randomizer.add_stream(-1, load(ROOT + group + "/" + file))
 		assert(randomizer.streams_count > 0, "no sounds in " + ROOT + group)
 		_groups[group] = randomizer
@@ -46,4 +46,15 @@ static func play(parent: Node3D, group: String, volume_db := 0.0, max_distance :
 		player.get_tree().create_timer(delay).timeout.connect(player.play)
 	else:
 		player.play()
+	return player
+
+
+## One take of group heard everywhere at the same level, not placed in the world (interface, stings).
+static func ui(parent: Node, group: String, volume_db := 0.0) -> AudioStreamPlayer:
+	var player := AudioStreamPlayer.new()
+	player.stream = stream(group)
+	player.volume_db = volume_db
+	player.finished.connect(player.queue_free)
+	parent.add_child(player)
+	player.play()
 	return player

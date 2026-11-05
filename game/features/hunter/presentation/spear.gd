@@ -43,8 +43,9 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
-	Sfx.play(self, "spear_fell", 0.0, 20.0)
-	# A boar or its larger hitbox (playtest 2026-10-27).
-	if body is BoarBody or body.has_method("spear_hit"):
+	# A boar or its larger hitbox (playtest 2026-10-27); it thuds into the carcass (owner, 2026-11-05).
+	var hits := body is BoarBody or body.has_method("spear_hit")
+	Sfx.play(self, "spear_hit" if hits else "spear_fell", 0.0, 20.0)
+	if hits:
 		body.spear_hit(Loadout.SPEAR_DAMAGE[kind])
 	Landing.land(self, body, _fly_velocity)

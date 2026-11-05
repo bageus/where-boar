@@ -111,6 +111,7 @@ func _ambience() -> void:
 	jungle.group = "jungle_sound"
 	jungle.max_distance = 0.0
 	jungle.volume_db = -10.0
+	jungle.paused_boost_db = 8.0
 	add_child(jungle)
 	var cliff := SfxLoop.new()
 	cliff.name = "CliffSound"
@@ -180,6 +181,7 @@ func _use(station: Node3D) -> void:
 	# Every other station is a shop: freeze the hunter and free the mouse while it is open.
 	hunter.set_physics_process(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	Sfx.ui(self, "shop")
 	_shop.open(station.station_id, station.title)
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/public/hunter.gd" id="1_hunter"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hunter_hud.gd" id="2_hud"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://game/features/hunter/presentation/radial_menu.gd" id="5_menu"]
 [ext_resource type="Script" path="res://game/features/hunter/presentation/shadow_body.gd" id="6_shadow"]
 [ext_resource type="Script" path="res://game/core/sfx/public/footsteps.gd" id="7_steps"]
+[ext_resource type="Script" path="res://game/features/hunter/presentation/hunter_sounds.gd" id="8_sounds"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_hunter"]
 radius = 0.4
@@ -253,6 +254,9 @@ script = ExtResource("7_steps")
 grass = "character_step_grass"
 bush = "character_bush"
 volume_db = -6.0
+
+[node name="Sounds" type="Node3D" parent="."]
+script = ExtResource("8_sounds")
 
 [node name="Rider" type="Node" parent="."]
 script = ExtResource("3_rider")

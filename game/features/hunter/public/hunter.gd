@@ -150,7 +150,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_reach.add_exception(self)
 	_base_fov = _camera.fov
-	$Voice.stream = Sfx.stream("character_roar")
+	$Voice.stream = Sfx.stream("man_hunting_cry")
 	_update_hud()
 
 
@@ -486,6 +486,7 @@ func _attack() -> void:
 			elif loadout.spear_in_hand:
 				_strike("spear_attack")
 				if _hits_boar(_reach.get_collider()):
+					Sfx.play(_reach.get_collider() as Node3D, "spear_hit", 0.0, 20.0)
 					_reach.get_collider().spear_hit(Loadout.SPEAR_DAMAGE[loadout.spear_kind])
 		Weapon.NET:
 			if loadout.throw_net():
@@ -493,14 +494,15 @@ func _attack() -> void:
 				Sfx.play(self, "net_throw")
 				_throw(NetScene, minf(NET_SPEED * lerpf(1.0, CHARGED_RANGE_SCALE, power), NET_MAX_SPEED))
 		Weapon.KNIFE:
-			_strike("")
+			_strike("knife_swing")
 			if _in_reach(KNIFE_REACH):
+				Sfx.play(_reach.get_collider() as Node3D, "knife_hit", 0.0, 20.0)
 				_reach.get_collider().spear_hit(roundi(KNIFE_DAMAGE * lerpf(1.0, CHARGED_DAMAGE_SCALE, power)))
 		Weapon.CLUB:
 			_strike("")
 			var target := _reach.get_collider()
 			if _in_reach(CLUB_REACH):
-				Sfx.play(target as Node3D, "club", 0.0, 20.0)
+				Sfx.play(target as Node3D, "club_hit", 0.0, 20.0)
 				var scale := lerpf(1.0, CHARGED_DAMAGE_SCALE, power)
 				target.spear_hit(roundi(CLUB_DAMAGE * scale))
 				if target.has_method("knock"):
