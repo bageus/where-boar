@@ -132,3 +132,13 @@ Unapproved ideas and possible future features belong here.
 | P3-078 | 3 | Forest boar remodelled after the owner's reference: blocky brown body, square snout, cream tusks, dark hooves (`tools/build_blocky_boar.py` + `rig_boars.py`) | P3-077 | DONE |
 | P3-079 | 3 | Hunter (bearded, plump, lanky) and helper models after the owner's references; character choice in the pause menu settings (`tools/build_peak_cavemen.py`, `hunter_looks.gd`) | P3-078 | DONE |
 | P3-080 | 3 | Fix ripple (shadow acne) on ground and walls: ground meshes stop casting live shadows (`baked_shadow.gd`) | P3-079 | DONE |
+| P3-081 | 3 | Audio buses Music/SFX/Ambience/UI, per-bus volume sliders saved in settings, non-positional `Sfx.play_ui` (`docs/AUDIO_AUDIT.md` §3) | P3-031 | TODO |
+| P3-082 | 3 | Combat sounds: ram thud and hunter hurt cry, projectile hit on flesh, boar death squeal and fall, knife swing/hit, club swing (`docs/AUDIO_AUDIT.md`) | P3-081 | TODO |
+| P3-083 | 3 | Trap and net sounds: trigger sound per trap kind, netted boar struggling, building hammer/dig, trap ready, bait placed, held boar taken | P3-081 | TODO |
+| P3-084 | 3 | Boar sounds: receding hooves on escape (M006), charge wind-up roar and pawing, rare boar sting, voice pitch by boar type, eating bait, alert snort | P3-081 | TODO |
+| P3-085 | 3 | Riding sounds: mount, dismount, thrown off, ramming while riding | P3-081 | TODO |
+| P3-086 | 3 | Hunter body sounds: downed, low-health heartbeat, low-stamina breathing, jump/land, lunge, drink, pick-up | P3-081 | TODO |
+| P3-087 | 3 | Camp sounds: purchase, not enough tusks/sold out, shop open/close per shop, start-hunt horn | P3-081 | TODO |
+| P3-088 | 3 | UI sounds: +tusks chime, hunt goal met, results tally, menu hover/click/slider, ring menus | P3-081 | TODO |
+| P3-089 | 3 | Music: calm camp theme, layered hunt theme (search/tension), rare boar sting, results jingles; ducked under hooves and ram (section 17) | P3-081 | TODO |
+| P3-090 | 3 | Ambience: wind on hunt-map heights and cliffs, point birds, insects in tall grass, leaf rustle | P3-081 | TODO |

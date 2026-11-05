@@ -116,6 +116,7 @@ None. P3-001..P3-080 done.
 Owner playtest of the vertical slice (playtest batches 1 and 2 of 2026-10-27 in, D027).
 
 ## Handoff notes
+- 2026-11-05 audio audit (owner): `docs/AUDIO_AUDIT.md` lists the 34 sound groups in use and what is missing (no music, no UI sounds, one Master bus; silent ram hit on the hunter, no boar death, escape, trap-trigger or purchase sounds). Planned as P3-081..P3-090 in `BACKLOG.md`; P3-081 (audio buses) first. New sounds need the owner's recordings.
 
 Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → results. Controls are listed on the HUD. After changing the Green Valley relief run `python tools/bake_green_valley.py`.
 
