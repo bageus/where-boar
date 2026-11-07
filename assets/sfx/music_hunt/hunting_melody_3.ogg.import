@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/hunting_melody_3.ogg-91f3b7df68d1179c60dd862d
 
 [params]
 
-loop=false
+loop=true
 loop_offset=0
 bpm=0
 beat_count=0

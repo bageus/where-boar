@@ -1,7 +1,7 @@
 extends AudioStreamPlayer
 
-## Hunt music (owner, 2026-11-05): once the hunter has hit a boar, the 8-second loops of music_hunt play one
-## after another in random order, seamlessly, while any boar still runs; when every boar has calmed down the
+## Hunt music (owner, 2026-11-07): once the hunter has hit a boar, one random 8-second take of music_hunt
+## loops seamlessly while any boar still runs; when every boar has calmed down the
 ## music fades out and waits for the next hit.
 
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
@@ -19,16 +19,16 @@ var _check_left := 0.0
 var _fade: Tween
 
 
-func _ready() -> void:
-	var playlist := AudioStreamPlaylist.new()
+## One random take loops (sample-accurate OGG loop, no seam) until the herd calms down; the next
+## attack picks another take.
+func _pick_take() -> void:
 	var takes := Sfx.stream("music_hunt")
-	playlist.stream_count = takes.streams_count
-	for i in takes.streams_count:
-		playlist.set_list_stream(i, takes.get_stream(i))
-	playlist.shuffle = true
-	playlist.loop = true
-	playlist.fade_time = 0.0  # each take is exactly one loop long, so they join without a seam
-	stream = playlist
+	var next := randi() % takes.streams_count
+	if takes.streams_count > 1 and takes.get_stream(next) == stream:
+		next = (next + 1) % takes.streams_count
+	var take: AudioStreamOggVorbis = takes.get_stream(next)
+	take.loop = true
+	stream = take
 
 
 ## A boar was hit: the music starts if it is not playing yet.
@@ -55,6 +55,7 @@ func _to(volume: float) -> void:
 		_fade.kill()
 	if volume > -60.0 and not playing:
 		volume_db = -40.0
+		_pick_take()
 		play()
 	_fade = create_tween()
 	_fade.tween_property(self, "volume_db", volume, FADE_SECONDS if volume <= -60.0 else 0.5)
