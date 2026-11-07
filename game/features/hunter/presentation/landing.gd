@@ -75,10 +75,16 @@ static func _stick(item: RigidBody3D, boar: Node3D, velocity: Vector3) -> void:
 		item.global_basis = Basis.looking_at(dir, up)
 		item.global_position = hit.point + dir * (TIP_DEPTH - half)
 	else:
-		# No flight line known: sink the missile toward the boar's middle.
-		var centre := boar.global_position + Vector3.UP * FLESH_Y
-		var to_centre := centre - item.global_position
-		item.global_position += to_centre.normalized() * minf(STICK_DEPTH, to_centre.length())
+		# Line missed the flesh (the hitbox is wider) or is unknown: the tip goes just under the skin nearest the item, pointing inward (owner, 2026-11-07).
+		var local := boar.to_local(item.global_position)
+		var axis := Geometry3D.get_closest_point_to_segment(local, Vector3(0.0, FLESH_Y, -FLESH_HALF), Vector3(0.0, FLESH_Y, FLESH_HALF))
+		var out := (local - axis).normalized() if local.distance_to(axis) > 0.01 else Vector3.UP
+		var dir_in: Vector3 = -(boar.global_basis * out).normalized()
+		var tip := boar.to_global(axis + out * (FLESH_RADIUS - TIP_DEPTH))
+		var up_in := Vector3.UP if absf(dir_in.dot(Vector3.UP)) < 0.99 else Vector3.RIGHT
+		item.global_basis = Basis.looking_at(dir_in, up_in)
+		var half_len := item.get_node("Collision").shape.height * 0.5 if capsule else 0.0
+		item.global_position = tip - dir_in * half_len
 	item.reparent(boar)
 	item.top_level = false
 

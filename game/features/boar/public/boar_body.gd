@@ -131,10 +131,9 @@ func _ready() -> void:
 
 
 func spear_hit(amount: int) -> void:
+	if boar.state == Boar.State.DEAD: return  # a corpse takes no more hits
 	var was_charging := boar.state == Boar.State.CHARGE
-	boar.take_hit(amount)
-	$Sounds.squeal()
-	$Model.flash()
+	boar.take_hit(amount); $Sounds.squeal(); $Model.flash()
 	if boar.state == Boar.State.CHARGE:
 		# Mid-ram: the hit hurts but does not stop it.
 		_after_change()
@@ -594,7 +593,7 @@ func _show_state() -> void:
 	_label.text = state_name()
 	$Sounds.running = boar.state in [Boar.State.FLEE, Boar.State.PANIC, Boar.State.CHARGE] and not hideout.hidden()
 	$Sounds.panicking = (boar.state == Boar.State.PANIC and not hideout.hidden()) or boar.state in [Boar.State.TRAPPED, Boar.State.CAPTURED]
-	# Health bar over the boar, green when full, red when nearly dead (section 16); shrinks to its centre.
+	$HealthBar.visible = boar.state != Boar.State.DEAD
 	var ratio := float(boar.health) / boar_type.max_health
 	_health_fill.scale.x = maxf(ratio, 0.001)
 	(_health_fill.material_override as StandardMaterial3D).albedo_color = Color.RED.lerp(Color.GREEN, ratio)
