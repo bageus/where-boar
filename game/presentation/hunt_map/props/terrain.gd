@@ -50,7 +50,7 @@ const CLIFF_ROCKS: Array[Mesh] = [
 ]
 ## One broad cliff wall per CLIFF_STEP x CLIFF_STEP metres of cliff, its face turned downhill so neighbours
 ## join into one face (owner, 2026-11-02: no chaotic pile of boulders); each is solid.
-const CLIFF_STEP := 6
+const CLIFF_STEP := 10
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
 const STUMP := preload("res://assets/nature/meshes/peak/PeakStump1.res")
 ## Fallen trees and logs (owner, 2026-10-28).
@@ -221,7 +221,7 @@ func _place_cliff_rocks() -> void:
 				continue
 			var k := rng.randi() % CLIFF_ROCKS.size()
 			var box := CLIFF_ROCKS[k].get_aabb()
-			var size := rng.randf_range(11.0, 15.0) / box.size.x
+			var size := rng.randf_range(16.0, 22.0) / box.size.x
 			var x := best.x - (w - 1) * 0.5
 			var z := best.y - (d - 1) * 0.5
 			var down := _normal(best.x, best.y)  # the wall's face (+z) looks down the slope

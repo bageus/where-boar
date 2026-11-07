@@ -147,3 +147,4 @@ Unapproved ideas and possible future features belong here.
 | P3-094 | 3 | Hunt bugs (2026-11-07): arrow sticks into boar body, no repeat death on corpse hit, no health bar on dead boar | P3-093 | DONE |
 | P3-095 | 3 | Hunter's shout wave runs over trees, stumps, rocks and other objects, not grass (overlay pass) | P3-094 | DONE |
 | P3-096 | 3 | Hunt FPS (owner 2026-11-07: ~8 FPS): forest boar one surface (1 draw call, not 6), grass in 10 m chunks with half density where it sinks, stone piles drawn within 45 m, outline skips unchanged items, far calm boars think every 4th tick and standing ones skip the slide; landing.gd parse fix | P3-095 | DONE |
+| P3-097 | 3 | Cliffs minimal: one solid rock per cliff, fewer and larger rim/drop-off rocks | P3-096 | DONE |

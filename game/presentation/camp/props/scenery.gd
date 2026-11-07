@@ -37,8 +37,8 @@ const GRASS_FOREST := 2500  # mostly hidden behind the palisade
 ## The wall's rocks reach down to the valley floor (vista.gd BASE_Y) so no sky or valley shows under them.
 const WALL_DEPTH := 44.0
 ## Rocks scattered onto the dirt from the rim: how many per rim spot (one every RIM_STEP metres) and how far in (metres).
-const CREEPERS_PER_RIM_SPOT := 1
-const RIM_STEP := 3
+const CREEPERS_PER_RIM_SPOT := 0
+const RIM_STEP := 6
 const CREEP_DEPTH := 3.6
 const GATE_HALF := 2.2
 const GATE_OPEN := 0.55  # radians each leaf swings out towards the forest
@@ -148,13 +148,13 @@ func _rock_wall(rng: RandomNumberGenerator) -> void:
 ## Rocks stepping down from the camp's rim towards the valley along the east side and the east half
 ## of the south side.
 func _drop_off(rng: RandomNumberGenerator) -> void:
-	for row in 5:
-		var top := 0.4 - row * row * 2.2 - row * 2.0
-		var out := 3.0 + row * 5.5
-		for z in range(int(FOREST_Z.x), int(HALF + out), 8):
-			_big_rock(rng, Vector3(HALF + out, top, z + rng.randf_range(-1.5, 1.5)), Vector2(8, 12) + Vector2.ONE * row * 4.0, true)
-		for x in range(int(SOUTH_SPLIT), int(HALF + out), 8):
-			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), top, HALF + out), Vector2(8, 12) + Vector2.ONE * row * 4.0, true)
+	for row in 3:
+		var top := 0.4 - row * row * 4.0 - row * 4.0
+		var out := 3.0 + row * 8.0
+		for z in range(int(FOREST_Z.x), int(HALF + out), 12):
+			_big_rock(rng, Vector3(HALF + out, top, z + rng.randf_range(-1.5, 1.5)), Vector2(10, 14) + Vector2.ONE * row * 4.0, true)
+		for x in range(int(SOUTH_SPLIT), int(HALF + out), 12):
+			_big_rock(rng, Vector3(x + rng.randf_range(-1.5, 1.5), top, HALF + out), Vector2(10, 14) + Vector2.ONE * row * 4.0, true)
 
 
 ## Lower rocks along the camp's rim, some well inside it: on the rock wall side they stand on the
@@ -177,7 +177,7 @@ func _skirt(rng: RandomNumberGenerator) -> void:
 		var t := at.x + at.z
 		var reach := 0.9 + 1.0 * sin(t * 0.42) + 0.8 * sin(t * 1.1 + 2.0) + rng.randf_range(-0.4, 0.4)
 		if _by_drop(spot):
-			_big_rock(rng, spot - inward * (reach + rng.randf_range(-0.6, 1.2)) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(4.5, 8.0), true, skirt)
+			_big_rock(rng, spot - inward * (reach + rng.randf_range(-0.6, 1.2)) + Vector3(0.0, rng.randf_range(0.15, 0.8), 0.0), Vector2(6.0, 9.0), true, skirt)
 		else:
 			_big_rock(rng, spot + inward * (reach + rng.randf_range(-0.8, 0.9)) + Vector3(0.0, 0.6, 0.0), Vector2(2.5, 6.0), false, skirt)
 	# Rocks creep onto the dirt along the whole join: thinning and shrinking inwards, so no line

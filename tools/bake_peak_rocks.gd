@@ -39,10 +39,10 @@ func _init() -> void:
 		var tool := _tool()
 		var y := 0.0
 		var z := 0.0
-		var layers := 2 + cliff_rng.randi() % 2
+		var layers := 1  # owner, 2026-11-07: one solid rock, no stacked layers
 		var width := cliff_rng.randf_range(9.0, 11.0)
 		for k in layers:
-			var h := cliff_rng.randf_range(3.0, 4.2)
+			var h := cliff_rng.randf_range(4.5, 6.0)
 			var r := Vector3(width * 0.5, h * 0.5, width * cliff_rng.randf_range(0.36, 0.42))  # deep enough not to read as a tower from the side
 			_slab(tool, cliff_rng, Vector3(cliff_rng.randf_range(-0.4, 0.4), y, z), r, 9 + cliff_rng.randi() % 4, true, true, 0.9)
 			y += h * cliff_rng.randf_range(0.82, 0.92)  # each layer sinks a little into the one below
