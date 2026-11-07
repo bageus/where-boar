@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bm4dcq5mp5adi"
-path="res://.godot/imported/tribal_rooster_3000.glb-ccc9b1648dce6708a55dd92ccf8b9476.scn"
+uid="uid://41wvw0bxi8n4"
+path="res://.godot/imported/rooster.glb-cabb363ce4cc0767764b15370976f7eb.scn"
 
 [deps]
 
-source_file="res://assets/models/tribal_rooster_3000.glb"
-dest_files=["res://.godot/imported/tribal_rooster_3000.glb-ccc9b1648dce6708a55dd92ccf8b9476.scn"]
+source_file="res://assets/models/birds_source/rooster.glb"
+dest_files=["res://.godot/imported/rooster.glb-cabb363ce4cc0767764b15370976f7eb.scn"]
 
 [params]
 

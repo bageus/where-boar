@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
 ## A wild rooster or turkey on the hunt map (D024): wanders, runs from a close hunter crying out,
-## caught by a net or by hand (E) when the hunter gets close enough. Shows the owner's thin bird model
-## (bird_model.gd) that idles, pecks, walks and runs.
+## caught by a net or by hand (E) when the hunter gets close enough. Shows the owner's rigged bird model
+## (tools/rig_birds.py) that idles, pecks, walks and runs.
 
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 

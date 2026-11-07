@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://k1pteknia88e"
-path="res://.godot/imported/tribal_rooster_3000_2.png-bcfed00b6f5dab952a08baa7084cc530.ctex"
+uid="uid://cjao2bm2alvpr"
+path="res://.godot/imported/rooster_rooster_albedo.png-01a076bc436b89a2fbeea94e1212967c.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "ffb3db7c30e45874bdc6f56e036034d0"
+"md5": "f96132168d061c058cf35028a9994ee9"
 }
 
 [deps]
 
-source_file="res://assets/models/tribal_rooster_3000_2.png"
-dest_files=["res://.godot/imported/tribal_rooster_3000_2.png-bcfed00b6f5dab952a08baa7084cc530.ctex"]
+source_file="res://assets/models/rooster_rooster_albedo.png"
+dest_files=["res://.godot/imported/rooster_rooster_albedo.png-01a076bc436b89a2fbeea94e1212967c.ctex"]
 
 [params]
 
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

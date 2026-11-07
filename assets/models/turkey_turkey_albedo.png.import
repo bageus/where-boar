@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7wreryp4sw7q"
-path="res://.godot/imported/tribal_turkey_3000_0.png-42d8009f0285a5c7560c06f52ae2d656.ctex"
+uid="uid://ctp2jbclf7tdx"
+path="res://.godot/imported/turkey_turkey_albedo.png-3ced8fca890e151c7895e9cdec2580ab.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "3cb3d9ff4df5e9452a1f6e1b99511e98"
+"md5": "8efad5cc361f2a4e20f28029ed89018d"
 }
 
 [deps]
 
-source_file="res://assets/models/tribal_turkey_3000_0.png"
-dest_files=["res://.godot/imported/tribal_turkey_3000_0.png-42d8009f0285a5c7560c06f52ae2d656.ctex"]
+source_file="res://assets/models/turkey_turkey_albedo.png"
+dest_files=["res://.godot/imported/turkey_turkey_albedo.png-3ced8fca890e151c7895e9cdec2580ab.ctex"]
 
 [params]
 
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

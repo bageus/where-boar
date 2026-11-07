@@ -15,10 +15,10 @@ const PEN_ANIMALS := {
 	"turkey": preload("res://game/features/companions/public/wild_turkey.tscn"),
 }
 ## Cage slots, local to the cage rack (its cages open towards +x): roosters on the lower row, turkeys on the upper one.
+## Birds keep their hunt size there (owner, 2026-11-07: a tight fit is fine).
 const CAGE_ROW_Y := {"rooster": 0.25, "turkey": 1.07}
 const CAGE_Z := [-1.4, -2.12, -2.84]
 const CAGE_X := 5.15
-const CAGE_BIRD_SCALE := 0.45
 ## Standing spots inside the pen fence (x, z, yaw), local to the pens station; clear of shelter, trough and basin.
 const PEN_SPOTS: Array[Vector3] = [Vector3(-2.0, 0.6, 0.5), Vector3(1.0, 0.2, 2.2), Vector3(3.2, 1.2, -1.0),
 		Vector3(-1.0, 2.2, 3.5), Vector3(2.0, 2.3, -2.4)]
@@ -78,7 +78,6 @@ func _fill_pen() -> void:
 			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
 			animal.process_mode = Node.PROCESS_MODE_DISABLED
 			$Stations/Cages.add_child(animal)
-			animal.scale = Vector3.ONE * CAGE_BIRD_SCALE
 			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
 			animal.rotation.y = -PI / 2  # faces out of the cage
 			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage

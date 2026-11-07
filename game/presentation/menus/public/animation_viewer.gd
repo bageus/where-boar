@@ -11,7 +11,7 @@ const MODELS := {
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
 const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]
-## Roosters and turkeys (bird_model.gd).
+## Roosters and turkeys (tools/rig_birds.py).
 const BIRDS := {
 	"Rooster": preload("res://game/features/companions/public/rooster_model.tscn"),
 	"Turkey": preload("res://game/features/companions/public/turkey_model.tscn"),
@@ -92,6 +92,8 @@ func show_bird(bird_name: String) -> void:
 	add_child(character)
 	character.rotation.y = PI
 	player = character.find_child("AnimationPlayer") as AnimationPlayer
+	for anim in BIRD_ANIMATIONS:
+		player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR  # the glb's clips do not loop by themselves
 	_list_animations(BIRD_ANIMATIONS)
 
 

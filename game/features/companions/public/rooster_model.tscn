@@ -1,9 +1,5 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://game/features/companions/public/bird_model.gd" id="1_bird"]
-[ext_resource type="PackedScene" path="res://assets/models/tribal_rooster_3000.glb" id="2_glb"]
+[ext_resource type="PackedScene" path="res://assets/models/rooster.glb" id="1_glb"]
 
-[node name="BirdModel" type="Node3D"]
-script = ExtResource("1_bird")
-source = ExtResource("2_glb")
-yaw = 90.0
+[node name="BirdModel" instance=ExtResource("1_glb")]

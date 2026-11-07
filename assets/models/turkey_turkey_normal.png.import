@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2h8ue7kuwhvx"
-path="res://.godot/imported/tribal_rooster_3000_0.png-04f45872b1359323a2fe90d4efbd1f53.ctex"
+uid="uid://di8rgd03xb75w"
+path="res://.godot/imported/turkey_turkey_normal.png-fc05d9978e1829d93ad2b38044998b7f.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "19690b32c5c56efd45fb66e93423d7dd"
+"md5": "91ffa9e42f1a091040cbbaeca99b8120"
 }
 
 [deps]
 
-source_file="res://assets/models/tribal_rooster_3000_0.png"
-dest_files=["res://.godot/imported/tribal_rooster_3000_0.png-04f45872b1359323a2fe90d4efbd1f53.ctex"]
+source_file="res://assets/models/turkey_turkey_normal.png"
+dest_files=["res://.godot/imported/turkey_turkey_normal.png-fc05d9978e1829d93ad2b38044998b7f.ctex"]
 
 [params]
 
@@ -40,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
