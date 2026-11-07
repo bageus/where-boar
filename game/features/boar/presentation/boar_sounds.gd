@@ -4,7 +4,7 @@ extends Node3D
 ## to run so the others know (each boar picks another take, a little later than the last), squeals
 ## layered and some reversed while it panics, a squeal when hit, a grunt at the ram, hooves while it runs
 ## (splashes in a river, also at a walk), and quiet grunts now and then while it roams or eats.
-## Held by a trap or a net, or lying stunned, it squeals in panic all along (owner, 2026-11-05); dying, a death cry.
+## Held by a trap or a net, or lying stunned, it squeals in panic, but only for the first 5-10 seconds (owner, 2026-11-07); dying, a death cry.
 
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
@@ -18,6 +18,9 @@ const PANIC_LAYER_CHANCE := 0.4
 ## A call starts up to this late, so a herd's calls overlap without all starting at once.
 const CRY_DELAY_SECONDS := 0.5
 const CRY_DISTANCE := 50.0
+## A boar squeals only this long (seconds) each time it is caught or stunned, then falls quiet.
+const PANIC_MIN_TOTAL := 5.0
+const PANIC_MAX_TOTAL := 10.0
 
 ## Fact: a weapon (or a ram) hit this boar; the hunt map starts its music.
 signal hit
@@ -28,7 +31,11 @@ var running := false:
 		running = value
 		if _steps:
 			_steps.active = value and not silent
-var panicking := false
+var panicking := false:
+	set(value):
+		if value and not panicking:
+			_panic_budget = randf_range(PANIC_MIN_TOTAL, PANIC_MAX_TOTAL)
+		panicking = value
 ## Set on death: a dead boar makes no more idle voice, panic squeals or steps, only its death cry.
 var silent := false:
 	set(value):
@@ -40,6 +47,7 @@ var silent := false:
 
 var _voice_left := randf_range(0.0, VOICE_MAX_SECONDS)
 var _panic_left := 0.0
+var _panic_budget := 0.0
 ## Seconds left of squealing while it lies stunned by a tripwire.
 var _stunned_left := 0.0
 var _steps: Footsteps
@@ -64,6 +72,7 @@ func squeal() -> void:
 ## Tripped: panicked squeals for the seconds it lies stunned.
 func trapped(seconds: float) -> void:
 	_stunned_left = seconds
+	_panic_budget = randf_range(PANIC_MIN_TOTAL, PANIC_MAX_TOTAL)
 
 
 ## Started to run: the call that warns the herd.
@@ -81,6 +90,9 @@ func _process(delta: float) -> void:
 		return
 	_stunned_left -= delta
 	if panicking or _stunned_left > 0.0:
+		_panic_budget -= delta
+		if _panic_budget <= 0.0:
+			return
 		_panic_left -= delta
 		if _panic_left <= 0.0:
 			_panic_left = randf_range(PANIC_MIN_SECONDS, PANIC_MAX_SECONDS)

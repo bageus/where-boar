@@ -193,6 +193,9 @@ station_id = "tavern"
 title = "Tavern (hire helpers)"
 model = ExtResource("15_tavern")
 
+[node name="Flame" parent="Stations/Tavern" instance=ExtResource("40_flame")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -1.63, 0.12, -0.92)
+
 [node name="Pens" parent="Stations" instance=ExtResource("5_station")]
 transform = Transform3D(-0.8682, 0, 0.4961, 0, 1, 0, -0.4961, 0, -0.8682, -6, 0, 10.5)
 solid = true

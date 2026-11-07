@@ -545,8 +545,13 @@ func _tavern() -> void:
 	_box(Vector3(-1.62, 1.6, -1.1), Vector3(0.75, 0.9, 0.4), STONE_DARK)
 	_box(Vector3(-1.62, 0.04, -0.85), Vector3(1.3, 0.08, 0.5), STONE)
 	_log(Vector3(-1.9, 0.12, -0.95), Vector3(-1.35, 0.14, -0.95), 0.07, WOOD_DARK)
+	# No static flames (owner, 2026-11-07): camp.tscn sets the shader flame on the hearth; scratch surface keeps the random layout.
+	var glow := _glow
+	_glow = SurfaceTool.new()
+	_glow.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_log(Vector3(-1.63, 0.12, -0.92), Vector3(-1.63, 0.6, -0.92), 0.16, FIRE, 0.0, 5, true)
 	_log(Vector3(-1.5, 0.12, -0.9), Vector3(-1.5, 0.45, -0.9), 0.1, FIRE_CORE, 0.0, 5, true)
+	_glow = glow
 	_log(Vector3(-2.2, 0, -0.35), Vector3(-2.2, 0.45, -0.35), 0.13, CLAY, 0.08, 7)
 	# The feast table and its benches, food on it.
 	_box(Vector3(-0.18, 0.85, 1.11), Vector3(2.9, 0.1, 0.85), WOOD_LIGHT)
