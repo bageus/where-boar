@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-095
+active_task_id: P3-096
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-07
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-080 P3-091..P3-095 done.
+None. P3-001..P3-080 P3-091..P3-096 done.
 
 ## Last completed work
 
@@ -149,6 +149,7 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-078 (2026-11-02): forest boar (`common_brown`) remodelled after the owner's reference image (owner). `tools/build_blocky_boar.py` builds the source (chamfered block body, head block, light square snout with nostril slots, eyes, ears, cream tusks, legs with dark hooves; 580 triangles, flat colours), `rig_boars.py common_brown` rigs and animates it as before (same bones and animations, length 1.9 m, height ~1.1 m). `BoarType.back_height` (default 0.85, forest boar 1.0) sets the saddle height on the back. Other boar types unchanged.
 - P3-080 (2026-11-03): ripple on ground and walls: ground/terrain meshes skipped by the shadow bake now also stop casting live shadows (`baked_shadow.gd`), so they no longer shadow themselves.
 - P3-091 (2026-11-05): owner's new sounds wired, WAV removed (OGG only); hunt music loops after the first hit until boars calm down, results tune; baited cage, bump thud and shake, held boars panic, birds louder in pause.
+- P3-096 (2026-11-07): hunt FPS (owner: ~8 FPS). `boar_model.gd` merges the forest boar's six flat-colour surfaces into one vertex-coloured surface (47 boars: ~280 fewer draw calls plus shadows); `terrain.gd` grass chunks 10 m (were 20; ~40% fewer clumps in range, finer culling), every other short clump drawn only within ~20 m (where clumps are mostly sunk); stone pile pebbles drawn within 45 m (`hunt_map.gd`, 126 draw calls); `Highlight.set_on` skips unchanged items; `boar_body.gd`: calm boars past 40 m think every 4th physics tick (accumulated delta), standing boars on the floor skip `move_and_slide`; ram dash moved to `boar_dash.gd`. `landing.gd`: `half_len` typed (the untyped ternary failed to parse, thrown items never landed). xvfb: hunt start 572 -> 292 draw calls, centre 329 -> 241; headless physics 9.3 -> 5.1 ms per tick. Not checked: FPS in the browser.
 - P3-094 (2026-11-07): arrows stick under the skin when the line misses the flesh capsule; dead boar ignores hits (no repeat death animation) and hides its health bar.
 - P3-079 (2026-11-02): three playable hunters (bearded, plump, lanky) and the helper rebuilt as low-poly models after the owner's references (`tools/build_peak_cavemen.py`, rigged and animated by `rig_cavemen.py`, `assets/models/peak_cavemen/`). The pause menu has a Character option saved in settings (`character`); it swaps the shadow body and the first-person arm (`hunter_looks.gd`). Old Meshy `caveman_*.glb` files are unused.
 - P3-066 (2026-11-02): weapons restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_weapons.gd` bakes `assets/models/peak_weapons/<name>.res` + `<name>.tscn` (Node3D + MeshInstance3D `Model`) for spear, arrow, club, knife, sling, bow and sling stone: chunky flat-shaded prisms, one vertex-colour surface, 56-252 triangles (old textured glbs 220-830). Replace the glbs in `hands.tscn`, `spear.tscn`, `arrow.tscn`, `stone.tscn`, `stone_pile.tscn`. Thrown ones lie along +Y, tip up, so they fly tip first along the capsule; `landing.gd` unchanged. In hand: sling raised 0.17, bow turned 50 degrees. Net keeps its rig, gets a flat rope material (`net_model.gd` `ROPE`). Animation viewer still uses the old glbs. Not checked: look in the browser.
