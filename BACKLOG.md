@@ -145,3 +145,4 @@ Unapproved ideas and possible future features belong here.
 | P3-091 | 3 | Owner's new recordings (2026-11-05): all WAV converted to OGG and removed; wire hit/death/trap/bump/hunter body/riding/shop/ring-menu/pickup sounds, hunt music loops and results tune; baited cage, bump shake, held boars panic, birds louder in pause (covers parts of P3-082..P3-089) | P3-080 | DONE |
 | P3-093 | 3 | Trapped/netted boars squeal only first 5-10 s; tavern hearth gets the shader flame (owner, 2026-11-07) | P3-092 | DONE |
 | P3-094 | 3 | Hunt bugs (2026-11-07): arrow sticks into boar body, no repeat death on corpse hit, no health bar on dead boar | P3-093 | DONE |
+| P3-095 | 3 | Hunter's shout wave runs over trees, stumps, rocks and other objects, not grass (overlay pass) | P3-094 | DONE |

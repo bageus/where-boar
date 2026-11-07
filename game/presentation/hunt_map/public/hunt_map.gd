@@ -338,9 +338,10 @@ func _on_shouted(at: Vector3) -> void:
 		if boar.global_position.distance_to(at) <= SHOUT_RADIUS:
 			boar.hear_shout(at)
 	# A wave shows the shout's reach, and the minimap points out where the saddled boar waits (owner, 2026-10-27).
-	var wave: MeshInstance3D = ShoutWaveScene.instantiate()
+	var wave: Node3D = ShoutWaveScene.instantiate()
 	wave.radius = SHOUT_RADIUS
-	wave.position = Vector3(at.x, at.y + 0.3, at.z)
+	wave.surfaces.assign([$Terrain, $Surroundings, $Props])
+	wave.position = at
 	add_child(wave)
 	$Hud/Minimap.show_mount(_hunter.mount_node())
 
