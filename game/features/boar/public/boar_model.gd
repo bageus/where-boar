@@ -21,6 +21,8 @@ var _dead := false
 var _dust: CPUParticles3D
 var _flash := StandardMaterial3D.new()
 var _next_chomp := 0
+## Source mesh -> its one-surface copy (see _one_surface), shared by every boar of the type.
+static var _merged := {}
 
 
 func show_type(boar_type: Resource) -> void:
@@ -29,6 +31,8 @@ func show_type(boar_type: Resource) -> void:
 	_back_height = boar_type.back_height
 	var model: Node3D = boar_type.model.instantiate()
 	add_child(model)
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		mesh.mesh = _one_surface(mesh.mesh)
 	_player = model.find_child("AnimationPlayer") as AnimationPlayer
 	for anim in ["idle", "walk", "run", "eat"]:
 		_player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
@@ -63,6 +67,49 @@ func flash() -> void:
 	tween.tween_callback(func() -> void:
 		for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 			mesh.material_overlay = null)
+
+
+## A mesh in flat colours, one material per colour (the blocky boar: six), as one surface with the colours in
+## its vertices: one draw call per boar instead of six, 47 boars on the map (owner, 2026-11-07: 8 FPS on the hunt).
+## Meshes with textures or materials differing in more than colour are kept as they are.
+static func _one_surface(mesh: Mesh) -> Mesh:
+	if not mesh is ArrayMesh or mesh.get_surface_count() < 2:
+		return mesh
+	if _merged.has(mesh):
+		return _merged[mesh]
+	var first := mesh.surface_get_material(0) as StandardMaterial3D
+	var merged: Array = []
+	merged.resize(Mesh.ARRAY_MAX)
+	for s in mesh.get_surface_count():
+		var material := mesh.surface_get_material(s) as StandardMaterial3D
+		if material == null or material.albedo_texture or material.vertex_color_use_as_albedo \
+				or material.roughness != first.roughness or material.metallic != first.metallic or material.cull_mode != first.cull_mode \
+				or mesh.surface_get_primitive_type(s) != Mesh.PRIMITIVE_TRIANGLES or mesh.surface_get_format(s) != mesh.surface_get_format(0):
+			return mesh
+		var arrays := mesh.surface_get_arrays(s)
+		var count: int = arrays[Mesh.ARRAY_VERTEX].size()
+		var colours := PackedColorArray()
+		colours.resize(count)
+		colours.fill(material.albedo_color)
+		arrays[Mesh.ARRAY_COLOR] = colours
+		if arrays[Mesh.ARRAY_INDEX] != null and merged[Mesh.ARRAY_VERTEX] != null:
+			var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var offset: int = merged[Mesh.ARRAY_VERTEX].size()
+			for i in indices.size():
+				indices[i] += offset
+			arrays[Mesh.ARRAY_INDEX] = indices
+		for k in Mesh.ARRAY_MAX:
+			if arrays[k] != null:
+				merged[k] = arrays[k] if merged[k] == null else merged[k] + arrays[k]
+	var one := ArrayMesh.new()
+	one.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, merged, [], {}, mesh.surface_get_format(0) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+	var material := first.duplicate() as StandardMaterial3D
+	material.albedo_color = Color.WHITE
+	material.vertex_color_use_as_albedo = true
+	material.vertex_color_is_srgb = true  # albedo colours are sRGB
+	one.surface_set_material(0, material)
+	_merged[mesh] = one
+	return one
 
 
 ## A few tan low-poly cubes kicked up behind the feet while running; local space off, so they stay where they fell.

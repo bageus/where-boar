@@ -37,6 +37,8 @@ const SCOUT_CHECK_SECONDS := 0.5
 ## Props are drawn as one MultiMesh per model and square this wide, metres (80: the map's four quadrants) (owner, 2026-10-29: low FPS;
 ## 169 bushes alone cost about 1100 draw calls). Stone piles stay separate: they get outlined and picked up.
 const BATCH_CELL := 80.0
+## Stone piles (pebbles 0.2 m across) are drawn within this many metres (owner, 2026-11-07: 8 FPS on the hunt).
+const PILE_RANGE := 45.0
 const TIPS := [
 	"Boars flee when you get close. Caps Lock toggles sneaking.",
 	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
@@ -122,8 +124,9 @@ func _batch_props() -> void:
 	for prop in $Props.get_children():
 		var piles: bool = prop.is_in_group("stone_piles")
 		for mesh_node: MeshInstance3D in prop.find_children("*", "MeshInstance3D", true, false):
-			if piles:  # a few pebbles: their shadow is not worth a draw call each
+			if piles:  # a few pebbles: their shadow is not worth a draw call each, nor are they far off (126 draw calls)
 				mesh_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				mesh_node.visibility_range_end = PILE_RANGE
 				continue
 			var at := mesh_node.global_position
 			var key := [mesh_node.mesh, Vector2i(floori(at.x / BATCH_CELL), floori(at.z / BATCH_CELL)), mesh_node.cast_shadow]

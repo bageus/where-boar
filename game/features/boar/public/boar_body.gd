@@ -12,6 +12,7 @@ const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 const StunStars = preload("res://game/features/boar/presentation/stun_stars.gd")
 const BoarFlight = preload("res://game/features/boar/presentation/boar_flight.gd")
+const BoarDash = preload("res://game/features/boar/presentation/boar_dash.gd")
 const BoarBump = preload("res://game/features/boar/public/boar_bump.gd")
 
 # ASSUMPTION numbers (D013); per-type speeds and senses live in BoarType.
@@ -35,13 +36,12 @@ const SHOUT_SECONDS := 2.0
 const FENCE_TURN_SECONDS := 1.5
 # Herds (M009), ASSUMPTION numbers (D013).
 const HERD_ALARM_RADIUS := 8.0
+## Beyond this many metres (past the widest perception, 22 m x 1.5 mounted) a calm boar thinks every THINK_EVERY ticks.
+const THINK_FAR := 40.0
+const THINK_EVERY := 4
 const HERD_SPREAD := 6.0
 ## Split-off groups and loners rejoin mates within this reach once calm (playtest 2026-10-27).
 const HERD_REJOIN_RADIUS := 30.0
-# Ram dash (playtest 2026-10-27): close to the hunter a charging boar locks on and runs through him.
-const RAM_DASH_DISTANCE := 4.0
-const RAM_DASH_SECONDS := 1.0
-const RAM_HIT_DISTANCE := 1.3
 ## How far a wall or fence turns a boar away from its normal, radians.
 const WALL_TURN_SPREAD := PI / 4.0
 ## Physics layer 6: the boar's hitbox (weapons and the hunter's E look for it).
@@ -97,9 +97,7 @@ var _knock := Vector3.ZERO
 var _ram_cooldown := 0.0
 ## Flight deflection rolled when the boar gets scared, so a herd scatters.
 var _scatter := 0.0
-var _dash_heading := Vector2.ZERO
-var _dash_left := 0.0
-var _dash_hit := false
+var dash := BoarDash.new()
 var _calm_left := 0.0
 var _was_fleeing := false
 ## Set when the boar saw another boar killed; makes the current flight longer.
@@ -118,6 +116,8 @@ var _stars: Node3D
 var _snared := false
 ## Standing at a bait and eating it.
 var _eating := false
+## Seconds since the boar last thought (see THINK_FAR).
+var _unthought := 0.0
 
 @onready var _label: Label3D = $Label
 @onready var _alert_mark: Label3D = $AlertMark
@@ -319,12 +319,19 @@ func _physics_process(delta: float) -> void:
 	if not boar.is_free() or _stun_left > 0.0:
 		velocity.x = 0.0
 		velocity.z = 0.0
-		_apply_knock(delta)
-		move_and_slide()
-		$Model.move(0.0)
+		_move(delta, false)
 		return
 	var pos := Vector2(global_position.x, global_position.z)
 	var hunter_pos := Vector2(hunter.global_position.x, hunter.global_position.z)
+	# Calm boars far from the hunter think every few ticks, in turn, and keep going meanwhile (owner, 2026-11-07: 8 FPS).
+	_unthought += delta
+	if boar.state == Boar.State.WANDER and pos.distance_squared_to(hunter_pos) > THINK_FAR * THINK_FAR \
+			and (Engine.get_physics_frames() + get_instance_id()) % THINK_EVERY != 0:
+		_move(delta, true)
+		return
+	var tick := delta
+	delta = _unthought
+	_unthought = 0.0
 	var before := boar.state
 	_perceive(delta, pos, hunter_pos)
 	if boar.state == Boar.State.WANDER and not herd.is_empty():
@@ -345,10 +352,19 @@ func _physics_process(delta: float) -> void:
 			$Sounds.cry()
 		_show_state()
 	_steer(delta, pos, hunter_pos)
+	_move(tick, true)
+
+
+## Knock, slide and animate; a free boar standing on the ground (grazing, resting) skips the slide.
+func _move(delta: float, free: bool) -> void:
 	_apply_knock(delta)
+	if free and is_on_floor() and velocity.x == 0.0 and velocity.z == 0.0:
+		$Model.move(0.0, _eating)
+		return
 	move_and_slide()
-	$Model.move(Vector2(velocity.x, velocity.z).length(), _eating)
-	_ram(delta)
+	$Model.move(Vector2(velocity.x, velocity.z).length() if free else 0.0, _eating and free)
+	if free:
+		_ram(delta)
 
 
 ## A calm boar that keeps noticing the hunter grows alarmed in three stages, then flees or attacks;
@@ -468,7 +484,10 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 			else:
 				_idle(delta, pos)
 		Boar.State.CHARGE:
-			_charge_heading(delta, pos, hunter_pos)
+			_heading = dash.heading(self, delta, pos, hunter_pos, RAM_IMPULSE, boar_type.damage * HP_PER_DAMAGE)
+			if boar.state != Boar.State.CHARGE:
+				_state_time = 0.0
+				_show_state()
 			speed = boar_type.flee_speed
 		_:
 			var panic := boar.state == Boar.State.PANIC
@@ -515,32 +534,6 @@ func _idle(delta: float, pos: Vector2) -> void:
 		_:
 			_heading = Vector2.ZERO
 	_eating = idle.activity == BoarIdle.Activity.GRAZE
-
-
-## Runs at the hunter; once close it locks its line and dashes through him (playtest 2026-10-27).
-func _charge_heading(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
-	if not boar.ramming:
-		_heading = (hunter_pos - pos).normalized()
-		if pos.distance_to(hunter_pos) <= RAM_DASH_DISTANCE:
-			boar.ramming = true
-			$Model.attack()
-			$Sounds.attack()
-			_dash_heading = _heading
-			_dash_left = RAM_DASH_SECONDS
-			_dash_hit = false
-			add_collision_exception_with(hunter)
-		return
-	_heading = _dash_heading
-	if not _dash_hit and global_position.distance_to(hunter.global_position) <= RAM_HIT_DISTANCE:
-		_dash_hit = true
-		var push := Vector3(_dash_heading.x, 0.0, _dash_heading.y)
-		hunter.knock(push * RAM_IMPULSE + Vector3.UP * 3.0, boar_type.damage * HP_PER_DAMAGE, boar_type)
-	_dash_left -= delta
-	if _dash_left <= 0.0:
-		remove_collision_exception_with(hunter)
-		boar.end_charge()
-		_state_time = 0.0
-		_show_state()
 
 
 func _apply_knock(delta: float) -> void:

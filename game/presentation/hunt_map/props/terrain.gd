@@ -24,7 +24,9 @@ const ROCK_NORMAL_Y := 0.75
 const GRASS_CLUMP: Mesh = preload("res://assets/grass/peak_grass.res")
 const GRASS_MATERIAL := preload("res://assets/grass/grass_material.tres")
 const GROUND_MATERIAL := preload("res://assets/grass/ground_material.tres")
-const GRASS_CHUNK := 20
+## 10 m chunks (owner, 2026-11-07: 8 FPS on the hunt): 20 m ones drew about a million grass triangles a frame,
+## most of them out of range or behind the camera.
+const GRASS_CHUNK := 10
 ## Short grass (owner, 2026-11-02: denser, very short, a little taller and shorter by turns): 2.7 times the
 ## clumps of before, each narrower and much lower; the height follows a noise field over the map
 ## (short_grass_scale). Clumps shrink into the ground towards GRASS_RANGE metres (peak_grass.gdshader
@@ -33,6 +35,8 @@ const GRASS_PER_METRE := 8
 const GRASS_WIDTH := Vector2(0.18, 0.24)
 const GRASS_HEIGHT := Vector2(0.06, 0.15)
 const GRASS_RANGE := 24.0
+## Every other short clump is drawn only this near (clumps sink from fade_end * 0.6 on): half density where they are mostly sunk.
+const GRASS_THIN_FROM := GRASS_RANGE * 0.85
 ## Tall grass patches (owner, 2026-10-28): clumps about twice as tall, with some wheat; they hide the hunter
 ## from boars like a bush (cover layer, see boar_body.gd).
 const TALL_PATCHES := 12
@@ -169,6 +173,7 @@ func _plant_grass() -> void:
 			# Visibility range counts from the node's origin, so each chunk sits at its centre.
 			var centre := Vector3(ci + GRASS_CHUNK * 0.5 - (w - 1) * 0.5, 0.0, cj + GRASS_CHUNK * 0.5 - (d - 1) * 0.5)
 			var spots: Array[Transform3D] = []
+			var near: Array[Transform3D] = []
 			var wheat: Array[Transform3D] = []
 			for j in range(cj, mini(cj + GRASS_CHUNK, d - 1)):
 				for i in range(ci, mini(ci + GRASS_CHUNK, w - 1)):
@@ -185,11 +190,12 @@ func _plant_grass() -> void:
 						var size := Vector3(tall_size * 1.41, tall_size, tall_size * 1.41) if tall else short_grass_scale(x, z, rng)
 						var spot := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(size),
 								Vector3(x, height_at(x, z) - 0.03, z) - centre)
-						spots.append(spot)
+						(near if k % 2 == 1 and not tall else spots).append(spot)
 						if tall and k == 0 and rng.randf() < 0.5:
 							wheat.append(spot.scaled_local(Vector3.ONE * 1.4 / size.y))
 			# A chunk counts its range from its centre; its corners stand up to 0.71 chunk further out.
 			_add_multimesh(clump, spots, centre, GRASS_MATERIAL, GRASS_RANGE + GRASS_CHUNK * 0.71)
+			_add_multimesh(clump, near, centre, GRASS_MATERIAL, GRASS_THIN_FROM + GRASS_CHUNK * 0.71)
 			_add_multimesh(WHEAT, wheat, centre, null, GRASS_RANGE + GRASS_CHUNK * 0.71)
 
 

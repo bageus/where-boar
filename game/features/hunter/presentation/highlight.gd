@@ -15,5 +15,8 @@ void vertex() { VERTEX += NORMAL * 0.05; }
 void fragment() { ALBEDO = vec3(1.0, 0.85, 0.3); ALPHA = 0.55 + 0.35 * sin(TIME * 5.0); }"""
 		_material = ShaderMaterial.new()
 		_material.shader = shader
+	if item.get_meta("highlit", false) == on:
+		return  # called every frame for every pile and thrown item: skip the tree walk when nothing changes
+	item.set_meta("highlit", on)
 	for mesh: Node in item.find_children("*", "MeshInstance3D"):
 		mesh.material_overlay = _material if on else null

@@ -83,7 +83,7 @@ static func _stick(item: RigidBody3D, boar: Node3D, velocity: Vector3) -> void:
 		var tip := boar.to_global(axis + out * (FLESH_RADIUS - TIP_DEPTH))
 		var up_in := Vector3.UP if absf(dir_in.dot(Vector3.UP)) < 0.99 else Vector3.RIGHT
 		item.global_basis = Basis.looking_at(dir_in, up_in)
-		var half_len := item.get_node("Collision").shape.height * 0.5 if capsule else 0.0
+		var half_len: float = item.get_node("Collision").shape.height * 0.5 if capsule else 0.0
 		item.global_position = tip - dir_in * half_len
 	item.reparent(boar)
 	item.top_level = false
