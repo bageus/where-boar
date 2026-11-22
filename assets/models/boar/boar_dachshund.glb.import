@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://deriu2egbpwmp"
-path="res://.godot/imported/boar_dachshund.glb-3b9a193766abd525bab8d1640a8e3427.scn"
+path="res://.godot/imported/boar_dachshund.glb-88bb262e90da16bdb2d975188c5ee6f1.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_dachshund.glb"
-dest_files=["res://.godot/imported/boar_dachshund.glb-3b9a193766abd525bab8d1640a8e3427.scn"]
+source_file="res://assets/models/boar/boar_dachshund.glb"
+dest_files=["res://.godot/imported/boar_dachshund.glb-88bb262e90da16bdb2d975188c5ee6f1.scn"]
 
 [params]
 

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://blwep6lf2imq"
-path="res://.godot/imported/boar_armored_black.glb-1aaa24a9d9c6ac6b68f026761f6fe1bb.scn"
+path="res://.godot/imported/boar_armored_black.glb-4a231d30b067c27a8c4349646c52301e.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_armored_black.glb"
-dest_files=["res://.godot/imported/boar_armored_black.glb-1aaa24a9d9c6ac6b68f026761f6fe1bb.scn"]
+source_file="res://assets/models/boar/boar_armored_black.glb"
+dest_files=["res://.godot/imported/boar_armored_black.glb-4a231d30b067c27a8c4349646c52301e.scn"]
 
 [params]
 

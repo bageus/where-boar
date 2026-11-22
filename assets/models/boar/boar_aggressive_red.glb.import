@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bpdey2s8nmtml"
-path="res://.godot/imported/boar_aggressive_red.glb-54e07451b20b77b14d4dcd1e174de132.scn"
+path="res://.godot/imported/boar_aggressive_red.glb-c82bf949d78ab4f022ced40dd11228d1.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_aggressive_red.glb"
-dest_files=["res://.godot/imported/boar_aggressive_red.glb-54e07451b20b77b14d4dcd1e174de132.scn"]
+source_file="res://assets/models/boar/boar_aggressive_red.glb"
+dest_files=["res://.godot/imported/boar_aggressive_red.glb-c82bf949d78ab4f022ced40dd11228d1.scn"]
 
 [params]
 

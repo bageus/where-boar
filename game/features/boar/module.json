@@ -1,7 +1,7 @@
 {
   "id": "features.boar",
   "layer": "features",
-  "purpose": "Own boar state and the authored boar types (five MVP types and rare variants): type, health, capture, death and escape (M002, M004, M006), and the boar agent scene that steers by it.",
+  "purpose": "Own boar state and the authored boar types (five MVP types and rare variants): type, health, capture, death and escape (M002, M004, M006), and the boar agent scene that steers by it. Also the cyborg (terminator) boars of the invasion: domain Cyborg and the cyborg_body scene.",
   "state_owner": [
     "Boar runtime state for one hunt"
   ],
@@ -14,7 +14,9 @@
     "public/boar_type.gd",
     "public/boar_types.gd",
     "public/boar_hitbox.gd",
-    "public/boar_bump.gd"
+    "public/boar_bump.gd",
+    "public/cyborg_body.tscn",
+    "public/cyborg_body.gd"
   ],
   "dependencies": [
     "core.sfx"

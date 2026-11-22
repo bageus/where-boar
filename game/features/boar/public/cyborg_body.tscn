@@ -1,0 +1,61 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://game/features/boar/public/cyborg_body.gd" id="1_cyborg"]
+[ext_resource type="Script" path="res://game/features/boar/public/boar_hitbox.gd" id="2_hitbox"]
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(1.2, 1.3, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_hitbox"]
+size = Vector3(1.6, 1.8, 2.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bar_back"]
+shading_mode = 0
+billboard_mode = 1
+billboard_keep_scale = true
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bar_fill"]
+resource_local_to_scene = true
+shading_mode = 0
+billboard_mode = 1
+billboard_keep_scale = true
+albedo_color = Color(0.3, 0.6, 1, 1)
+
+[sub_resource type="QuadMesh" id="Mesh_bar"]
+size = Vector2(1.4, 0.14)
+
+[sub_resource type="QuadMesh" id="Mesh_fill"]
+size = Vector2(1.4, 0.14)
+center_offset = Vector3(0, 0, 0.01)
+
+[node name="CyborgBody" type="CharacterBody3D"]
+script = ExtResource("1_cyborg")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+shape = SubResource("Shape_body")
+
+[node name="Hitbox" type="StaticBody3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+script = ExtResource("2_hitbox")
+
+[node name="Shape" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_hitbox")
+
+[node name="HealthBar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+
+[node name="Back" type="MeshInstance3D" parent="HealthBar"]
+cast_shadow = 0
+visibility_range_end = 40.0
+mesh = SubResource("Mesh_bar")
+material_override = SubResource("Mat_bar_back")
+
+[node name="Fill" type="MeshInstance3D" parent="HealthBar"]
+cast_shadow = 0
+visibility_range_end = 40.0
+mesh = SubResource("Mesh_fill")
+material_override = SubResource("Mat_bar_fill")
