@@ -47,6 +47,28 @@ const ITEMS := {
 	"item_saddle_runner_grey": {"name": "Saddle a Runner (fast)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "runner_grey"},
 	"item_saddle_aggressive_red": {"name": "Saddle an Angry boar (rams)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "aggressive_red"},
 	"item_saddle_armored_black": {"name": "Saddle an Armored boar (steady)", "shop": "pens", "price": 50, "unique": true, "requires_caught": "armored_black"},
+	# A hut of one's own (issue #22); the clan tent upgrade comes with clans.
+	"item_hut": {"name": "Buy this hut", "shop": "hut", "price": 3000, "unique": true},
+	# The forge is built from everyone's gifts (issue #11): each purchase gives its price to the build.
+	"item_forge_100": {"name": "Give to the forge", "shop": "forge", "price": 100, "unique": false, "donate": 100},
+	"item_forge_1000": {"name": "Give to the forge", "shop": "forge", "price": 1000, "unique": false, "donate": 1000},
+	"item_forge_10000": {"name": "Give to the forge", "shop": "forge", "price": 10000, "unique": false, "donate": 10000},
+}
+
+## Tusks the forge needs before it opens (issue #11).
+const FORGE_COST := 100000
+
+## What each camp shop buys from the forest (issues #18, #21, #28): material id -> units for one tusk.
+const SELL := {
+	"weapon_shop": {"stone": 12, "feather": 12},
+	"campfire": {"stick": 12, "mushroom": 10},
+	"beauty_hut": {"berry": 10, "daisy": 10},
+	"shaman_hut": {"poison_berry": 6, "larva": 4, "frog": 6},
+	"pens": {"grass": 12, "mushroom": 10},
+}
+const MATERIAL_NAMES := {
+	"stone": "Stones", "feather": "Feathers", "stick": "Sticks", "mushroom": "Mushrooms", "berry": "Berries",
+	"daisy": "Daisies", "poison_berry": "Poisonous berries", "larva": "Larvae", "frog": "Frogs", "grass": "Grass",
 }
 
 

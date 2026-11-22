@@ -10,12 +10,24 @@ extends Node3D
 
 
 func _ready() -> void:
+	set_model(model)
+	$Label.text = title
+
+
+## Shows scene as the station's building (a hut's variant, the forge once built) and fits the footprint to it.
+func set_model(scene: PackedScene) -> void:
+	if has_node("Model"):
+		var old := get_node("Model")
+		remove_child(old)
+		old.queue_free()
+	model = scene
 	var node := model.instantiate()
+	node.name = "Model"
 	add_child(node)
 	if solid:
 		fit_collision($Body/Collision, node)
-		$Label.position = Vector3($Body/Collision.position.x, $Label.position.y, $Body/Collision.position.z)
-	$Label.text = title
+		var box: CollisionShape3D = $Body/Collision
+		$Label.position = box.position + Vector3(0.0, (box.shape as BoxShape3D).size.y * 0.5 + 0.6, 0.0)
 
 
 ## How far the point is from the station on the ground plane: from the footprint's edge when solid

@@ -12,35 +12,55 @@ const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
+const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const BUILDINGS := "res://assets/models/buildings/"
+## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
+const HUT_VARIANTS: Array[PackedScene] = [
+	preload(BUILDINGS + "Burdock_Hut_Variants/01_Coral_High_Peak.glb"),
+	preload(BUILDINGS + "Burdock_Hut_Variants/02_Ochre_Wide_Entrance.glb"),
+	preload(BUILDINGS + "Burdock_Hut_Variants/03_Russet_Long_Skirt.glb"),
+	preload(BUILDINGS + "Burdock_Hut_Variants/04_Sand_Swept_Cap.glb"),
+	preload(BUILDINGS + "Burdock_Hut_Variants/05_Prehistoric_Burdock_Tent.glb"),
+]
+const FORGE_BUILT = preload(BUILDINGS + "Primitive_Blacksmith_Shelter.glb")
+## Clan buildings wait for clans (issue #23): only planning mode offers them for now.
+const CLAN_MODELS := ["Prehistoric_Ochre_Clan_Tent", "Chunky_Boar_Log_Totem", "Tripod_Cauldron_and_Hearth"]
+const PALETTE := ["Prehistoric_Communal_Longhouse", "Burdock_Hut_Variants/01_Coral_High_Peak",
+	"Burdock_Hut_Variants/02_Ochre_Wide_Entrance", "Burdock_Hut_Variants/03_Russet_Long_Skirt",
+	"Burdock_Hut_Variants/04_Sand_Swept_Cap", "Burdock_Hut_Variants/05_Prehistoric_Burdock_Tent", "Prehistoric_Stone_Well",
+	"Prehistoric_Cauldron_and_Brazier_Set", "Prehistoric_Trail_Signpost", "Prehistoric_Bow_and_Spear_Stall",
+	"Prehistoric_Hunting_Stall", "boar_pen", "Prehistoric_Six_Cage_Rack", "Prehistoric_Hide_Canopy_Tavern",
+	"Bird_Bear_Boar_Totem", "Primitive_Stick_Chest", "Prehistoric_Quest_Board", "Prehistoric_Beauty_Hut", "Shaman_Hide_Hut",
+	"Primitive_Workshop_Construction_Site", "Primitive_Blacksmith_Shelter"]
 const PEN_ANIMALS := {
 	"rooster": preload("res://game/features/companions/public/wild_rooster.tscn"),
 	"turkey": preload("res://game/features/companions/public/wild_turkey.tscn"),
 }
-## Cage slots, local to the cage rack (its cages open towards +x): roosters on the lower row, turkeys on the upper one.
-## Birds keep their hunt size there (owner, 2026-11-07: a tight fit is fine).
-const CAGE_ROW_Y := {"rooster": 0.25, "turkey": 1.07}
-const CAGE_Z := [-1.4, -2.12, -2.84]
-const CAGE_X := 5.15
-## Standing spots inside the pen fence (x, z, yaw), local to the pens station; clear of shelter, trough and basin.
-const PEN_SPOTS: Array[Vector3] = [Vector3(-2.0, 0.6, 0.5), Vector3(1.0, 0.2, 2.2), Vector3(3.2, 1.2, -1.0),
-		Vector3(-1.0, 2.2, 3.5), Vector3(2.0, 2.3, -2.4)]
-## Saddles hung over the front fence rail (x, yaw), local to the pens station.
-const RAIL_SADDLES := [Vector2(-3.2, 0.0), Vector2(2.2, 0.1), Vector2(3.6, -0.1)]
-const RAIL_Z := 3.38
-const RAIL_TOP := 1.0
+## Cage floors, local to the six-cage rack (cages open towards +z): roosters on the lower shelf, turkeys on
+## the upper one. Birds keep their hunt size there (owner, 2026-11-07: a tight fit is fine).
+const CAGE_ROW_Y := {"rooster": 0.6, "turkey": 2.07}
+const CAGE_X := [-1.08, 0.0, 1.08]
+const CAGE_Z := 0.05
+## Standing spots inside the pen fence (x, z, yaw), in the pen model's units; clear of shelter, trough and basin.
+const PEN_SPOTS: Array[Vector3] = [Vector3(-4.5, 3.0, 0.5), Vector3(1.0, 4.5, 2.2), Vector3(5.0, 0.5, -1.0),
+		Vector3(-1.0, -1.0, 2.3), Vector3(2.5, -5.0, -2.4)]
+## Saddles hung over the front fence rail (x, yaw), in the pen model's units; the gate is at x -1.2..3.4.
+const RAIL_SADDLES := [Vector2(-7.0, 0.0), Vector2(-4.5, 0.1), Vector2(7.0, -0.1)]
+const RAIL_Z := 8.07
+const RAIL_TOP := 1.56
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
-## The helper's seat on the tavern's inner bench, local to the tavern model, facing the feast table;
-## lowered by his knee height (0.25 m) so he sits on the bench top (0.52).
-const HELPER_SEAT := Vector3(-0.2, 0.52 - 0.25, 0.37)
+## The helper's seat on the tavern's front bench, local to the tavern model, facing the table;
+## lowered by his knee height (0.25 m) so he sits on the bench top (0.43).
+const HELPER_SEAT := Vector3(-0.1, 0.43 - 0.25, 2.25)
 
 const USE_RADIUS := 2.5  # from a point station
 const USE_RADIUS_SOLID := 1.5  # from the edge of a solid one
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 ## The tavern hearth's flames, local to the tavern model.
-const TAVERN_HEARTH := Vector3(-1.63, 0.3, -0.75)
+const TAVERN_HEARTH := Vector3(1.4, 0.8, -0.9)
 ## Wind over the drop-off (east side and south-east corner), heard near the rim; follows the hunter along it.
 const DROP_EAST := 17.0  # Dressing.HALF
 const DROP_SOUTH_FROM := 2.0  # Dressing.SOUTH_SPLIT
@@ -53,6 +73,16 @@ var progress: Progress
 var layout: Dictionary = {}
 ## Injected: planning mode shows the camp with no hunter, shops or HUD.
 var planning := false
+
+## Shop windows' extra line for stations whose own features come later.
+const INFO := {
+	"totem": "Clans come later: here you will see the clans and their rating, and found your own (it takes a hut and its clan tent).",
+	"chest": "Your gear store comes later: swap weapons, baits and traps here.",
+	"beauty_hut": "Paint and decorations come later; they change only the look.",
+	"shaman_hut": "Rituals come later.",
+}
+
+var _open_station: Node3D
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
@@ -71,25 +101,29 @@ func _ready() -> void:
 	_shop.progress = progress
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
+	_dress_huts()
+	_dress_forge()
 	_show_progress()
 	_fill_pen()
 	_seat_helper()
 	_ambience()
 	_dress()
 	# The camp ground and the forest floor behind the palisade.
-	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $LargeTent, $AFrameTent, $RoundTent, $RoundTent2] as Array[Node],
+	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $Longhouse] as Array[Node],
 			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp
 
 
 func _dress() -> void:
-	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
-			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
+	var buildings: Array[Node3D] = [$Longhouse]
+	for station: Node3D in $Stations.get_children():
+		if station.name not in ["StartHunt", "Campfire"]:
+			buildings.append(station)
 	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings, $Scenery.rim_rocks)
 
 
-## Objects planning mode may move, turn, scale, copy and delete: tents and stations.
+## Objects planning mode may move, turn, scale, copy and delete: the longhouse and stations.
 func planning_targets() -> Array[Node]:
-	var nodes: Array[Node] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2]
+	var nodes: Array[Node] = [$Longhouse]
 	nodes.append_array($Stations.get_children())
 	nodes.append_array(get_children().filter(func(n: Node) -> bool: return n.has_meta(LevelLayout.ADDED_META)))
 	return nodes
@@ -106,9 +140,8 @@ func planning_centre() -> Vector3:
 ## Building models (decoration only: a copied stall sells nothing), then the shared nature models.
 func planning_palette() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
-	for model in ["large_hide_tent", "round_hide_tent", "aframe_hide_tent", "tribal_well", "campfire", "direction_sign",
-			"weapon_stall", "hunter_stall", "boar_pen", "cage_rack", "tavern"]:
-		entries.append({"name": model.capitalize(), "res": "res://assets/models/peak/%s.scn" % model, "solid": ""})
+	for model: String in PALETTE + CLAN_MODELS:
+		entries.append({"name": model.get_file().capitalize(), "res": BUILDINGS + model + ".glb", "solid": ""})
 	entries.append_array(LevelLayout.nature_palette())
 	return entries
 
@@ -122,12 +155,13 @@ func planning_removable(node: Node) -> bool:
 func _fill_pen() -> void:
 	var pens: Node3D = $Stations/Pens
 	for animal_id in PEN_ANIMALS:
-		for i in mini(progress.helpers.get(animal_id, 0), CAGE_Z.size()):
+		for i in mini(progress.helpers.get(animal_id, 0), CAGE_X.size()):
 			var animal: CharacterBody3D = PEN_ANIMALS[animal_id].instantiate()
 			animal.process_mode = Node.PROCESS_MODE_DISABLED
 			$Stations/Cages.add_child(animal)
-			animal.position = Vector3(CAGE_X, CAGE_ROW_Y[animal_id], CAGE_Z[i])
-			animal.rotation.y = -PI / 2  # faces out of the cage
+			animal.position = Vector3(CAGE_X[i], CAGE_ROW_Y[animal_id], CAGE_Z)
+			animal.scale = Vector3.ONE / $Stations/Cages.scale.x  # the rack is scaled, the birds keep their size
+			animal.rotation.y = PI  # faces out of the cage
 			animal.get_node("Model").process_mode = Node.PROCESS_MODE_ALWAYS  # idles in the cage
 	var penned: Array[Node3D] = []
 	for i in mini(progress.pen.size(), PEN_SPOTS.size()):
@@ -137,13 +171,15 @@ func _fill_pen() -> void:
 		boar.show_type(BoarTypes.find(progress.pen[i]))
 		boar.position = Vector3(PEN_SPOTS[i].x, 0.0, PEN_SPOTS[i].y)
 		boar.rotation.y = PEN_SPOTS[i].z
+		boar.scale = Vector3.ONE / pens.scale.x  # the pen model is scaled down, the boars are not
 	if not penned.is_empty():
 		get_tree().create_timer(randf_range(0.0, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(penned))
 	for spot: Vector2 in RAIL_SADDLES:
 		var saddle: Node3D = Saddle.instantiate()
 		pens.add_child(saddle)
-		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3, RAIL_Z)
+		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3 / pens.scale.x, RAIL_Z)
 		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
+		saddle.scale = Vector3.ONE / pens.scale.x
 
 
 ## The crackle of the campfire with its brazier and of the tavern hearth, heard only close by; the jungle
@@ -187,7 +223,8 @@ func _seat_helper() -> void:
 	var helper: Node3D = Helper.instantiate()
 	tavern.add_child(helper)
 	helper.position = HELPER_SEAT
-	helper.scale = Vector3.ONE / tavern.scale.x  # the tavern model is scaled up, the helper is not
+	helper.scale = Vector3.ONE / tavern.scale.x  # the tavern model is scaled, the helper is not
+	helper.rotation.y = PI  # faces the table
 	helper.find_child("hammer").hide()
 	var player: AnimationPlayer = helper.find_child("AnimationPlayer")
 	player.get_animation("sit").loop_mode = Animation.LOOP_LINEAR
@@ -204,8 +241,14 @@ func _show_progress() -> void:
 	for animal_id in progress.helpers:
 		lines.append("%s%s: %d in pens" % [ItemIcons.bbcode(animal_id), animal_id, progress.helpers[animal_id]])
 	if progress.hunts == 0:
-		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water).")
+		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water), Quests (by the gate).")
 	$Hud/Progress.text = "[right]%s[/right]" % "\n".join(lines)
+	# Quests done of all on the board, green once all are done (issue #25).
+	progress.quests.renew_if_due(int(Time.get_unix_time_from_system()))
+	var board: Label3D = $Stations/QuestBoard/Label
+	var done := progress.quests.claimed_count()
+	board.text = "Quests %d / %d" % [done, progress.quests.quests.size()]
+	board.modulate = Color(0.45, 1.0, 0.4) if done == progress.quests.quests.size() else Color.WHITE
 
 
 func _on_interacted() -> void:
@@ -229,13 +272,47 @@ func _use(station: Node3D) -> void:
 	hunter.set_physics_process(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.ui(self, "shop")
-	_shop.open(station.station_id, station.title)
+	_open_station = station
+	_shop.info = INFO.get(station.station_id, "")
+	if station.station_id == "hut" and _is_my_hut(station):
+		_shop.info = "Your hut. The clan tent upgrade (5000 tusks) comes with clans."
+	_shop.open(station.station_id, "Hut" if station.station_id == "hut" else station.title)
 
 
-func _on_purchased(_item_id: String) -> void:
+func _on_purchased(item_id: String) -> void:
+	if item_id == "item_hut":
+		progress.hut_slot = _open_station.get_index() - $Stations/Hut1.get_index()
+		progress.hut_variant = _open_station.get_meta("variant")
+		_dress_huts()
+	elif item_id.begins_with("item_forge") and progress.forge_built():
+		_dress_forge()
 	hunter.equip(progress.items)
 	_show_progress()
 	purchased.emit()
+
+
+## Six huts (issue #22): free ones show any look and their price, a bought one keeps its own look.
+func _dress_huts() -> void:
+	for i in 6:
+		var hut: Node3D = get_node("Stations/Hut%d" % (i + 1))
+		var mine := progress.hut_slot == i and progress.owns("item_hut")
+		if not hut.has_meta("variant") or mine:
+			hut.set_meta("variant", progress.hut_variant if mine else randi() % HUT_VARIANTS.size())
+			hut.set_model(HUT_VARIANTS[hut.get_meta("variant")])
+		hut.title = "Your hut" if mine else "For sale\n%d tusks" % ShopCatalog.ITEMS["item_hut"]["price"]
+		hut.get_node("Label").text = hut.title
+
+
+func _is_my_hut(station: Node3D) -> bool:
+	return progress.owns("item_hut") and station == get_node_or_null("Stations/Hut%d" % (progress.hut_slot + 1))
+
+
+## A building site until the camp has given the forge's cost, then the forge (issue #11).
+func _dress_forge() -> void:
+	if progress.forge_built():
+		$Stations/Forge.set_model(FORGE_BUILT)
+		$Stations/Forge.title = "Forge (recipes coming later)"
+		$Stations/Forge.get_node("Label").text = $Stations/Forge.title
 
 
 func _on_shop_closed() -> void:

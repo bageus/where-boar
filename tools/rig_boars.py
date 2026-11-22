@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rig, skin and animate the owner's boar models into assets/models/boar_<type id>.glb.
+"""Rig, skin and animate the owner's boar models into assets/models/boar/boar_<type id>.glb.
 
 Needs Blender as a Python module (`pip install bpy`). The sources are Meshy exports (20k-170k
 triangles, flat shaded, snout towards -Y); each is turned to face the game's forward, scaled to
@@ -20,7 +20,7 @@ import bpy
 from mathutils import Matrix, Quaternion, Vector
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "assets" / "models"
+OUT = ROOT / "assets" / "models" / "boar"
 TEXTURE_SIZE = 512
 FPS = 30
 

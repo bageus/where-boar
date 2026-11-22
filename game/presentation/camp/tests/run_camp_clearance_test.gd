@@ -1,7 +1,7 @@
 extends SceneTree
 
-## Camp placement clearance: bushes, ferns, display traps and rim rocks must not stand inside a
-## building's footprint (or a display trap inside a rock). Boxes are in the camp's XZ plane.
+## Camp placement clearance: bushes, ferns, display traps, rim rocks and other buildings must not stand
+## inside a building's footprint (or a display trap inside a rock). Boxes are in the camp's XZ plane.
 
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
@@ -22,15 +22,19 @@ func _process(_delta: float) -> bool:
 	_frame += 1
 	if _frame < 3:
 		return false
-	var boxes := {}
-	for path in ["LargeTent", "AFrameTent", "RoundTent", "RoundTent2", "Stations/WeaponShop", "Stations/HuntingHut", "Stations/Tavern", "Stations/Well"]:
-		boxes[path] = _footprint(_camp.get_node(path))
+	var boxes := {"Longhouse": _footprint(_camp.get_node("Longhouse"))}
+	for station: Node3D in _camp.get_node("Stations").get_children():
+		if station.name != "StartHunt":
+			boxes[str(station.name)] = _footprint(station)
 	var keys := boxes.keys()
 	for a in keys.size():
 		for b in range(a + 1, keys.size()):
-			# The round tents' boxes are loose at the corners: compare their inner 60 %.
-			if boxes[keys[a]].grow(-boxes[keys[a]].size.x * 0.2).intersects(boxes[keys[b]].grow(-boxes[keys[b]].size.x * 0.2)):
+			# Tent and hut boxes are loose at the corners: compare their inner 60 %.
+			if _inner(boxes[keys[a]]).intersects(_inner(boxes[keys[b]])):
 				_fail("buildings overlap: %s / %s" % [keys[a], keys[b]])
+		for rock: Rect2 in _camp.get_node("Scenery").rim_rocks:
+			if _inner(boxes[keys[a]]).intersects(_inner(rock)):
+				_fail("%s inside a rim rock at %s" % [keys[a], rock.get_center()])
 	for t: Array in ShopDisplay.TRAP_SPOTS:
 		var trap := _trap_rect(t)
 		for key in keys:
@@ -64,6 +68,10 @@ func _footprint(building: Node3D) -> Rect2:
 		box = rect if first else box.merge(rect)
 		first = false
 	return box
+
+
+func _inner(box: Rect2) -> Rect2:
+	return Rect2(box.position + box.size * 0.2, box.size * 0.6)
 
 
 ## The display trap's real ground footprint, from its meshes placed as shop_display.gd places them.

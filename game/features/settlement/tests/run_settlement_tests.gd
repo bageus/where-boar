@@ -4,6 +4,7 @@ const Progress = preload("res://game/features/settlement/public/progress.gd")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
 
 
 func _init() -> void:
@@ -19,6 +20,10 @@ func _init() -> void:
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
+	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
+	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
+	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
+	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -121,3 +126,63 @@ func _saddle_needs_caught_boar() -> bool:
 	var locked := not progress.buy("item_saddle_runner_grey")
 	progress.caught = {"runner_grey": 1}
 	return locked and progress.tusks == 100 and progress.buy("item_saddle_runner_grey") and progress.tusks == 50
+
+
+func _sell_whole_tusks_only() -> bool:
+	var progress := Progress.new()
+	progress.materials = {"stick": 30}
+	var earned := progress.sell("stick", 30, 12)
+	return earned == 2 and progress.tusks == 2 and progress.materials["stick"] == 6 and progress.sell("stick", 6, 12) == 0 \
+		and progress.sell("feather", 50, 12) == 0
+
+
+func _forge_takes_gifts_until_built() -> bool:
+	var progress := Progress.new()
+	progress.tusks = ShopCatalog.FORGE_COST + 500
+	for i in ShopCatalog.FORGE_COST / 10000:
+		progress.buy("item_forge_10000")
+	return progress.forge_built() and not progress.buy("item_forge_100") and progress.tusks == 500 \
+		and not progress.items.has("item_forge_10000")
+
+
+func _quests_accept_progress_claim() -> bool:
+	var board := QuestBoard.new()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	board.renew_if_due(1000, rng)
+	var drawn := board.quests.size() == QuestBoard.POOL_SIZE and board.renews_at == 1000 + QuestBoard.RENEW_SECONDS
+	var kinds := board.quests.map(func(q: Dictionary) -> String: return q["kind"])
+	board.renew_if_due(2000, rng)
+	var kept: bool = board.quests.map(func(q: Dictionary) -> String: return q["kind"]) == kinds
+	board.quests = [{"kind": "catch", "amount": 2, "reward": 20, "have": 0, "state": "open"},
+		{"kind": "stick", "amount": 24, "reward": 3, "have": 0, "state": "open"}]
+	var progress := Progress.new()
+	progress.quests = board
+	var hunt := Hunt.new(2)
+	hunt.record("common_brown", BoarOutcome.Kind.CAPTURED)
+	progress.add_hunt(hunt)  # not accepted yet: does not count
+	board.accept(0)
+	board.accept(1)
+	progress.add_hunt(hunt)
+	var half := not board.can_claim(0, progress.materials)
+	progress.add_hunt(hunt)
+	progress.materials = {"stick": 30}
+	var before := progress.tusks
+	var claimed := progress.claim_quest(0) and progress.claim_quest(1) and not progress.claim_quest(1)
+	return drawn and kept and half and claimed and progress.tusks == before + 23 and progress.materials["stick"] == 6 \
+		and board.claimed_count() == 2
+
+
+func _hut_and_board_survive_save() -> bool:
+	var progress := Progress.new()
+	progress.hut_slot = 3
+	progress.hut_variant = 4
+	progress.forge = 1200
+	progress.materials = {"frog": 5}
+	progress.quests.renew_if_due(10)
+	progress.quests.accept(1)
+	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
+	var bad := Progress.from_dict({"hut_slot": 99, "quests": {"quests": [{"kind": "nope"}, 5]}})
+	return back.hut_slot == 3 and back.hut_variant == 4 and back.forge == 1200 and back.materials == {"frog": 5} \
+		and back.quests.quests.size() == QuestBoard.POOL_SIZE and back.quests.quests[1]["state"] == "accepted" \
+		and back.quests.renews_at == progress.quests.renews_at and bad.hut_slot == -1 and bad.quests.quests.is_empty()
