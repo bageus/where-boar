@@ -8,7 +8,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Planner = preload("res://game/presentation/planning/public/planner.gd")
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
-const EXPECTED_CHECKS := 10
+const EXPECTED_CHECKS := 11
 
 var _frame := 0
 var _failures := 0
@@ -98,10 +98,13 @@ func _physics_process(_delta: float) -> bool:
 			planner.sculpt(Vector3(at.x, before, at.z), 1.0)
 			_raised = Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
 			_check(_raised.y > before + 1.5, "the brush raises the ground")
+			planner._brush = "paint:sand"
+			planner.sculpt(Vector3(-20, 0, 20), 0.1)
 			data = planner._layout()
 			_fresh_level(MapScene, data)
 		5:
 			_check(is_equal_approx(_fresh.planning_terrain().height_at(_raised.x, _raised.z), _raised.y), "a fresh hunt map has the raised ground")
+			_check(not _fresh.planning_terrain().grassy_at(-20, 20), "a fresh hunt map has the sand painted, with no grass")
 			_verify("hunt")
 			_main.show_planning("camp")
 		7:
