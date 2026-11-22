@@ -7,7 +7,7 @@ Canonical rules live in `AGENTS.md`; this file is a quick map. Godot 4.x, GDScri
 Follow the mode they select. Do not implement gameplay while `GAME_SPEC.md` is `DRAFT`.
 
 ## Code index
-`docs/CODE_INDEX.md` lists every `.gd` file with its class, signals, public funcs and preloads (~8k tokens for the whole codebase). Grep or read it before exploring `game/`, then open only the files you need. After changing `.gd` files, run `python tools/build_code_index.py` and commit the result.
+`docs/CODE_INDEX.md` lists every `.gd` file with its class, signals, public funcs and preloads (~8k tokens for the whole codebase). Grep or read it before exploring `game/`, then open only the files you need. **Mandatory:** every commit that adds, removes or changes a `.gd` file must rerun `python tools/build_code_index.py` and include the updated `docs/CODE_INDEX.md` in the same commit. `validate_project.py` fails on a stale index.
 
 ## Layout
 - `game/` — GDScript source, by feature (`game/<feature>/`); `architecture.yml` per module.
@@ -30,4 +30,4 @@ python tools/validate_project.py
 godot --headless --path . --editor --quit   # Godot 4.7.2, when available
 ```
 If `godot` is missing in a cloud session (the SessionStart hook does not always run in project threads), run `.claude/hooks/install-godot.sh` once.
-`validate_project.py` runs the architecture, source-size and import-file checks.
+`validate_project.py` runs the architecture, source-size, import-file and code-index freshness checks.

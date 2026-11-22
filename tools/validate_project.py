@@ -38,6 +38,7 @@ def main() -> int:
         [python, "tools/validate_architecture.py"],
         [python, "tools/validate_source_size.py"],
         [python, "tools/check_import_files.py"],
+        [python, "tools/build_code_index.py", "--check"],
     ]
 
     if status in {"READY", "LOCKED"}:

@@ -66,6 +66,8 @@ Before editing, the agent MUST identify:
 
 During implementation, the agent MUST make the smallest coherent change, preserve unrelated files, and update manifests before adding cross-module dependencies.
 
+Every commit that touches `.gd` files MUST rerun `python tools/build_code_index.py` and include the updated `docs/CODE_INDEX.md`; the gate below fails on a stale index.
+
 Before completion it MUST run the status-aware gate:
 
 ```bash

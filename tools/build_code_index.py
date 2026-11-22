@@ -7,6 +7,7 @@ Read the index before exploring the code; rerun this script after changing .gd f
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,5 +55,10 @@ def selftest() -> None:
 
 if __name__ == "__main__":
     selftest()
+    if "--check" in sys.argv:
+        if not OUT.exists() or OUT.read_text(encoding="utf-8") != build():
+            sys.exit("docs/CODE_INDEX.md is stale: run python tools/build_code_index.py and commit it.")
+        print("code index up to date")
+        sys.exit(0)
     OUT.write_text(build(), encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}")

@@ -75,6 +75,7 @@ AI must request approval before:
 
 - Preserve user changes.
 - Use descriptive, task-scoped commits.
+- Every commit touching `.gd` files must rerun `python tools/build_code_index.py` and commit the updated `docs/CODE_INDEX.md` (checked by `tools/validate_project.py`).
 - Do not rewrite shared history.
 - Before playable MVP: commit approved-scope work directly to `main`.
 - After playable MVP: use feature branches and pull requests.
