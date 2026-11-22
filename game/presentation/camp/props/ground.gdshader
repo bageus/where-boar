@@ -7,7 +7,7 @@ render_mode specular_disabled;
 // rock wall, the palisade and the south-west, and trodden patches and paths (dressing.gd fills the
 // worn_* uniforms). edge_band() and greenness() mirror Dressing.greenness() in dressing.gd.
 
-uniform float half_size = 17.0;
+uniform float half_size = 25.0;
 uniform float south_split = 2.0;
 uniform sampler2D mottle : filter_linear_mipmap, repeat_enable;
 uniform int worn_count = 0;

@@ -29,10 +29,10 @@ const HALF := Dressing.HALF  # the camp's dirt square
 ## The south side splits here: rock wall to the west of it, drop-off to the east.
 const SOUTH_SPLIT := Dressing.SOUTH_SPLIT
 ## The forest behind the palisade: x and z ranges.
-const FOREST_X := Vector2(-40.0, 18.0)
-const FOREST_Z := Vector2(-67.0, -20.0)
-const TREE_COUNT := 75
-const GRASS_INSIDE := 1800  # the camp shrank from 40 m to 34 m; same density
+const FOREST_X := Vector2(-48.0, 26.0)
+const FOREST_Z := Vector2(-75.0, -28.0)
+const TREE_COUNT := 100
+const GRASS_INSIDE := 2650  # along a border 50 m a side; same density as at 34 m
 const GRASS_FOREST := 2500  # mostly hidden behind the palisade
 ## The wall's rocks reach down to the valley floor (vista.gd BASE_Y) so no sky or valley shows under them.
 const WALL_DEPTH := 44.0

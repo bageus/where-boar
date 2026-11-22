@@ -8,11 +8,11 @@ const TRAPS := "res://assets/models/peak_traps/"
 ## Traps around the hunting hut, in camp (world) coordinates so they clear the tents, the tavern and each
 ## other: [file, x, z, yaw, scale]. East and south of the hut, nowhere near the way from the campfire.
 const TRAP_SPOTS := [
-	["pit", 14.0, -1.0, 0.0, 0.6], ["snare", 13.8, 6.4, 0.3, 1.0], ["fence", 13.9, 2.6, PI / 2, 0.8],
-	["tripwire", 11.7, 5.6, PI / 2, 1.0], ["cage", 14.0, 8.0, 0.0, 0.7],
+	["pit", 20.5, -0.5, 0.0, 0.6], ["snare", 20.0, 6.5, 0.3, 1.0], ["fence", 20.3, 3.0, PI / 2, 0.8],
+	["tripwire", 17.0, 6.0, PI / 2, 1.0], ["cage", 20.3, 9.5, 0.0, 0.7],
 ]
 ## The strip they stand in, kept free of rim rocks (scenery.gd) and of plants (dressing.gd): x, z, width, depth.
-const TRAP_ZONE := Rect2(11.2, -2.6, 4.1, 12.2)
+const TRAP_ZONE := Rect2(16.3, -2.0, 5.4, 12.8)
 
 
 func _ready() -> void:

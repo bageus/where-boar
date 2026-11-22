@@ -62,7 +62,7 @@ const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 ## The tavern hearth's flames, local to the tavern model.
 const TAVERN_HEARTH := Vector3(1.4, 0.8, -0.9)
 ## Wind over the drop-off (east side and south-east corner), heard near the rim; follows the hunter along it.
-const DROP_EAST := 17.0  # Dressing.HALF
+const DROP_EAST := 25.0  # Dressing.HALF
 const DROP_SOUTH_FROM := 2.0  # Dressing.SOUTH_SPLIT
 ## Penned boars grunt now and then, less than wild ones (owner, 2026-10-29).
 const PEN_VOICE_SECONDS := Vector2(6.0, 16.0)

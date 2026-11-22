@@ -19,7 +19,7 @@ const PEBBLE_MESHES: Array[Mesh] = [
 	preload("res://assets/nature/meshes/peak/PeakRock4.res"), preload("res://assets/nature/meshes/peak/PeakRock6.res"),
 	preload("res://assets/nature/meshes/peak/PeakRock8.res"),
 ]
-const HALF := 17.0  # the camp's dirt square, as in ground.tscn and ground.gdshader
+const HALF := 25.0  # the camp's dirt square, as in ground.tscn and ground.gdshader (owner 2026-11-22: was 17, too tight for the new buildings)
 const SOUTH_SPLIT := 2.0
 const GATE := Vector2(0.0, -HALF)
 const PEBBLES := 90
