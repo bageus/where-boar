@@ -159,3 +159,4 @@ Unapproved ideas and possible future features belong here.
 | P3-106 | 3 | Planning mode: redraw the river course | P3-102 | TODO |
 | P3-107 | 3 | Gathering level (third level from issue #29): needs a spec, does not exist yet | — | TODO |
 | P3-108 | 3 | Inventory icons from the three owner atlases (hotbar, bait slot, rings, camp HUD, results) | P3-101 | DONE |
+| P3-109 | 3 | Forest gatherables on the hunt map (issues #21, #26): grass, daisies, berries, mushrooms, poisonous berries, feathers, sticks scattered at random; hopping frogs, crawling grubs. Collecting them is not done | — | DONE |
