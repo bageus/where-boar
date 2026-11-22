@@ -118,6 +118,7 @@ var _snared := false
 var _eating := false
 ## Seconds since the boar last thought (see THINK_FAR).
 var _unthought := 0.0
+var _leaving := false
 
 @onready var _label: Label3D = $Label
 @onready var _alert_mark: Label3D = $AlertMark
@@ -294,6 +295,12 @@ func witness_capture() -> void:
 	_show_alert()
 
 
+## Terminators landed (issue 8): every free boar leaves the map through the nearest escape zone.
+func leave() -> void:
+	if not boar.is_free(): return
+	_leaving = true; boar.flee(); hideout.stop(); _show_state()  # runs for the nearest zone, never calms down
+
+
 func saw_kill() -> void:
 	if not boar.is_free():
 		return
@@ -401,7 +408,7 @@ func _track_flight(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 		alert.alarm()
 		hideout.start_flight()
 	_was_fleeing = fleeing
-	if not fleeing:
+	if not fleeing or _leaving:
 		return
 	if hideout.active():
 		var was_hidden := hideout.hidden()
@@ -495,6 +502,7 @@ func _steer(delta: float, pos: Vector2, hunter_pos: Vector2) -> void:
 				_turn = randf_range(-PANIC_TURN_MAX, PANIC_TURN_MAX)
 				_turn_left = PANIC_TURN_SECONDS
 			var away := BoarSenses.flee_heading(pos, hunter_pos, escape_zones).rotated((_turn if panic else 0.0) + _scatter)
+			if _leaving and not escape_zones.is_empty(): away = (escape_zones[BoarSenses.nearest_zone(pos, escape_zones)] - pos).normalized()
 			_heading = flight.heading(self, delta, _heading, pos, hunter_pos, away, EYE_RISE)
 			speed = boar_type.panic_speed if panic else boar_type.flee_speed
 	if hideout.active() and boar.state in [Boar.State.FLEE, Boar.State.PANIC]:

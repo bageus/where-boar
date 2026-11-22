@@ -1,0 +1,12 @@
+{
+  "id": "presentation.planning",
+  "layer": "presentation",
+  "purpose": "Planning mode (issue #29): fly over a level, move, raise, turn, scale, copy, delete and add its objects, and save the layout.",
+  "state_owner": [],
+  "public_api": [
+    "public/planner.gd"
+  ],
+  "dependencies": [
+    "core.level_layout"
+  ]
+}

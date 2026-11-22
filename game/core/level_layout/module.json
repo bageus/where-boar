@@ -1,0 +1,10 @@
+{
+  "id": "core.level_layout",
+  "layer": "core",
+  "purpose": "A level's planned layout (planning mode, issue #29): moved, removed and added objects as a plain dictionary, applied to a level scene before it starts.",
+  "state_owner": [],
+  "public_api": [
+    "public/level_layout.gd"
+  ],
+  "dependencies": []
+}

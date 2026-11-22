@@ -2,6 +2,7 @@ extends SceneTree
 
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
+const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 
 
 func _init() -> void:
@@ -14,6 +15,11 @@ func _init() -> void:
 	failures += _check(_ends_when_no_boars_left(), "hunt ends when every boar is resolved")
 	failures += _check(_ends_on_return(), "hunt ends when the hunter returns early")
 	failures += _check(_trapped_boars_end_hunt_and_count(), "trapped boars end the hunt and count as captured")
+	failures += _check(_no_terminators_before_eleventh_hunt(), "no terminators before the 11th hunt")
+	failures += _check(_leader_kill_or_kill_target_calls_them(), "killing the leader or 30-40 boars calls the terminators once")
+	failures += _check(_caught_leader_calls_them_off(), "catching the leader alive calls the terminators off")
+	failures += _check(_invasion_sizes(), "2-30 terminators, more as hunts go on")
+	failures += _check(_hunt_waits_for_terminators(), "hunt goes on until the terminators are gone; kills drop metal")
 	print("hunt tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -73,3 +79,46 @@ func _trapped_boars_end_hunt_and_count() -> bool:
 	hunt.close_traps(["armored_black"])
 	return over and hunt.held == 0 and hunt.count("armored_black", BoarOutcome.Kind.CAPTURED) == 1 \
 		and hunt.tusks() == 2 + 14
+
+
+func _no_terminators_before_eleventh_hunt() -> bool:
+	var invasion := Invasion.new(9, 0.0, 0.0)
+	return not invasion.allowed and not invasion.record_boar(true, false, true) and invasion.size == 0
+
+
+func _leader_kill_or_kill_target_calls_them() -> bool:
+	var by_leader := Invasion.new(10, 0.0, 0.0)
+	var leader_ok := by_leader.record_boar(true, false, true) and by_leader.left == by_leader.size \
+			and not by_leader.record_boar(true, false, false)
+	var by_kills := Invasion.new(10, 0.999, 0.0)
+	var calls := 0
+	for n in 40:
+		calls += 1 if by_kills.record_boar(true, false, false) else 0
+	var captures := Invasion.new(10, 0.0, 0.0)
+	for n in 50:
+		captures.record_boar(false, true, false)
+	return leader_ok and by_kills.kill_target == 40 and calls == 1 and Invasion.new(10, 0.0, 0.0).kill_target == 30 \
+			and not captures.started
+
+
+func _caught_leader_calls_them_off() -> bool:
+	var invasion := Invasion.new(20, 0.0, 0.0)
+	invasion.record_boar(false, true, true)
+	for n in 40:
+		invasion.record_boar(true, false, false)
+	return not invasion.started
+
+
+func _invasion_sizes() -> bool:
+	return Invasion.new(10, 0.0, 0.0).size == 2 and Invasion.new(10, 0.0, 0.999).size == 4 \
+			and Invasion.new(100, 0.0, 0.999).size == 30 and Invasion.new(100, 0.0, 0.0).size == 2
+
+
+func _hunt_waits_for_terminators() -> bool:
+	var hunt := Hunt.new(1)
+	hunt.invasion = Invasion.new(10, 0.0, 0.0)
+	var started := hunt.record("runner", BoarOutcome.Kind.DEAD, false, true)
+	var waits := started and not hunt.is_over()
+	hunt.invasion.record_terminator(true)
+	hunt.invasion.record_terminator(false)
+	return waits and hunt.is_over() and hunt.invasion.loot.get("item_metal_plate", 0) == Invasion.LOOT["item_metal_plate"]

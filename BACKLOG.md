@@ -149,3 +149,12 @@ Unapproved ideas and possible future features belong here.
 | P3-096 | 3 | Hunt FPS (owner 2026-11-07: ~8 FPS): forest boar one surface (1 draw call, not 6), grass in 10 m chunks with half density where it sinks, stone piles drawn within 45 m, outline skips unchanged items, far calm boars think every 4th tick and standing ones skip the slide; landing.gd parse fix | P3-095 | DONE |
 | P3-097 | 3 | Cliffs minimal: one solid rock per cliff, fewer and larger rim/drop-off rocks | P3-096 | DONE |
 | P3-098 | 3 | Owner's new rooster and turkey models (2026-11-07): painted, baked colour and feather normal maps, rigged with idle/walk/run/peck; cage birds at hunt size | P3-097 | DONE |
+| P3-099 | 3 | Cyborg (terminator) boars: armour then health, slow pursuit, ±90° turret (cannon shot / machinegun burst, 4-5 s cooldown), search where the hunter hid; owner's models and sounds | P3-098 | IN_PROGRESS |
+| P3-100 | 3 | Terminator invasion (issue 8): from the 11th hunt, killing the herd leader or 30-40 boars calls 2-30 terminators in teleport eggs; red dusk sky, all boars flee the map; catching the leader calls it off; terminators drop metal tusks, plates, components | P3-098 | DONE |
+| P3-101 | 3 | Planning mode stage 1 (issue #29): start screen opens the hunt map or camp under a free camera; pick, drag, raise, turn, scale, copy, delete authored objects, add props and nature models from a palette, teleport to centre; layout saved per level and applied in play | P3-098 | DONE |
+| P3-102 | 3 | Planning mode: terrain brush (raise, lower, flatten) saved with the layout; ground and grass follow | P3-101 | TODO |
+| P3-103 | 3 | Planning mode: paint ground (grass, sand, mud, rock) | P3-102 | TODO |
+| P3-104 | 3 | Planning mode: procedural objects editable (terrain-scattered trees, stumps, logs, ferns, cliffs, tall-grass patches; camp dressing) | P3-101 | TODO |
+| P3-105 | 3 | Planning mode: scatter loot by group with a count (stones now; sticks and berries need items first) | P3-101 | TODO |
+| P3-106 | 3 | Planning mode: redraw the river course | P3-102 | TODO |
+| P3-107 | 3 | Gathering level (third level from issue #29): needs a spec, does not exist yet | — | TODO |

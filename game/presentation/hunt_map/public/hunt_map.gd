@@ -13,6 +13,8 @@ const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 const HuntMusic = preload("res://game/presentation/hunt_map/props/hunt_music.gd")
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
+const InvasionDirector = preload("res://game/presentation/hunt_map/props/invasion_director.gd")
+const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
 	preload("res://game/features/companions/public/wild_turkey.tscn"),
@@ -21,7 +23,7 @@ const WILD_SCENES := [
 ## Fact: the hunter returned to camp, was downed, or no free boars are left.
 signal hunt_ended(hunt: Hunt)
 
-## ASSUMPTION (D013, section 11): two herds, six groups and loners.
+## ASSUMPTION (D013, section 11): two herds, six groups and loners. The first boar of the biggest herd leads it (issue 8).
 const GROUP_SIZES := [15, 12, 4, 4, 3, 3, 3, 1, 1, 1]
 const RETURN_RADIUS := 3.0
 ## ASSUMPTION (D013): how far a shout carries, metres.
@@ -39,6 +41,7 @@ const SCOUT_CHECK_SECONDS := 0.5
 const BATCH_CELL := 80.0
 ## Stone piles (pebbles 0.2 m across) are drawn within this many metres (owner, 2026-11-07: 8 FPS on the hunt).
 const PILE_RANGE := 45.0
+const LEADER_SCALE := 1.3
 const TIPS := [
 	"Boars flee when you get close. Caps Lock toggles sneaking.",
 	"Hit a boar with the spear (LMB), or hold RMB and click to throw it. Press E to pick it up.",
@@ -61,11 +64,18 @@ var _scouting := false
 var _scout_left := 0.0
 ## Injected: the player's first hunt shows tips (section 16).
 var first_hunt := false
+## Injected: hunts finished before this one; terminators can come from the 11th on (issue 8).
+var hunts_done := 0
 var _tip := 0
 var _tip_left := 0.0
 ## Bait on the ground; the same array is shared with every boar.
 var _baits: Array[Node3D] = []
 var _music: HuntMusic
+var _invasion: InvasionDirector
+## Injected: the planned layout (planning mode, issue #29) applied before anything reads the props.
+var layout: Dictionary = {}
+## Injected: planning mode shows the map with no hunter, boars or HUD; props stay separate so they can be picked.
+var planning := false
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _terrain: StaticBody3D = $Terrain
@@ -74,6 +84,13 @@ var _music: HuntMusic
 
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
+	LevelLayout.apply(self, layout)
+	if planning:
+		$Hunter.free()
+		$Hud.hide()
+		set_process(false)
+		set_process_unhandled_input(false)
+		return
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()
@@ -90,8 +107,18 @@ func _ready() -> void:
 	for g in groups:
 		total += GROUP_SIZES[g]
 	hunt = Hunt.new(total)
+	hunt.invasion = Hunt.Invasion.new(hunts_done if InvasionDirector.available() else 0, randf(), randf())
 	for g in groups:
-		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones)
+		_spawn_group(GROUP_SIZES[g], spawns[g].position, zones, g == 0)
+	_invasion = InvasionDirector.new()
+	_invasion.name = "Invasion"
+	_invasion.hunter = _hunter
+	_invasion.terrain = _terrain
+	_invasion.boars = $Boars
+	_invasion.world = $Environment
+	_invasion.sun = $Sun
+	_invasion.terminator_gone.connect(_on_terminator_gone)
+	add_child(_invasion)
 	# Spare spawn points get a small flock of wild roosters and turkeys to catch (D024; owner 2026-10-29: more birds).
 	for spot in spawns.slice(groups):
 		for w in WILD_PER_SPOT * WILD_SCENES.size():
@@ -116,6 +143,39 @@ func _ready() -> void:
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
 	$Hud/Tip.visible = first_hunt
+
+
+## Objects planning mode may move, turn, scale, copy and delete.
+func planning_targets() -> Array[Node]:
+	var nodes: Array[Node] = $Props.get_children() + $EscapeZones.get_children()
+	nodes.append_array([$ReturnPoint, $Bridge])
+	return nodes
+
+
+## Where planning mode puts new objects: with the props, so they are batched in play.
+func planning_parent() -> Node3D:
+	return $Props
+
+
+func planning_centre() -> Vector3:
+	return Vector3(0.0, _terrain.height_at(0.0, 0.0), 0.0)
+
+
+## The map's own props (a tree or bush picks its model by name; a bush hides the hunter), then the shared nature models.
+func planning_palette() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = [
+		{"name": "Map tree", "res": "res://game/presentation/hunt_map/props/tree.tscn", "solid": ""},
+		{"name": "Map bush (cover)", "res": "res://game/presentation/hunt_map/props/bush.tscn", "solid": ""},
+		{"name": "Map rock", "res": "res://game/presentation/hunt_map/props/rock.tscn", "solid": ""},
+		{"name": "Stone pile (loot)", "res": "res://game/presentation/hunt_map/props/stone_pile.tscn", "solid": ""},
+	]
+	entries.append_array(LevelLayout.nature_palette())
+	return entries
+
+
+## Props and escape zones may go; the return point and the bridge only move.
+func planning_removable(node: Node) -> bool:
+	return node.get_parent() in [$Props, $EscapeZones]
 
 
 func _batch_props() -> void:
@@ -203,7 +263,8 @@ func _process(delta: float) -> void:
 
 
 ## Spawns size boars in a ring around centre; a group of two or more shares one herd array.
-func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
+## With leader, its first boar is the herd leader: bigger, and killing it calls the terminators (issue 8).
+func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2], leader := false) -> void:
 	var herd: Array[Node3D] = []
 	for i in size:
 		var boar := BoarScene.instantiate()
@@ -217,7 +278,9 @@ func _spawn_group(size: int, centre: Vector3, zones: Array[Vector2]) -> void:
 		var ring := 1.2 * sqrt(size)
 		boar.position = centre + Vector3(cos(TAU * i / size) * ring, 0.0, sin(TAU * i / size) * ring)
 		boar.position.y = _terrain.height_at(boar.position.x, boar.position.z) + 0.5
-		boar.outcome_reached.connect(_on_outcome)
+		boar.outcome_reached.connect(_on_outcome.bind(leader and i == 0))
+		if leader and i == 0:
+			boar.get_node("Model").scale *= LEADER_SCALE
 		boar.held_changed.connect(_on_held_changed)
 		boar.get_node("Sounds").hit.connect(_music.engage)
 		$Boars.add_child(boar)
@@ -277,14 +340,19 @@ func _on_helper_caught(animal_id: String) -> void:
 	_show_goal()
 
 
-func _on_outcome(type_id: String, kind: int, wounded: bool) -> void:
+func _on_outcome(type_id: String, kind: int, wounded: bool, leader := false) -> void:
 	if hunt.is_over():
 		return
 	var tusks_before := hunt.tusks()
-	hunt.record(type_id, kind, wounded)
+	var invaded := hunt.record(type_id, kind, wounded, leader)
 	if hunt.tusks() > tusks_before:
 		_hunter.show_gain("+%d tusks" % (hunt.tusks() - tusks_before))
 		Sfx.ui(self, "tusk")
+	if kind == BoarOutcome.Kind.ESCAPED and hunt.invasion.started and not invaded:
+		_show_goal()  # boars running from terminators leave quietly
+		if hunt.is_over():
+			_end()
+		return
 	if kind == BoarOutcome.Kind.ESCAPED:
 		Sfx.ui(self, "boar_escaped", -4.0)
 	var type := BoarTypes.find(type_id)
@@ -292,6 +360,23 @@ func _on_outcome(type_id: String, kind: int, wounded: bool) -> void:
 	if wounded and kind == BoarOutcome.Kind.CAPTURED:
 		verb = "caught wounded (pays less)"
 	_announce("%s %s" % [type.display_name if type else type_id, verb])
+	if invaded:
+		_invasion.start(hunt.invasion.size)
+		_announce("The sky turns red: terminators are coming!")
+	elif leader and kind == BoarOutcome.Kind.CAPTURED and hunt.invasion.allowed and not hunt.invasion.started:
+		_announce("The leader is caught: no terminators this hunt")
+	_show_goal()
+	if hunt.is_over():
+		_end()
+
+
+func _on_terminator_gone(killed: bool) -> void:
+	if hunt.is_over():
+		return
+	hunt.invasion.record_terminator(killed)
+	if killed:
+		_hunter.show_gain("+metal tusks, plates, components")
+		_announce("Terminator destroyed")
 	_show_goal()
 	if hunt.is_over():
 		_end()
@@ -404,10 +489,11 @@ func _show_goal() -> void:
 
 ## Boar counts for the pause menu (owner, 2026-10-28: stats on Esc, not on screen).
 func stats_text() -> String:
-	return "Boars left: %d\nIn traps: %d\nKilled: %d\nCaught: %d\nEscaped: %d" % [
+	return "Boars left: %d\nIn traps: %d\nKilled: %d\nCaught: %d\nEscaped: %d\nTerminators left: %d" % [
 		hunt.remaining(),
 		hunt.held,
 		hunt.count_all(BoarOutcome.Kind.DEAD),
 		hunt.count_all(BoarOutcome.Kind.CAPTURED),
 		hunt.count_all(BoarOutcome.Kind.ESCAPED),
+		hunt.invasion.left,
 	]
