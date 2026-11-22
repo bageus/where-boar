@@ -82,6 +82,11 @@ var planning := false
 @onready var _goal: Label = $Hud/Goal
 
 
+## The ground must take its planned heights before it dresses itself in its own _ready.
+func _enter_tree() -> void:
+	$Terrain.height_edits = layout.get("heights", {})
+
+
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
 	LevelLayout.apply(self, layout)
@@ -155,6 +160,11 @@ func planning_targets() -> Array[Node]:
 ## Where planning mode puts new objects: with the props, so they are batched in play.
 func planning_parent() -> Node3D:
 	return $Props
+
+
+## The ground the planning brush shapes.
+func planning_terrain() -> Node3D:
+	return _terrain
 
 
 func planning_centre() -> Vector3:

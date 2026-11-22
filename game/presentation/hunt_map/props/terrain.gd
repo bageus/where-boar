@@ -89,6 +89,9 @@ var _arrays: Array
 ## Leaf pit openings: x, z, radius (the grass shader takes up to 8).
 var _holes := PackedVector4Array()
 
+## Injected before _ready: planned ground heights (planning mode), "i,j" -> metres; also filled by sculpt().
+var height_edits: Dictionary = {}
+
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
 static var _grass_noise: FastNoiseLite
@@ -111,6 +114,14 @@ func _ready() -> void:
 	add_to_group("terrain")
 	GRASS_MATERIAL.set_shader_parameter("hole_count", 0)
 	GRASS_MATERIAL.set_shader_parameter("fade_end", GRASS_RANGE)
+	if not height_edits.is_empty():
+		_shape = _shape.duplicate()  # the .tres is shared: edits must not leak into the next load
+		$Collision.shape = _shape
+		var data := _shape.map_data
+		for key: String in height_edits:
+			var ij := key.split_floats(",")
+			data[int(ij[1]) * _shape.map_width + int(ij[0])] = height_edits[key]
+		_shape.map_data = data
 	$Mesh.mesh = _build_mesh()
 	for node in get_parent().find_children("*", "Node3D", true, false):
 		if node != self and not is_ancestor_of(node):
@@ -127,6 +138,40 @@ func _ready() -> void:
 	gatherables.name = "Gatherables"
 	add_child(gatherables)
 	gatherables.populate(self, {"stumps": stumps, "logs": logs, "trees": trees, "shrubs": shrubs})
+
+
+## Planning brush: ground within radius of at rises by amount (lowers when negative), or with flatten moves
+## that share of the way to at.y; soft towards the rim. Collision changes now, the look on rebuild();
+## grass chunks over it hide until the map is loaded again (scattered stumps, logs, cliffs stay put too).
+func sculpt(at: Vector3, radius: float, amount: float, flatten := false) -> void:
+	if _shape.resource_path != "":
+		_shape = _shape.duplicate()
+		$Collision.shape = _shape
+	var w := _shape.map_width
+	var d := _shape.map_depth
+	var data := _shape.map_data
+	var ci := roundi(at.x + (w - 1) * 0.5)
+	var cj := roundi(at.z + (d - 1) * 0.5)
+	var reach := ceili(radius)
+	for j in range(maxi(cj - reach, 0), mini(cj + reach + 1, d)):
+		for i in range(maxi(ci - reach, 0), mini(ci + reach + 1, w)):
+			var dist := Vector2(i - ci, j - cj).length()
+			if dist > radius:
+				continue
+			var soft := 1.0 - smoothstep(radius * 0.4, radius, dist)
+			var k := j * w + i
+			data[k] = lerpf(data[k], at.y, clampf(amount * soft, 0.0, 1.0)) if flatten else data[k] + amount * soft
+			height_edits["%d,%d" % [i, j]] = data[k]
+	_shape.map_data = data
+	for node in get_children():
+		if node is MultiMeshInstance3D and node.position != Vector3.ZERO \
+				and Vector2(node.position.x - at.x, node.position.z - at.z).length() < radius + GRASS_CHUNK:
+			node.hide()
+
+
+## Redraws the ground after sculpt().
+func rebuild() -> void:
+	$Mesh.mesh = _build_mesh()
 
 
 ## Ground height at a map point, metres; edges clamp to the last sample.

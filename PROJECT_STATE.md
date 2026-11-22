@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-110
+active_task_id: P3-112
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-22
@@ -165,3 +165,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-108 (2026-11-22): Иконки инвентаря из трёх атласов владельца (`assets/icon/*.png`). `tools/slice_icons.py` режет их на 23 иконки 128 px в `assets/icon/items/` (оружие, палки/цветок/трава/гриб/ягоды/лягушка/перо/личинка, петух, индюк, бивни, металлическая пластина, компонент, металлические бивни; мусорные пятна вокруг убраны). `game/features/settlement/public/item_icons.gd` — id → иконка (приманки берут иконку каталога). Показано: хотбар охотника (иконка оружия), слот приманки и кольцо приманок/ловушек (`hunter_hud.gd`, `radial_menu.gd`), лагерный HUD (бивни, птицы в клетках) и итоги охоты (бивни, металлическая добыча) через RichTextLabel с `[img]`. У ловушек, воды и еды иконок нет в атласах. Собираемых предметов из природного атласа в игре ещё нет — иконки лежат готовыми. Проверено: `validate_project.py`, кольцо в xvfb. Не проверено: хотбар и итоги в игре — сцена охоты не грузилась (пути кабанов исправлены в `game/features/boar/content/*.tres`, возвращены удалённые stall.glb, turkey.glb, arm_bearded.glb).
 - P3-101 (2026-11-22): planning mode, stage 1 (issue #29): "Plan hunt map" / "Plan camp" on the start screen open the level with no hunter under a free camera (`presentation.planning` `planner.gd`): pick, drag, raise, turn, scale, copy, delete objects, add from a palette (map props, all PEAK nature models, wheat; camp buildings), "To centre". Layout (`core.level_layout`: moved/removed/added) saved to `user://layout_<level>.json`, applied by `hunt_map.gd`/`camp.gd` before their props are read; fallback `res://content/layouts/<level>.json` (Export copies the JSON).
 - P3-109 (2026-11-22): forest gatherables scattered on the hunt map (`presentation.hunt_map` `gatherables.gd`, `frog.gd`, `grub.gd`; models in `assets/models/props/`): grass, daisies, berries, mushrooms, poisonous berries, feathers, sticks, hopping frogs, crawling grubs; random counts per load. Collecting them is not implemented.
+- P3-102 (2026-11-22): planning mode ground brush on the hunt map: Raise / Lower / Flatten buttons, hold LMB, [ ] brush size; objects under it ride along; heights saved as `heights` ("i,j" -> m) in the layout, applied by `terrain.gd` before it scatters and plants grass (shape duplicated, the .tres stays clean). Grass over sculpted ground hides until reload; scattered stumps/logs/cliffs do not follow (P3-104). The camp ground is a flat box: no brush there.
