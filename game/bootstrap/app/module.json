@@ -8,12 +8,14 @@
   ],
   "public_api": [],
   "dependencies": [
+    "core.level_layout",
     "core.sfx",
     "features.boar",
     "features.settlement",
     "infrastructure.save",
     "presentation.camp",
     "presentation.hunt_map",
-    "presentation.menus"
+    "presentation.menus",
+    "presentation.planning"
   ]
 }

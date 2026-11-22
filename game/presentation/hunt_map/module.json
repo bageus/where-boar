@@ -7,6 +7,7 @@
     "public/hunt_map.tscn"
   ],
   "dependencies": [
+    "core.level_layout",
     "core.baked_shadow",
     "core.clouds",
     "core.sfx",

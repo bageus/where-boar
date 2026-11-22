@@ -8,6 +8,7 @@ signal hunt_requested
 signal purchased
 
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
+const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const PEN_ANIMALS := {
@@ -47,12 +48,23 @@ const PEN_VOICE_SECONDS := Vector2(6.0, 16.0)
 
 ## Injected before the camp enters the tree.
 var progress: Progress
+## Injected: the planned layout (planning mode, issue #29) applied before the camp is dressed.
+var layout: Dictionary = {}
+## Injected: planning mode shows the camp with no hunter, shops or HUD.
+var planning := false
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
 
 
 func _ready() -> void:
+	LevelLayout.apply(self, layout)
+	if planning:
+		hunter.free()
+		$Hud.hide()
+		set_process(false)
+		_dress()
+		return
 	hunter.interacted.connect(_on_interacted)
 	hunter.equip(progress.items)
 	_shop.progress = progress
@@ -62,12 +74,47 @@ func _ready() -> void:
 	_fill_pen()
 	_seat_helper()
 	_ambience()
-	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
-			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
-	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings, $Scenery.rim_rocks)
+	_dress()
 	# The camp ground and the forest floor behind the palisade.
 	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $LargeTent, $AFrameTent, $RoundTent, $RoundTent2] as Array[Node],
 			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp
+
+
+func _dress() -> void:
+	var buildings: Array[Node3D] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2, $Stations/WeaponShop,
+			$Stations/HuntingHut, $Stations/Tavern, $Stations/Well]
+	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings, $Scenery.rim_rocks)
+
+
+## Objects planning mode may move, turn, scale, copy and delete: tents and stations.
+func planning_targets() -> Array[Node]:
+	var nodes: Array[Node] = [$LargeTent, $AFrameTent, $RoundTent, $RoundTent2]
+	nodes.append_array($Stations.get_children())
+	nodes.append_array(get_children().filter(func(n: Node) -> bool: return n.has_meta(LevelLayout.ADDED_META)))
+	return nodes
+
+
+func planning_parent() -> Node3D:
+	return self
+
+
+func planning_centre() -> Vector3:
+	return $Stations/Campfire.global_position
+
+
+## Building models (decoration only: a copied stall sells nothing), then the shared nature models.
+func planning_palette() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	for model in ["large_hide_tent", "round_hide_tent", "aframe_hide_tent", "tribal_well", "campfire", "direction_sign",
+			"weapon_stall", "hunter_stall", "boar_pen", "cage_rack", "tavern"]:
+		entries.append({"name": model.capitalize(), "res": "res://assets/models/peak/%s.scn" % model, "solid": ""})
+	entries.append_array(LevelLayout.nature_palette())
+	return entries
+
+
+## Tents and stations are used by the camp itself, so only added objects may go.
+func planning_removable(node: Node) -> bool:
+	return node.has_meta(LevelLayout.ADDED_META)
 
 
 ## Roosters and turkeys caught on hunts stand in the cages, the newest boars (up to five) in the pen.

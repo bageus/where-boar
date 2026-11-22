@@ -14,6 +14,7 @@ const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 const HuntMusic = preload("res://game/presentation/hunt_map/props/hunt_music.gd")
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
 const InvasionDirector = preload("res://game/presentation/hunt_map/props/invasion_director.gd")
+const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
 	preload("res://game/features/companions/public/wild_turkey.tscn"),
@@ -71,6 +72,10 @@ var _tip_left := 0.0
 var _baits: Array[Node3D] = []
 var _music: HuntMusic
 var _invasion: InvasionDirector
+## Injected: the planned layout (planning mode, issue #29) applied before anything reads the props.
+var layout: Dictionary = {}
+## Injected: planning mode shows the map with no hunter, boars or HUD; props stay separate so they can be picked.
+var planning := false
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _terrain: StaticBody3D = $Terrain
@@ -79,6 +84,13 @@ var _invasion: InvasionDirector
 
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
+	LevelLayout.apply(self, layout)
+	if planning:
+		$Hunter.free()
+		$Hud.hide()
+		set_process(false)
+		set_process_unhandled_input(false)
+		return
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()
@@ -131,6 +143,39 @@ func _ready() -> void:
 	minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
 	$Hud/Tip.visible = first_hunt
+
+
+## Objects planning mode may move, turn, scale, copy and delete.
+func planning_targets() -> Array[Node]:
+	var nodes: Array[Node] = $Props.get_children() + $EscapeZones.get_children()
+	nodes.append_array([$ReturnPoint, $Bridge])
+	return nodes
+
+
+## Where planning mode puts new objects: with the props, so they are batched in play.
+func planning_parent() -> Node3D:
+	return $Props
+
+
+func planning_centre() -> Vector3:
+	return Vector3(0.0, _terrain.height_at(0.0, 0.0), 0.0)
+
+
+## The map's own props (a tree or bush picks its model by name; a bush hides the hunter), then the shared nature models.
+func planning_palette() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = [
+		{"name": "Map tree", "res": "res://game/presentation/hunt_map/props/tree.tscn", "solid": ""},
+		{"name": "Map bush (cover)", "res": "res://game/presentation/hunt_map/props/bush.tscn", "solid": ""},
+		{"name": "Map rock", "res": "res://game/presentation/hunt_map/props/rock.tscn", "solid": ""},
+		{"name": "Stone pile (loot)", "res": "res://game/presentation/hunt_map/props/stone_pile.tscn", "solid": ""},
+	]
+	entries.append_array(LevelLayout.nature_palette())
+	return entries
+
+
+## Props and escape zones may go; the return point and the bridge only move.
+func planning_removable(node: Node) -> bool:
+	return node.get_parent() in [$Props, $EscapeZones]
 
 
 func _batch_props() -> void:

@@ -11,6 +11,9 @@ const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const SaveStore = preload("res://game/infrastructure/save/public/save_store.gd")
+const Planner = preload("res://game/presentation/planning/public/planner.gd")
+## A layout committed with the game (Export in planning mode), used when this machine has none saved.
+const SHIPPED_LAYOUT := "res://content/layouts/%s.json"
 
 ## The one screen or map shown now.
 var current: Node
@@ -89,6 +92,8 @@ func show_start() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	start.get_node("%Start").pressed.connect(show_camp)
 	start.get_node("%Animations").pressed.connect(show_viewer)
+	start.get_node("%PlanHunt").pressed.connect(show_planning.bind("hunt"))
+	start.get_node("%PlanCamp").pressed.connect(show_planning.bind("camp"))
 
 
 func show_viewer() -> void:
@@ -97,9 +102,45 @@ func show_viewer() -> void:
 	viewer.closed.connect(show_start)
 
 
+## Planning mode (issue #29): the level with no hunter, under a free camera; Save stores its layout.
+func show_planning(level_id: String) -> void:
+	var level: Node3D = (MapScene if level_id == "hunt" else CampScene).instantiate()
+	level.planning = true
+	level.layout = _layout(level_id)
+	if level_id == "camp":
+		level.progress = progress
+	_swap(level)
+	var planner := Planner.new()
+	planner.level = level
+	planner.saved.connect(func(data: Dictionary) -> void: _layout_store(level_id).save_data(data))
+	planner.reset_requested.connect(func() -> void:
+		var store := _layout_store(level_id)
+		for file_path in [store.path, store.backup_path()]:
+			DirAccess.remove_absolute(file_path)
+		show_planning(level_id))
+	planner.closed.connect(show_start)
+	level.add_child(planner)
+
+
+static func _layout_store(level_id: String) -> SaveStore:
+	var store := SaveStore.new()
+	store.path = "user://layout_%s.json" % level_id
+	return store
+
+
+## The layout saved on this machine, else the one shipped with the game, else none.
+func _layout(level_id: String) -> Dictionary:
+	var data := _layout_store(level_id).load_data()
+	if data.is_empty() and FileAccess.file_exists(SHIPPED_LAYOUT % level_id):
+		var shipped = JSON.parse_string(FileAccess.get_file_as_string(SHIPPED_LAYOUT % level_id))
+		data = shipped if shipped is Dictionary else {}
+	return data
+
+
 func show_camp() -> void:
 	var camp := CampScene.instantiate()
 	camp.progress = progress
+	camp.layout = _layout("camp")
 	_swap(camp)
 	camp.hunter.apply_settings(settings)
 	camp.purchased.connect(_save)
@@ -112,6 +153,7 @@ func _save() -> void:
 
 func start_hunt() -> void:
 	var map := MapScene.instantiate()
+	map.layout = _layout("hunt")
 	map.items = progress.items
 	map.helpers = progress.helpers
 	map.companion = progress.companion

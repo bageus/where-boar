@@ -8,6 +8,7 @@
     "public/camp.gd"
   ],
   "dependencies": [
+    "core.level_layout",
     "core.baked_shadow",
     "core.clouds",
     "core.sfx",
