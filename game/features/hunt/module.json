@@ -1,12 +1,13 @@
 {
   "id": "features.hunt",
   "layer": "features",
-  "purpose": "Own the results of one hunt and the tusk rewards for them (M007).",
+  "purpose": "Own the results of one hunt, the tusk rewards for them (M007) and the terminator invasion rules (issue 8).",
   "state_owner": [
     "Results of the current hunt"
   ],
   "public_api": [
-    "public/hunt.gd"
+    "public/hunt.gd",
+    "public/invasion.gd"
   ],
   "dependencies": [
     "features.boar"

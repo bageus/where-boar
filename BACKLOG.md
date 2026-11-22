@@ -150,3 +150,4 @@ Unapproved ideas and possible future features belong here.
 | P3-097 | 3 | Cliffs minimal: one solid rock per cliff, fewer and larger rim/drop-off rocks | P3-096 | DONE |
 | P3-098 | 3 | Owner's new rooster and turkey models (2026-11-07): painted, baked colour and feather normal maps, rigged with idle/walk/run/peck; cage birds at hunt size | P3-097 | DONE |
 | P3-099 | 3 | Cyborg (terminator) boars: armour then health, slow pursuit, ±90° turret (cannon shot / machinegun burst, 4-5 s cooldown), search where the hunter hid; owner's models and sounds | P3-098 | IN_PROGRESS |
+| P3-100 | 3 | Terminator invasion (issue 8): from the 11th hunt, killing the herd leader or 30-40 boars calls 2-30 terminators in teleport eggs; red dusk sky, all boars flee the map; catching the leader calls it off; terminators drop metal tusks, plates, components | P3-098 | DONE |

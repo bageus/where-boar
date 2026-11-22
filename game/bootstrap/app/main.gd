@@ -116,6 +116,7 @@ func start_hunt() -> void:
 	map.helpers = progress.helpers
 	map.companion = progress.companion
 	map.first_hunt = progress.hunts == 0
+	map.hunts_done = progress.hunts
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 	map.get_node("Hunter").apply_settings(settings)

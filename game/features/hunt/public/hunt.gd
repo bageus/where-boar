@@ -5,6 +5,7 @@ extends RefCounted
 
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 
 ## Boars on the map when the hunt started.
 var total := 0
@@ -15,6 +16,8 @@ var used_items: Dictionary = {}
 var held := 0
 ## animal_id -> wild helper animals (rooster, turkey) caught for the camp pen.
 var helpers_caught: Dictionary = {}
+## Terminators of this hunt (issue 8); the default one never comes.
+var invasion := Invasion.new()
 ## type_id -> BoarOutcome.Kind -> count
 var _counts: Dictionary = {}
 ## type_id -> how many of the captured boars were wounded.
@@ -28,15 +31,17 @@ func _init(p_total: int = 0) -> void:
 
 ## Callers pass the public outcome; NONE means the boar was never counted.
 ## wounded only matters for CAPTURED: such a boar still counts as caught but pays less.
-func record(type_id: String, kind: BoarOutcome.Kind, wounded := false) -> void:
+## True when this outcome (a kill, or the leader killed) calls the terminators down.
+func record(type_id: String, kind: BoarOutcome.Kind, wounded := false, leader := false) -> bool:
 	if kind == BoarOutcome.Kind.NONE:
-		return
+		return false
 	if wounded and kind == BoarOutcome.Kind.CAPTURED:
 		_wounded[type_id] = _wounded.get(type_id, 0) + 1
 	var per_type: Dictionary = _counts.get(type_id, {})
 	per_type[kind] = per_type.get(kind, 0) + 1
 	_counts[type_id] = per_type
 	_resolved += 1
+	return invasion.record_boar(kind == BoarOutcome.Kind.DEAD, kind == BoarOutcome.Kind.CAPTURED, leader)
 
 
 func count(type_id: String, kind: BoarOutcome.Kind) -> int:
@@ -67,9 +72,9 @@ func close_traps(held_type_ids: Array) -> void:
 		record(type_id, BoarOutcome.Kind.CAPTURED)
 
 
-## The hunt ends when the hunter returns to camp or no free boars are left (section 07).
+## The hunt ends when the hunter returns to camp or no free boars and no terminators are left (section 07).
 func is_over() -> bool:
-	return returned or remaining() <= 0
+	return returned or (remaining() <= 0 and invasion.left <= 0)
 
 
 ## Rough tusk count shown during the hunt (owner, 2026-10-27): "< 10", "< 20", ... "< 1000", then "1000+".

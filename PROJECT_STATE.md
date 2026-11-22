@@ -96,6 +96,8 @@ None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) in progress: dom
 
 ## Latest
 
+- 2026-11-22 P3-100 terminator invasion (issue 8): from the 11th hunt, killing the herd leader (biggest boar of the large herd) or 30-40 boars calls 2-30 terminators down in teleport eggs around the hunter; the sky turns red at dusk, every boar runs off the map, the hunt lasts until the terminators are gone; killed terminators drop metal tusks, plates and components (camp items). Waits for the cyborg body scene (P3-099) before it can trigger in game.
+
 - 2026-11-05 campfire fire: the baked flame logs are gone from `campfire.scn`; a cartoon low-poly flame (`assets/fire/flame.tscn` + `flame.gdshader`: faceted cones, choppy sway, yellow/orange/red bands) sits on the pit (camp.tscn `Stations/Campfire/Flame`), and the coals of the pit and the brazier use `assets/fire/embers.tres` (stepped breathing glow). Tavern hearth unchanged.
 - 2026-10-28: pickups (stone piles, landed spears/arrows/stones/nets) get a pulsing outline within 8 m (`highlight.gd`); a net that hits a tree or rock now drops to the ground instead of freezing in the air.
 

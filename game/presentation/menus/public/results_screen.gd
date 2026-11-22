@@ -22,6 +22,10 @@ func show_results(hunt: Hunt, total_tusks: int) -> void:
 		])
 	if lines.is_empty():
 		lines.append("No boars this time.")
+	var loot := hunt.invasion.loot
+	if not loot.is_empty():
+		lines.append("Terminator loot: metal tusks %d, metal plates %d, components %d" % [
+			loot.get("item_metal_tusk", 0), loot.get("item_metal_plate", 0), loot.get("item_component", 0)])
 	lines.append("")
 	lines.append("Tusks earned: %d   (tribe total: %d)" % [hunt.tusks(), total_tusks])
 	%Summary.text = "\n".join(lines)
