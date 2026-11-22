@@ -158,3 +158,4 @@ Unapproved ideas and possible future features belong here.
 | P3-105 | 3 | Planning mode: scatter loot by group with a count (stones now; sticks and berries need items first) | P3-101 | TODO |
 | P3-106 | 3 | Planning mode: redraw the river course | P3-102 | TODO |
 | P3-107 | 3 | Gathering level (third level from issue #29): needs a spec, does not exist yet | — | TODO |
+| P3-108 | 3 | Inventory icons from the three owner atlases (hotbar, bait slot, rings, camp HUD, results) | P3-101 | DONE |

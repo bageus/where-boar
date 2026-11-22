@@ -5,10 +5,13 @@ extends CanvasLayer
 
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
+const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 const SPEAR_NAMES := {"flint": "Flint spear", "bone": "Bone spear", "wood": "Wooden spear"}
 const WEAPON_NAMES := ["Spear", "Net", "Club", "Sling", "Bow", "Knife"]
+const WEAPON_IDS := ["item_spear", "item_net", "item_club", "item_sling", "item_bow", "item_knife"]
+const ICON_SIZE := 36.0
 
 var _gain_fade: Tween
 var _prompt_pulse: Tween
@@ -17,10 +20,28 @@ var _menu_key := ""
 
 
 func _ready() -> void:
-	for weapon_name in WEAPON_NAMES:
-		var slot := Label.new()
-		slot.add_theme_font_size_override("font_size", 22)
+	for i in WEAPON_NAMES.size():
+		var slot := HBoxContainer.new()
+		slot.add_child(_icon_rect(ItemIcons.of(WEAPON_IDS[i])))
+		var label := Label.new()
+		label.add_theme_font_size_override("font_size", 22)
+		slot.add_child(label)
 		$Hotbar.add_child(slot)
+	# Bait on the left, trap on the right: an icon beside the text (traps have none yet).
+	for label: Label in [$Bait, $Trap]:
+		var margin := StyleBoxEmpty.new()
+		margin.set("content_margin_" + ("left" if label == $Bait else "right"), ICON_SIZE + 6)
+		label.add_theme_stylebox_override("normal", margin)
+		var icon := _icon_rect(null)
+		var right := label == $Trap
+		icon.anchor_left = 1.0 if right else 0.0
+		icon.anchor_right = icon.anchor_left
+		icon.offset_left = -ICON_SIZE if right else 0.0
+		icon.offset_right = 0.0 if right else ICON_SIZE
+		icon.offset_top = -4.0
+		icon.offset_bottom = ICON_SIZE - 4.0
+		icon.name = "Icon"
+		label.add_child(icon)
 
 
 ## The "E" keycap above the stamina bar pulses while something in reach can be used.
@@ -63,10 +84,13 @@ func show_loadout(loadout: Loadout, weapon: Loadout.Weapon) -> void:
 		"",
 	]
 	for i in WEAPON_NAMES.size():
-		var slot: Label = $Hotbar.get_child(i)
+		var slot: HBoxContainer = $Hotbar.get_child(i)
+		var label: Label = slot.get_child(1)
 		slot.visible = loadout.in_hotbar(i)
-		slot.text = "[%d] %s%s" % [i + 1, SPEAR_NAMES.get(loadout.spear_kind, "Spear") if i == 0 else WEAPON_NAMES[i], extras[i]]
+		label.text = "[%d] %s%s" % [i + 1, SPEAR_NAMES.get(loadout.spear_kind, "Spear") if i == 0 else WEAPON_NAMES[i], extras[i]]
 		slot.modulate = Color.YELLOW if weapon == i else Color.WHITE
+	$Bait/Icon.texture = ItemIcons.of(loadout.bait_id)
+	$Trap/Icon.texture = ItemIcons.of(loadout.trap_id)
 	$Bait.text = "[F] %s x%d" % [_name(loadout.bait_id), loadout.baits.get(loadout.bait_id, 0)]
 	$Trap.text = "[T] %s x%d" % [_name(loadout.trap_id), loadout.traps.get(loadout.trap_id, 0)]
 	$Water.text = "[Q] Water %d/%d" % [loadout.water_sips, Loadout.WATER_SIPS]
@@ -78,7 +102,8 @@ func open_menu(loadout: Loadout, key: String) -> void:
 	Sfx.ui(self, "inventory_" + key)
 	var ids: Array = Loadout.BAIT_IDS if key == "bait" else Loadout.TRAP_IDS
 	var stock: Dictionary = loadout.baits if key == "bait" else loadout.traps
-	$Menu.open(ids, ids.map(func(item_id: String) -> String: return "%s x%d" % [_name(item_id), stock.get(item_id, 0)]))
+	$Menu.open(ids, ids.map(func(item_id: String) -> String: return "%s x%d" % [_name(item_id), stock.get(item_id, 0)]),
+		ids.map(ItemIcons.of))
 
 
 func menu_open() -> bool:
@@ -113,6 +138,15 @@ func show_gain(text: String) -> void:
 
 func show_helper(text: String) -> void:
 	$Helper.text = text
+
+
+static func _icon_rect(texture: Texture2D) -> TextureRect:
+	var rect := TextureRect.new()
+	rect.texture = texture
+	rect.custom_minimum_size = Vector2.ONE * ICON_SIZE
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	return rect
 
 
 static func _name(item_id: String) -> String:

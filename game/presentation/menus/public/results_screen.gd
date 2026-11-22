@@ -5,6 +5,7 @@ extends CenterContainer
 const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 
@@ -24,8 +25,9 @@ func show_results(hunt: Hunt, total_tusks: int) -> void:
 		lines.append("No boars this time.")
 	var loot := hunt.invasion.loot
 	if not loot.is_empty():
-		lines.append("Terminator loot: metal tusks %d, metal plates %d, components %d" % [
-			loot.get("item_metal_tusk", 0), loot.get("item_metal_plate", 0), loot.get("item_component", 0)])
+		lines.append("Terminator loot: %s metal tusks %d, %s metal plates %d, %s components %d" % [
+			ItemIcons.bbcode("item_metal_tusk"), loot.get("item_metal_tusk", 0), ItemIcons.bbcode("item_metal_plate"),
+			loot.get("item_metal_plate", 0), ItemIcons.bbcode("item_component"), loot.get("item_component", 0)])
 	lines.append("")
-	lines.append("Tusks earned: %d   (tribe total: %d)" % [hunt.tusks(), total_tusks])
-	%Summary.text = "\n".join(lines)
+	lines.append("%sTusks earned: %d   (tribe total: %d)" % [ItemIcons.bbcode("tusk"), hunt.tusks(), total_tusks])
+	%Summary.text = "[center]%s[/center]" % "\n".join(lines)

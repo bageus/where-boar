@@ -16,6 +16,7 @@
     "core.sfx",
     "features.boar",
     "features.companions",
-    "features.hunt"
+    "features.hunt",
+    "features.settlement"
   ]
 }
