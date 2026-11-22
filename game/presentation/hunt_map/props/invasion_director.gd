@@ -92,9 +92,15 @@ func _dusk() -> void:
 	var environment := world.environment
 	var sky := environment.sky.sky_material as ProceduralSkyMaterial
 	var tween := create_tween().set_parallel()
-	tween.tween_property(sky, "sky_top_color", Color(0.3, 0.03, 0.03), DUSK_SECONDS)
-	tween.tween_property(sky, "sky_horizon_color", Color(0.95, 0.32, 0.14), DUSK_SECONDS)
-	tween.tween_property(sky, "ground_horizon_color", Color(0.95, 0.32, 0.14), DUSK_SECONDS)
-	tween.tween_property(sun, "light_color", Color(1.0, 0.45, 0.32), DUSK_SECONDS)
-	tween.tween_property(sun, "light_energy", 0.75, DUSK_SECONDS)
-	tween.tween_property(environment, "ambient_light_color", Color(0.78, 0.42, 0.36), DUSK_SECONDS)
+	tween.tween_property(sky, "sky_top_color", Color(0.55, 0.02, 0.01), DUSK_SECONDS)
+	tween.tween_property(sky, "sky_horizon_color", Color(1.0, 0.16, 0.05), DUSK_SECONDS)
+	tween.tween_property(sky, "ground_horizon_color", Color(1.0, 0.16, 0.05), DUSK_SECONDS)
+	tween.tween_property(sun, "light_color", Color(1.0, 0.32, 0.2), DUSK_SECONDS)
+	tween.tween_property(sun, "light_energy", 0.8, DUSK_SECONDS)
+	tween.tween_property(environment, "ambient_light_color", Color(0.85, 0.35, 0.3), DUSK_SECONDS)
+	# A thin red haze reddens the far trees and hills too (owner, 2026-11-22: redder).
+	environment.fog_enabled = true
+	environment.fog_light_color = Color(0.9, 0.12, 0.05)
+	environment.fog_sky_affect = 0.0
+	environment.fog_density = 0.0
+	tween.tween_property(environment, "fog_density", 0.0025, DUSK_SECONDS)

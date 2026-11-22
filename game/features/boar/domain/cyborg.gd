@@ -7,7 +7,9 @@ extends RefCounted
 ## and tall grass. Seen hiding, the cyborg walks to the spot and searches there. Engine-light: the scene
 ## feeds positions, sight and delta; this class decides.
 
-enum State { PATROL, CHASE, SEARCH, DEAD }
+enum State { PATROL, NOTICE, CHASE, SEARCH, DEAD }
+## The mark over its head (owner, 2026-11-22): magnifier while it searches, "?" while unsure, an eye once it hunts.
+enum Mark { SEARCH, DOUBT, SURE }
 enum Gun { CANNON, MACHINEGUN }
 
 ## Slower than the hunter's walk (4 m/s) and far slower than any boar (owner: "скорость ниже").
@@ -37,6 +39,10 @@ const FIRE_RANGE := 25.0
 const SEARCH_FIND_RADIUS := 2.0
 ## How long it searches the last seen spot before it gives up and patrols again, seconds (ASSUMPTION).
 const SEARCH_TIME := 8.0
+## It stands and stares this long at a hunter it spotted before it is sure and attacks, seconds (ASSUMPTION).
+const NOTICE_TIME := 1.0
+## Having lost the hunter, it wonders ("?") this long before it searches (magnifier), seconds (ASSUMPTION).
+const DOUBT_TIME := 1.5
 ## Close enough to stop walking toward the target, metres.
 const CHASE_STOP := 6.0
 
@@ -52,6 +58,8 @@ var _cooldown := 0.0
 var _burst_left := 0
 var _burst_timer := 0.0
 var _search_left := 0.0
+var _notice_left := 0.0
+var _lost_for := 0.0
 
 
 func _init(p_gun: Gun, p_armor: int, p_health: int) -> void:
@@ -77,9 +85,7 @@ func take_hit(damage: int, from := Vector2.INF) -> void:
 		_burst_left = 0
 		return
 	if from != Vector2.INF and state == State.PATROL:
-		last_seen = from
-		_search_left = SEARCH_TIME
-		state = State.SEARCH
+		_lose(from)
 
 
 ## One think step. sees: the hunter is in line of sight and not in cover (the scene checks).
@@ -88,14 +94,21 @@ func think(delta: float, pos: Vector2, hunter_pos: Vector2, sees: bool) -> Vecto
 	if is_dead():
 		return Vector2.INF
 	var dist := pos.distance_to(hunter_pos)
+	_lost_for += delta
 	if (sees and dist <= SIGHT_RANGE) or (state == State.SEARCH and dist <= SEARCH_FIND_RADIUS):
-		state = State.CHASE
 		last_seen = hunter_pos
-	elif state == State.CHASE:
+		if state != State.CHASE and state != State.NOTICE:
+			state = State.NOTICE
+			_notice_left = NOTICE_TIME
+		_notice_left -= delta
+		if state == State.NOTICE and (_notice_left <= 0.0 or dist <= SEARCH_FIND_RADIUS):
+			state = State.CHASE
+	elif state in [State.CHASE, State.NOTICE]:
 		# Lost sight (cover or behind something): go to where it last saw the hunter and search.
-		state = State.SEARCH
-		_search_left = SEARCH_TIME
+		_lose(last_seen)
 	match state:
+		State.NOTICE:
+			return Vector2.INF
 		State.CHASE:
 			return Vector2.INF if dist <= CHASE_STOP else hunter_pos
 		State.SEARCH:
@@ -105,6 +118,21 @@ func think(delta: float, pos: Vector2, hunter_pos: Vector2, sees: bool) -> Vecto
 					state = State.PATROL
 			return last_seen
 	return Vector2.INF
+
+
+func _lose(at: Vector2) -> void:
+	last_seen = at
+	state = State.SEARCH
+	_search_left = SEARCH_TIME
+	_lost_for = 0.0
+
+
+func mark() -> Mark:
+	if state == State.CHASE:
+		return Mark.SURE
+	if state == State.NOTICE or (state == State.SEARCH and _lost_for < DOUBT_TIME):
+		return Mark.DOUBT
+	return Mark.SEARCH
 
 
 func speed() -> float:

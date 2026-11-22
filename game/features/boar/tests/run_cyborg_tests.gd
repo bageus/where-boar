@@ -13,6 +13,7 @@ func _init() -> void:
 	failures += _check(_seen_hiding_is_searched(), "hunter seen hiding is searched for at the spot, found up close")
 	failures += _check(_gives_up_after_search(), "cyborg gives up after searching and patrols")
 	failures += _check(_hit_makes_it_hunt(), "a hit turns a patrolling cyborg toward the shooter")
+	failures += _check(_marks_follow_certainty(), "magnifier while searching, ? while unsure or just lost, eye while hunting")
 	print("cyborg tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -45,7 +46,7 @@ func _turret_clamped_to_90() -> bool:
 
 func _chasing(gun: Cyborg.Gun) -> Cyborg:
 	var c := Cyborg.new(gun, 10, 10)
-	c.think(0.1, Vector2.ZERO, Vector2(10, 0), true)
+	c.think(Cyborg.NOTICE_TIME, Vector2.ZERO, Vector2(10, 0), true)
 	return c
 
 
@@ -88,3 +89,16 @@ func _hit_makes_it_hunt() -> bool:
 	var c := Cyborg.new(Cyborg.Gun.CANNON, 10, 10)
 	c.take_hit(1, Vector2(5, 5))
 	return c.state == Cyborg.State.SEARCH and c.last_seen == Vector2(5, 5)
+
+
+func _marks_follow_certainty() -> bool:
+	var c := Cyborg.new(Cyborg.Gun.CANNON, 10, 10)
+	var patrol := c.mark() == Cyborg.Mark.SEARCH
+	var stands := c.think(0.5, Vector2.ZERO, Vector2(10, 0), true) == Vector2.INF
+	var doubt := c.state == Cyborg.State.NOTICE and c.mark() == Cyborg.Mark.DOUBT
+	c.think(0.6, Vector2.ZERO, Vector2(10, 0), true)
+	var sure := c.state == Cyborg.State.CHASE and c.mark() == Cyborg.Mark.SURE
+	c.think(0.1, Vector2.ZERO, Vector2(10, 0), false)
+	var lost := c.mark() == Cyborg.Mark.DOUBT
+	c.think(Cyborg.DOUBT_TIME, Vector2.ZERO, Vector2(10, 0), false)
+	return patrol and stands and doubt and sure and lost and c.mark() == Cyborg.Mark.SEARCH

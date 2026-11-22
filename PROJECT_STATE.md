@@ -96,6 +96,8 @@ None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) done. P3-101 (pl
 
 ## Latest
 
+- 2026-11-22 P3-112: invasion sky redder with a red haze; terminators stare 1 s before attacking and show a mark: magnifier with running dots while searching, "?" with dots while unsure or just lost, an eye while attacking. The hunter can still leave the hunt at the camp zone during an invasion.
+
 - 2026-11-22 P3-100 terminator invasion (issue 8): from the 11th hunt, killing the herd leader (biggest boar of the large herd) or 30-40 boars calls 2-30 terminators down in teleport eggs around the hunter; the sky turns red at dusk, every boar runs off the map, the hunt lasts until the terminators are gone; killed terminators drop metal tusks, plates and components (camp items). Waits for the cyborg body scene (P3-099) before it can trigger in game.
 
 - 2026-11-05 campfire fire: the baked flame logs are gone from `campfire.scn`; a cartoon low-poly flame (`assets/fire/flame.tscn` + `flame.gdshader`: faceted cones, choppy sway, yellow/orange/red bands) sits on the pit (camp.tscn `Stations/Campfire/Flame`), and the coals of the pit and the brazier use `assets/fire/embers.tres` (stepped breathing glow). Tavern hearth unchanged.

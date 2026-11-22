@@ -39,6 +39,12 @@ const PATROL_SECONDS := 8.0
 ## Below this height it fell off the map: reported as gone (no loot) so the hunt can end.
 const FALL_LIMIT := -30.0
 const CORPSE_SECONDS := 4.0
+## Mark over the head (owner, 2026-11-22): magnifier or "?" with running dots under it, eye with none.
+const MARK_ICONS := {Cyborg.Mark.SEARCH: preload("res://assets/ui/cyborg_marks/magnifier.svg"),
+		Cyborg.Mark.DOUBT: preload("res://assets/ui/cyborg_marks/question.svg"),
+		Cyborg.Mark.SURE: preload("res://assets/ui/cyborg_marks/eye.svg")}
+const MARK_HEIGHT := 2.95
+const DOTS_PER_SECOND := 3.0
 
 ## Fact: this cyborg's hunt ended; DEAD when killed, ESCAPED when it fell off the map. Same as boar_body.
 signal outcome_reached(type_id: String, kind: int, wounded: bool)
@@ -61,6 +67,8 @@ var _patrol_target := Vector2.INF
 var _patrol_left := 0.0
 var _firing_left := 0.0
 var _reported := false
+var _icon: Sprite3D
+var _text: Label3D
 
 
 func _ready() -> void:
@@ -83,6 +91,20 @@ func _ready() -> void:
 	_steps.stride = 1.6
 	add_child(_steps)
 	_show_bar()
+	_icon = Sprite3D.new()
+	_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_icon.pixel_size = 0.006
+	_icon.no_depth_test = true
+	_icon.position.y = MARK_HEIGHT
+	add_child(_icon)
+	_text = Label3D.new()
+	_text.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_text.no_depth_test = true
+	_text.font_size = 160
+	_text.outline_size = 24
+	_text.modulate = Color(1.0, 0.85, 0.2)
+	_text.position.y = MARK_HEIGHT - 0.5
+	add_child(_text)
 
 
 ## Clips key the turret in place; drop those keys so the turret aims by code (clips are shared by all cyborgs).
@@ -146,8 +168,16 @@ func _physics_process(delta: float) -> void:
 	if _firing_left > 0.0:
 		target = Vector2.INF
 	# Standing in range it still turns its body toward the hunter, so he cannot hide behind its turret's arc.
-	var face := hunter_pos if target == Vector2.INF and cyborg.state == Cyborg.State.CHASE else target
+	var face := hunter_pos if target == Vector2.INF and cyborg.state in [Cyborg.State.CHASE, Cyborg.State.NOTICE] else target
 	_walk(delta, pos, target, face)
+	_show_mark()
+
+
+## Icon (magnifier, "?" or eye) over the head, with loading dots running after it while unsure or searching.
+func _show_mark() -> void:
+	var mark := cyborg.mark()
+	_icon.texture = MARK_ICONS[mark]
+	_text.text = "" if mark == Cyborg.Mark.SURE else ".".repeat(1 + int(Time.get_ticks_msec() / 1000.0 * DOTS_PER_SECOND) % 3)
 
 
 func _patrol(delta: float, pos: Vector2, hunter_pos: Vector2) -> Vector2:
@@ -205,6 +235,8 @@ func _fire() -> void:
 
 
 func _die() -> void:
+	_icon.visible = false
+	_text.visible = false
 	_steps.active = false
 	_player.pause()
 	Sfx.play(self, "boar_death", -6.0, 40.0)

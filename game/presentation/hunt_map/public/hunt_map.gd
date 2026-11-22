@@ -362,7 +362,7 @@ func _on_outcome(type_id: String, kind: int, wounded: bool, leader := false) -> 
 	_announce("%s %s" % [type.display_name if type else type_id, verb])
 	if invaded:
 		_invasion.start(hunt.invasion.size)
-		_announce("The sky turns red: terminators are coming!")
+		_announce("Terminators are coming! Fight, or run back to camp")
 	elif leader and kind == BoarOutcome.Kind.CAPTURED and hunt.invasion.allowed and not hunt.invasion.started:
 		_announce("The leader is caught: no terminators this hunt")
 	_show_goal()
