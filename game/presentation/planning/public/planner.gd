@@ -4,7 +4,7 @@ extends Node3D
 ## raise, turn, scale, copy or delete it with keys, add new ones from the palette, then save the layout:
 ## the level applies it whenever it is played. The level (injected) answers planning_targets(),
 ## planning_parent(), planning_centre(), planning_palette() and planning_removable(node); a level with
-## planning_terrain() also gets the ground brush (raise, lower, flatten), its heights saved with the layout.
+## planning_terrain() also gets the ground brush (raise, lower, flatten, paint), saved with the layout.
 
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 
@@ -49,7 +49,7 @@ var _palette_entries: Array[Dictionary] = []
 var _palette := ItemList.new()
 var _status := Label.new()
 var _terrain: Node3D
-## "" picks objects; else "raise", "lower" or "flatten".
+## "" picks objects; else "raise", "lower", "flatten" or "paint:<kind>" (terrain.gd PAINT).
 var _brush := ""
 var _radius := 6.0
 var _ring := MeshInstance3D.new()
@@ -104,7 +104,9 @@ func _build_ui() -> void:
 	ui.add_child(bar)
 	for pair in [["Save", save], ["Export (copy JSON)", _export], ["Reset level", reset_requested.emit],
 			["To centre", to_centre], ["Exit", closed.emit]] + ([["Objects", _use_brush.bind("")], ["Raise", _use_brush.bind("raise")],
-			["Lower", _use_brush.bind("lower")], ["Flatten", _use_brush.bind("flatten")]] if _terrain else []):
+			["Lower", _use_brush.bind("lower")], ["Flatten", _use_brush.bind("flatten")], ["Grass", _use_brush.bind("paint:grass")],
+			["Sand", _use_brush.bind("paint:sand")], ["Mud", _use_brush.bind("paint:mud")], ["Rock", _use_brush.bind("paint:rock")]]
+			if _terrain else []):
 		var button := Button.new()
 		button.text = pair[0]
 		button.focus_mode = Control.FOCUS_NONE
@@ -153,6 +155,7 @@ func _layout() -> Dictionary:
 	var data := LevelLayout.capture(level, _targets, _removed)
 	if _terrain:
 		data["heights"] = _terrain.height_edits.duplicate()
+		data["paint"] = _terrain.ground_paint.duplicate()
 	return data
 
 
@@ -208,6 +211,7 @@ func sculpt(at: Vector3, delta: float) -> void:
 		"raise": _terrain.sculpt(at, _radius, SCULPT_RATE * delta)
 		"lower": _terrain.sculpt(at, _radius, -SCULPT_RATE * delta)
 		"flatten": _terrain.sculpt(Vector3(at.x, _flat_y, at.z), _radius, FLATTEN_RATE * delta, true)
+		_: _terrain.paint(at, _radius, _brush.trim_prefix("paint:"))
 	for target: Node3D in riders:
 		target.global_position.y += _terrain.height_at(target.global_position.x, target.global_position.z) - riders[target]
 

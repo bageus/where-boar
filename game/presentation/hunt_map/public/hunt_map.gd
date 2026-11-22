@@ -85,6 +85,7 @@ var planning := false
 ## The ground must take its planned heights before it dresses itself in its own _ready.
 func _enter_tree() -> void:
 	$Terrain.height_edits = layout.get("heights", {})
+	$Terrain.ground_paint = layout.get("paint", {})
 
 
 func _ready() -> void:

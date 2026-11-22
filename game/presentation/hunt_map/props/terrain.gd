@@ -11,6 +11,8 @@ const ROCK := Color(0.47, 0.46, 0.47)
 const MUD := Color(0.5, 0.36, 0.2)
 const SAND := Color(0.74, 0.64, 0.42)
 const WET_SAND := Color(0.6, 0.52, 0.34)
+## Ground cover the planning brush paints.
+const PAINT := {"grass": GRASS, "sand": SAND, "mud": MUD, "rock": ROCK}
 ## Water surface height and the z band the river (and the Water plane in hunt_map.tscn) covers.
 const WATER_Y := -0.5
 const RIVER_BAND := Vector2(-38.0, -2.0)
@@ -91,6 +93,8 @@ var _holes := PackedVector4Array()
 
 ## Injected before _ready: planned ground heights (planning mode), "i,j" -> metres; also filled by sculpt().
 var height_edits: Dictionary = {}
+## Injected before _ready: planned ground cover, "i,j" -> a PAINT key; grass grows only on painted "grass".
+var ground_paint: Dictionary = {}
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
@@ -163,6 +167,25 @@ func sculpt(at: Vector3, radius: float, amount: float, flatten := false) -> void
 			data[k] = lerpf(data[k], at.y, clampf(amount * soft, 0.0, 1.0)) if flatten else data[k] + amount * soft
 			height_edits["%d,%d" % [i, j]] = data[k]
 	_shape.map_data = data
+	_hide_grass(at, radius)
+
+
+## Planning brush: paints ground cover (a PAINT key) within radius of at; drawn on rebuild(), grass follows on reload.
+func paint(at: Vector3, radius: float, kind: String) -> void:
+	var w := _shape.map_width
+	var d := _shape.map_depth
+	var ci := roundi(at.x + (w - 1) * 0.5)
+	var cj := roundi(at.z + (d - 1) * 0.5)
+	var reach := ceili(radius)
+	for j in range(maxi(cj - reach, 0), mini(cj + reach + 1, d)):
+		for i in range(maxi(ci - reach, 0), mini(ci + reach + 1, w)):
+			if Vector2(i - ci, j - cj).length() <= radius:
+				ground_paint["%d,%d" % [i, j]] = kind
+	_hide_grass(at, radius)
+
+
+## Grass chunks (placed at their centres; ferns and scattered props sit at the origin) near an edit hide until reload.
+func _hide_grass(at: Vector3, radius: float) -> void:
 	for node in get_children():
 		if node is MultiMeshInstance3D and node.position != Vector3.ZERO \
 				and Vector2(node.position.x - at.x, node.position.z - at.z).length() < radius + GRASS_CHUNK:
@@ -384,6 +407,8 @@ func grassy_at(x: float, z: float) -> bool:
 
 ## Open, gentle, dry ground that is not sand: where grass, stumps, logs and trees go.
 func _grassy(i: int, j: int) -> bool:
+	if not ground_paint.is_empty() and ground_paint.has("%d,%d" % [i, j]):
+		return ground_paint["%d,%d" % [i, j]] == "grass"
 	return _shape.map_data[j * _shape.map_width + i] >= -0.3 and _normal(i, j).y >= ROCK_NORMAL_Y and not _sandy(i, j)
 
 
@@ -483,7 +508,11 @@ func _build_mesh() -> ArrayMesh:
 			normals.append(normal)
 			var underwater := h < WATER_Y and j - (d - 1) * 0.5 > RIVER_BAND.x and j - (d - 1) * 0.5 < RIVER_BAND.y
 			var ground := MUD if h < -0.3 and not underwater else GRASS.lerp(SAND, _sand(i, j))
-			colors.append(ROCK if normal.y < ROCK_NORMAL_Y else (WET_SAND.lerp(SAND, _sand(i, j)) if underwater else ground))
+			var painted: String = ground_paint.get("%d,%d" % [i, j], "") if not ground_paint.is_empty() else ""
+			if painted != "":
+				colors.append(PAINT[painted])
+			else:
+				colors.append(ROCK if normal.y < ROCK_NORMAL_Y else (WET_SAND.lerp(SAND, _sand(i, j)) if underwater else ground))
 	for j in d - 1:
 		for i in w - 1:
 			var a := j * w + i

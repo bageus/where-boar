@@ -153,7 +153,7 @@ Unapproved ideas and possible future features belong here.
 | P3-100 | 3 | Terminator invasion (issue 8): from the 11th hunt, killing the herd leader or 30-40 boars calls 2-30 terminators in teleport eggs; red dusk sky, all boars flee the map; catching the leader calls it off; terminators drop metal tusks, plates, components | P3-098 | DONE |
 | P3-101 | 3 | Planning mode stage 1 (issue #29): start screen opens the hunt map or camp under a free camera; pick, drag, raise, turn, scale, copy, delete authored objects, add props and nature models from a palette, teleport to centre; layout saved per level and applied in play | P3-098 | DONE |
 | P3-102 | 3 | Planning mode: terrain brush (raise, lower, flatten) saved with the layout; ground and grass follow | P3-101 | DONE |
-| P3-103 | 3 | Planning mode: paint ground (grass, sand, mud, rock) | P3-102 | TODO |
+| P3-103 | 3 | Planning mode: paint ground (grass, sand, mud, rock) | P3-102 | DONE |
 | P3-104 | 3 | Planning mode: procedural objects editable (terrain-scattered trees, stumps, logs, ferns, cliffs, tall-grass patches; camp dressing) | P3-101 | TODO |
 | P3-105 | 3 | Planning mode: scatter loot by group with a count (stones now; sticks and berries need items first) | P3-101 | TODO |
 | P3-106 | 3 | Planning mode: redraw the river course | P3-102 | TODO |
