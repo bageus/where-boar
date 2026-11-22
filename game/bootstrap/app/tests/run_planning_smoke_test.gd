@@ -8,7 +8,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Planner = preload("res://game/presentation/planning/public/planner.gd")
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
-const EXPECTED_CHECKS := 8
+const EXPECTED_CHECKS := 10
 
 var _frame := 0
 var _failures := 0
@@ -17,6 +17,8 @@ var _main: Node
 var _fresh: Node3D
 var _expect := {}  # node path -> global position in the fresh level
 var _gone := ""
+## Ground point raised by the brush, with its new height.
+var _raised := Vector3.ZERO
 
 
 func _initialize() -> void:
@@ -88,8 +90,18 @@ func _physics_process(_delta: float) -> bool:
 		3:
 			var data := _edit("hunt")
 			_check(_gone != "", "a hunt prop can be deleted")
+			var planner := _planner()
+			var terrain: Node3D = _main.current.planning_terrain()
+			var at := Vector3(20, 0, 20)
+			var before: float = terrain.height_at(at.x, at.z)
+			planner._brush = "raise"
+			planner.sculpt(Vector3(at.x, before, at.z), 1.0)
+			_raised = Vector3(at.x, terrain.height_at(at.x, at.z), at.z)
+			_check(_raised.y > before + 1.5, "the brush raises the ground")
+			data = planner._layout()
 			_fresh_level(MapScene, data)
 		5:
+			_check(is_equal_approx(_fresh.planning_terrain().height_at(_raised.x, _raised.z), _raised.y), "a fresh hunt map has the raised ground")
 			_verify("hunt")
 			_main.show_planning("camp")
 		7:

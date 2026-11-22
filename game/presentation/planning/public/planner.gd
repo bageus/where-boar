@@ -3,7 +3,8 @@ extends Node3D
 ## Planning mode (issue #29): a free camera over a level. Click an object to pick it, drag it over the ground,
 ## raise, turn, scale, copy or delete it with keys, add new ones from the palette, then save the layout:
 ## the level applies it whenever it is played. The level (injected) answers planning_targets(),
-## planning_parent(), planning_centre(), planning_palette() and planning_removable(node).
+## planning_parent(), planning_centre(), planning_palette() and planning_removable(node); a level with
+## planning_terrain() also gets the ground brush (raise, lower, flatten), its heights saved with the layout.
 
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 
@@ -23,8 +24,14 @@ const GROW := 1.1
 const PICK_REACH := 2.5
 ## Tall-grass and bush cover (terrain.gd COVER_LAYER) is not ground and holds nothing to pick.
 const RAY_MASK := 0xFFFFFFFF & ~(1 << 4)
+## Ground brush: metres a second at the centre, share a second for flatten, radius range and redraw period.
+const SCULPT_RATE := 2.0
+const FLATTEN_RATE := 3.0
+const RADIUS_RANGE := Vector2(2.0, 30.0)
+const REDRAW_SECONDS := 0.15
 const HELP := "Fly: WASD, Q/E down/up, Shift faster, hold RMB to look.  LMB: pick and drag over the ground.\n" \
-		+ "Up/Down: raise/lower.  Left/Right: turn (Shift: 90°).  +/-: size.  Ctrl+D: copy.  Del: delete.  Esc: drop.  Ctrl+S: save."
+		+ "Up/Down: raise/lower.  Left/Right: turn (Shift: 90°).  +/-: size.  Ctrl+D: copy.  Del: delete.  Esc: drop.  Ctrl+S: save.\n" \
+		+ "Ground brush: hold LMB to shape, [ / ] brush size; objects under it ride along."
 
 var level: Node3D
 
@@ -41,6 +48,17 @@ var _lift := 0.0
 var _palette_entries: Array[Dictionary] = []
 var _palette := ItemList.new()
 var _status := Label.new()
+var _terrain: Node3D
+## "" picks objects; else "raise", "lower" or "flatten".
+var _brush := ""
+var _radius := 6.0
+var _ring := MeshInstance3D.new()
+var _sculpting := false
+## Flatten pulls the ground to the height first clicked.
+var _flat_y := 0.0
+var _redraw_left := 0.0
+## Colliders the brush looks through, gathered when a brush is chosen.
+var _see_through: Array[RID] = []
 
 
 func _ready() -> void:
@@ -63,6 +81,17 @@ func _ready() -> void:
 	_box.top_level = true
 	_box.visible = false
 	add_child(_box)
+	_terrain = level.planning_terrain() if level.has_method("planning_terrain") else null
+	var disc := CylinderMesh.new()
+	disc.top_radius = 1.0
+	disc.bottom_radius = 1.0
+	disc.height = 0.2
+	_ring.mesh = disc
+	_ring.material_override = material
+	_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_ring.top_level = true
+	_ring.visible = false
+	add_child(_ring)
 	_build_ui()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
@@ -74,7 +103,8 @@ func _build_ui() -> void:
 	bar.position = Vector2(8, 8)
 	ui.add_child(bar)
 	for pair in [["Save", save], ["Export (copy JSON)", _export], ["Reset level", reset_requested.emit],
-			["To centre", to_centre], ["Exit", closed.emit]]:
+			["To centre", to_centre], ["Exit", closed.emit]] + ([["Objects", _use_brush.bind("")], ["Raise", _use_brush.bind("raise")],
+			["Lower", _use_brush.bind("lower")], ["Flatten", _use_brush.bind("flatten")]] if _terrain else []):
 		var button := Button.new()
 		button.text = pair[0]
 		button.focus_mode = Control.FOCUS_NONE
@@ -94,7 +124,7 @@ func _build_ui() -> void:
 	help.anchor_top = 1.0
 	help.anchor_bottom = 1.0
 	help.offset_left = 8.0
-	help.offset_top = -56.0
+	help.offset_top = -80.0
 	ui.add_child(help)
 	_say("Pick an object, or choose one in the list and click the ground to add it.")
 
@@ -111,13 +141,28 @@ func to_centre() -> void:
 	_camera.global_position = centre + _camera.global_basis.z * 30.0
 
 
+func _use_brush(brush: String) -> void:
+	_brush = brush
+	_see_through = _target_bodies() if brush != "" else []
+	_pick(null)
+	_palette.deselect_all()
+	_say("Ground brush: %s. Hold LMB on the ground." % brush if brush != "" else "Pick an object.")
+
+
+func _layout() -> Dictionary:
+	var data := LevelLayout.capture(level, _targets, _removed)
+	if _terrain:
+		data["heights"] = _terrain.height_edits.duplicate()
+	return data
+
+
 func save() -> void:
-	saved.emit(LevelLayout.capture(level, _targets, _removed))
+	saved.emit(_layout())
 	_say("Saved: the level now plays with this layout.")
 
 
 func _export() -> void:
-	DisplayServer.clipboard_set(JSON.stringify(LevelLayout.capture(level, _targets, _removed), "\t"))
+	DisplayServer.clipboard_set(JSON.stringify(_layout(), "\t"))
 	_say("Layout copied to the clipboard as JSON.")
 
 
@@ -133,6 +178,47 @@ func _process(delta: float) -> void:
 		var bounds := _bounds(_selected)
 		_box.global_transform = Transform3D(Basis.from_scale(bounds.size), bounds.get_center())
 	_box.visible = is_instance_valid(_selected)
+	_brush_tick(delta)
+
+
+## Moves the brush disc to the ground under the mouse and shapes the ground while LMB is held.
+func _brush_tick(delta: float) -> void:
+	var hit := _ray(get_viewport().get_mouse_position(), _see_through) if _brush != "" else {}
+	_ring.visible = not hit.is_empty()
+	if hit.is_empty():
+		return
+	_ring.global_transform = Transform3D(Basis.from_scale(Vector3(_radius, 1.0, _radius)), hit.position)
+	_redraw_left -= delta
+	if not _sculpting:
+		return
+	sculpt(hit.position, delta)
+	if _redraw_left <= 0.0:
+		_redraw_left = REDRAW_SECONDS
+		_terrain.rebuild()
+
+
+## One brush step at a ground point; objects under the brush keep their height over the ground.
+func sculpt(at: Vector3, delta: float) -> void:
+	var riders := {}
+	for target in _targets:
+		if is_instance_valid(target) and target is Node3D \
+				and Vector2(target.global_position.x - at.x, target.global_position.z - at.z).length() < _radius + 1.0:
+			riders[target] = _terrain.height_at(target.global_position.x, target.global_position.z)
+	match _brush:
+		"raise": _terrain.sculpt(at, _radius, SCULPT_RATE * delta)
+		"lower": _terrain.sculpt(at, _radius, -SCULPT_RATE * delta)
+		"flatten": _terrain.sculpt(Vector3(at.x, _flat_y, at.z), _radius, FLATTEN_RATE * delta, true)
+	for target: Node3D in riders:
+		target.global_position.y += _terrain.height_at(target.global_position.x, target.global_position.z) - riders[target]
+
+
+## Colliders of the level's objects: the brush looks through them to the ground.
+func _target_bodies() -> Array[RID]:
+	var rids: Array[RID] = []
+	for target in _targets:
+		if is_instance_valid(target):
+			rids.append_array(_bodies(target))
+	return rids
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -142,7 +228,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if button.pressed else Input.MOUSE_MODE_VISIBLE
 		elif button.button_index == MOUSE_BUTTON_LEFT:
 			_dragging = false
-			if button.pressed:
+			if _brush != "":
+				_sculpting = button.pressed
+				var hit := _ray(button.position, _see_through) if button.pressed else {}
+				_flat_y = hit.position.y if hit else _flat_y
+				if not button.pressed:
+					_terrain.rebuild()
+			elif button.pressed:
 				_click(button.position)
 	elif event is InputEventMouseMotion:
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -176,6 +268,9 @@ func _key(key: InputEventKey) -> void:
 	var shift := key.shift_pressed
 	if key.ctrl_pressed and key.keycode == KEY_S:
 		save()
+	elif key.keycode in [KEY_BRACKETLEFT, KEY_BRACKETRIGHT]:
+		_radius = clampf(_radius * (0.8 if key.keycode == KEY_BRACKETLEFT else 1.25), RADIUS_RANGE.x, RADIUS_RANGE.y)
+		_say("Brush size %.0f m" % _radius)
 	elif key.keycode == KEY_ESCAPE:
 		_pick(null)
 		_palette.deselect_all()
