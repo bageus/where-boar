@@ -10,6 +10,7 @@ signal purchased
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const PEN_ANIMALS := {
 	"rooster": preload("res://game/features/companions/public/wild_rooster.tscn"),
@@ -196,15 +197,15 @@ func _seat_helper() -> void:
 ## Shows the tribe's tusks and live catches in the camp HUD.
 func _show_progress() -> void:
 	var caught := progress.caught
-	var lines := PackedStringArray(["Tusks: %d" % progress.tusks])
+	var lines := PackedStringArray([ItemIcons.bbcode("tusk") + "Tusks: %d" % progress.tusks])
 	for type_id in caught:
 		var type := BoarTypes.find(type_id)
 		lines.append("%s: %d in pens" % [type.display_name if type else type_id, caught[type_id]])
 	for animal_id in progress.helpers:
-		lines.append("%s: %d in pens" % [animal_id, progress.helpers[animal_id]])
+		lines.append("%s%s: %d in pens" % [ItemIcons.bbcode(animal_id), animal_id, progress.helpers[animal_id]])
 	if progress.hunts == 0:
 		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water).")
-	$Hud/Progress.text = "\n".join(lines)
+	$Hud/Progress.text = "[right]%s[/right]" % "\n".join(lines)
 
 
 func _on_interacted() -> void:

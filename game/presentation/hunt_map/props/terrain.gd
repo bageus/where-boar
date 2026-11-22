@@ -52,6 +52,7 @@ const CLIFF_ROCKS: Array[Mesh] = [
 ## join into one face (owner, 2026-11-02: no chaotic pile of boulders); each is solid.
 const CLIFF_STEP := 10
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
+const Gatherables = preload("res://game/presentation/hunt_map/props/gatherables.gd")
 const STUMP := preload("res://assets/nature/meshes/peak/PeakStump1.res")
 ## Fallen trees and logs (owner, 2026-10-28).
 const LOGS: Array[Mesh] = [
@@ -81,6 +82,8 @@ const CLEAR_RADIUS := 5.0
 ## Grid cells under stumps, logs and trees: no grass grows through them.
 var _blocked := {}
 var _taken: Array[Vector3] = []
+## Metre cells within 3 m of a prop (built on first use by free_spot).
+var _near_props := {}
 ## Ground mesh arrays, kept so leaf pits can cut holes into it.
 var _arrays: Array
 ## Leaf pit openings: x, z, radius (the grass shader takes up to 8).
@@ -112,12 +115,18 @@ func _ready() -> void:
 	for node in get_parent().find_children("*", "Node3D", true, false):
 		if node != self and not is_ancestor_of(node):
 			_taken.append((node as Node3D).global_position)
-	_scatter([STUMP], STUMPS, Vector2(1.0, 1.4), false, 13)
-	_scatter(LOGS, LOG_COUNT, Vector2(1.0, 1.4), false, 14)
-	_scatter(TREES, EXTRA_TREES, Vector2(6.0, 10.0), true, 15)
-	_scatter(FERNS, FERN_COUNT, Vector2(1.0, 1.6), false, 16, false, 1.5)
+	var stumps := _scatter([STUMP], STUMPS, Vector2(1.0, 1.4), false, 13)
+	var logs := _scatter(LOGS, LOG_COUNT, Vector2(1.0, 1.4), false, 14)
+	var trees := _scatter(TREES, EXTRA_TREES, Vector2(6.0, 10.0), true, 15)
+	var shrubs := _scatter(FERNS, FERN_COUNT, Vector2(1.0, 1.6), false, 16, false, 1.5)
 	_plant_grass()
 	_place_cliff_rocks()
+	if Engine.is_editor_hint():
+		return
+	var gatherables := Gatherables.new()
+	gatherables.name = "Gatherables"
+	add_child(gatherables)
+	gatherables.populate(self, {"stumps": stumps, "logs": logs, "trees": trees, "shrubs": shrubs})
 
 
 ## Ground height at a map point, metres; edges clamp to the last sample.
@@ -240,7 +249,8 @@ func _place_cliff_rocks() -> void:
 ## collision shape on this body: a box for stumps and logs, a trunk for trees (fit_height: size_range is the
 ## height, else a scale). The rest (ferns) are drawn only near the camera, like grass.
 func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: bool, rng_seed: int,
-		solid := true, clear := CLEAR_RADIUS) -> void:
+		solid := true, clear := CLEAR_RADIUS) -> Array:
+	var placed_spots := []  # [mesh, Transform3D] of everything placed
 	var w := _shape.map_width
 	var d := _shape.map_depth
 	var rng := RandomNumberGenerator.new()
@@ -273,6 +283,7 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		at.y = lowest_under(foot_at.x, foot_at.z, foot_r) - 0.15 - (box.position.y * size if fit_height else 0.0)
 		var spot := Transform3D(turn.scaled(Vector3.ONE * size), at)
 		spots[k].append(spot)
+		placed_spots.append([meshes[k], spot])
 		# No grass inside the footprint (a tree: its trunk), turned with the model.
 		var reach := ceili(maxf(box.size.x, box.size.z) * size * 0.5)
 		var half := Vector2(box.size.x, box.size.z) * (0.08 if fit_height else 0.5)
@@ -297,6 +308,26 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		add_child(shape)
 	for k in meshes.size():
 		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE, batches[k])
+	return placed_spots
+
+
+## A random grass spot clear of props, for small scattered things (gatherables.gd); null when none is found.
+func free_spot(rng: RandomNumberGenerator) -> Variant:
+	if _near_props.is_empty():
+		for p in _taken:
+			for dj in range(-3, 4):
+				for di in range(-3, 4):
+					_near_props[Vector2i(roundi(p.x) + di, roundi(p.z) + dj)] = true
+	var w := _shape.map_width
+	var d := _shape.map_depth
+	for _try in 40:
+		var i := rng.randi_range(4, w - 5)
+		var j := rng.randi_range(4, d - 5)
+		var x := i - (w - 1) * 0.5 + rng.randf_range(-0.5, 0.5)
+		var z := j - (d - 1) * 0.5 + rng.randf_range(-0.5, 0.5)
+		if _grassy(i, j) and not _blocked.has(Vector2i(i, j)) and not _near_props.has(Vector2i(roundi(x), roundi(z))):
+			return Vector3(x, height_at(x, z), z)
+	return null
 
 
 ## True where grass grows at a map point; footsteps there rustle (core/sfx footsteps.gd).
