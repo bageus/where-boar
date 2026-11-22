@@ -6,6 +6,9 @@ Canonical rules live in `AGENTS.md`; this file is a quick map. Godot 4.x, GDScri
 `AI_START_HERE.md`, `AGENTS.md`, `GAME_SPEC.md`, `docs/WORKING_AGREEMENT.md`, `PROJECT_STATE.md`, `ACTIVE_TASK.md`.
 Follow the mode they select. Do not implement gameplay while `GAME_SPEC.md` is `DRAFT`.
 
+## Code index
+`docs/CODE_INDEX.md` lists every `.gd` file with its class, signals, public funcs and preloads (~8k tokens for the whole codebase). Grep or read it before exploring `game/`, then open only the files you need. After changing `.gd` files, run `python tools/build_code_index.py` and commit the result.
+
 ## Layout
 - `game/` — GDScript source, by feature (`game/<feature>/`); `architecture.yml` per module.
 - `architecture/policy.json`, `docs/ARCHITECTURE.md`, `docs/adr/` — layer and dependency rules.
