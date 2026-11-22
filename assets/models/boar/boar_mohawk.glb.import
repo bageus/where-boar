@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dipdb23pfwg5o"
-path="res://.godot/imported/boar_mohawk.glb-7a13c6a56b4929317bbe9f8a49e27f6c.scn"
+path="res://.godot/imported/boar_mohawk.glb-f4bce0aa7c666999fbd1df6c56f5b34e.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_mohawk.glb"
-dest_files=["res://.godot/imported/boar_mohawk.glb-7a13c6a56b4929317bbe9f8a49e27f6c.scn"]
+source_file="res://assets/models/boar/boar_mohawk.glb"
+dest_files=["res://.godot/imported/boar_mohawk.glb-f4bce0aa7c666999fbd1df6c56f5b34e.scn"]
 
 [params]
 

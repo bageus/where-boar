@@ -7,7 +7,8 @@
   ],
   "public_api": [
     "public/progress.gd",
-    "public/shop_catalog.gd"
+    "public/shop_catalog.gd",
+    "public/item_icons.gd"
   ],
   "dependencies": [
     "features.boar",

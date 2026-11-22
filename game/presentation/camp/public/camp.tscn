@@ -216,7 +216,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 6)
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="Progress" type="Label" parent="Hud"]
+[node name="Progress" type="RichTextLabel" parent="Hud"]
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0

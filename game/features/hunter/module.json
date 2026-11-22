@@ -12,6 +12,7 @@
   ],
   "dependencies": [
     "core.sfx",
-    "features.boar"
+    "features.boar",
+    "features.settlement"
   ]
 }

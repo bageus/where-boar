@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0jnc2xut5yj0"
-path="res://.godot/imported/boar_bun_Image_2.jpg-87ecd6caecb1437bd11b4c3972a60b3a.ctex"
+path="res://.godot/imported/boar_bun_Image_2.jpg-05f570b45c385142e768875e0d500cfc.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/boar_bun_Image_2.jpg"
-dest_files=["res://.godot/imported/boar_bun_Image_2.jpg-87ecd6caecb1437bd11b4c3972a60b3a.ctex"]
+source_file="res://assets/models/boar/boar_bun_Image_2.jpg"
+dest_files=["res://.godot/imported/boar_bun_Image_2.jpg-05f570b45c385142e768875e0d500cfc.ctex"]
 
 [params]
 

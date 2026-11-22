@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://woel4agt387n"
-path="res://.godot/imported/boar_armored_black_Image_2.jpg-d5bd612a169421cae37d82f5189a5c58.ctex"
+path="res://.godot/imported/boar_armored_black_Image_2.jpg-32a894e27088fd4cf1f7281132c295c2.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/boar_armored_black_Image_2.jpg"
-dest_files=["res://.godot/imported/boar_armored_black_Image_2.jpg-d5bd612a169421cae37d82f5189a5c58.ctex"]
+source_file="res://assets/models/boar/boar_armored_black_Image_2.jpg"
+dest_files=["res://.godot/imported/boar_armored_black_Image_2.jpg-32a894e27088fd4cf1f7281132c295c2.ctex"]
 
 [params]
 

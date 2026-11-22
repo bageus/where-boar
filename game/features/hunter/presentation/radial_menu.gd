@@ -11,19 +11,28 @@ var _ids: Array = []
 var _hovered := -1
 
 
-## Shows labels[i] for ids[i] around the centre and frees the mouse to point.
-func open(ids: Array, labels: Array) -> void:
+## Shows labels[i] (with icons[i] when it has one) for ids[i] around the centre and frees the mouse to point.
+func open(ids: Array, labels: Array, icons: Array = []) -> void:
 	_ids = ids
 	_hovered = -1
 	for child in get_children():
 		child.free()
 	for i in ids.size():
+		var item := HBoxContainer.new()
+		if i < icons.size() and icons[i]:
+			var icon := TextureRect.new()
+			icon.texture = icons[i]
+			icon.custom_minimum_size = Vector2.ONE * 40.0
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			item.add_child(icon)
 		var label := Label.new()
 		label.text = labels[i]
 		label.add_theme_font_size_override("font_size", 22)
 		label.add_theme_color_override("font_outline_color", Color.BLACK)
 		label.add_theme_constant_override("outline_size", 6)
-		add_child(label)
+		item.add_child(label)
+		add_child(item)
 	show()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_viewport().warp_mouse(get_viewport_rect().size / 2.0)
@@ -43,7 +52,7 @@ func _process(_delta: float) -> void:
 	var pointer := get_viewport().get_mouse_position() - centre
 	_hovered = choice_at(pointer, _ids.size())
 	for i in get_child_count():
-		var label: Label = get_child(i)
+		var label: Control = get_child(i)
 		var angle := TAU * i / _ids.size() - PI / 2.0
 		label.position = centre + Vector2(cos(angle), sin(angle)) * RADIUS - label.size / 2.0
 		label.modulate = Color.YELLOW if i == _hovered else Color.WHITE

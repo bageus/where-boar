@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0dkhwjsw0q4f"
-path="res://.godot/imported/boar_mohawk_Image_2.jpg-b499af08b0303e2d06b59759fda684a3.ctex"
+path="res://.godot/imported/boar_mohawk_Image_2.jpg-8b06f45575e27ac41813be6027ec26e1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/boar_mohawk_Image_2.jpg"
-dest_files=["res://.godot/imported/boar_mohawk_Image_2.jpg-b499af08b0303e2d06b59759fda684a3.ctex"]
+source_file="res://assets/models/boar/boar_mohawk_Image_2.jpg"
+dest_files=["res://.godot/imported/boar_mohawk_Image_2.jpg-8b06f45575e27ac41813be6027ec26e1.ctex"]
 
 [params]
 

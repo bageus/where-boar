@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://58trvhc1gcc7"
-path="res://.godot/imported/boar_bubble.glb-0676fcabb75aa869ed50703704e49900.scn"
+path="res://.godot/imported/boar_bubble.glb-a2c541876a936698e67546c510ba0654.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_bubble.glb"
-dest_files=["res://.godot/imported/boar_bubble.glb-0676fcabb75aa869ed50703704e49900.scn"]
+source_file="res://assets/models/boar/boar_bubble.glb"
+dest_files=["res://.godot/imported/boar_bubble.glb-a2c541876a936698e67546c510ba0654.scn"]
 
 [params]
 
