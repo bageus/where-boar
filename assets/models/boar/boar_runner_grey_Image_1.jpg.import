@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://g4ttc0cuhd71"
-path="res://.godot/imported/boar_runner_grey_Image_1.jpg-97d2adbe456f847d4a3ecff822f73301.ctex"
+path="res://.godot/imported/boar_runner_grey_Image_1.jpg-0423f3086b14b3c52404642d4c42c881.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/boar_runner_grey_Image_1.jpg"
-dest_files=["res://.godot/imported/boar_runner_grey_Image_1.jpg-97d2adbe456f847d4a3ecff822f73301.ctex"]
+source_file="res://assets/models/boar/boar_runner_grey_Image_1.jpg"
+dest_files=["res://.godot/imported/boar_runner_grey_Image_1.jpg-0423f3086b14b3c52404642d4c42c881.ctex"]
 
 [params]
 

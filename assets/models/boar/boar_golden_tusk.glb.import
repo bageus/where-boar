@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://1rdldco2jrw0"
-path="res://.godot/imported/boar_golden_tusk.glb-aca0cc0dc40371bfa431f1a98dba60e4.scn"
+path="res://.godot/imported/boar_golden_tusk.glb-1dff6265928de8c7d4d2e48739bc4c1c.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_golden_tusk.glb"
-dest_files=["res://.godot/imported/boar_golden_tusk.glb-aca0cc0dc40371bfa431f1a98dba60e4.scn"]
+source_file="res://assets/models/boar/boar_golden_tusk.glb"
+dest_files=["res://.godot/imported/boar_golden_tusk.glb-1dff6265928de8c7d4d2e48739bc4c1c.scn"]
 
 [params]
 

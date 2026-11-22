@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://d1d6231gb7xw6"
-path="res://.godot/imported/boar_tiny.glb-81ea71cff9b5e45605ff93f91d2ed43f.scn"
+path="res://.godot/imported/boar_tiny.glb-aa0140e3c8d0ba21fe374f286a5fad35.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_tiny.glb"
-dest_files=["res://.godot/imported/boar_tiny.glb-81ea71cff9b5e45605ff93f91d2ed43f.scn"]
+source_file="res://assets/models/boar/boar_tiny.glb"
+dest_files=["res://.godot/imported/boar_tiny.glb-aa0140e3c8d0ba21fe374f286a5fad35.scn"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdbuf05bedclf"
-path="res://.godot/imported/boar_tiny_Image_2.jpg-90c982a514519db32e18caf9e71aac90.ctex"
+path="res://.godot/imported/boar_tiny_Image_2.jpg-e1ce010a6138a80dfe27e297fe74e01d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -13,8 +13,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/boar_tiny_Image_2.jpg"
-dest_files=["res://.godot/imported/boar_tiny_Image_2.jpg-90c982a514519db32e18caf9e71aac90.ctex"]
+source_file="res://assets/models/boar/boar_tiny_Image_2.jpg"
+dest_files=["res://.godot/imported/boar_tiny_Image_2.jpg-e1ce010a6138a80dfe27e297fe74e01d.ctex"]
 
 [params]
 

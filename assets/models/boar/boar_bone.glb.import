@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cymkp65wjicnv"
-path="res://.godot/imported/boar_bone.glb-6bbc231348751474ca03d5d2ce128d13.scn"
+path="res://.godot/imported/boar_bone.glb-901189e8a4a590bebb227e5c8edb339b.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_bone.glb"
-dest_files=["res://.godot/imported/boar_bone.glb-6bbc231348751474ca03d5d2ce128d13.scn"]
+source_file="res://assets/models/boar/boar_bone.glb"
+dest_files=["res://.godot/imported/boar_bone.glb-901189e8a4a590bebb227e5c8edb339b.scn"]
 
 [params]
 

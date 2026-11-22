@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b7d133ouleii8"
-path="res://.godot/imported/boar_camo.glb-805c05cd99cec0766ae5e05f2dccc8ed.scn"
+path="res://.godot/imported/boar_camo.glb-cff6b1eeb73d20f71440e14df328ad09.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_camo.glb"
-dest_files=["res://.godot/imported/boar_camo.glb-805c05cd99cec0766ae5e05f2dccc8ed.scn"]
+source_file="res://assets/models/boar/boar_camo.glb"
+dest_files=["res://.godot/imported/boar_camo.glb-cff6b1eeb73d20f71440e14df328ad09.scn"]
 
 [params]
 

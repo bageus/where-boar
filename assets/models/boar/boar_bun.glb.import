@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://blmj3rglpvstt"
-path="res://.godot/imported/boar_bun.glb-32e714769f4cb490ea323d449c129cfe.scn"
+path="res://.godot/imported/boar_bun.glb-d97a75cd8648a99d98fdfd652453f16b.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_bun.glb"
-dest_files=["res://.godot/imported/boar_bun.glb-32e714769f4cb490ea323d449c129cfe.scn"]
+source_file="res://assets/models/boar/boar_bun.glb"
+dest_files=["res://.godot/imported/boar_bun.glb-d97a75cd8648a99d98fdfd652453f16b.scn"]
 
 [params]
 

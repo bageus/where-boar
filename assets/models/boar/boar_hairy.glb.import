@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://camgsjpn4l3rd"
-path="res://.godot/imported/boar_hairy.glb-5630a0806af052c6692f973d1f5d8e8a.scn"
+path="res://.godot/imported/boar_hairy.glb-73f5249d52ab08a3ada539d96f967e54.scn"
 
 [deps]
 
-source_file="res://assets/models/boar_hairy.glb"
-dest_files=["res://.godot/imported/boar_hairy.glb-5630a0806af052c6692f973d1f5d8e8a.scn"]
+source_file="res://assets/models/boar/boar_hairy.glb"
+dest_files=["res://.godot/imported/boar_hairy.glb-73f5249d52ab08a3ada539d96f967e54.scn"]
 
 [params]
 
