@@ -149,3 +149,4 @@ Unapproved ideas and possible future features belong here.
 | P3-096 | 3 | Hunt FPS (owner 2026-11-07: ~8 FPS): forest boar one surface (1 draw call, not 6), grass in 10 m chunks with half density where it sinks, stone piles drawn within 45 m, outline skips unchanged items, far calm boars think every 4th tick and standing ones skip the slide; landing.gd parse fix | P3-095 | DONE |
 | P3-097 | 3 | Cliffs minimal: one solid rock per cliff, fewer and larger rim/drop-off rocks | P3-096 | DONE |
 | P3-098 | 3 | Owner's new rooster and turkey models (2026-11-07): painted, baked colour and feather normal maps, rigged with idle/walk/run/peck; cage birds at hunt size | P3-097 | DONE |
+| P3-099 | 3 | Cyborg (terminator) boars: armour then health, slow pursuit, ±90° turret (cannon shot / machinegun burst, 4-5 s cooldown), search where the hunter hid; owner's models and sounds | P3-098 | IN_PROGRESS |

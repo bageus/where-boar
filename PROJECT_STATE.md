@@ -3,10 +3,10 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-098
+active_task_id: P3-099
 last_completed_task_id: P3-055
 build_status: PASS
-updated: 2026-11-07
+updated: 2026-11-22
 ---
 
 # Project State
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-080 P3-091..P3-098 done.
+None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) in progress: domain done, waiting for the owner's models and sounds.
 
 ## Last completed work
 
@@ -157,3 +157,4 @@ Run the game from `game/bootstrap/app/main.tscn`: start screen → hunt → resu
 - P3-067 (2026-11-02): stumps and logs restyled after PEAK (owner), own procedural shapes. `tools/bake_peak_stumps.gd` bakes `PeakStump1` and `PeakLog1-4` into `assets/nature/meshes/peak/` (73-116 triangles instead of 232-464, same AABBs); `terrain.gd` and `log_bridge.tscn` point at them, collisions and placement unchanged. Not checked: look and FPS in the browser.
 - P3-061 (2026-11-02): trees and bushes restyled after PEAK (owner) to match P3-059, own procedural shapes. `tools/bake_peak_trees.gd` bakes `assets/nature/meshes/peak/`: `PeakTree1-4` (crowns of jittered icosahedron puffs, half-smoothed normals, dark undersides), `PeakPine1-3` (jagged cone tiers), `PeakDead1-2`, `PeakPalm1-3` (jungle), `PeakBush1-3` (hunt `bush.tscn` now uses `varied_mesh.gd`, camp bushes) and `PeakShrub1-3` (undergrowth replacing the 3k-triangle ferns). One vertex-coloured surface each, 60-190 triangles. Used by `tree.tscn`, `terrain.gd`, `surroundings.gd`, `scenery.gd`, `vista.gd`, `dressing.gd`. xvfb: hunt start 1.33M -> 0.86M triangles, 438 -> 417 draw calls; camp 1.07M -> 0.78M, 277 -> 248. Old nature-pack tree/fern meshes stay on disk (stumps, logs still use the pack).
 - P3-059 (2026-11-02): rocks, cliffs and grass restyled after PEAK (owner), with our own procedural shapes. `tools/bake_peak_rocks.gd` bakes `assets/nature/meshes/peak/`: 8 boulders (`PeakRock*`, hunt rocks and camp pebbles), 5 layered cliff chunks (`PeakCliff*`, hunt cliffs and outcrops, camp rock wall, drop-off and rim) and 3 horizon peaks (`PeakSpire*`, hazy mountains); each is a convex cut of a dozen-plus planes, flat shaded, light stone, moss on faces turned up (cliffs: flat ledges only), darker at the foot. Grass is a 13-blade clump (`assets/grass/peak_grass.res`, 39 triangles, one 3-blade LOD for far chunks) with `peak_grass.gdshader`: dark root to bright tip, yellow-green patches, wind sway, darkened by baked shadows. Hunt ground colours brighter (`terrain.gd` GRASS, ROCK). Measured (xvfb): hunt start view 917-921k -> ~923k triangles, draw calls about the same (noisy 410-490 both); camp ~1.01M -> ~1.03-1.06M. Hunt smoke test: the same one turkey failure as on main. Not checked: look and FPS in the browser.
+- P3-099 (2026-11-22, in progress): cyborg boar domain `game/features/boar/domain/cyborg.gd` (armour then health, slow pursuit 3.5 m/s, ±90° turret, 4-5 s cooldown, cannon shot / machinegun burst, search the hiding spot); tests `run_cyborg_tests.gd`. Models and WAV sounds not in the repo yet.
