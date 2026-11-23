@@ -16,6 +16,7 @@ func _init() -> void:
 	failures += _check(_round_trip(), "progress survives to_dict/from_dict")
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
+	failures += _check(_one_crewman_at_a_time(), "hiring a warrior sends the trap setter home; the porter stays")
 	failures += _check(_pick_helper_from_pen(), "a helper in the pen can be taken on the hunt, one at a time")
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
@@ -96,6 +97,14 @@ func _pick_helper_from_pen() -> bool:
 	var turkey := progress.buy("item_take_turkey") and progress.sold_out("item_take_turkey")
 	var rooster := progress.buy("item_take_rooster") and not progress.sold_out("item_take_turkey")
 	return empty_pen and turkey and rooster and Progress.from_dict(progress.to_dict()).companion == "rooster"
+
+
+func _one_crewman_at_a_time() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 1000
+	var hired := progress.buy("item_porter") and progress.buy("item_trap_setter") and progress.buy("item_warrior")
+	return hired and progress.owns("item_warrior") and not progress.owns("item_trap_setter") \
+		and progress.team() == PackedStringArray(["Porter", "Warrior"])
 
 
 func _buy_weapon_once() -> bool:

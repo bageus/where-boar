@@ -54,6 +54,9 @@ func _refresh() -> void:
 	%Tusks.text = "Tusks: %d" % progress.tusks
 	if _shop_id == "forge":  # one player for now, so the givers list is just you (issue #11)
 		info = "Built: %d / %d tusks\nYou gave %d" % [mini(progress.forge, ShopCatalog.FORGE_COST), ShopCatalog.FORGE_COST, progress.forge]
+	if _shop_id == "tavern":
+		var team := progress.team()
+		info = "In your team: %s" % (", ".join(team) if not team.is_empty() else "nobody yet")
 	%Info.text = info
 	%Info.visible = info != "" or _shop_id == "quests"
 	%Sell.visible = ShopCatalog.SELL.has(_shop_id)
