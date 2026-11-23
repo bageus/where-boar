@@ -3,7 +3,7 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-121
+active_task_id: P3-124
 last_completed_task_id: P3-055
 build_status: PASS
 updated: 2026-11-23
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) done. P3-101 (planning mode stage 1) done; P3-109 (forest gatherables placed, collecting not yet) done; P3-110 (owner's new camp building models, huts for sale, forge build, quest board, sell resources) done; P3-114 (owner's new boar and hunter models, hunter clips built in code, hunters at the tavern table) done; P3-115 (owner's new weapon models, no arms in first person, procedural bowstring and slingshot bands, net hangs and unfolds with spin) done; P3-118 (mount and bird choice, hunting hut tabs, selling birds and baits, gear box with carry slots) done; P3-120 (tavern crew: trap setter, warrior or healer, one per hunt) done; P3-121 (signpost window, circle and countdown, lobby rules, team pass) done; next stages P3-102..P3-107.
+None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) done. P3-101 (planning mode stage 1) done; P3-109 (forest gatherables placed) done; P3-123 (gathering them with E into pockets, sold and quested in camp) done; P3-110 (owner's new camp building models, huts for sale, forge build, quest board, sell resources) done; P3-114 (owner's new boar and hunter models, hunter clips built in code, hunters at the tavern table) done; P3-115 (owner's new weapon models, no arms in first person, procedural bowstring and slingshot bands, net hangs and unfolds with spin) done; P3-118 (mount and bird choice, hunting hut tabs, selling birds and baits, gear box with carry slots) done; P3-120 (tavern crew: trap setter, warrior or healer, one per hunt) done; P3-121 (walk into huts, mesh walls) done; next stages P3-102..P3-107; P3-124 (signpost window, circle and countdown, lobby rules, team pass) done.
 
 ## Last completed work
 

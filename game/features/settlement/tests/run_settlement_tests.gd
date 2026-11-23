@@ -23,9 +23,11 @@ func _init() -> void:
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
+	failures += _check(_hunt_brings_finds_home(), "forest finds of a hunt join the camp materials")
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
+	failures += _check(_clan_needs_hut_and_tent(), "a clan is founded with the hut, its clan tent and a name, rates its hunts and survives a save")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
 	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
 	failures += _check(_ride_a_saddled_boar(), "the pens pick which saddled boar is ridden; only its saddle goes on the hunt")
@@ -92,6 +94,24 @@ func _forge_recipes_need_forge_and_metal() -> bool:
 	var short := not progress.buy("item_armor_shock")
 	return before_built and short and progress.buy("item_armor") and progress.owns("item_armor") and progress.tusks == 500 \
 		and progress.items["item_metal_plate"] == 5 and progress.items["item_component"] == 0 and not progress.buy("item_armor")
+
+
+func _clan_needs_hut_and_tent() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 8000
+	var no_tent_first := not progress.buy("item_clan_tent") and progress.buy("item_hut") and not progress.found_clan("Tusks")
+	var founded := progress.buy("item_clan_tent") and not progress.found_clan("  ") and progress.found_clan(" Tusks ")
+	progress.clan.rules = {"hunts": 5}
+	var hunt := Hunt.new(3)
+	hunt.record("common_brown", BoarOutcome.Kind.DEAD)
+	hunt.record("golden_tusk", BoarOutcome.Kind.CAPTURED)
+	hunt.invasion.record_terminator(true)
+	progress.add_hunt(hunt)
+	progress.add_hunt(Hunt.new(1))  # nothing killed or caught: not a hunt for the clan
+	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
+	return no_tent_first and founded and back.clan.name == "Tusks" and back.clan.rules == {"hunts": 5} \
+		and back.clan.rating() == 100 + 20 + 50 + 200 and back.clan.achievements() == ["First hunt", "First boar caught", "First terminator"] \
+		and back.clan.tier_name() == "New" and Progress.from_dict({}).clan == null
 
 
 func _bad_data_falls_back() -> bool:
@@ -167,6 +187,16 @@ func _saddle_needs_caught_boar() -> bool:
 	var locked := not progress.buy("item_saddle_runner_grey")
 	progress.caught = {"runner_grey": 1}
 	return locked and progress.tusks == 100 and progress.buy("item_saddle_runner_grey") and progress.tusks == 50
+
+
+func _hunt_brings_finds_home() -> bool:
+	var progress := Progress.new()
+	progress.materials = {"stick": 5}
+	var hunt := Hunt.new()
+	hunt.gather("stick")
+	hunt.gather("frog")
+	progress.add_hunt(hunt)
+	return progress.materials == {"stick": 6, "frog": 1}
 
 
 func _sell_whole_tusks_only() -> bool:

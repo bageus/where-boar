@@ -13,6 +13,7 @@ const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
 const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
 const SignpostPanel = preload("res://game/presentation/camp/hud/signpost_panel.gd")
 const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
@@ -86,12 +87,12 @@ var planning := false
 
 ## Shop windows' extra line for stations whose own features come later.
 const INFO := {
-	"totem": "Clans come later: here you will see the clans and their rating, and found your own (it takes a hut and its clan tent).",
 	"beauty_hut": "Paint and decorations come later; they change only the look.",
 	"shaman_hut": "Rituals come later.",
 }
 
 var _open_station: Node3D
+var _clan_panel := ClanPanel.new()
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
@@ -117,6 +118,10 @@ func _ready() -> void:
 	_shop.progress = progress
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
+	_clan_panel.progress = progress
+	$Hud.add_child(_clan_panel)
+	_clan_panel.purchased.connect(_on_purchased)
+	_clan_panel.closed.connect(_on_shop_closed)
 	_box.progress = progress
 	$Hud.add_child(_box)
 	_box.changed.connect(_on_purchased.bind("box"))
@@ -231,7 +236,7 @@ func _ambience() -> void:
 
 
 func _process(delta: float) -> void:
-	hunter.point_at(null if _menu_open() else _station_in_reach())
+	hunter.point_at(null if _window_open() else _station_in_reach())
 	if _hunt_left >= 0.0:
 		_hunt_left -= delta
 		_countdown.text = "The hunt starts in %d s: stay in the circle" % ceili(_hunt_left)
@@ -277,6 +282,12 @@ func _show_progress() -> void:
 		lines.append("%s: %d in pens" % [type.display_name if type else type_id, caught[type_id]])
 	for animal_id in progress.helpers:
 		lines.append("%s%s: %d in pens" % [ItemIcons.bbcode(animal_id), animal_id, progress.helpers[animal_id]])
+	var finds := PackedStringArray()
+	for material_id: String in progress.materials:
+		if progress.materials[material_id] > 0:
+			finds.append("%s%d" % [ItemIcons.bbcode(material_id, 22), progress.materials[material_id]])
+	if not finds.is_empty():
+		lines.append(" ".join(finds))
 	if progress.hunts == 0:
 		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water), Quests (by the gate).")
 	$Hud/Progress.text = "[right]%s[/right]" % "\n".join(lines)
@@ -290,8 +301,12 @@ func _show_progress() -> void:
 
 func _on_interacted() -> void:
 	var station := _station_in_reach()
-	if station and not _menu_open():
+	if station and not _window_open():
 		_use(station)
+
+
+func _window_open() -> bool:
+	return _shop.visible or _clan_panel.visible or _box.visible or _signpost.visible
 
 
 func _station_in_reach() -> Node3D:
@@ -310,20 +325,27 @@ func _use(station: Node3D) -> void:
 	if station.station_id == "start_hunt":
 		_signpost.open()
 		return
+	if station.station_id == "totem":
+		_clan_panel.open()
+		return
 	if station.station_id == "chest":
 		_box.open()
 		return
 	_shop.info = INFO.get(station.station_id, "")
 	if station.station_id == "hut" and _is_my_hut(station):
-		_shop.info = "Your hut. The clan tent upgrade (5000 tusks) comes with clans."
+		_shop.info = "Your hut. Its clan tent upgrade lets you found a clan at the totem."
 	_shop.open(station.station_id, "Hut" if station.station_id == "hut" else station.title)
 
 
 func _on_purchased(item_id: String) -> void:
-	if item_id == "item_hut":
-		progress.hut_slot = _open_station.get_index() - $Stations/Hut1.get_index()
-		progress.hut_variant = _open_station.get_meta("variant")
+	if item_id == "item_hut":  # bought at a hut, or at the totem (the first hut then)
+		var hut: Node3D = _open_station if _open_station.station_id == "hut" else $Stations/Hut1
+		progress.hut_slot = hut.get_index() - $Stations/Hut1.get_index()
+		progress.hut_variant = hut.get_meta("variant")
 		_dress_huts()
+	elif item_id == "item_clan_tent" and _shop.visible:  # upgraded in the hut: go on to founding (issue #27)
+		_shop.hide()
+		_clan_panel.open(true)
 	elif item_id.begins_with("item_forge") and progress.forge_built():
 		_dress_forge()
 	hunter.equip(progress.hunt_items())
@@ -358,10 +380,6 @@ func _dress_forge() -> void:
 func _on_shop_closed() -> void:
 	hunter.set_physics_process(true)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-func _menu_open() -> bool:
-	return _shop.visible or _box.visible or _signpost.visible
 
 
 ## A ring on the ground around the signpost and the countdown line at the top of the screen (issue #24).
@@ -400,7 +418,7 @@ func _start_hunt() -> void:
 	_hunt_left = -1.0
 	_countdown.text = ""
 	# shortcut: one player, so the circle holds only you; co-op fills it from the network (GAME_SPEC 19).
-	var me := {"name": "you", "clan": "", "pass": progress.owns(HuntLobby.PASS_ID)}
+	var me := {"name": "you", "clan": progress.clan.name if progress.clan else "", "pass": progress.owns(HuntLobby.PASS_ID)}
 	var in_circle := [me] if hunter.global_position.distance_to($Stations/StartHunt.global_position) <= HUNT_CIRCLE else []
 	var groups := HuntLobby.split(HuntLobby.entrants(_hunt_mode, me, in_circle, _hunt_invited))
 	if groups.any(func(group: Array) -> bool: return me in group):

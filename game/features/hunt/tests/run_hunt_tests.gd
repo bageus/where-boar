@@ -20,6 +20,7 @@ func _init() -> void:
 	failures += _check(_caught_leader_calls_them_off(), "catching the leader alive calls the terminators off")
 	failures += _check(_invasion_sizes(), "2-30 terminators, more as hunts go on")
 	failures += _check(_hunt_waits_for_terminators(), "hunt goes on until the terminators are gone; kills drop metal")
+	failures += _check(_pockets_have_limits(), "forest finds fill the pockets up to their limit; unknown finds are refused")
 	print("hunt tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -28,6 +29,14 @@ func _check(ok: bool, name: String) -> int:
 	if not ok:
 		push_error("FAIL: " + name)
 	return 0 if ok else 1
+
+
+func _pockets_have_limits() -> bool:
+	var hunt := Hunt.new()
+	var taken := 0
+	for i in 6:
+		taken += 1 if hunt.gather("larva") else 0
+	return taken == 4 and hunt.gathered == {"larva": 4} and not hunt.gather("pebble")
 
 
 func _results_and_tusks() -> bool:

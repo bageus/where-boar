@@ -2,7 +2,8 @@ extends Node3D
 
 ## Things to gather, scattered over the map (issues #21, #26; owner 2026-11-22): grass tufts, daisies, berries,
 ## poisonous berries, mushrooms, feathers and sticks, plus hopping frogs and crawling grubs. Counts are random
-## per map load. Still things are merged into one mesh per 40 m cell and material, drawn within RANGE metres.
+## per map load. Still things are merged into one mesh per 40 m cell and material, drawn within RANGE metres;
+## picking one up (find + remove) rebuilds that cell's mesh without it.
 
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
 const DIR := "res://assets/models/props/"
@@ -17,6 +18,13 @@ const GROUND := {
 	"Poisonous_Berries": [35, Vector2(0.35, 0.55)],
 	"Feather": [70, Vector2(0.25, 0.55)],
 }
+## glb (or "frog", "grub") -> material id the find becomes in the pockets (shop_catalog.gd MATERIAL_NAMES).
+const MATERIAL := {
+	"Grass_Tufts": "grass", "Daisies_6_Colors": "daisy", "Berries_6_Colors": "berry", "Mushrooms": "mushroom",
+	"Poisonous_Berries": "poison_berry", "Feather": "feather", "Sticks_3_Variants": "stick", "frog": "frog", "grub": "larva",
+}
+## Berries on a bush hang up to this high over the hunter's feet and can still be reached.
+const REACH_UP := 2.5
 const BERRIES_ON_SHRUBS := 70
 const POISON_ON_SHRUBS := 15
 const MUSHROOMS_ON_WOOD := 45
@@ -34,7 +42,9 @@ const Grub = preload("res://game/presentation/hunt_map/props/grub.gd")
 var _terrain: Node3D
 var _rng := RandomNumberGenerator.new()
 var _meshes := {}  # glb name -> Array[Mesh]
-var _batches := {}  # [material group, cell] -> Array of [Mesh, Transform3D]
+var _batches := {}  # [material group, cell] -> Array of [Mesh, Transform3D, material id]
+var _nodes := {}  # same key -> its baked MeshInstance3D
+var _critters: Array[Node3D] = []  # frogs and grubs, with meta "material"
 
 
 ## `hosts` holds [mesh, Transform3D] lists for "stumps", "logs", "trees" and "shrubs" the terrain placed.
@@ -76,7 +86,7 @@ func _still(glb: String, at: Vector3, scale_range: Vector2, tilt := 0.0) -> void
 	var key := ["poison" if glb == "Poisonous_Berries" else "atlas", Vector2i(floori(at.x / CELL), floori(at.z / CELL))]
 	if not _batches.has(key):
 		_batches[key] = []
-	_batches[key].append([meshes[_rng.randi() % meshes.size()], spot])
+	_batches[key].append([meshes[_rng.randi() % meshes.size()], spot, MATERIAL[glb]])
 
 
 ## Berries hang on the outside of a bush, in its upper two thirds.
@@ -107,18 +117,66 @@ func _load_meshes(glb: String) -> Array:
 	return _meshes[glb]
 
 
+## The find nearest to `near` (global) within `reach` metres across, or {} when there is none:
+## {"material", "node"} for a frog or grub, {"material", "key", "index"} for a still thing.
+func find(near: Vector3, reach: float) -> Dictionary:
+	var at := to_local(near)
+	var best := {}
+	var best_d := reach
+	for critter in _critters:
+		var d := _flat_distance(critter.position, at)
+		if d < best_d:
+			best_d = d
+			best = {"material": critter.get_meta("material"), "node": critter}
+	var cell := Vector2i(floori(at.x / CELL), floori(at.z / CELL))
+	for key: Array in _batches:
+		if absi(key[1].x - cell.x) > 1 or absi(key[1].y - cell.y) > 1:
+			continue
+		var items: Array = _batches[key]
+		for i in items.size():
+			var d := _flat_distance((items[i][1] as Transform3D).origin, at)
+			if d < best_d:
+				best_d = d
+				best = {"material": items[i][2], "key": key, "index": i}
+	return best
+
+
+## Takes a find returned by find() off the map.
+func remove(found: Dictionary) -> void:
+	if found.has("node"):
+		_critters.erase(found["node"])
+		found["node"].queue_free()
+		return
+	_batches[found["key"]].remove_at(found["index"])
+	_bake_cell(found["key"])
+
+
+func _flat_distance(p: Vector3, at: Vector3) -> float:
+	return INF if p.y - at.y > REACH_UP or at.y - p.y > 1.0 else Vector2(p.x - at.x, p.z - at.z).length()
+
+
 func _bake() -> void:
 	for key: Array in _batches:
-		var tool := SurfaceTool.new()
-		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for item: Array in _batches[key]:
-			tool.append_from(item[0], 0, item[1])
-		tool.set_material((_batches[key][0][0] as Mesh).surface_get_material(0))
-		var node := MeshInstance3D.new()
-		node.mesh = tool.commit()
-		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		node.visibility_range_end = RANGE
-		add_child(node)
+		_bake_cell(key)
+
+
+func _bake_cell(key: Array) -> void:
+	if _nodes.has(key):
+		_nodes[key].queue_free()
+		_nodes.erase(key)
+	if _batches[key].is_empty():
+		return
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for item: Array in _batches[key]:
+		tool.append_from(item[0], 0, item[1])
+	tool.set_material((_batches[key][0][0] as Mesh).surface_get_material(0))
+	var node := MeshInstance3D.new()
+	node.mesh = tool.commit()
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	node.visibility_range_end = RANGE
+	add_child(node)
+	_nodes[key] = node
 
 
 ## A rigged model with only variant `n` of its rigs left, its animation `anim` ready on the returned player.
@@ -144,6 +202,8 @@ func _frog(at: Vector3) -> void:
 	frog.anim = v[1]
 	frog.anim_name = v[2]
 	frog.add_child(v[0])
+	frog.set_meta("material", MATERIAL["frog"])
+	_critters.append(frog)
 	add_child(frog)
 	frog.position = at
 	frog.rotation.y = _rng.randf() * TAU
@@ -157,6 +217,8 @@ func _grub(wood: Array, trees: Array) -> void:
 	grub.anim = v[1]
 	grub.anim_name = v[2]
 	grub.add_child(v[0])
+	grub.set_meta("material", MATERIAL["grub"])
+	_critters.append(grub)
 	add_child(grub)
 	if _rng.randf() < 0.5:
 		grub.position = _wood_top(wood)

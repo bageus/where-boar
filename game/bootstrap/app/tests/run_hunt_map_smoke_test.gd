@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 38
+const EXPECTED_CHECKS := 40
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -44,6 +44,7 @@ func _physics_process(_delta: float) -> bool:
 		_check("caught 1" in _main.current.get_node("%Summary").text or "caught 2" in _main.current.get_node("%Summary").text, "results list the caught boars")
 		_check(_hunt.count_all(BoarOutcome.Kind.CAPTURED) == 2 and _hunt.held == 0, "the trapped boar counts as caught at hunt end")
 		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
+		_check("Gathered:" in _main.current.get_node("%Summary").text, "results list the forest finds")
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
 		_buy_club(_main.current)
@@ -121,9 +122,17 @@ func _physics_process(_delta: float) -> bool:
 			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
 			_check_relief(hunter, boars[4])
-			hunter.global_position = _map.get_node("ReturnPoint").global_position
-			hunter.interacted.emit()
+			_gather_and_return(hunter)
 	return false
+
+
+## E next to a frog puts a find in the pockets (issue #26), then E at the return point ends the hunt.
+func _gather_and_return(hunter: CharacterBody3D) -> void:
+	hunter.global_position = _map.get_node("Terrain/Gatherables")._critters[0].global_position
+	hunter.interacted.emit()
+	_check(_map.hunt.gathered.values() == [1], "E picks up a forest find in reach into the pockets")
+	hunter.global_position = _map.get_node("ReturnPoint").global_position
+	hunter.interacted.emit()
 
 
 ## Hits stay in the boar (owner, 2026-10-27): the net comes back from the caught boar only up close,

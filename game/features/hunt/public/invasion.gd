@@ -24,6 +24,8 @@ var leader_caught := false
 var kills := 0
 ## Terminators still on the map.
 var left := 0
+## Terminators killed this hunt (clan rating, issue #27).
+var killed := 0
 ## item_id -> count dropped by killed terminators.
 var loot: Dictionary = {}
 
@@ -53,5 +55,6 @@ func record_boar(dead: bool, captured: bool, leader: bool) -> bool:
 func record_terminator(killed: bool) -> void:
 	left = maxi(0, left - 1)
 	if killed:
+		self.killed += 1
 		for item_id in LOOT:
 			loot[item_id] = loot.get(item_id, 0) + LOOT[item_id]

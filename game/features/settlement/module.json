@@ -10,7 +10,8 @@
     "public/shop_catalog.gd",
     "public/item_icons.gd",
     "public/quest_board.gd",
-    "public/hunt_lobby.gd"
+    "public/hunt_lobby.gd",
+    "public/clan.gd"
   ],
   "dependencies": [
     "features.boar",

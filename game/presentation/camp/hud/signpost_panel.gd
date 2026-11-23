@@ -20,7 +20,7 @@ const LOCATIONS := [{"name": "Green Valley", "preview": preload("res://assets/ui
 const TABS := {"public": "Public hunt", "clan": "Clan hunt", "private": "Private hunt"}
 const TAB_TEXT := {
 	"public": "Everyone standing in the circle around the signpost goes on the hunt.",
-	"clan": "Only your clan mates in the circle go. You are in no clan yet: clans come with the clan totem.",
+	"clan": "Only your clan mates in the circle go.",
 	"private": "Only the players you invite go, and each of them needs a team pass.",
 }
 
@@ -93,7 +93,7 @@ func _hunt_page() -> void:
 	preview.custom_minimum_size = Vector2(0, 180)
 	about.add_child(preview)
 	_label(LOCATIONS[0]["text"], 16, about)
-	_label(TAB_TEXT[_mode], 18)
+	_label(TAB_TEXT[_mode] + (" You are in no clan yet: found or join one at the clan totem." if _mode == "clan" and not progress.clan else ""), 18)
 	if _mode == "private":
 		_private_rows()
 	var timer := HBoxContainer.new()
@@ -116,7 +116,7 @@ func _hunt_page() -> void:
 	var start := _button(buttons, "Start", func() -> void:
 		hide()
 		launched.emit(_mode, _seconds, _invited.duplicate()))
-	start.disabled = _mode == "clan" or (_mode == "private" and not progress.owns(HuntLobby.PASS_ID))
+	start.disabled = (_mode == "clan" and not progress.clan) or (_mode == "private" and not progress.owns(HuntLobby.PASS_ID))
 	_button(buttons, "Back", _choice_page)
 	_button(buttons, "Close", close)
 
