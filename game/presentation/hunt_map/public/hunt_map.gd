@@ -139,7 +139,7 @@ func _ready() -> void:
 	_hunter.pit_dug.connect(_terrain.dig)  # before the trap setter digs any
 	if items.get("item_trap_setter", 0) > 0:
 		_set_traps_at_zones(zones)
-		_hunter.bring_trap_setter()
+	_hunter.bring_crew(items)
 	_hunter.interacted.connect(_on_interacted)
 	_hunter.downed.connect(_on_downed)
 	_hunter.shouted.connect(_on_shouted)
@@ -491,8 +491,9 @@ func _scout() -> void:
 func _show_goal() -> void:
 	_goal.text = "Tusks: %s" % Hunt.tusk_bracket(hunt.tusks())
 	var lines := PackedStringArray()
-	if items.get("item_trap_setter", 0) > 0:
-		lines.append("Helper: trap setter")
+	for item_id in ["item_trap_setter", "item_warrior", "item_healer"]:
+		if items.get(item_id, 0) > 0:
+			lines.append("Helper: %s" % item_id.trim_prefix("item_").replace("_", " "))
 	var animal_id := _companion()
 	if animal_id != "" and _helpers_used.is_empty():
 		lines.append("[Z] release %s" % animal_id)

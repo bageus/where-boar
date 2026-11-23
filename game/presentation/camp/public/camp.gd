@@ -14,6 +14,7 @@ const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
+const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
 const BUILDINGS := "res://assets/models/buildings/"
 ## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
 const HUT_VARIANTS: Array[PackedScene] = [
@@ -82,7 +83,6 @@ var planning := false
 
 ## Shop windows' extra line for stations whose own features come later.
 const INFO := {
-	"chest": "Your gear store comes later: swap weapons, baits and traps here.",
 	"beauty_hut": "Paint and decorations come later; they change only the look.",
 	"shaman_hut": "Rituals come later.",
 }
@@ -92,6 +92,7 @@ var _clan_panel := ClanPanel.new()
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
+var _box := BoxPanel.new()
 
 
 func _ready() -> void:
@@ -103,7 +104,7 @@ func _ready() -> void:
 		_dress()
 		return
 	hunter.interacted.connect(_on_interacted)
-	hunter.equip(progress.items)
+	hunter.equip(progress.hunt_items())
 	_shop.progress = progress
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
@@ -111,6 +112,10 @@ func _ready() -> void:
 	$Hud.add_child(_clan_panel)
 	_clan_panel.purchased.connect(_on_purchased)
 	_clan_panel.closed.connect(_on_shop_closed)
+	_box.progress = progress
+	$Hud.add_child(_box)
+	_box.changed.connect(_on_purchased.bind("box"))
+	_box.closed.connect(_on_shop_closed)
 	_dress_huts()
 	_dress_forge()
 	_show_progress()
@@ -274,7 +279,7 @@ func _on_interacted() -> void:
 
 
 func _window_open() -> bool:
-	return _shop.visible or _clan_panel.visible
+	return _shop.visible or _clan_panel.visible or _box.visible
 
 
 func _station_in_reach() -> Node3D:
@@ -296,6 +301,9 @@ func _use(station: Node3D) -> void:
 	if station.station_id == "totem":
 		_clan_panel.open()
 		return
+	if station.station_id == "chest":
+		_box.open()
+		return
 	_shop.info = INFO.get(station.station_id, "")
 	if station.station_id == "hut" and _is_my_hut(station):
 		_shop.info = "Your hut. Its clan tent upgrade lets you found a clan at the totem."
@@ -313,7 +321,7 @@ func _on_purchased(item_id: String) -> void:
 		_clan_panel.open(true)
 	elif item_id.begins_with("item_forge") and progress.forge_built():
 		_dress_forge()
-	hunter.equip(progress.items)
+	hunter.equip(progress.hunt_items())
 	_show_progress()
 	purchased.emit()
 

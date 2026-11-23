@@ -20,7 +20,8 @@ var progress: Progress
 var info := ""
 var _shop_id := ""
 var _selling := false
-## The forge's open recipe tab (issue #11).
+## Shown tab of a shop whose items have tabs: the forge's recipes (issue #11), the hunting hut's baits and
+## traps (issue #13).
 var _tab: String = ShopCatalog.FORGE_TABS[0]
 
 
@@ -35,6 +36,7 @@ func _ready() -> void:
 func open(shop_id: String, title: String) -> void:
 	_shop_id = shop_id
 	_selling = false
+	_tab = ShopCatalog.FORGE_TABS[0] if shop_id == "forge" else ""
 	%Title.text = title
 	_refresh()
 	show()
@@ -56,6 +58,9 @@ func _refresh() -> void:
 	%Tusks.text = "Tusks: %d" % progress.tusks
 	if _shop_id == "forge":
 		_forge_header()
+	if _shop_id == "tavern":
+		var team := progress.team()
+		info = "In your team: %s" % (", ".join(team) if not team.is_empty() else "nobody yet")
 	%Info.text = info
 	%Info.visible = info != "" or _shop_id == "quests"
 	%Sell.visible = ShopCatalog.SELL.has(_shop_id)
@@ -97,17 +102,22 @@ func _forge_header() -> void:
 
 
 func _item_rows() -> void:
-	for item_id in ShopCatalog.for_shop(_shop_id):
+	var ids := ShopCatalog.for_shop(_shop_id)
+	if _shop_id != "forge":  # the forge draws its own tabs in its header
+		_tab_buttons(ids)
+	for item_id in ids:
 		var item: Dictionary = ShopCatalog.ITEMS[item_id]
-		if _shop_id == "forge" and (item.get("tab", "") != _tab if progress.forge_built() else not item.has("donate")):
+		var hidden: bool = (item.get("tab", "") != _tab if progress.forge_built() else not item.has("donate")) \
+				if _shop_id == "forge" else item.get("tab", _tab) != _tab
+		if hidden:
 			continue
 		var button := Button.new()
 		var owned: bool = progress.sold_out(item_id)
 		var count: String = "" if item["unique"] or item.has("donate") else "  (have %d)" % progress.items.get(item_id, 0)
 		if item.has("requires_item") and not progress.unlocked(item_id):
 			continue  # the clan tent upgrade shows once the hut is bought
-		var locked := "" if progress.unlocked(item_id) else "  (catch one first)"
-		var taken := "taken" if item.has("companion") else ("owned" if item["unique"] else "max")
+		var locked := "" if progress.unlocked(item_id) else ("  (saddle it first)" if item.has("mount") else "  (catch one first)")
+		var taken := "taken" if item.has("companion") else ("riding" if item.has("mount") else ("owned" if item["unique"] else "max"))
 		var price_text: String = taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id))
 		var short := "" if owned or progress.tusks >= ShopCatalog.price(item_id) else "  (not enough tusks)"
 		if short == "" and not owned and not progress.has_parts(item_id):
@@ -128,16 +138,42 @@ func _item_rows() -> void:
 		%Items.add_child(button)
 
 
+## A row of tab buttons when the shop's items have tabs; the first tab shows at first.
+func _tab_buttons(ids: Array[String]) -> void:
+	var tabs: Array[String] = []
+	for item_id in ids:
+		var tab: String = ShopCatalog.ITEMS[item_id].get("tab", "")
+		if tab != "" and tab not in tabs:
+			tabs.append(tab)
+	if tabs.is_empty():
+		return
+	if _tab not in tabs:
+		_tab = tabs[0]
+	var row := HBoxContainer.new()
+	for tab in tabs:
+		var button := Button.new()
+		button.text = tab
+		button.toggle_mode = true
+		button.button_pressed = tab == _tab
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			_tab = tab
+			_refresh())
+		row.add_child(button)
+	%Items.add_child(row)
+
+
 ## One row per material the shop buys: a slider in whole tusks' worth, and a sell button showing the pay.
 func _sell_rows() -> void:
 	var total := 0
 	var prices: Dictionary = ShopCatalog.SELL[_shop_id]
 	for material_id: String in prices:
-		var units: int = prices[material_id]
-		var have: int = progress.materials.get(material_id, 0)
-		total += have / units
+		var rate := ShopCatalog.sell_rate(_shop_id, material_id)
+		var units := rate.x
+		var have: int = progress.stock(material_id).get(material_id, 0)
+		total += have / units * rate.y
 		var label := Label.new()
-		label.text = "%s: %d  (%d for 1 tusk)" % [ShopCatalog.MATERIAL_NAMES[material_id], have, units]
+		label.text = "%s: %d  (%d for %d tusk%s)" % [ShopCatalog.sell_name(material_id), have, units, rate.y, "" if rate.y == 1 else "s"]
 		var row := HBoxContainer.new()
 		var slider := HSlider.new()
 		slider.step = units
@@ -146,7 +182,7 @@ func _sell_rows() -> void:
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var button := Button.new()
 		var show_pay := func(value: float) -> void:
-			button.text = "Sell %d — %d tusks" % [int(value), int(value) / units]
+			button.text = "Sell %d — %d tusks" % [int(value), int(value) / units * rate.y]
 			button.disabled = value < units
 		show_pay.call(slider.value)
 		slider.value_changed.connect(show_pay)
@@ -160,7 +196,7 @@ func _sell_rows() -> void:
 	all.disabled = total == 0
 	var everything := {}
 	for material_id: String in prices:
-		everything[material_id] = progress.materials.get(material_id, 0)
+		everything[material_id] = progress.stock(material_id).get(material_id, 0)
 	all.pressed.connect(_sell.bind(everything))
 	%Items.add_child(all)
 
@@ -197,7 +233,8 @@ func _quest_rows() -> void:
 func _sell(counts: Dictionary) -> void:
 	var earned := 0
 	for material_id: String in counts:
-		earned += progress.sell(material_id, counts[material_id], ShopCatalog.SELL[_shop_id][material_id])
+		var rate := ShopCatalog.sell_rate(_shop_id, material_id)
+		earned += progress.sell(material_id, counts[material_id], rate.x, rate.y)
 	if earned > 0:
 		Sfx.ui(self, "tusk")
 		purchased.emit("sell")
