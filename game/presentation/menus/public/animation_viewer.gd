@@ -1,6 +1,7 @@
 extends Node3D
 
 ## Animation viewer from the start screen: pick a caveman, a boar or a bird and an animation; drag to orbit, wheel to zoom.
+## Cavemen hold a weapon of choice (owner, 2026-11-23); an attack clip switches to a weapon it is made for.
 
 signal closed
 
@@ -9,7 +10,8 @@ const MODELS := {
 	"Plump": preload("res://assets/models/hunter/plump_hunter.glb"),
 	"Lanky": preload("res://assets/models/peak_cavemen/lanky.glb"),
 }
-const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
+const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "club_swing",
+		"club_heavy", "thrust", "spear_heavy", "bow_shot"]
 const BOAR_ANIMATIONS: Array[String] = ["idle", "walk", "run", "eat", "attack", "death", "net"]
 ## Roosters and turkeys (tools/rig_birds.py).
 const BIRDS := {
@@ -22,21 +24,35 @@ const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
 const HUNTER_BONES := {"hips": "pelvis", "hand_r": "hand.R", "hand_l": "hand.L", "fingers_r": "hand.R", "fingers_l": "hand.L"}
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
-const Club = preload("res://assets/models/club.glb")
-const Bow = preload("res://assets/models/bow.glb")
-const Arrow = preload("res://assets/models/arrow.glb")
+const Arrow = preload("res://assets/models/weapon_new/arrow.tscn")
 const LOOSE_TIME := 34.0 / 30.0  # bow_shot frame where the string is released (tools/rig_cavemen.py)
-const GRIP := Vector3(0, 0.1, -0.04)  # inside the fist, in hand bone space
+## The weapon models (bow and slingshot without their first-person strings): scene, hand, and where the fist closes on it in the model's frame
+## (HunterRig.hold: the model's +Y leaves the fist on the thumb side, its -X toward the fingers), its turn.
+const WEAPONS := {
+	"Club": ["res://assets/models/weapon_new/club.tscn", "hand_r", Vector3(0, -0.06, 0), Basis.IDENTITY],
+	"Spear": ["res://assets/models/weapon_new/spear.tscn", "hand_r", Vector3.ZERO, Basis.IDENTITY],
+	"Knife": ["res://assets/models/weapon_new/knife.tscn", "hand_r", Vector3(0, -0.04, 0), Basis.IDENTITY],
+	"Bow": ["res://assets/models/weapon_new/Bow_No_String.glb", "hand_l", Vector3.ZERO,
+			Basis(Vector3(-0.7, 0, 0), Vector3(0, 0.7, 0), Vector3(0, 0, -0.7))],  # grip bulge toward the target
+	"Sling": ["res://assets/models/weapon_new/Slingshot_No_Bands.glb", "hand_l", Vector3(0, -0.08, 0),
+			Basis(Vector3(0, 0, -0.6), Vector3(0, 0.6, 0), Vector3(0.6, 0, 0))],  # shots fly toward the fingers
+	"Net": ["res://assets/models/net_bundle.glb", "hand_r", Vector3.ZERO, Basis.IDENTITY * 1.5],
+}
+## The weapons each attack clip is made for; any other clip keeps the weapon in hand.
+const CLIP_WEAPONS := {
+	"attack": ["Spear", "Net"], "strong_attack": ["Club"], "club_swing": ["Club"], "club_heavy": ["Club"],
+	"thrust": ["Spear", "Knife"], "spear_heavy": ["Spear"], "bow_shot": ["Bow"],
+}
 
 var character: Node3D
 var player: AnimationPlayer
 var animation := "idle"
 ## Animations of the shown model: ANIMATIONS for a caveman, BOAR_ANIMATIONS for a boar.
 var animations: Array[String] = ANIMATIONS
+var weapon := "Club"
 var _skeleton: Skeleton3D
-var _club: Node3D
-var _bow: Node3D
-var _arrow := Node3D.new()
+var _held: Node3D
+var _arrow: Node3D
 var _yaw := 0.5
 var _pitch := -0.15
 var _distance := 3.2
@@ -53,7 +69,10 @@ func _ready() -> void:
 		_add_button(%Models, boar_type.display_name, show_boar.bind(boar_type.id))
 	for bird_name: String in BIRDS:
 		_add_button(%Models, bird_name, show_bird.bind(bird_name))
+	for weapon_name: String in WEAPONS:
+		_add_button(%Weapons, weapon_name, show_weapon.bind(weapon_name))
 	_boar.show_type(BoarTypes.find("common_brown"))
+	_arrow = Node3D.new()
 	var arrow_model: Node3D = Arrow.instantiate()
 	arrow_model.transform = Transform3D(Basis(Vector3(1, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0)), Vector3.ZERO)  # tip toward -Z
 	_arrow.add_child(arrow_model)
@@ -69,12 +88,23 @@ func show_model(model_name: String) -> void:
 	add_child(character)
 	player = character.find_child("AnimationPlayer") as AnimationPlayer
 	_skeleton = character.find_child("Skeleton3D") as Skeleton3D
-	for anim in ANIMATIONS:
+	var names := ANIMATIONS.filter(player.has_animation)  # the lanky caveman has only the older clips
+	for anim: String in names:
 		player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR  # the viewer repeats every animation
-	# Hand bones run wrist -> knuckles along +Y, the palm faces -Z and the fingers curl around X.
-	_club = _attach(Club, "hand_r", Transform3D(Basis(Vector3(0, 1, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1)), GRIP + Vector3(-0.25, 0, 0)))
-	_bow = _attach(Bow, "hand_l", Transform3D(Basis(Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, -1, 0)), GRIP))
-	_list_animations(ANIMATIONS)
+	show_weapon(weapon)
+	_list_animations(names)
+
+
+## Puts this weapon in the caveman's hand, in place of the one held.
+func show_weapon(weapon_name: String) -> void:
+	weapon = weapon_name
+	if _skeleton == null:
+		return
+	if _held:
+		_held.get_parent().queue_free()
+	var spec: Array = WEAPONS[weapon_name]
+	_held = load(spec[0]).instantiate()
+	HunterRig.hold(_skeleton, _bone(spec[1]), _held, spec[2], spec[3])
 
 
 ## Boars turned to face the camera; attack and death replay when they end instead of looping, because
@@ -106,8 +136,8 @@ func _clear() -> void:
 		remove_child(character)
 		character.queue_free()
 	character = null
-	_club = null
-	_bow = null
+	_skeleton = null
+	_held = null
 	_boar.visible = false
 
 
@@ -123,11 +153,10 @@ func _list_animations(names: Array[String]) -> void:
 func play(anim: String) -> void:
 	animation = anim
 	player.play(anim)
-	if not _club:
+	if not _skeleton:
 		return
-	# Cavemen always carry a weapon: the bow for shooting, the club otherwise.
-	_club.visible = anim != "bow_shot"
-	_bow.visible = anim == "bow_shot"
+	if CLIP_WEAPONS.has(anim) and weapon not in CLIP_WEAPONS[anim]:
+		show_weapon(CLIP_WEAPONS[anim][0])
 	_boar.visible = anim == "ride"
 	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone(_bone("hips"))).origin.y
 	# On the saddle, as in mount.gd.
@@ -136,31 +165,22 @@ func play(anim: String) -> void:
 
 # The arrow lies from the drawing fist through the bow grip until the string is released.
 func _process(_delta: float) -> void:
-	_arrow.visible = animation == "bow_shot" and player.current_animation_position < LOOSE_TIME
+	_arrow.visible = animation == "bow_shot" and weapon == "Bow" and player.current_animation_position < LOOSE_TIME
 	if not _arrow.visible:
 		return
-	var nock := _bone_position("fingers_r")
-	var aim := (_bone_position("fingers_l") - nock).normalized()
+	var nock := _palm("hand_r")
+	var aim := (_palm("hand_l") - nock).normalized()
 	_arrow.look_at_from_position(nock + aim * 0.4, nock + aim, Vector3.UP)
 
 
-func _bone_position(bone: String) -> Vector3:
-	return _skeleton.global_transform * _skeleton.get_bone_global_pose(_skeleton.find_bone(_bone(bone))).origin
+## Where a hand's fist is now (HunterRig.PALM).
+func _palm(bone: String) -> Vector3:
+	return _skeleton.global_transform * _skeleton.get_bone_global_pose(_skeleton.find_bone(_bone(bone))) * HunterRig.PALM
 
 
 ## A caveman bone's name in the shown skeleton.
 func _bone(bone: String) -> String:
 	return bone if _skeleton.find_bone(bone) >= 0 else HUNTER_BONES.get(bone, bone)
-
-
-func _attach(scene: PackedScene, bone: String, offset: Transform3D) -> Node3D:
-	var socket := BoneAttachment3D.new()
-	socket.bone_name = _bone(bone)
-	_skeleton.add_child(socket)
-	var item: Node3D = scene.instantiate()
-	item.transform = offset
-	socket.add_child(item)
-	return item
 
 
 func _add_button(box: Container, text: String, pressed: Callable) -> void:

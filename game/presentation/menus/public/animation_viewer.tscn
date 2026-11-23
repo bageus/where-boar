@@ -59,13 +59,23 @@ unique_name_in_owner = true
 layout_mode = 2
 columns = 2
 
+[node name="WeaponsTitle" type="Label" parent="Ui/Panel"]
+layout_mode = 2
+text = "Weapon"
+
+[node name="Weapons" type="GridContainer" parent="Ui/Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 3
+
 [node name="AnimationsTitle" type="Label" parent="Ui/Panel"]
 layout_mode = 2
 text = "Animation"
 
-[node name="Animations" type="VBoxContainer" parent="Ui/Panel"]
+[node name="Animations" type="GridContainer" parent="Ui/Panel"]
 unique_name_in_owner = true
 layout_mode = 2
+columns = 2
 
 [node name="Back" type="Button" parent="Ui/Panel"]
 unique_name_in_owner = true

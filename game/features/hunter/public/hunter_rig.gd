@@ -1,8 +1,9 @@
 extends RefCounted
 
 ## The owner's rigged hunters (assets/models/hunter/*.glb, owner 2026-11-23) come without animations: this
-## gives each instance an AnimationPlayer with idle, walk, run, sneak, ride, sit, attack (spear throw),
-## strong_attack (two-handed smash) and bow_shot, built from poses on their 24-bone rig (root, pelvis,
+## gives each instance an AnimationPlayer with idle, walk, run, sneak, ride, sit, attack (spear or net throw),
+## strong_attack (two-handed smash), club_swing, club_heavy, thrust (spear or knife), spear_heavy and bow_shot,
+## built from poses on their 24-bone rig (root, pelvis,
 ## spine, chest, neck, head, clavicle/upper_arm/forearm/hand/thumb.L|R, thigh/shin/foot/toe.L|R).
 ## Poses are rotations in the model's rest frame (+X the left hand, +Y up, +Z the front), each applied
 ## before the parent's: a bone's local rotation is parent_rest⁻¹ · pose · rest. Right side mirrors left.
@@ -10,6 +11,13 @@ extends RefCounted
 const LOOPS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "sit"]
 const LOOSE_TIME := 34.0 / 30.0  # bow_shot: string released, as the cavemen's (tools/rig_cavemen.py)
 const ARM_DOWN := -72.0  # T-pose arms lowered to the sides
+## Heavy blows (owner, 2026-11-23): the swing's wind-up is held this long, as while the attack is charged.
+const CHARGE_HOLD := 0.8
+## Every weapon's attach point: the middle of the fist in either hand bone's space (both hunters' hand meshes
+## centre there; the bone runs wrist -> fingers along +Y).
+const PALM := Vector3(0.0, 0.15, 0.0)
+## A held item's frame in the hand bone: its +Y out of the thumb side of the fist, its -X toward the fingers.
+const FIST := {"L": Basis(Vector3.DOWN, Vector3.RIGHT, Vector3.BACK), "R": Basis(Vector3.DOWN, Vector3.LEFT, Vector3.FORWARD)}
 
 ## Model scene path -> its AnimationLibrary, shared by every instance.
 static var _libraries := {}
@@ -33,6 +41,18 @@ static func instance(scene: PackedScene) -> Node3D:
 		_libraries[scene.resource_path] = _build(skeleton, String(model.get_path_to(skeleton)))
 	player.add_animation_library("", _libraries[scene.resource_path])
 	return model
+
+
+## Puts item in the fist of hand bone ("hand.R", "hand_l"...): grip is where the fist closes on it in the
+## item's own frame, turn the item's rotation and scale in the fist.
+static func hold(skeleton: Skeleton3D, bone: String, item: Node3D, grip := Vector3.ZERO, turn := Basis.IDENTITY) -> BoneAttachment3D:
+	var socket := BoneAttachment3D.new()
+	socket.bone_name = bone
+	skeleton.add_child(socket)
+	var basis: Basis = FIST["R" if bone.to_upper().ends_with("R") else "L"] * turn
+	item.transform = Transform3D(basis, PALM - basis * grip)
+	socket.add_child(item)
+	return socket
 
 
 ## Vertices well below the T-pose arms lose their arm weights to the chest: raising an arm then no longer
@@ -87,6 +107,10 @@ static func _build(skeleton: Skeleton3D, path: String) -> AnimationLibrary:
 		"attack": [1.0, _throw()],
 		"strong_attack": [1.2, _smash()],
 		"bow_shot": [1.6, _bow()],
+		"club_swing": [1.0, _club()],
+		"club_heavy": [1.0 + CHARGE_HOLD, _held(_club(), 1)],
+		"thrust": [0.9, _thrust()],
+		"spear_heavy": [1.0 + CHARGE_HOLD, _held(_spear_swing(), 1)],
 	}
 	for clip: String in clips:
 		library.add_animation(clip, _clip(skeleton, path, clips[clip][0], clips[clip][1], clip in LOOPS))
@@ -197,20 +221,53 @@ static func _smash() -> Array:
 	]
 
 
-## Bow raised in the left hand, the right draws the string to the chin and lets go at LOOSE_TIME.
+## Bow arm straight out in front, bow upright; the right fist draws the string back to the cheek with the
+## arrow running on from it, and lets go at LOOSE_TIME. Arm rotations solved for the fist's place and the
+## weapon's direction (tools/solve_arm_poses.py), so they are quaternions, not angles.
 static func _bow() -> Array:
-	var aim := {"upper_arm.L": rx(-90.0) * rz(-15.0), "forearm.L": ry(-5.0), "chest": ry(20.0), "head": ry(-15.0)}
-	var drawn := aim.duplicate()
-	drawn.merge({"upper_arm.R": rx(-85.0) * ry(-35.0) * rz(-20.0), "forearm.R": ry(120.0)}, true)  # fist by the cheek, not in it
-	var loose := aim.duplicate()
-	loose.merge({"upper_arm.R": rx(-80.0) * ry(-50.0) * rz(-20.0), "forearm.R": ry(85.0)}, true)
+	var aim := {"upper_arm.L": Quaternion(0.514, 0.636, 0.454, -0.353), "forearm.L": Quaternion(0.000, 0.000, 0.000, 1.000), "hand.L": Quaternion(-0.002, 0.084, 0.095, 0.992), "chest": ry(-20.0), "head": ry(20.0)}
 	var nock := aim.duplicate()
-	nock.merge({"upper_arm.R": rx(-85.0) * rz(-ARM_DOWN - 35.0), "forearm.R": ry(40.0)}, true)
+	nock.merge({"upper_arm.R": Quaternion(0.279, -0.685, -0.652, -0.167), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.001, -0.014, 0.009, 1.000)}, true)
+	var drawn := aim.duplicate()
+	drawn.merge({"upper_arm.R": Quaternion(0.305, -0.746, -0.591, 0.028), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(-0.002, -0.167, -0.152, 0.974)}, true)
+	var loose := aim.duplicate()
+	loose.merge({"upper_arm.R": Quaternion(0.391, -0.768, -0.480, 0.165), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.001, -0.357, -0.226, 0.906)}, true)
 	return [
 		[0.0, _stand()], [0.3, _stand(nock)], [0.55, _stand(nock)], [1.0, _stand(drawn)],
 		[LOOSE_TIME - 0.03, _stand(drawn)], [LOOSE_TIME + 0.05, _stand(loose)], [1.4, _stand(loose)],
 		[1.6, _stand()],
 	]
+
+
+## Club in the right hand: raised up and back over the shoulder, club pointing back, then brought down hard
+## in front.
+static func _club() -> Array:
+	var raised := {"upper_arm.R": Quaternion(0.580, -0.792, -0.183, 0.056), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.002, -0.113, -0.041, 0.993), "chest": ry(-20.0), "spine": rx(-8.0)}
+	var struck := {"upper_arm.R": Quaternion(0.581, 0.043, -0.803, 0.124), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.012, -0.439, -0.096, 0.893), "chest": ry(15.0), "spine": rx(18.0), "pelvis": -0.04}
+	return [[0.0, _stand()], [0.35, _stand(raised)], [0.5, _stand(struck)], [0.75, _stand(struck)], [1.0, _stand()]]
+
+
+## Spear or knife in the right hand, held low: drawn back by the hip, then jabbed straight forward.
+static func _thrust() -> Array:
+	var low := {"upper_arm.R": Quaternion(-0.022, 0.208, 0.873, 0.440), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(-0.029, -0.225, -0.657, 0.719)}
+	var jab := {"upper_arm.R": Quaternion(0.554, -0.219, -0.771, -0.226), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.009, -0.245, -0.008, 0.969), "chest": ry(10.0), "spine": rx(12.0)}
+	return [[0.0, _stand()], [0.2, _stand(low)], [0.4, _stand(jab)], [0.6, _stand(jab)], [0.9, _stand()]]
+
+
+## Charged spear: gripped at the middle, raised over the shoulder with the point forward, then driven down
+## and forward like the heavy club blow.
+static func _spear_swing() -> Array:
+	var raised := {"upper_arm.R": Quaternion(-0.020, 0.251, -0.793, 0.554), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.000, -0.085, -0.057, 0.995), "chest": ry(-20.0), "spine": rx(-6.0)}
+	var struck := {"upper_arm.R": Quaternion(0.512, 0.102, -0.827, 0.210), "forearm.R": Quaternion(0.000, -0.000, 0.000, 1.000), "hand.R": Quaternion(0.008, -0.355, -0.109, 0.928), "chest": ry(15.0), "spine": rx(18.0), "pelvis": -0.04}
+	return [[0.0, _stand()], [0.35, _stand(raised)], [0.5, _stand(struck)], [0.75, _stand(struck)], [1.0, _stand()]]
+
+
+## keys with key index held for CHARGE_HOLD: the later keys move that much later.
+static func _held(keys: Array, index: int) -> Array:
+	var held := keys.slice(0, index + 1)
+	for key: Array in keys.slice(index):
+		held.append([key[0] + CHARGE_HOLD, key[1]])
+	return held
 
 
 ## One clip from [time, pose] keys; a bone missing from a key is at rest then, "pelvis" is its drop (m).

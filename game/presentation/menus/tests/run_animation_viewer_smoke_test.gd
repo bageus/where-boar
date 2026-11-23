@@ -1,6 +1,7 @@
 extends SceneTree
 
-## Loads the animation viewer headless: both cavemen have every animation, the boar shows only for
+## Loads the animation viewer headless: the rigged hunters have every animation and the lanky caveman his own,
+## every weapon goes into a hand bone and attack clips pick a weapon made for them, the boar shows only for
 ## riding, every boar type and bird has its animations, and Back reports that the viewer closed.
 
 const Viewer = preload("res://game/presentation/menus/public/animation_viewer.tscn")
@@ -18,9 +19,14 @@ func _process(_delta: float) -> bool:
 	var viewer := _viewer
 	for model_name: String in viewer.MODELS:
 		viewer.show_model(model_name)
-		for anim: String in viewer.ANIMATIONS:
-			_check(viewer.player.has_animation(anim), "%s has %s" % [model_name, anim])
+		if model_name != "Lanky":
+			_check(viewer.animations == viewer.ANIMATIONS, "%s has every animation" % model_name)
+		for weapon_name: String in viewer.WEAPONS:
+			viewer.show_weapon(weapon_name)
+			_check(viewer._held.get_parent() is BoneAttachment3D, "%s holds the %s" % [model_name, weapon_name])
+		for anim: String in viewer.animations:
 			viewer.play(anim)
+			_check(viewer.weapon in viewer.CLIP_WEAPONS.get(anim, [viewer.weapon]), "%s fits %s" % [viewer.weapon, anim])
 			_check(viewer.player.current_animation == anim, "%s plays %s" % [model_name, anim])
 			_check(viewer.get_node("%Boar").visible == (anim == "ride"), "boar only for ride (%s)" % anim)
 		viewer.play("ride")
