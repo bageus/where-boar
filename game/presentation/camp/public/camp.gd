@@ -53,14 +53,12 @@ const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn"
 const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
 ## The helper's seat on the tavern's front bench, local to the tavern model, facing the table;
 ## lowered by his knee height (0.25 m) so he sits on the bench top (0.43).
-const HELPER_SEAT := Vector3(-0.35, 0.43 - 0.25, 2.25)
+const HELPER_SEAT := Vector3(-0.1, 0.43 - 0.25, 2.25)
 const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
-## The owner's rigged hunters on the same bench either side of the helper (owner, 2026-11-23); their
-## knees are 0.3 m high.
-const TAVERN_GUESTS := {
-	"res://assets/models/hunter/prehistoric_hunter.glb": Vector3(-1.1, 0.43 - 0.3, 2.25),
-	"res://assets/models/hunter/plump_hunter.glb": Vector3(0.45, 0.43 - 0.3, 2.25),
-}
+## One of the owner's rigged hunters, picked at random each visit, on the back bench facing the helper
+## (owner, 2026-11-23); knees 0.3 m high.
+const TAVERN_GUESTS: Array[String] = ["res://assets/models/hunter/prehistoric_hunter.glb", "res://assets/models/hunter/plump_hunter.glb"]
+const GUEST_SEAT := Vector3(-0.1, 0.43 - 0.3, 1.55)
 
 const USE_RADIUS := 2.5  # from a point station
 const USE_RADIUS_SOLID := 1.5  # from the edge of a solid one
@@ -224,8 +222,8 @@ func _pen_voice(boars: Array[Node3D]) -> void:
 	get_tree().create_timer(randf_range(PEN_VOICE_SECONDS.x, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(boars))
 
 
-## The helper for hire sits at the tavern's feast table (owner, 2026-10-29), his hammer put away, two
-## hunters beside him.
+## The helper for hire sits at the tavern's feast table (owner, 2026-10-29), his hammer put away, a
+## hunter across the table.
 func _seat_helper() -> void:
 	var tavern: Node3D = $Stations/Tavern
 	var helper: Node3D = Helper.instantiate()
@@ -237,15 +235,11 @@ func _seat_helper() -> void:
 	var player: AnimationPlayer = helper.find_child("AnimationPlayer")
 	player.get_animation("sit").loop_mode = Animation.LOOP_LINEAR
 	player.play("sit")
-	for model: String in TAVERN_GUESTS:
-		var guest := HunterRig.instance(load(model))
-		tavern.add_child(guest)
-		guest.position = TAVERN_GUESTS[model]
-		guest.scale = Vector3.ONE / tavern.scale.x
-		guest.rotation.y = PI
-		var guest_player: AnimationPlayer = guest.find_child("AnimationPlayer")
-		guest_player.play("sit")
-		guest_player.seek(randf() * 4.0)  # not in step with each other
+	var guest := HunterRig.instance(load(TAVERN_GUESTS.pick_random()))
+	tavern.add_child(guest)
+	guest.position = GUEST_SEAT
+	guest.scale = Vector3.ONE / tavern.scale.x
+	guest.find_child("AnimationPlayer").play("sit")
 
 
 ## Shows the tribe's tusks and live catches in the camp HUD.
