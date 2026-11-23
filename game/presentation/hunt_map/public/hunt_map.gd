@@ -99,6 +99,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
+	add_child(SunFx.new())
 	LevelLayout.apply(self, layout)
 	if planning:
 		$Hunter.free()

@@ -58,6 +58,21 @@ popup/item_1/id = 1
 popup/item_2/text = "Lanky"
 popup/item_2/id = 2
 
+[node name="QualityLabel" type="Label" parent="Center/Box"]
+layout_mode = 2
+text = "Graphics quality"
+
+[node name="Quality" type="OptionButton" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "Low (FXAA)"
+popup/item_1/text = "Medium (MSAA 2x, glow)"
+popup/item_1/id = 1
+popup/item_2/text = "High (MSAA 4x, glow, light shafts)"
+popup/item_2/id = 2
+selected = 2
+
 [node name="FovLabel" type="Label" parent="Center/Box"]
 layout_mode = 2
 text = "Field of view"

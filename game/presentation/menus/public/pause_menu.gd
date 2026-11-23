@@ -19,6 +19,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	%Continue.pressed.connect(resumed.emit)
 	%Quit.pressed.connect(quit_requested.emit)
+	%Quality.item_selected.connect(func(index: int) -> void: _change("quality", SunFx.QUALITIES[index]))
 	%Character.item_selected.connect(func(index: int) -> void: _change("character", CHARACTERS[index]))
 	%Fov.value_changed.connect(func(value: float) -> void: _change("fov", value))
 	%Sensitivity.value_changed.connect(func(value: float) -> void: _change("mouse_sensitivity", value / 1000.0))
@@ -31,6 +32,7 @@ func open(settings: Dictionary, stats := "") -> void:
 	_settings = settings.duplicate()
 	%Stats.text = stats
 	%Stats.visible = stats != ""
+	%Quality.select(maxi(0, SunFx.QUALITIES.find(settings["quality"])))
 	%Character.select(maxi(0, CHARACTERS.find(settings["character"])))
 	%Fov.set_value_no_signal(settings["fov"])
 	%Sensitivity.set_value_no_signal(settings["mouse_sensitivity"] * 1000.0)

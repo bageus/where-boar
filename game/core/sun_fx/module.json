@@ -1,0 +1,10 @@
+{
+  "id": "core.sun_fx",
+  "layer": "core",
+  "purpose": "Anti-aliasing, glow, warm tone mapping and sun effects (disc, lens glow, light shafts, sun scatter) shared by camp, hunt and gather scenes; one quality switch.",
+  "state_owner": [],
+  "public_api": [
+    "public/sun_fx.gd"
+  ],
+  "dependencies": []
+}

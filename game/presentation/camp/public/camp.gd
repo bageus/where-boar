@@ -119,6 +119,7 @@ func _ready() -> void:
 		set_process(false)
 		_dress()
 		return
+	add_child(SunFx.new())
 	hunter.interacted.connect(_on_interacted)
 	hunter.equip(progress.hunt_items())
 	_shop.progress = progress

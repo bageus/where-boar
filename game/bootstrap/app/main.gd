@@ -24,7 +24,7 @@ var save_store := SaveStore.new()
 var progress: Progress
 ## Settings live in their own file, apart from progress (section 18).
 var settings_store := _settings_store()
-var settings := {"fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded"}
+var settings := {"quality": "high", "fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded"}
 var _pause: CanvasLayer
 
 
@@ -42,6 +42,7 @@ func _ready() -> void:
 	for key in settings:
 		if saved.has(key) and typeof(saved[key]) == typeof(settings[key]):  # JSON numbers load as floats
 			settings[key] = saved[key]
+	SunFx.set_quality(settings["quality"])
 	Sfx.preload_all()
 	_apply_volume()
 	_pause = PauseScene.instantiate()
@@ -85,6 +86,7 @@ func _on_settings_changed(changed: Dictionary) -> void:
 	settings = changed
 	settings_store.save_data(settings)
 	_apply_volume()
+	SunFx.set_quality(settings["quality"], get_tree())
 	if current and current.has_node("Hunter"):
 		current.get_node("Hunter").apply_settings(settings)
 
