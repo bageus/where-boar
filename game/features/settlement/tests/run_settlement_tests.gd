@@ -5,6 +5,7 @@ const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
+const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
 
 
 func _init() -> void:
@@ -17,6 +18,7 @@ func _init() -> void:
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
 	failures += _check(_one_crewman_at_a_time(), "hiring a warrior sends the trap setter home; the porter stays")
+	failures += _check(_lobby_picks_and_splits(), "the signpost sends the right players and splits a crowd into even hunts")
 	failures += _check(_pick_helper_from_pen(), "a helper in the pen can be taken on the hunt, one at a time")
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
@@ -152,6 +154,21 @@ func _one_crewman_at_a_time() -> bool:
 	var hired := progress.buy("item_porter") and progress.buy("item_trap_setter") and progress.buy("item_warrior")
 	return hired and progress.owns("item_warrior") and not progress.owns("item_trap_setter") \
 		and progress.team() == PackedStringArray(["Porter", "Warrior"])
+
+
+func _lobby_picks_and_splits() -> bool:
+	var me := {"name": "me", "clan": "tusks", "pass": true}
+	var mate := {"name": "mate", "clan": "tusks", "pass": false}
+	var friend := {"name": "friend", "clan": "", "pass": true}
+	var stranger := {"name": "stranger", "clan": "", "pass": true}
+	var circle := [me, mate, friend, stranger]
+	var nobody_without_pass: bool = HuntLobby.entrants("private", mate, circle, PackedStringArray(["me"])).is_empty()
+	var sizes := HuntLobby.split(range(9)).map(func(g: Array) -> int: return g.size())
+	return HuntLobby.entrants("public", me, circle, PackedStringArray()).size() == 4 \
+		and HuntLobby.entrants("clan", me, circle, PackedStringArray()) == [me, mate] \
+		and HuntLobby.entrants("private", me, circle, PackedStringArray(["friend", "mate"])) == [me, friend] \
+		and nobody_without_pass and sizes == [3, 3, 3] and HuntLobby.split([me]) == [[me]] \
+		and HuntLobby.timer(5) == 10 and HuntLobby.timer(90) == 60
 
 
 func _buy_weapon_once() -> bool:

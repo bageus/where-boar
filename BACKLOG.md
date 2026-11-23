@@ -174,4 +174,5 @@ Unapproved ideas and possible future features belong here.
 | P3-122 | 3 | Hut interior decor (#22; no decor anywhere yet) | P3-121 | TODO |
 | P3-123 | 3 | Gather forest finds with E (issues #21, #25, #26): pocket limits per hunt, finds go to camp materials for selling and quests, icons on results and camp HUD | P3-109 | DONE |
 | P3-124 | 3 | Camp issue #9 leftovers: campfire meals raise max health as well as max stamina for the hunt (stew +10, roast +20, feast +30) | P3-110 | DONE |
+| P3-126 | 3 | Signpost and group hunts (issue #24): hunt or gather first, then location with preview, public / clan / private tabs, 10-60 s countdown, circle around the signpost; team pass 2000 for private hunts; lobby rules pick entrants and split a crowd into even hunts (one player until co-op) | P3-110 | DONE |
 | P3-125 | 3 | Clan tent leftovers (#23): stew +10% damage (hits are whole 1–3 now), beds and weapon stand, clan trophies on the walls (needs #19); top 6 clan tents and their overlap wait for co-op | P3-111 | TODO |
