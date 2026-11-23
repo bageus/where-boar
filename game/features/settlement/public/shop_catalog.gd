@@ -56,7 +56,29 @@ const ITEMS := {
 	"item_forge_100": {"name": "Give to the forge", "shop": "forge", "price": 100, "unique": false, "donate": 100},
 	"item_forge_1000": {"name": "Give to the forge", "shop": "forge", "price": 1000, "unique": false, "donate": 1000},
 	"item_forge_10000": {"name": "Give to the forge", "shop": "forge", "price": 10000, "unique": false, "donate": 10000},
+	# Forge recipes (issue #11): open once the forge is built; parts are terminator metal (issue 8).
+	# Costs ASSUMPTION (D013): a terminator drops 2 metal tusks, 2 plates and 1 component.
+	"item_armor": {"name": "Armor (takes 200 damage)", "shop": "forge", "tab": "Armor", "price": 2000, "unique": true,
+		"parts": {"item_metal_plate": 20, "item_component": 5, "item_metal_tusk": 10}},
+	"item_armor_shock": {"name": "Shock armor (takes 300 damage, no knockback)", "shop": "forge", "tab": "Armor", "price": 5000,
+		"unique": true, "parts": {"item_metal_plate": 40, "item_component": 15, "item_metal_tusk": 20}},
+	"item_stun_sling": {"name": "Stun sling (a spark stuns for 5 s)", "shop": "forge", "tab": "Weapons", "price": 4000, "unique": true,
+		"parts": {"item_metal_plate": 10, "item_component": 20, "item_metal_tusk": 10}},
+	"item_spear_thrower": {"name": "Spear thrower (shoots spears)", "shop": "forge", "tab": "Weapons", "price": 6000, "unique": true,
+		"parts": {"item_metal_plate": 30, "item_component": 20, "item_metal_tusk": 30}},
+	"item_booster": {"name": "Booster (speed builds up while running)", "shop": "forge", "tab": "Upgrades", "price": 3000, "unique": true,
+		"parts": {"item_metal_plate": 10, "item_component": 15, "item_metal_tusk": 10}},
+	"item_jump": {"name": "Jumper (long jumps)", "shop": "forge", "tab": "Upgrades", "price": 3000, "unique": true,
+		"parts": {"item_metal_plate": 10, "item_component": 15, "item_metal_tusk": 10}},
+	"item_war_cry": {"name": "War cry (boars stand stunned 10 s, terminators up to 3 s)", "shop": "forge", "tab": "Upgrades",
+		"price": 5000, "unique": true, "parts": {"item_metal_plate": 10, "item_component": 25, "item_metal_tusk": 20}},
+	"item_ram_shield": {"name": "Ram shield (run into boars to knock them back)", "shop": "forge", "tab": "Upgrades", "price": 5000,
+		"unique": true, "parts": {"item_metal_plate": 30, "item_component": 10, "item_metal_tusk": 20}},
 }
+
+## Forge recipe tabs, in order (issue #11).
+const FORGE_TABS: Array[String] = ["Armor", "Weapons", "Upgrades"]
+const PART_NAMES := {"item_metal_tusk": "metal tusks", "item_metal_plate": "metal plates", "item_component": "components"}
 
 ## Tusks the forge needs before it opens (issue #11).
 const FORGE_COST := 100000
@@ -82,6 +104,11 @@ const STARTER_KIT := {"item_spear": 1, "item_net": 3, "item_stone": 5}
 ## What item_id costs right now.
 static func price(item_id: String) -> int:
 	return 0 if free_for_testing else ITEMS[item_id]["price"]
+
+
+## Parts item_id takes right now (nothing while testing, like the price).
+static func parts(item_id: String) -> Dictionary:
+	return {} if free_for_testing else ITEMS[item_id].get("parts", {})
 
 
 ## Item ids sold at shop_id, in catalog order.

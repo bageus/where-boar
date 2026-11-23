@@ -6,10 +6,14 @@ extends RefCounted
 const MAX := 100
 
 var value := MAX
+## Forge armor worn this hunt (issue #11): damage it can still take before health does.
+var armor := 0
 
 
 func take(damage: int) -> void:
-	value = maxi(0, value - damage)
+	var absorbed := mini(armor, damage)
+	armor -= absorbed
+	value = maxi(0, value - (damage - absorbed))
 
 
 func is_down() -> bool:
