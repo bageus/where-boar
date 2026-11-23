@@ -17,6 +17,7 @@ const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
 const PenWander = preload("res://game/presentation/camp/props/pen_wander.gd")
+const HearthFire = preload("res://game/presentation/camp/props/hearth_fire.gd")
 const ClanTent = preload("res://game/presentation/camp/props/clan_tent.gd")
 const ShamanRitual = preload("res://game/presentation/camp/props/shaman_ritual.gd")
 const BeautyPanel = preload("res://game/presentation/camp/hud/beauty_panel.gd")
@@ -78,6 +79,7 @@ const USE_RADIUS_SOLID := 1.5  # from the edge of a solid one
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 ## The tavern hearth's flames, local to the tavern model.
+const FORGE_FIRE_AT := Vector3(1.0, 0.5, -1.0)
 const TAVERN_HEARTH := Vector3(1.4, 0.8, -0.9)
 ## Wind over the drop-off (east side and south-east corner), heard near the rim; follows the hunter along it.
 const DROP_EAST := 25.0  # Dressing.HALF
@@ -441,6 +443,8 @@ func _dress_forge() -> void:
 		$Stations/Forge.set_model(FORGE_BUILT)
 		$Stations/Forge.title = "Forge (recipes coming later)"
 		$Stations/Forge.get_node("Label").text = $Stations/Forge.title
+		if not $Stations/Forge.has_node("HearthFire"):  # the furnace mouth, in the shelter model's units
+			HearthFire.light($Stations/Forge, FORGE_FIRE_AT, 0.55, 0.3)
 
 
 func _on_shop_closed() -> void:
