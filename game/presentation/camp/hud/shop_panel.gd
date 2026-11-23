@@ -104,6 +104,8 @@ func _item_rows() -> void:
 		var button := Button.new()
 		var owned: bool = progress.sold_out(item_id)
 		var count: String = "" if item["unique"] or item.has("donate") else "  (have %d)" % progress.items.get(item_id, 0)
+		if item.has("requires_item") and not progress.unlocked(item_id):
+			continue  # the clan tent upgrade shows once the hut is bought
 		var locked := "" if progress.unlocked(item_id) else "  (catch one first)"
 		var taken := "taken" if item.has("companion") else ("owned" if item["unique"] else "max")
 		var price_text: String = taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id))

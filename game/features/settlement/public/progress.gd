@@ -7,6 +7,7 @@ const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
+const Clan = preload("res://game/features/settlement/public/clan.gd")
 
 const PEN_MAX := 5
 
@@ -32,6 +33,8 @@ var hut_variant := -1
 var forge := 0
 ## Daily quests on the camp board (issue #25).
 var quests := QuestBoard.new()
+## The hunter's clan, null until founded at the totem (issue #27).
+var clan: Clan = null
 
 
 ## Adds a finished hunt's tusks and live catches and takes spent consumables out of stock.
@@ -45,6 +48,8 @@ func add_hunt(hunt: Hunt) -> void:
 	for item_id in hunt.used_items:
 		items[item_id] = maxi(0, items.get(item_id, 0) - hunt.used_items[item_id])
 	quests.add_hunt(hunt)
+	if clan:
+		clan.add_hunt(hunt)
 	for type_id in hunt.type_ids():
 		var alive := hunt.count(type_id, BoarOutcome.Kind.CAPTURED)
 		if alive > 0:
@@ -92,6 +97,15 @@ func sold_out(item_id: String) -> bool:
 	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
 
 
+## Founding a clan takes the hut and its clan tent upgrade and a name (issue #27); false and no clan otherwise.
+func found_clan(clan_name: String) -> bool:
+	if clan or clan_name.strip_edges() == "" or not owns("item_hut") or not owns("item_clan_tent"):
+		return false
+	clan = Clan.new()
+	clan.name = clan_name.strip_edges()
+	return true
+
+
 ## True when the stock holds every part a forge recipe takes.
 func has_parts(item_id: String) -> bool:
 	var parts := ShopCatalog.parts(item_id)
@@ -105,6 +119,8 @@ func has_parts(item_id: String) -> bool:
 func unlocked(item_id: String) -> bool:
 	if ShopCatalog.ITEMS.get(item_id, {}).has("parts"):
 		return forge_built()
+	if ShopCatalog.ITEMS.get(item_id, {}).has("requires_item"):
+		return owns(ShopCatalog.ITEMS[item_id]["requires_item"])
 	var animal: String = ShopCatalog.ITEMS.get(item_id, {}).get("companion", "")
 	if animal != "":
 		return helpers.get(animal, 0) > 0
@@ -140,7 +156,8 @@ func owns(item_id: String) -> bool:
 func to_dict() -> Dictionary:
 	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(),
 		"pen": pen.duplicate(), "hunts": hunts, "kit": true, "companion": companion, "materials": materials.duplicate(),
-		"hut_slot": hut_slot, "hut_variant": hut_variant, "forge": forge, "quests": quests.to_dict()}
+		"hut_slot": hut_slot, "hut_variant": hut_variant, "forge": forge, "quests": quests.to_dict(),
+		"clan": clan.to_dict() if clan else {}}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
@@ -170,6 +187,8 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.forge = maxi(0, int(data.get("forge", 0)))
 	var saved_quests: Variant = data.get("quests")
 	progress.quests = QuestBoard.from_dict(saved_quests if saved_quests is Dictionary else {})
+	var saved_clan: Variant = data.get("clan")
+	progress.clan = Clan.from_dict(saved_clan if saved_clan is Dictionary else {})
 	# New games, and saves from before ammo became stock, get the starter kit once.
 	if not data.get("kit", false):
 		for item_id in ShopCatalog.STARTER_KIT:

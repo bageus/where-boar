@@ -13,6 +13,7 @@ const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
 const BUILDINGS := "res://assets/models/buildings/"
 ## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
 const HUT_VARIANTS: Array[PackedScene] = [
@@ -81,13 +82,13 @@ var planning := false
 
 ## Shop windows' extra line for stations whose own features come later.
 const INFO := {
-	"totem": "Clans come later: here you will see the clans and their rating, and found your own (it takes a hut and its clan tent).",
 	"chest": "Your gear store comes later: swap weapons, baits and traps here.",
 	"beauty_hut": "Paint and decorations come later; they change only the look.",
 	"shaman_hut": "Rituals come later.",
 }
 
 var _open_station: Node3D
+var _clan_panel := ClanPanel.new()
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
@@ -106,6 +107,10 @@ func _ready() -> void:
 	_shop.progress = progress
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
+	_clan_panel.progress = progress
+	$Hud.add_child(_clan_panel)
+	_clan_panel.purchased.connect(_on_purchased)
+	_clan_panel.closed.connect(_on_shop_closed)
 	_dress_huts()
 	_dress_forge()
 	_show_progress()
@@ -210,7 +215,7 @@ func _ambience() -> void:
 
 
 func _process(_delta: float) -> void:
-	hunter.point_at(null if _shop.visible else _station_in_reach())
+	hunter.point_at(null if _window_open() else _station_in_reach())
 	var at := hunter.global_position
 	var east := Vector3(DROP_EAST, 0.0, clampf(at.z, -DROP_EAST, DROP_EAST))
 	var south := Vector3(clampf(at.x, DROP_SOUTH_FROM, DROP_EAST), 0.0, DROP_EAST)
@@ -264,8 +269,12 @@ func _show_progress() -> void:
 
 func _on_interacted() -> void:
 	var station := _station_in_reach()
-	if station and not _shop.visible:
+	if station and not _window_open():
 		_use(station)
+
+
+func _window_open() -> bool:
+	return _shop.visible or _clan_panel.visible
 
 
 func _station_in_reach() -> Node3D:
@@ -284,17 +293,24 @@ func _use(station: Node3D) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.ui(self, "shop")
 	_open_station = station
+	if station.station_id == "totem":
+		_clan_panel.open()
+		return
 	_shop.info = INFO.get(station.station_id, "")
 	if station.station_id == "hut" and _is_my_hut(station):
-		_shop.info = "Your hut. The clan tent upgrade (5000 tusks) comes with clans."
+		_shop.info = "Your hut. Its clan tent upgrade lets you found a clan at the totem."
 	_shop.open(station.station_id, "Hut" if station.station_id == "hut" else station.title)
 
 
 func _on_purchased(item_id: String) -> void:
-	if item_id == "item_hut":
-		progress.hut_slot = _open_station.get_index() - $Stations/Hut1.get_index()
-		progress.hut_variant = _open_station.get_meta("variant")
+	if item_id == "item_hut":  # bought at a hut, or at the totem (the first hut then)
+		var hut: Node3D = _open_station if _open_station.station_id == "hut" else $Stations/Hut1
+		progress.hut_slot = hut.get_index() - $Stations/Hut1.get_index()
+		progress.hut_variant = hut.get_meta("variant")
 		_dress_huts()
+	elif item_id == "item_clan_tent" and _shop.visible:  # upgraded in the hut: go on to founding (issue #27)
+		_shop.hide()
+		_clan_panel.open(true)
 	elif item_id.begins_with("item_forge") and progress.forge_built():
 		_dress_forge()
 	hunter.equip(progress.items)
