@@ -22,6 +22,8 @@ const CALL_SECONDS := 1.2
 ## A calm bird clucks or gobbles quietly this often (ASSUMPTION).
 const IDLE_MIN_SECONDS := 6.0
 const IDLE_MAX_SECONDS := 15.0
+## The peck clip dips the beak and chest under the floor; the model is lifted this much while pecking, metres.
+const PECK_LIFT := 0.06
 ## Share of wander turns spent standing and pecking the ground (ASSUMPTION).
 const PECK_CHANCE := 0.4
 const MODEL_WALK_SPEED := 1.0  # ground speed the walk cycle was keyed for, m/s (ASSUMPTION)
@@ -115,4 +117,6 @@ func _animate(speed: float) -> void:
 		rotation.y = atan2(-_heading.x, -_heading.y)
 	var anim := ("peck" if _pecking else "idle") if speed == 0.0 else ("walk" if speed < RUN_SPEED else "run")
 	_player.play(anim, 0.2)
+	var model: Node3D = $Model
+	model.position.y = move_toward(model.position.y, PECK_LIFT if anim == "peck" else 0.0, 0.5 * get_physics_process_delta_time())
 	_player.speed_scale = 1.0 if speed == 0.0 else speed / (MODEL_WALK_SPEED if anim == "walk" else MODEL_RUN_SPEED)

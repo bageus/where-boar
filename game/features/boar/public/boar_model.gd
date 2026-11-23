@@ -9,6 +9,7 @@ const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
+const HeadIdle = preload("res://game/features/boar/presentation/boar_head_idle.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 ## Seconds between chomps while eating (owner, 2026-11-05: chomping, takes in turn).
 const CHOMP_SECONDS := Vector2(0.9, 1.6)
@@ -27,6 +28,7 @@ var _player: AnimationPlayer
 var _back_height := 0.85
 var _dead := false
 var _dust: CPUParticles3D
+var _head_idle: SkeletonModifier3D
 var _flash := StandardMaterial3D.new()
 var _next_chomp := 0
 ## Source mesh -> its one-surface copy (see _one_surface), shared by every boar of the type.
@@ -47,6 +49,8 @@ func show_type(boar_type: Resource) -> void:
 		_player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
 	_add_net_fall()
 	_add_dust()
+	_head_idle = HeadIdle.new()
+	_player.get_parent().find_child("Skeleton3D").add_child(_head_idle)
 	_flash.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_flash.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_dead = false
@@ -61,6 +65,7 @@ func move(speed: float, eating := false) -> void:
 	_player.play(anim, 0.4 if anim == "eat" else 0.2)
 	_player.speed_scale = 1.0 if anim == "idle" else speed / (WALK_SPEED if anim == "walk" else RUN_SPEED)
 	_dust.emitting = anim == "run"
+	_head_idle.active = anim == "idle"
 	if anim == "eat" and Time.get_ticks_msec() >= _next_chomp:
 		_next_chomp = Time.get_ticks_msec() + roundi(randf_range(CHOMP_SECONDS.x, CHOMP_SECONDS.y) * 1000.0)
 		Sfx.play(self, "chomping", -6.0, 15.0)
@@ -169,6 +174,7 @@ func _add_dust() -> void:
 
 func attack() -> void:
 	if not _dead:
+		_head_idle.active = false
 		_player.speed_scale = 1.0
 		_player.play("attack", 0.1)
 
