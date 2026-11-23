@@ -13,6 +13,11 @@ const ARM_DOWN := -72.0  # T-pose arms lowered to the sides
 
 ## Model scene path -> its AnimationLibrary, shared by every instance.
 static var _libraries := {}
+## Source mesh -> its copy with the belly freed from the arms (see _free_belly).
+static var _freed := {}
+## Arm bones the Meshy auto-weights also gave the plump hunter's belly sides (spikes when an arm went up).
+const ARM_BONES: Array[String] = ["clavicle", "upper_arm", "forearm", "hand", "thumb"]
+const BELOW_ARM := 0.18  # m under the T-pose arm: no arm vertex is that low
 
 
 static func instance(scene: PackedScene) -> Node3D:
@@ -22,10 +27,50 @@ static func instance(scene: PackedScene) -> Node3D:
 	player.name = "AnimationPlayer"
 	model.add_child(player)  # root_node ".." is the model
 	player.owner = model  # find_child() only finds owned nodes
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		mesh.mesh = _free_belly(mesh, skeleton)
 	if not _libraries.has(scene.resource_path):
 		_libraries[scene.resource_path] = _build(skeleton, String(model.get_path_to(skeleton)))
 	player.add_animation_library("", _libraries[scene.resource_path])
 	return model
+
+
+## Vertices well below the T-pose arms lose their arm weights to the chest: raising an arm then no longer
+## pulls the belly out after it.
+static func _free_belly(instance: MeshInstance3D, skeleton: Skeleton3D) -> Mesh:
+	var mesh := instance.mesh as ArrayMesh
+	if mesh == null or instance.skin == null:
+		return instance.mesh
+	if _freed.has(mesh):
+		return _freed[mesh]
+	var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone("upper_arm.L")).origin.y
+	var chest := -1
+	var arm := {}
+	for bind in instance.skin.get_bind_count():
+		var bone_name := String(instance.skin.get_bind_name(bind))
+		if bone_name == "chest":
+			chest = bind
+		if bone_name.get_basename() in ARM_BONES:
+			arm[bind] = true
+	var freed := ArrayMesh.new()
+	for s in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(s)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+		var per := bones.size() / vertices.size()
+		for v in vertices.size():
+			if chest < 0 or (instance.transform * vertices[v]).y > shoulder - BELOW_ARM:
+				continue
+			for k in per:
+				if arm.has(bones[v * per + k]):
+					bones[v * per + k] = chest
+		arrays[Mesh.ARRAY_BONES] = bones
+		freed.add_surface_from_arrays(mesh.surface_get_primitive_type(s), arrays, [], {},
+				mesh.surface_get_format(s) & Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS)
+		freed.surface_set_material(s, mesh.surface_get_material(s))
+	_freed[mesh] = freed
+	return freed
 
 
 static func _build(skeleton: Skeleton3D, path: String) -> AnimationLibrary:
