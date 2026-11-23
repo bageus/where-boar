@@ -20,6 +20,8 @@ var progress: Progress
 var info := ""
 var _shop_id := ""
 var _selling := false
+## The forge's open recipe tab (issue #11).
+var _tab: String = ShopCatalog.FORGE_TABS[0]
 
 
 func _ready() -> void:
@@ -52,8 +54,8 @@ func _refresh() -> void:
 	for child in %Items.get_children():
 		child.queue_free()
 	%Tusks.text = "Tusks: %d" % progress.tusks
-	if _shop_id == "forge":  # one player for now, so the givers list is just you (issue #11)
-		info = "Built: %d / %d tusks\nYou gave %d" % [mini(progress.forge, ShopCatalog.FORGE_COST), ShopCatalog.FORGE_COST, progress.forge]
+	if _shop_id == "forge":
+		_forge_header()
 	%Info.text = info
 	%Info.visible = info != "" or _shop_id == "quests"
 	%Sell.visible = ShopCatalog.SELL.has(_shop_id)
@@ -66,9 +68,39 @@ func _refresh() -> void:
 		_item_rows()
 
 
+## The building site shows its bar and givers (one player for now, so just you); the built forge its recipe
+## tabs and the metal in stock (issue #11).
+func _forge_header() -> void:
+	if not progress.forge_built():
+		info = "Built: %d / %d tusks\nGivers:\n  You — %d tusks" % [progress.forge, ShopCatalog.FORGE_COST, progress.forge]
+		var bar := ProgressBar.new()
+		bar.max_value = ShopCatalog.FORGE_COST
+		bar.value = progress.forge
+		%Items.add_child(bar)
+		return
+	var stock := PackedStringArray()
+	for part_id in ShopCatalog.PART_NAMES:
+		stock.append("%d %s" % [progress.items.get(part_id, 0), ShopCatalog.PART_NAMES[part_id]])
+	info = "In stock: " + ", ".join(stock)
+	var tabs := HBoxContainer.new()
+	for tab in ShopCatalog.FORGE_TABS:
+		var button := Button.new()
+		button.text = tab
+		button.toggle_mode = true
+		button.button_pressed = tab == _tab
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(func() -> void:
+			_tab = tab
+			_refresh())
+		tabs.add_child(button)
+	%Items.add_child(tabs)
+
+
 func _item_rows() -> void:
 	for item_id in ShopCatalog.for_shop(_shop_id):
 		var item: Dictionary = ShopCatalog.ITEMS[item_id]
+		if _shop_id == "forge" and (item.get("tab", "") != _tab if progress.forge_built() else not item.has("donate")):
+			continue
 		var button := Button.new()
 		var owned: bool = progress.sold_out(item_id)
 		var count: String = "" if item["unique"] or item.has("donate") else "  (have %d)" % progress.items.get(item_id, 0)
@@ -76,6 +108,11 @@ func _item_rows() -> void:
 		var taken := "taken" if item.has("companion") else ("owned" if item["unique"] else "max")
 		var price_text: String = taken if owned else ("free" if ShopCatalog.price(item_id) == 0 else "%d tusks" % ShopCatalog.price(item_id))
 		var short := "" if owned or progress.tusks >= ShopCatalog.price(item_id) else "  (not enough tusks)"
+		if short == "" and not owned and not progress.has_parts(item_id):
+			short = "  (not enough metal)"
+		var parts := ShopCatalog.parts(item_id)
+		for part_id in parts:
+			price_text += ", %d %s" % [parts[part_id], ShopCatalog.PART_NAMES[part_id]]
 		if item.has("donate"):
 			price_text = "%d tusks" % item["donate"]
 		if item.has("icon"):
