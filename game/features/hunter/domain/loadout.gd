@@ -40,6 +40,8 @@ const TRAP_SETTER_ID := "item_trap_setter"
 
 ## Camp meals and their stamina bonus; one of each kind is eaten at hunt start (M012, ASSUMPTION).
 const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
+## Extra max health from the same meals (issue #9: "max stamina and health for the run"); ASSUMPTION (D013).
+const MEAL_HEALTH := {"item_feast": 30, "item_roast": 20, "item_stew": 10}
 const WATER_BAG_ID := "item_water_bag"
 ## Forge armor and the damage it takes each hunt; the best one owned is worn (issue #11, ASSUMPTION).
 const ARMORS := {"item_armor_shock": 300, "item_armor": 200}
@@ -269,11 +271,12 @@ func _spend_trap(item_id: String) -> String:
 
 
 ## Eats one of each meal kind carried; different meals stack, the same one does not (owner, 2026-10-27).
-func eat_meals() -> float:
-	var bonus := 0.0
+## Returns Vector2(max stamina bonus, max health bonus).
+func eat_meals() -> Vector2:
+	var bonus := Vector2.ZERO
 	for item_id in MEALS:
 		if _meals[item_id] > 0:
-			bonus += MEALS[item_id]
+			bonus += Vector2(MEALS[item_id], MEAL_HEALTH[item_id])
 			used[item_id] = used.get(item_id, 0) + 1
 		_meals[item_id] = 0
 	return bonus

@@ -161,7 +161,7 @@ Unapproved ideas and possible future features belong here.
 | P3-108 | 3 | Inventory icons from the three owner atlases (hotbar, bait slot, rings, camp HUD, results) | P3-101 | DONE |
 | P3-109 | 3 | Forest gatherables on the hunt map (issues #21, #26): grass, daisies, berries, mushrooms, poisonous berries, feathers, sticks scattered at random; hopping frogs, crawling grubs. Collecting them is not done | — | DONE |
 | P3-110 | 3 | Owner's new camp building models (issues #11-#28): all stations, six huts for sale with a kept variant, longhouse to walk into, forge building site with gifts, quest board (random pool, 12 h), unified Sell resources window; clan tents only in the planning palette | P3-101 | DONE |
-| P3-111 | 3 | Camp features behind the new buildings, part 1: forge site bar and givers, forge recipes (issue #11), clans with the totem (#27), clan tent (#23) | P3-110 | IN_PROGRESS |
+| P3-111 | 3 | Camp features behind the new buildings, part 1: forge site bar and givers, forge recipes (issue #11), clans with the totem (#27), clan tent (#23) | P3-110 | DONE |
 | P3-112 | 3 | Invasion fixes (owner 2026-11-22): redder sky and red haze; cyborg notices before attacking; marks over cyborgs: magnifier + dots searching, ? + dots unsure or lost, eye attacking | P3-100 | DONE |
 | P3-113 | 3 | Camp widened from 34 to 50 m a side so all buildings fit at full size; rocks, palisade, forest and ground follow Dressing.HALF | P3-110 | DONE |
 | P3-114 | 3 | Owner's new boar models (9 of 13 types, scaled in import to the old sizes, clips renamed) and rigged hunters (clips built in code: idle, walk, run, sneak, ride, sit, attack, strong_attack, bow_shot) as the Bearded and Plump characters and seated at the tavern table | P3-110 | DONE |
@@ -170,3 +170,9 @@ Unapproved ideas and possible future features belong here.
 | P3-116 | 3 | Effects of the forge recipes (issue #11): stun sling, spear thrower and its spears at the armory, booster, jumper, war cry, ram shield; shock armor stops ram knockback | P3-111 | TODO |
 | P3-117 | 3 | Camp features behind the new buildings, part 2: beauty hut painting (#18), shaman ritual (#20), trophies (#19), which birds can be trained (owner: only bought ones; needs a rule for buying birds) | P3-110 | TODO |
 | P3-118 | 3 | Issues #16, #17, #13, #15: pick the ridden boar in the pens; sell caught birds at the cages and baits at the hunting hut; hunting hut tabs (baits, traps, other); gear box at the chest: pack vs box, 2 weapon kinds + club + knife, 3 baits / 1 trap (6 / 2 with a helper), 1 armor, 1 tool (forge upgrade) | P3-110 | DONE |
+| P3-121 | 3 | Huts can be walked into (#22): mesh-exact hut walls, doorway open (`station.gd` `walk_in`) | P3-110 | DONE |
+| P3-122 | 3 | Hut interior decor (#22; no decor anywhere yet) | P3-121 | TODO |
+| P3-123 | 3 | Gather forest finds with E (issues #21, #25, #26): pocket limits per hunt, finds go to camp materials for selling and quests, icons on results and camp HUD | P3-109 | DONE |
+| P3-124 | 3 | Camp issue #9 leftovers: campfire meals raise max health as well as max stamina for the hunt (stew +10, roast +20, feast +30) | P3-110 | DONE |
+| P3-126 | 3 | Signpost and group hunts (issue #24): hunt or gather first, then location with preview, public / clan / private tabs, 10-60 s countdown, circle around the signpost; team pass 2000 for private hunts; lobby rules pick entrants and split a crowd into even hunts (one player until co-op) | P3-110 | DONE |
+| P3-125 | 3 | Clan tent leftovers (#23): stew +10% damage (hits are whole 1–3 now), beds and weapon stand, clan trophies on the walls (needs #19); top 6 clan tents and their overlap wait for co-op | P3-111 | TODO |

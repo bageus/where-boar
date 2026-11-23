@@ -240,7 +240,7 @@ func knock(impulse: Vector3, damage: int = 0, rammer: BoarType = null) -> void:
 	if health.is_down():
 		return
 	health.take(damage)
-	_hud.show_health(health.value)
+	_hud.show_health(health.value, health.max_value)
 	if health.is_down():
 		downed.emit()
 
@@ -255,14 +255,17 @@ func mount_node() -> Node3D:
 	return $Rider.mount
 
 
-## Called when a hunt starts: camp meals are eaten and raise max stamina for the hunt (M012),
+## Called when a hunt starts: camp meals are eaten and raise max stamina and health for the hunt (M012, #9),
 ## and the first saddled boar waits beside the hunter; the backpack goes on.
 func start_hunt() -> void:
 	$ShadowBody.wear_backpack()
 	if not loadout.saddled.is_empty():
 		$Rider.bring_mount(loadout.saddled[0])
-	stamina.eat(loadout.eat_meals())
+	var meals := loadout.eat_meals()
+	stamina.eat(meals.x)
+	health.eat(int(meals.y))
 	_hud.show_stamina(stamina.value, stamina.max_value)
+	_hud.show_health(health.value, health.max_value)
 
 
 ## A short tap places the active bait or trap; after a hold the menu picks the active one (owner, 2026-10-28).

@@ -3,7 +3,7 @@ extends RefCounted
 ## What camp shops sell and for how many tusks (section 13; ASSUMPTION prices, D013).
 ## unique items (weapons) are bought once; others stack, up to max when given; pack is how many one
 ## purchase adds (default 1).
-## requires_caught names a boar type that must be in the pens.
+## requires_caught names a boar type that must be in the pens; requires_item an item that must be owned.
 
 ## shortcut: everything in camp is free and unlocked while the owner tests the slice (2026-10-27);
 ## set to false (or delete) before balancing prices.
@@ -36,9 +36,9 @@ const ITEMS := {
 	"item_fence": {"name": "Fence (trap)", "shop": "hunting_hut", "price": 35, "unique": false, "slot": "trap", "tab": "Traps"},
 	"item_water_bag": {"name": "Water bag", "shop": "hunting_hut", "price": 25, "unique": true, "tab": "Other"},
 	"item_water": {"name": "Water (3 sips, needs the bag)", "shop": "well", "price": 0, "unique": false, "max": 3, "pack": 3},
-	"item_stew": {"name": "Herb stew (+20 stamina)", "shop": "campfire", "price": 10, "unique": false},
-	"item_roast": {"name": "Roast (+35 stamina)", "shop": "campfire", "price": 18, "unique": false},
-	"item_feast": {"name": "Feast (+50 stamina)", "shop": "campfire", "price": 25, "unique": false},
+	"item_stew": {"name": "Herb stew (+20 stamina, +10 health)", "shop": "campfire", "price": 10, "unique": false},
+	"item_roast": {"name": "Roast (+35 stamina, +20 health)", "shop": "campfire", "price": 18, "unique": false},
+	"item_feast": {"name": "Feast (+50 stamina, +30 health)", "shop": "campfire", "price": 25, "unique": false},
 	"item_porter": {"name": "Porter (carries +2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
 	# Only one of the crew goes on a hunt (issue #12): hiring one sends the other home.
 	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true, "crew": true},
@@ -54,8 +54,11 @@ const ITEMS := {
 	"item_ride_runner_grey": {"name": "Ride the Runner", "shop": "pens", "price": 0, "unique": true, "mount": "runner_grey"},
 	"item_ride_aggressive_red": {"name": "Ride the Angry boar", "shop": "pens", "price": 0, "unique": true, "mount": "aggressive_red"},
 	"item_ride_armored_black": {"name": "Ride the Armored boar", "shop": "pens", "price": 0, "unique": true, "mount": "armored_black"},
-	# A hut of one's own (issue #22); the clan tent upgrade comes with clans.
+	# Private hunts from the signpost need it, for every player (issue #24); bought on its private tab.
+	"item_team_pass": {"name": "Team pass", "shop": "signpost", "price": 2000, "unique": true},
+	# A hut of one's own (issue #22); its clan tent upgrade lets the owner found a clan (issue #27).
 	"item_hut": {"name": "Buy this hut", "shop": "hut", "price": 3000, "unique": true},
+	"item_clan_tent": {"name": "Upgrade the hut: clan tent", "shop": "hut", "price": 5000, "unique": true, "requires_item": "item_hut"},
 	# The forge is built from everyone's gifts (issue #11): each purchase gives its price to the build.
 	"item_forge_100": {"name": "Give to the forge", "shop": "forge", "price": 100, "unique": false, "donate": 100},
 	"item_forge_1000": {"name": "Give to the forge", "shop": "forge", "price": 1000, "unique": false, "donate": 1000},

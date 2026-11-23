@@ -43,6 +43,12 @@ func eat(bonus: float) -> void:
 	value = max_value
 
 
+## The clan stew (issue #23) raises this hunt's maximum by a share and starts it full.
+func boost(share: float) -> void:
+	max_value *= 1.0 + share
+	value = max_value
+
+
 ## A sip from the water bag restores stamina at once, even mid-sprint (M012).
 func drink(amount: float) -> void:
 	value = minf(max_value, value + amount)

@@ -5,6 +5,7 @@ const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
+const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
 
 
 func _init() -> void:
@@ -17,13 +18,17 @@ func _init() -> void:
 	failures += _check(_bad_data_falls_back(), "malformed save data falls back to defaults")
 	failures += _check(_buy_weapon_once(), "a weapon is bought once for its price")
 	failures += _check(_one_crewman_at_a_time(), "hiring a warrior sends the trap setter home; the porter stays")
+	failures += _check(_lobby_picks_and_splits(), "the signpost sends the right players and splits a crowd into even hunts")
 	failures += _check(_pick_helper_from_pen(), "a helper in the pen can be taken on the hunt, one at a time")
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
+	failures += _check(_hunt_brings_finds_home(), "forest finds of a hunt join the camp materials")
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
+	failures += _check(_clan_stew_lasts_and_grows(), "the clan stew is eaten once per buff, which lasts longer and works harder with the level")
+	failures += _check(_clan_needs_hut_and_tent(), "a clan is founded with the hut, its clan tent and a name, rates its hunts and survives a save")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
 	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
 	failures += _check(_ride_a_saddled_boar(), "the pens pick which saddled boar is ridden; only its saddle goes on the hunt")
@@ -92,6 +97,35 @@ func _forge_recipes_need_forge_and_metal() -> bool:
 		and progress.items["item_metal_plate"] == 5 and progress.items["item_component"] == 0 and not progress.buy("item_armor")
 
 
+func _clan_stew_lasts_and_grows() -> bool:
+	var clan := Progress.Clan.new()
+	clan.name = "Stew"
+	var first := clan.eat_stew(1000) and not clan.eat_stew(1000 + 7199) and clan.stew_active(1000 + 7199)
+	var worn_off := not clan.stew_active(1000 + 7200)
+	clan.deeds["hunts"] = 100  # rating 10000: Common, level 1
+	var stronger := clan.eat_stew(9000) and clan.stew_until == 9000 + 3 * 3600 and is_equal_approx(clan.stew_bonus()["stamina"], 0.2)
+	var back := Progress.Clan.from_dict(clan.to_dict())
+	return first and worn_off and stronger and back.stew_until == clan.stew_until
+
+
+func _clan_needs_hut_and_tent() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 8000
+	var no_tent_first := not progress.buy("item_clan_tent") and progress.buy("item_hut") and not progress.found_clan("Tusks")
+	var founded := progress.buy("item_clan_tent") and not progress.found_clan("  ") and progress.found_clan(" Tusks ")
+	progress.clan.rules = {"hunts": 5}
+	var hunt := Hunt.new(3)
+	hunt.record("common_brown", BoarOutcome.Kind.DEAD)
+	hunt.record("golden_tusk", BoarOutcome.Kind.CAPTURED)
+	hunt.invasion.record_terminator(true)
+	progress.add_hunt(hunt)
+	progress.add_hunt(Hunt.new(1))  # nothing killed or caught: not a hunt for the clan
+	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
+	return no_tent_first and founded and back.clan.name == "Tusks" and back.clan.rules == {"hunts": 5} \
+		and back.clan.rating() == 100 + 20 + 50 + 200 and back.clan.achievements() == ["First hunt", "First boar caught", "First terminator"] \
+		and back.clan.tier_name() == "New" and Progress.from_dict({}).clan == null
+
+
 func _bad_data_falls_back() -> bool:
 	var back := Progress.from_dict({"tusks": -5, "caught": "oops"})
 	return back.tusks == 0 and back.caught.is_empty()
@@ -122,6 +156,21 @@ func _one_crewman_at_a_time() -> bool:
 		and progress.team() == PackedStringArray(["Porter", "Warrior"])
 
 
+func _lobby_picks_and_splits() -> bool:
+	var me := {"name": "me", "clan": "tusks", "pass": true}
+	var mate := {"name": "mate", "clan": "tusks", "pass": false}
+	var friend := {"name": "friend", "clan": "", "pass": true}
+	var stranger := {"name": "stranger", "clan": "", "pass": true}
+	var circle := [me, mate, friend, stranger]
+	var nobody_without_pass: bool = HuntLobby.entrants("private", mate, circle, PackedStringArray(["me"])).is_empty()
+	var sizes := HuntLobby.split(range(9)).map(func(g: Array) -> int: return g.size())
+	return HuntLobby.entrants("public", me, circle, PackedStringArray()).size() == 4 \
+		and HuntLobby.entrants("clan", me, circle, PackedStringArray()) == [me, mate] \
+		and HuntLobby.entrants("private", me, circle, PackedStringArray(["friend", "mate"])) == [me, friend] \
+		and nobody_without_pass and sizes == [3, 3, 3] and HuntLobby.split([me]) == [[me]] \
+		and HuntLobby.timer(5) == 10 and HuntLobby.timer(90) == 60
+
+
 func _buy_weapon_once() -> bool:
 	var progress := Progress.new()
 	progress.tusks = 60
@@ -150,6 +199,16 @@ func _saddle_needs_caught_boar() -> bool:
 	var locked := not progress.buy("item_saddle_runner_grey")
 	progress.caught = {"runner_grey": 1}
 	return locked and progress.tusks == 100 and progress.buy("item_saddle_runner_grey") and progress.tusks == 50
+
+
+func _hunt_brings_finds_home() -> bool:
+	var progress := Progress.new()
+	progress.materials = {"stick": 5}
+	var hunt := Hunt.new()
+	hunt.gather("stick")
+	hunt.gather("frog")
+	progress.add_hunt(hunt)
+	return progress.materials == {"stick": 6, "frog": 1}
 
 
 func _sell_whole_tusks_only() -> bool:

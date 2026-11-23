@@ -17,6 +17,7 @@ func _init() -> void:
 	failures += _check(_spear_throw_and_pick(), "spear is thrown once and picked up again")
 	failures += _check(_nets_run_out(), "nets run out and can be picked up")
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
+	failures += _check(_clan_stew_boosts_stamina_and_speed(), "the clan stew raises max stamina and on-foot speed by its shares")
 	failures += _check(_forge_armor_takes_damage_first(), "the best forge armor owned takes damage before health")
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
@@ -111,6 +112,15 @@ func _health_runs_down_to_zero() -> bool:
 	return hurt and health.value == 0 and health.is_down()
 
 
+func _clan_stew_boosts_stamina_and_speed() -> bool:
+	var stamina := Stamina.new()
+	stamina.eat(20.0)
+	stamina.boost(0.15)
+	var ride := Ride.new()
+	ride.foot_scale = 1.05
+	return is_equal_approx(stamina.max_value, 138.0) and stamina.value == stamina.max_value and is_equal_approx(ride.speed(4.0), 4.2)
+
+
 func _forge_armor_takes_damage_first() -> bool:
 	var loadout := Loadout.new()
 	loadout.equip({"item_armor": 1, "item_armor_shock": 1})
@@ -165,14 +175,19 @@ func _meal_and_water() -> bool:
 	var loadout := Loadout.new()
 	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1, "item_water": 2})
 	var stamina := Stamina.new()
-	stamina.eat(loadout.eat_meals())
-	var fed := is_equal_approx(stamina.max_value, 170.0) and is_equal_approx(stamina.value, 170.0)
+	var meals := loadout.eat_meals()
+	stamina.eat(meals.x)
+	var health := Health.new()
+	health.eat(int(meals.y))
+	health.take(200)
+	health.heal(500)
+	var fed := is_equal_approx(stamina.max_value, 170.0) and is_equal_approx(stamina.value, 170.0) and health.value == 140
 	stamina.value = 0.0
 	stamina.drink(40.0)
 	for i in 2:
 		loadout.drink()
 	return fed and is_equal_approx(stamina.value, 40.0) and not loadout.drink() \
-		and loadout.used == {"item_feast": 1, "item_stew": 1, "item_water": 2} and is_zero_approx(loadout.eat_meals())
+		and loadout.used == {"item_feast": 1, "item_stew": 1, "item_water": 2} and loadout.eat_meals() == Vector2.ZERO
 
 
 func _porter_and_any_trap() -> bool:

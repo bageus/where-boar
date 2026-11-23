@@ -7,6 +7,8 @@ extends Node3D
 @export var model: PackedScene = preload("res://assets/models/stall.glb")
 ## A building or pen the hunter cannot walk through: the collision is the model's own footprint.
 @export var solid := false
+## A solid building the hunter can walk into (a hut): walls collide mesh-exact, the doorway stays open.
+@export var walk_in := false
 
 
 func _ready() -> void:
@@ -28,6 +30,25 @@ func set_model(scene: PackedScene) -> void:
 		fit_collision($Body/Collision, node)
 		var box: CollisionShape3D = $Body/Collision
 		$Label.position = box.position + Vector3(0.0, (box.shape as BoxShape3D).size.y * 0.5 + 0.6, 0.0)
+		box.disabled = walk_in
+		if walk_in:
+			add_mesh_collision($Body, node)
+
+
+## Gives the body one mesh-exact shape per model mesh (both faces collide, so walls hold from inside).
+static func add_mesh_collision(body: Node3D, model_root: Node3D) -> void:
+	for old in body.get_children():
+		if old.name.begins_with("Wall"):
+			body.remove_child(old)
+			old.queue_free()
+	for mesh: MeshInstance3D in model_root.find_children("*", "MeshInstance3D", true, false):
+		var shape := mesh.mesh.create_trimesh_shape()
+		shape.backface_collision = true
+		var wall := CollisionShape3D.new()
+		wall.name = "Wall"
+		wall.shape = shape
+		wall.transform = mesh.transform
+		body.add_child(wall, true)
 
 
 ## How far the point is from the station on the ground plane: from the footprint's edge when solid

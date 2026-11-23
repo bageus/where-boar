@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 38
+const EXPECTED_CHECKS := 40
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -37,15 +37,14 @@ func _physics_process(_delta: float) -> bool:
 		var camp: Node3D = _main.current
 		_check_pause_and_settings(camp)
 		camp.hunter.global_position = camp.get_node("Stations/StartHunt").global_position + Vector3(0, 0, 1.5)
-		camp.hunter.interacted.emit()
-		_map = _main.current
-		_check(_map.name == "HuntMap", "start hunt station in camp opens the hunt")
+		_map = _start_at_signpost(camp)
 		return false
 	if _frame == 122:
 		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
 		_check("caught 1" in _main.current.get_node("%Summary").text or "caught 2" in _main.current.get_node("%Summary").text, "results list the caught boars")
 		_check(_hunt.count_all(BoarOutcome.Kind.CAPTURED) == 2 and _hunt.held == 0, "the trapped boar counts as caught at hunt end")
 		_check(FileAccess.file_exists(_main.save_store.path), "results are saved")
+		_check("Gathered:" in _main.current.get_node("%Summary").text, "results list the forest finds")
 		_main.current.get_node("%Again").pressed.emit()
 		_check(_main.current.name == "Camp" and "Tusks:" in _main.current.get_node("Hud/Progress").text, "results lead back to camp")
 		_buy_club(_main.current)
@@ -123,9 +122,17 @@ func _physics_process(_delta: float) -> bool:
 			_hunt = _map.hunt
 			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
 			_check_relief(hunter, boars[4])
-			hunter.global_position = _map.get_node("ReturnPoint").global_position
-			hunter.interacted.emit()
+			_gather_and_return(hunter)
 	return false
+
+
+## E next to a frog puts a find in the pockets (issue #26), then E at the return point ends the hunt.
+func _gather_and_return(hunter: CharacterBody3D) -> void:
+	hunter.global_position = _map.get_node("Terrain/Gatherables")._critters[0].global_position
+	hunter.interacted.emit()
+	_check(_map.hunt.gathered.values() == [1], "E picks up a forest find in reach into the pockets")
+	hunter.global_position = _map.get_node("ReturnPoint").global_position
+	hunter.interacted.emit()
 
 
 ## Hits stay in the boar (owner, 2026-10-27): the net comes back from the caught boar only up close,
@@ -261,3 +268,12 @@ func _check_healer() -> void:
 		healer._physics_process(1.0)
 	_check(healer and healer.get_script() == hunter.Crew.HIRES["item_healer"] and hunter.health.value == 60, "a hired healer comes along and heals")
 	map.free()
+
+
+## E at the signpost opens its window; Start (with the countdown cut to nothing) opens the hunt (issue #24).
+func _start_at_signpost(camp: Node3D) -> Node:
+	camp.hunter.interacted.emit()
+	var signpost_open: bool = camp._signpost.visible
+	camp._launch("public", 0, PackedStringArray())
+	_check(signpost_open and _main.current.name == "HuntMap", "the signpost opens its window, then its hunt starts")
+	return _main.current
