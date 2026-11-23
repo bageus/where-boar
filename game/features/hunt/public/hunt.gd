@@ -7,6 +7,10 @@ const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 
+## How many of each forest find fit in the pockets on one hunt (issue #26).
+const POCKET := {"grass": 12, "stick": 12, "feather": 12, "poison_berry": 6, "daisy": 10, "berry": 10,
+	"mushroom": 10, "frog": 6, "larva": 4}
+
 ## Boars on the map when the hunt started.
 var total := 0
 var returned := false
@@ -16,6 +20,8 @@ var used_items: Dictionary = {}
 var held := 0
 ## animal_id -> wild helper animals (rooster, turkey) caught for the camp pen.
 var helpers_caught: Dictionary = {}
+## material id -> forest finds picked up this hunt, carried to camp at the end (issues #21, #26).
+var gathered: Dictionary = {}
 ## Terminators of this hunt (issue 8); the default one never comes.
 var invasion := Invasion.new()
 ## type_id -> BoarOutcome.Kind -> count
@@ -75,6 +81,15 @@ func close_traps(held_type_ids: Array) -> void:
 ## The hunt ends when the hunter returns to camp or no free boars and no terminators are left (section 07).
 func is_over() -> bool:
 	return returned or (remaining() <= 0 and invasion.left <= 0)
+
+
+## Puts one find in the pockets; false (nothing taken) when that pocket is full or the find unknown.
+func gather(material_id: String) -> bool:
+	var have: int = gathered.get(material_id, 0)
+	if have >= POCKET.get(material_id, 0):
+		return false
+	gathered[material_id] = have + 1
+	return true
 
 
 ## Rough tusk count shown during the hunt (owner, 2026-10-27): "< 10", "< 20", ... "< 1000", then "1000+".
