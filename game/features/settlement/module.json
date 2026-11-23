@@ -11,7 +11,9 @@
     "public/item_icons.gd",
     "public/quest_board.gd",
     "public/hunt_lobby.gd",
-    "public/clan.gd"
+    "public/clan.gd",
+    "public/trophies.gd",
+    "public/shaman.gd"
   ],
   "dependencies": [
     "features.boar",

@@ -230,7 +230,10 @@ func show_tent() -> void:
 		show_tent())
 	eat.disabled = left > 0
 	_button("Clan totem", show_page)
-	_label("Trophies: none yet.")
+	var won := PackedStringArray()
+	for trophy_id in progress.trophies:
+		won.append("%s x%d" % [Progress.Trophies.TROPHIES[trophy_id]["name"], progress.trophies[trophy_id]])
+	_label("Trophies: %s" % (", ".join(won) if not won.is_empty() else "none yet (a rare find on hunts)."))
 
 
 func _clear(title: String) -> void:

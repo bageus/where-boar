@@ -5,6 +5,7 @@ extends Node3D
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
+const BoarModel = preload("res://game/features/boar/public/boar_model.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
@@ -70,6 +71,10 @@ var first_hunt := false
 var hunts_done := 0
 ## Injected: the clan stew's shares while it lasts (issue #23), {} otherwise.
 var stew: Dictionary = {}
+## Injected: the shaman's blessing share of max health (issue #20) and the ridden boar's paint (issue #18,
+## transparent for none).
+var blessing := 0.0
+var mount_paint := Color.TRANSPARENT
 var _tip := 0
 var _tip_left := 0.0
 ## Bait on the ground; the same array is shared with every boar.
@@ -139,7 +144,10 @@ func _ready() -> void:
 			animal.position = Vector3(at.x, _terrain.height_at(at.x, at.y) + 0.3, at.y)
 			_add_wild(animal)
 	_hunter.equip(items)
+	_hunter.health.blessing = blessing
 	_hunter.start_hunt()
+	if _hunter.mount_node() and mount_paint.a > 0.0:
+		(func() -> void: BoarModel.tint(_hunter.mount_node(), mount_paint)).call_deferred()
 	_hunter.health.armor = _hunter.loadout.armor
 	_hunter.stamina.boost(stew.get("stamina", 0.0))
 	_hunter.ride.foot_scale = 1.0 + stew.get("speed", 0.0)

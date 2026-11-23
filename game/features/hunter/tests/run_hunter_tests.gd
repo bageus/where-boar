@@ -118,7 +118,10 @@ func _clan_stew_boosts_stamina_and_speed() -> bool:
 	stamina.boost(0.15)
 	var ride := Ride.new()
 	ride.foot_scale = 1.05
-	return is_equal_approx(stamina.max_value, 138.0) and stamina.value == stamina.max_value and is_equal_approx(ride.speed(4.0), 4.2)
+	var health := Health.new()
+	health.blessing = 0.25  # the shaman's blessing
+	health.eat(20)
+	return health.max_value == 150 and health.value == 150 and is_equal_approx(stamina.max_value, 138.0) and stamina.value == stamina.max_value and is_equal_approx(ride.speed(4.0), 4.2)
 
 
 func _forge_armor_takes_damage_first() -> bool:

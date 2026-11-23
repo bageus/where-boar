@@ -6,6 +6,7 @@ extends RefCounted
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
 const Clan = preload("res://game/features/settlement/public/clan.gd")
+const Trophies = preload("res://game/features/settlement/public/trophies.gd")
 
 const PEN_MAX := 5
 const SADDLE := "item_saddle_"
@@ -38,11 +39,24 @@ var forge := 0
 var quests := QuestBoard.new()
 ## The hunter's clan, null until founded at the totem (issue #27).
 var clan: Clan = null
+## trophy id -> count won on hunts (issue #19); last_trophies are the last hunt's, for the results.
+var trophies: Dictionary = {}
+var last_trophies: Array[String] = []
+## Unix time the shaman's blessing wears off (issue #20).
+var blessed_until := 0
+## Beauty hut (issue #18): paint target ("hut", "mount") -> colour id, and colour id -> units of paint bought.
+var paint: Dictionary = {}
+var paints: Dictionary = {}
 
 
 ## Adds a finished hunt's tusks, live catches and forest finds and takes spent consumables out of stock.
-func add_hunt(hunt: Hunt) -> void:
+## rng rolls the hunt's trophies (issue #19).
+func add_hunt(hunt: Hunt, rng := RandomNumberGenerator.new()) -> void:
 	hunts += 1
+	var earned := hunt.count_all(BoarOutcome.Kind.DEAD) + hunt.count_all(BoarOutcome.Kind.CAPTURED) > 0
+	last_trophies = Trophies.roll(earned, rng)
+	for trophy_id in last_trophies:
+		trophies[trophy_id] = trophies.get(trophy_id, 0) + 1
 	tusks += hunt.tusks()
 	for animal_id in hunt.helpers_caught:
 		helpers[animal_id] = helpers.get(animal_id, 0) + hunt.helpers_caught[animal_id]
@@ -111,6 +125,27 @@ func sold_out(item_id: String) -> bool:
 		return riding() == item["mount"]
 	var have: int = items.get(item_id, 0)
 	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
+
+
+## Buys a pack of a paid colour (issue #18); white and black are free and never run out.
+func buy_paint(color_id: String) -> bool:
+	if not ShopCatalog.PAINTS.has(color_id) or ShopCatalog.PAINTS[color_id]["price"] == 0 \
+			or not spend(ShopCatalog.price_of_paint(color_id)):
+		return false
+	paints[color_id] = paints.get(color_id, 0) + ShopCatalog.PAINT_PACK
+	return true
+
+
+## Paints a target, spending one unit of a paid colour; false when out of it.
+func paint_target(target: String, color_id: String) -> bool:
+	if target not in ShopCatalog.PAINT_TARGETS or not ShopCatalog.PAINTS.has(color_id):
+		return false
+	if ShopCatalog.PAINTS[color_id]["price"] > 0:
+		if paints.get(color_id, 0) <= 0:
+			return false
+		paints[color_id] -= 1
+	paint[target] = color_id
+	return true
 
 
 ## Founding a clan takes the hut and its clan tent upgrade and a name (issue #27); false and no clan otherwise.
@@ -288,7 +323,8 @@ func to_dict() -> Dictionary:
 		"pen": pen.duplicate(), "hunts": hunts, "kit": true, "companion": companion, "mount": mount,
 		"carried": carried.duplicate(), "materials": materials.duplicate(),
 		"hut_slot": hut_slot, "hut_variant": hut_variant, "forge": forge, "quests": quests.to_dict(),
-		"clan": clan.to_dict() if clan else {}}
+		"clan": clan.to_dict() if clan else {}, "trophies": trophies.duplicate(), "blessed_until": blessed_until,
+		"paint": paint.duplicate(), "paints": paints.duplicate()}
 
 
 ## Unknown or malformed fields fall back to defaults instead of failing the load.
@@ -321,6 +357,14 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.quests = QuestBoard.from_dict(saved_quests if saved_quests is Dictionary else {})
 	var saved_clan: Variant = data.get("clan")
 	progress.clan = Clan.from_dict(saved_clan if saved_clan is Dictionary else {})
+	progress.trophies = _counts(data.get("trophies", {}))
+	progress.blessed_until = maxi(0, int(data.get("blessed_until", 0)))
+	progress.paints = _counts(data.get("paints", {}))
+	var saved_paint: Variant = data.get("paint")
+	if saved_paint is Dictionary:
+		for target in saved_paint:
+			if ShopCatalog.PAINTS.has(str(saved_paint[target])):
+				progress.paint[str(target)] = str(saved_paint[target])
 	# New games, and saves from before ammo became stock, get the starter kit once.
 	if not data.get("kit", false):
 		for item_id in ShopCatalog.STARTER_KIT:

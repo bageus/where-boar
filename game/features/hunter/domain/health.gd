@@ -11,6 +11,8 @@ var max_value := MAX
 var value := MAX
 ## Forge armor worn this hunt (issue #11): damage it can still take before health does.
 var armor := 0
+## The shaman's blessing (issue #20): share added to the maximum when the meals are eaten.
+var blessing := 0.0
 
 
 func take(damage: int) -> void:
@@ -30,5 +32,5 @@ func heal(amount: int) -> void:
 
 ## Camp meals (issue #9) raise the maximum for this hunt and start it full.
 func eat(bonus: int) -> void:
-	max_value = MAX + bonus
+	max_value = roundi((MAX + bonus) * (1.0 + blessing))
 	value = max_value

@@ -10,6 +10,8 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
+const Shaman = preload("res://game/features/settlement/public/shaman.gd")
+const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const SaveStore = preload("res://game/infrastructure/save/public/save_store.gd")
 const Planner = preload("res://game/presentation/planning/public/planner.gd")
 ## A layout committed with the game (Export in planning mode), used when this machine has none saved.
@@ -161,6 +163,10 @@ func start_hunt() -> void:
 	map.hunts_done = progress.hunts
 	if progress.clan and progress.clan.stew_active(int(Time.get_unix_time_from_system())):
 		map.stew = progress.clan.stew_bonus()
+	if progress.blessed_until > int(Time.get_unix_time_from_system()):
+		map.blessing = Shaman.HEALTH_SHARE
+	if progress.paint.has("mount"):
+		map.mount_paint = Color(ShopCatalog.PAINTS[progress.paint["mount"]]["color"])
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 	map.get_node("Hunter").apply_settings(settings)
@@ -173,7 +179,7 @@ func _show_results(hunt: RefCounted) -> void:
 	var results := ResultsScene.instantiate()
 	_swap(results)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	results.show_results(hunt, progress.tusks)
+	results.show_results(hunt, progress.tusks, Progress.Trophies.names(progress.last_trophies))
 	results.get_node("%Again").pressed.connect(show_camp)
 
 

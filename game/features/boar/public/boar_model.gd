@@ -100,6 +100,18 @@ func flash() -> void:
 			mesh.material_overlay = null)
 
 
+## Beauty hut paint (issue #18): every material under root multiplied by colour (copies, so shared
+## materials stay as they are). Used for the painted mount and, in camp, the painted hut.
+static func tint(root: Node, color: Color) -> void:
+	for mesh: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		for i in mesh.get_surface_override_material_count():
+			var material := mesh.get_active_material(i)
+			if material is BaseMaterial3D:
+				var painted: BaseMaterial3D = material.duplicate()
+				painted.albedo_color = color
+				mesh.set_surface_override_material(i, painted)
+
+
 ## A mesh in flat colours, one material per colour (the blocky boar: six), as one surface with the colours in
 ## its vertices: one draw call per boar instead of six, 47 boars on the map (owner, 2026-11-07: 8 FPS on the hunt).
 ## Meshes with textures or materials differing in more than colour are kept as they are.

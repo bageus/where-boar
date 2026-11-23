@@ -3,6 +3,7 @@ extends SceneTree
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
+const Shaman = preload("res://game/features/settlement/public/shaman.gd")
 const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
 
 
@@ -25,6 +26,7 @@ func _init() -> void:
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
+	failures += _check(_trophies_paint_and_blessing(), "hunts roll rare trophies, paint is bought and used up, the shaman's clock, all saved")
 	failures += _check(_clan_stew_lasts_and_grows(), "the clan stew is eaten once per buff, which lasts longer and works harder with the level")
 	failures += _check(_clan_needs_hut_and_tent(), "a clan is founded with the hut, its clan tent and a name, rates its hunts and survives a save")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
@@ -93,6 +95,27 @@ func _forge_recipes_need_forge_and_metal() -> bool:
 	var short := not progress.buy("item_armor_shock")
 	return before_built and short and progress.buy("item_armor") and progress.owns("item_armor") and progress.tusks == 500 \
 		and progress.items["item_metal_plate"] == 5 and progress.items["item_component"] == 0 and not progress.buy("item_armor")
+
+
+func _trophies_paint_and_blessing() -> bool:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var helmets := 0
+	for i in 20000:
+		helmets += Progress.Trophies.roll(true, rng).count("camo_helmet")
+	var rare := helmets > 60 and helmets < 140 and Progress.Trophies.roll(false, rng).is_empty()
+	var progress := Progress.new()
+	progress.tusks = 100
+	var paint: bool = progress.paint_target("hut", "white") and not progress.paint_target("mount", "red") \
+		and not progress.buy_paint("white") and progress.buy_paint("red") and progress.tusks == 60 \
+		and progress.paint_target("mount", "red") and progress.paints["red"] == ShopCatalog.PAINT_PACK - 1
+	progress.trophies = {"lucky_coin": 1}
+	progress.blessed_until = 5000
+	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
+	var clock: bool = Shaman.active(7200 + 30) and Shaman.seconds_left(7200 + 30) == 570 \
+		and not Shaman.active(7200 + 600) and Shaman.seconds_left(7200 + 600) == 3000
+	return rare and paint and clock and back.paint == {"hut": "white", "mount": "red"} and back.paints == progress.paints \
+		and back.trophies == {"lucky_coin": 1} and back.blessed_until == 5000
 
 
 func _clan_stew_lasts_and_grows() -> bool:

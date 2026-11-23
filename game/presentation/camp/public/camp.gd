@@ -15,6 +15,8 @@ const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
 const ClanTent = preload("res://game/presentation/camp/props/clan_tent.gd")
+const ShamanRitual = preload("res://game/presentation/camp/props/shaman_ritual.gd")
+const BeautyPanel = preload("res://game/presentation/camp/hud/beauty_panel.gd")
 const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
 const SignpostPanel = preload("res://game/presentation/camp/hud/signpost_panel.gd")
 const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
@@ -56,6 +58,7 @@ const RAIL_SADDLES := [Vector2(-7.0, 0.0), Vector2(-4.5, 0.1), Vector2(7.0, -0.1
 const RAIL_Z := 8.07
 const RAIL_TOP := 1.56
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
+const BoarModel = preload("res://game/features/boar/public/boar_model.gd")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/hunter/young_hunter.glb")
 ## The helper's seat on the tavern's front bench, local to the tavern model, facing the table;
@@ -88,12 +91,12 @@ var planning := false
 
 ## Shop windows' extra line for stations whose own features come later.
 const INFO := {
-	"beauty_hut": "Paint and decorations come later; they change only the look.",
-	"shaman_hut": "Rituals come later.",
+	"shaman_hut": "The ritual starts on the hour; stand in the circle round the hut while it lasts.",
 }
 
 var _open_station: Node3D
 var _clan_panel := ClanPanel.new()
+var _beauty := BeautyPanel.new()
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
@@ -127,6 +130,14 @@ func _ready() -> void:
 	$Hud.add_child(_box)
 	_box.changed.connect(_on_purchased.bind("box"))
 	_box.closed.connect(_on_shop_closed)
+	_beauty.progress = progress
+	$Hud.add_child(_beauty)
+	_beauty.painted.connect(_on_painted)
+	_beauty.closed.connect(_on_shop_closed)
+	_beauty.sell_requested.connect(func() -> void:
+		_beauty.hide()
+		_shop.open("beauty_hut", "Beauty hut"))
+	_add_ritual()
 	_signpost.progress = progress
 	$Hud.add_child(_signpost)
 	_signpost.purchased.connect(_on_purchased)
@@ -216,6 +227,8 @@ func _fill_pen() -> void:
 		pens.add_child(boar)
 		penned.append(boar)
 		boar.show_type(BoarTypes.find(progress.pen[i]))
+		if progress.pen[i] == progress.mount and progress.paint.has("mount"):  # the painted riding boar (issue #18)
+			BoarModel.tint(boar, Color(ShopCatalog.PAINTS[progress.paint["mount"]]["color"]))
 		boar.position = Vector3(PEN_SPOTS[i].x, 0.0, PEN_SPOTS[i].y)
 		boar.rotation.y = PEN_SPOTS[i].z
 		boar.scale = Vector3.ONE / pens.scale.x  # the pen model is scaled down, the boars are not
@@ -319,7 +332,7 @@ func _on_interacted() -> void:
 
 
 func _window_open() -> bool:
-	return _shop.visible or _clan_panel.visible or _box.visible or _signpost.visible
+	return _shop.visible or _clan_panel.visible or _box.visible or _signpost.visible or _beauty.visible
 
 
 func _station_in_reach() -> Node3D:
@@ -343,6 +356,9 @@ func _use(station: Node3D) -> void:
 		return
 	if station.station_id == "chest":
 		_box.open()
+		return
+	if station.station_id == "beauty_hut":
+		_beauty.open()
 		return
 	_shop.info = INFO.get(station.station_id, "")
 	if station.station_id == "hut" and _is_my_hut(station):
@@ -376,6 +392,8 @@ func _dress_huts() -> void:
 		if not hut.has_meta("variant") or mine:
 			hut.set_meta("variant", progress.hut_variant if mine else randi() % HUT_VARIANTS.size())
 			hut.set_model(HUT_VARIANTS[hut.get_meta("variant")])
+		if mine and progress.paint.has("hut"):
+			BoarModel.tint(hut.get_node("Model"), Color(ShopCatalog.PAINTS[progress.paint["hut"]]["color"]))
 		hut.title = "Your hut" if mine else "For sale\n%d tusks" % ShopCatalog.ITEMS["item_hut"]["price"]
 		hut.get_node("Label").text = hut.title
 
@@ -440,3 +458,23 @@ func _start_hunt() -> void:
 		hunt_requested.emit()
 	else:
 		hunter.show_gain("You left the circle: no hunt")
+
+
+## The shaman's ritual circle and countdown (issue #20).
+func _add_ritual() -> void:
+	var shaman: Node3D = $Stations/Shaman
+	var ritual := ShamanRitual.new()
+	ritual.progress = progress
+	ritual.hunter = hunter
+	ritual.label = shaman.get_node("Label")
+	ritual.top_level = true
+	ritual.blessed.connect(func() -> void: purchased.emit())
+	shaman.add_child(ritual)
+	ritual.global_position = shaman.global_position
+
+
+## Beauty hut paint (issue #18): the bought hut is rebuilt in its new colour; pen boars repaint on the next visit.
+func _on_painted() -> void:
+	_dress_huts()
+	_show_progress()
+	purchased.emit()

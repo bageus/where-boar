@@ -83,6 +83,18 @@ const ITEMS := {
 		"unique": true, "parts": {"item_metal_plate": 30, "item_component": 10, "item_metal_tusk": 20}},
 }
 
+## Beauty hut colours (issue #18): white and black free, the rest bought in packs of PAINT_PACK coats.
+## Prices ASSUMPTION (D013).
+const PAINTS := {
+	"white": {"name": "White", "color": "#f1ede2", "price": 0}, "black": {"name": "Black", "color": "#2a2622", "price": 0},
+	"red": {"name": "Clay red", "color": "#b8442f", "price": 40}, "ochre": {"name": "Ochre", "color": "#d39a2c", "price": 40},
+	"green": {"name": "Moss green", "color": "#5f8a3a", "price": 60}, "blue": {"name": "Berry blue", "color": "#3f5fa8", "price": 80},
+	"purple": {"name": "Plum", "color": "#7a3f8f", "price": 100},
+}
+const PAINT_PACK := 5
+## What can be painted: the hut and the ridden boar (hunter and gear come later, P3-117).
+const PAINT_TARGETS: Array[String] = ["hut", "mount"]
+
 ## Forge recipe tabs, in order (issue #11).
 const FORGE_TABS: Array[String] = ["Armor", "Weapons", "Upgrades"]
 const PART_NAMES := {"item_metal_tusk": "metal tusks", "item_metal_plate": "metal plates", "item_component": "components"}
@@ -126,6 +138,11 @@ const STARTER_KIT := {"item_spear": 1, "item_net": 3, "item_stone": 5}
 ## What item_id costs right now.
 static func price(item_id: String) -> int:
 	return 0 if free_for_testing else ITEMS[item_id]["price"]
+
+
+## What a pack of a paint costs right now (free while testing, like the shops).
+static func price_of_paint(color_id: String) -> int:
+	return 0 if free_for_testing else PAINTS[color_id]["price"]
 
 
 ## Parts item_id takes right now (nothing while testing, like the price).
