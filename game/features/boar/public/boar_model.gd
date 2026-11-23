@@ -8,14 +8,14 @@ const WALK_SPEED := 1.5  # ground speed the walk cycle was keyed for, m/s (ASSUM
 const RUN_SPEED := 9.0
 const RUN_FROM := 4.0
 
-const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
+const Saddle = preload("res://assets/models/weapon_new/boar_saddle.glb")
 const HeadIdle = preload("res://game/features/boar/presentation/boar_head_idle.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 ## Seconds between chomps while eating (owner, 2026-11-05: chomping, takes in turn).
 const CHOMP_SECONDS := Vector2(0.9, 1.6)
 const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
 const SADDLE_HEIGHT := 1.1  # and its height, m
-const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
+const SADDLE_PAD := 0.03  # saddle height of the underside of its pad (boar_saddle.glb: pad bottom at 0.016)
 ## The owner's boar_new clips (the importer drops "_loop") under this file's names; the first one found wins.
 const NEW_CLIPS := {
 	"walk": ["Walk"], "run": ["Run"], "eat": ["Eat"], "attack": ["Tusk_attack"],
@@ -244,7 +244,7 @@ func top() -> float:
 	return height
 
 
-## Straps the saddle (assets/models/peak_gear/saddle.tscn) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
+## Straps the saddle (assets/models/weapon_new/boar_saddle.glb) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
 func put_saddle() -> void:
 	var skeleton: Skeleton3D = find_children("*", "Skeleton3D", true, false)[0]
 	var back: String = BACK_BONES.filter(func(b: String) -> bool: return skeleton.find_bone(b) >= 0)[0]

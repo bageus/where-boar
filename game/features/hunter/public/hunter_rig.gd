@@ -155,10 +155,10 @@ static func _ride() -> Array:
 	return keys
 
 
-## On a bench at a table: thighs level, shins down, forearms on the table, now and then looking about.
+## On a bench at a table: thighs level, shins down, upper arms raised and out, elbows on the table, now and then looking about.
 static func _sit(drop: float) -> Array:
-	var base := {"thigh.L": rx(-88.0), "shin.L": rx(88.0), "upper_arm.L": rx(-35.0) * rz(-78.0),
-			"forearm.L": ry(-75.0), "spine": rx(6.0), "pelvis": -drop}
+	var base := {"thigh.L": rx(-88.0), "shin.L": rx(88.0), "upper_arm.L": rx(-45.0) * rz(-50.0),
+			"forearm.L": ry(-60.0), "spine": rx(6.0), "pelvis": -drop}
 	var keys := []
 	for k: Array in [[0.0, 0.0, 0.0], [1.2, 3.0, 25.0], [2.4, 0.0, -20.0], [4.0, 0.0, 0.0]]:
 		var pose := base.duplicate()

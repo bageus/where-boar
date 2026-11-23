@@ -57,15 +57,15 @@ const RAIL_Z := 8.07
 const RAIL_TOP := 1.56
 const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
-const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
+const Helper = preload("res://assets/models/hunter/young_hunter.glb")
 ## The helper's seat on the tavern's front bench, local to the tavern model, facing the table;
-## lowered by his knee height (0.25 m) so he sits on the bench top (0.43).
-const HELPER_SEAT := Vector3(-0.1, 0.43 - 0.25, 2.25)
+## lowered by his knee height (0.3 m) so he sits on the bench top (0.43).
+const HELPER_SEAT := Vector3(-0.1, 0.43 - 0.3, 2.25)
 const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
 ## One of the owner's rigged hunters, picked at random each visit, on the back bench facing the helper
 ## (owner, 2026-11-23); knees 0.3 m high.
 const TAVERN_GUESTS: Array[String] = ["res://assets/models/hunter/prehistoric_hunter.glb", "res://assets/models/hunter/plump_hunter.glb"]
-const GUEST_SEAT := Vector3(-0.1, 0.43 - 0.3, 1.55)
+const GUEST_SEAT := Vector3(-0.1, 0.43 - 0.3, 1.3)
 
 const USE_RADIUS := 2.5  # from a point station
 const USE_RADIUS_SOLID := 1.5  # from the edge of a solid one
@@ -273,15 +273,12 @@ func _pen_voice(boars: Array[Node3D]) -> void:
 ## hunter across the table.
 func _seat_helper() -> void:
 	var tavern: Node3D = $Stations/Tavern
-	var helper: Node3D = Helper.instantiate()
+	var helper := HunterRig.instance(Helper)
 	tavern.add_child(helper)
 	helper.position = HELPER_SEAT
 	helper.scale = Vector3.ONE / tavern.scale.x  # the tavern model is scaled, the helper is not
 	helper.rotation.y = PI  # faces the table
-	helper.find_child("hammer").hide()
-	var player: AnimationPlayer = helper.find_child("AnimationPlayer")
-	player.get_animation("sit").loop_mode = Animation.LOOP_LINEAR
-	player.play("sit")
+	helper.find_child("AnimationPlayer").play("sit")
 	var guest := HunterRig.instance(load(TAVERN_GUESTS.pick_random()))
 	tavern.add_child(guest)
 	guest.position = GUEST_SEAT
