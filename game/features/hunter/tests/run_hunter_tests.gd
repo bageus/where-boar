@@ -17,6 +17,7 @@ func _init() -> void:
 	failures += _check(_spear_throw_and_pick(), "spear is thrown once and picked up again")
 	failures += _check(_nets_run_out(), "nets run out and can be picked up")
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
+	failures += _check(_forge_armor_takes_damage_first(), "the best forge armor owned takes damage before health")
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
 	failures += _check(_traps_cycle_and_run_out(), "the active trap is placed, then the next in stock")
@@ -108,6 +109,17 @@ func _health_runs_down_to_zero() -> bool:
 	var hurt := health.value == 70 and not health.is_down()
 	health.take(500)
 	return hurt and health.value == 0 and health.is_down()
+
+
+func _forge_armor_takes_damage_first() -> bool:
+	var loadout := Loadout.new()
+	loadout.equip({"item_armor": 1, "item_armor_shock": 1})
+	var health := Health.new()
+	health.armor = loadout.armor
+	health.take(250)
+	var shielded := health.value == 100 and health.armor == 50
+	health.take(80)
+	return shielded and health.armor == 0 and health.value == 70
 
 
 func _bought_weapons_unlock() -> bool:
