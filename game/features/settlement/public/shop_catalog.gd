@@ -36,9 +36,9 @@ const ITEMS := {
 	"item_fence": {"name": "Fence (trap)", "shop": "hunting_hut", "price": 35, "unique": false, "slot": "trap", "tab": "Traps"},
 	"item_water_bag": {"name": "Water bag", "shop": "hunting_hut", "price": 25, "unique": true, "tab": "Other"},
 	"item_water": {"name": "Water (3 sips, needs the bag)", "shop": "well", "price": 0, "unique": false, "max": 3, "pack": 3},
-	"item_stew": {"name": "Herb stew (+20 stamina)", "shop": "campfire", "price": 10, "unique": false},
-	"item_roast": {"name": "Roast (+35 stamina)", "shop": "campfire", "price": 18, "unique": false},
-	"item_feast": {"name": "Feast (+50 stamina)", "shop": "campfire", "price": 25, "unique": false},
+	"item_stew": {"name": "Herb stew (+20 stamina, +10 health)", "shop": "campfire", "price": 10, "unique": false},
+	"item_roast": {"name": "Roast (+35 stamina, +20 health)", "shop": "campfire", "price": 18, "unique": false},
+	"item_feast": {"name": "Feast (+50 stamina, +30 health)", "shop": "campfire", "price": 25, "unique": false},
 	"item_porter": {"name": "Porter (carries +2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
 	# Only one of the crew goes on a hunt (issue #12): hiring one sends the other home.
 	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true, "crew": true},

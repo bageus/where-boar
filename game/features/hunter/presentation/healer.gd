@@ -15,13 +15,13 @@ var _heal := 0.0
 
 func _physics_process(delta: float) -> void:
 	super(delta)
-	if hunter.global_position.distance_to(global_position) > HEAL_RADIUS or hunter.health.value >= hunter.health.MAX:
+	if hunter.global_position.distance_to(global_position) > HEAL_RADIUS or hunter.health.value >= hunter.health.max_value:
 		return
 	_heal += HEAL_PER_SECOND * delta
 	if _heal >= 1.0:
 		hunter.health.heal(int(_heal))
 		_heal -= int(_heal)
-		hunter.get_node("Hud").show_health(hunter.health.value)
+		hunter.get_node("Hud").show_health(hunter.health.value, hunter.health.max_value)
 
 
 func _body() -> PackedScene:

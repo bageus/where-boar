@@ -165,14 +165,19 @@ func _meal_and_water() -> bool:
 	var loadout := Loadout.new()
 	loadout.equip({"item_stew": 2, "item_feast": 1, "item_water_bag": 1, "item_water": 2})
 	var stamina := Stamina.new()
-	stamina.eat(loadout.eat_meals())
-	var fed := is_equal_approx(stamina.max_value, 170.0) and is_equal_approx(stamina.value, 170.0)
+	var meals := loadout.eat_meals()
+	stamina.eat(meals.x)
+	var health := Health.new()
+	health.eat(int(meals.y))
+	health.take(200)
+	health.heal(500)
+	var fed := is_equal_approx(stamina.max_value, 170.0) and is_equal_approx(stamina.value, 170.0) and health.value == 140
 	stamina.value = 0.0
 	stamina.drink(40.0)
 	for i in 2:
 		loadout.drink()
 	return fed and is_equal_approx(stamina.value, 40.0) and not loadout.drink() \
-		and loadout.used == {"item_feast": 1, "item_stew": 1, "item_water": 2} and is_zero_approx(loadout.eat_meals())
+		and loadout.used == {"item_feast": 1, "item_stew": 1, "item_water": 2} and loadout.eat_meals() == Vector2.ZERO
 
 
 func _porter_and_any_trap() -> bool:
