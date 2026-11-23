@@ -159,6 +159,8 @@ func start_hunt() -> void:
 	map.companion = progress.companion
 	map.first_hunt = progress.hunts == 0
 	map.hunts_done = progress.hunts
+	if progress.clan and progress.clan.stew_active(int(Time.get_unix_time_from_system())):
+		map.stew = progress.clan.stew_bonus()
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 	map.get_node("Hunter").apply_settings(settings)

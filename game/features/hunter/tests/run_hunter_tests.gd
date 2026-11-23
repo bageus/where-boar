@@ -17,6 +17,7 @@ func _init() -> void:
 	failures += _check(_spear_throw_and_pick(), "spear is thrown once and picked up again")
 	failures += _check(_nets_run_out(), "nets run out and can be picked up")
 	failures += _check(_health_runs_down_to_zero(), "damage lowers health and stops at zero")
+	failures += _check(_clan_stew_boosts_stamina_and_speed(), "the clan stew raises max stamina and on-foot speed by its shares")
 	failures += _check(_forge_armor_takes_damage_first(), "the best forge armor owned takes damage before health")
 	failures += _check(_bought_weapons_unlock(), "bought weapons unlock; arrows run out")
 	failures += _check(_bait_strongest_first(), "bait is placed strongest first and counted as used")
@@ -109,6 +110,15 @@ func _health_runs_down_to_zero() -> bool:
 	var hurt := health.value == 70 and not health.is_down()
 	health.take(500)
 	return hurt and health.value == 0 and health.is_down()
+
+
+func _clan_stew_boosts_stamina_and_speed() -> bool:
+	var stamina := Stamina.new()
+	stamina.eat(20.0)
+	stamina.boost(0.15)
+	var ride := Ride.new()
+	ride.foot_scale = 1.05
+	return is_equal_approx(stamina.max_value, 138.0) and stamina.value == stamina.max_value and is_equal_approx(ride.speed(4.0), 4.2)
 
 
 func _forge_armor_takes_damage_first() -> bool:

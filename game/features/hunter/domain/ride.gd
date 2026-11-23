@@ -10,6 +10,8 @@ const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const MOUNT_TYPES := ["runner_grey", "aggressive_red", "armored_black"]
 
 var type: BoarType = null
+## On-foot speed scale for this hunt (the clan stew, issue #23).
+var foot_scale := 1.0
 
 
 func is_riding() -> bool:
@@ -25,7 +27,7 @@ func dismount() -> void:
 
 
 func speed(on_foot: float) -> float:
-	return type.flee_speed if type else on_foot
+	return type.flee_speed if type else on_foot * foot_scale
 
 
 ## Every weapon works from the saddle (owner, 2026-10-27); kept as the one place to restrict it again.

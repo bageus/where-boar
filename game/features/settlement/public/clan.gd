@@ -31,6 +31,29 @@ var motto := ""
 var rules: Dictionary = {}
 ## Deeds since founding: rule ids hunts, kills, captures, terminators -> count.
 var deeds := {"hunts": 0, "kills": 0, "captures": 0, "terminators": 0}
+## Unix time the clan stew's buff wears off (issue #23).
+var stew_until := 0
+
+## The free clan stew in the tent (issue #23): 2 h plus 1 h a level; each level adds to the buff (ASSUMPTION).
+const STEW_HOURS := 2
+
+
+## Shares added to stamina, damage and speed while the stew lasts.
+func stew_bonus() -> Dictionary:
+	var at := level()
+	return {"stamina": 0.15 + 0.05 * at, "damage": 0.10 + 0.02 * at, "speed": 0.05 + 0.01 * at}
+
+
+func stew_active(now: int) -> bool:
+	return now < stew_until
+
+
+## Eats the stew; false while the last bowl still works.
+func eat_stew(now: int) -> bool:
+	if stew_active(now):
+		return false
+	stew_until = now + (STEW_HOURS + level()) * 3600
+	return true
 
 
 ## Counts a finished hunt's deeds.
@@ -73,7 +96,8 @@ func achievements() -> Array[String]:
 
 
 func to_dict() -> Dictionary:
-	return {"name": name, "icon": icon, "motto": motto, "rules": rules.duplicate(), "deeds": deeds.duplicate()}
+	return {"name": name, "icon": icon, "motto": motto, "rules": rules.duplicate(), "deeds": deeds.duplicate(),
+		"stew_until": stew_until}
 
 
 ## Malformed fields fall back to defaults; an empty name means no clan (null).
@@ -88,6 +112,7 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	var saved := _counts(data.get("deeds", {}), POINTS)
 	for deed in clan.deeds:
 		clan.deeds[deed] = saved.get(deed, 0)
+	clan.stew_until = maxi(0, int(data.get("stew_until", 0)))
 	return clan
 
 

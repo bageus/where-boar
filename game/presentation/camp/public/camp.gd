@@ -14,6 +14,7 @@ const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
+const ClanTent = preload("res://game/presentation/camp/props/clan_tent.gd")
 const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
 const BUILDINGS := "res://assets/models/buildings/"
 ## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
@@ -118,6 +119,8 @@ func _ready() -> void:
 	_box.closed.connect(_on_shop_closed)
 	_dress_huts()
 	_dress_forge()
+	if progress.clan:
+		ClanTent.raise($Stations, progress.clan)
 	_show_progress()
 	_fill_pen()
 	_seat_helper()
@@ -304,8 +307,8 @@ func _use(station: Node3D) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.ui(self, "shop")
 	_open_station = station
-	if station.station_id == "totem":
-		_clan_panel.open()
+	if station.station_id in ["totem", "clan_tent"]:
+		_clan_panel.open(false, station.station_id == "clan_tent")
 		return
 	if station.station_id == "chest":
 		_box.open()
@@ -325,6 +328,8 @@ func _on_purchased(item_id: String) -> void:
 	elif item_id == "item_clan_tent" and _shop.visible:  # upgraded in the hut: go on to founding (issue #27)
 		_shop.hide()
 		_clan_panel.open(true)
+	elif item_id == "clan":
+		ClanTent.raise($Stations, progress.clan)
 	elif item_id.begins_with("item_forge") and progress.forge_built():
 		_dress_forge()
 	hunter.equip(progress.hunt_items())

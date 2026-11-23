@@ -70,6 +70,8 @@ var _scout_left := 0.0
 var first_hunt := false
 ## Injected: hunts finished before this one; terminators can come from the 11th on (issue 8).
 var hunts_done := 0
+## Injected: the clan stew's shares while it lasts (issue #23), {} otherwise.
+var stew: Dictionary = {}
 var _tip := 0
 var _tip_left := 0.0
 ## Bait on the ground; the same array is shared with every boar.
@@ -140,6 +142,8 @@ func _ready() -> void:
 	_hunter.equip(items)
 	_hunter.start_hunt()
 	_hunter.health.armor = _hunter.loadout.armor
+	_hunter.stamina.boost(stew.get("stamina", 0.0))
+	_hunter.ride.foot_scale = 1.0 + stew.get("speed", 0.0)
 	_hunter.pit_dug.connect(_terrain.dig)  # before the trap setter digs any
 	if items.get("item_trap_setter", 0) > 0:
 		_set_traps_at_zones(zones)

@@ -50,9 +50,11 @@ func _ready() -> void:
 	hide()
 
 
-## Opens on the clan list; from a just-upgraded hut, on what founding takes.
-func open(founding := false) -> void:
-	if founding and not progress.clan:
+## Opens on the clan list; from a just-upgraded hut, on what founding takes; in the clan tent, on the tent.
+func open(founding := false, tent := false) -> void:
+	if tent and progress.clan:
+		show_tent()
+	elif founding and not progress.clan:
 		show_requirements()
 	else:
 		show_list()
@@ -209,6 +211,26 @@ func show_page() -> void:
 	_label("Achievements: %s" % (", ".join(earned) if not earned.is_empty() else "none yet"))
 	_button("Edit clan", show_form)
 	_button("All clans", show_list)
+
+
+## Inside the clan tent (issue #23): the free stew, the clan totem, the trophies.
+func show_tent() -> void:
+	var clan: Clan = progress.clan
+	_clear("%s tent" % clan.name)
+	_label("%s tent, rating %d" % [clan.tier_name(), clan.rating()])
+	var bonus := clan.stew_bonus()
+	var now := int(Time.get_unix_time_from_system())
+	_label("Clan stew: +%d%% stamina and +%d%% speed on hunts for %d h." % [roundi(bonus["stamina"] * 100),
+		roundi(bonus["speed"] * 100), Clan.STEW_HOURS + clan.level()])
+	var left := clan.stew_until - now
+	var eat := _button("Working: %d:%02d left" % [left / 3600, left / 60 % 60] if left > 0 else "Eat the stew (free)", func() -> void:
+		if clan.eat_stew(int(Time.get_unix_time_from_system())):
+			Sfx.ui(self, "buying")
+			purchased.emit("stew")
+		show_tent())
+	eat.disabled = left > 0
+	_button("Clan totem", show_page)
+	_label("Trophies: none yet.")
 
 
 func _clear(title: String) -> void:

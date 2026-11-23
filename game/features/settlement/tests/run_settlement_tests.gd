@@ -25,6 +25,7 @@ func _init() -> void:
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
+	failures += _check(_clan_stew_lasts_and_grows(), "the clan stew is eaten once per buff, which lasts longer and works harder with the level")
 	failures += _check(_clan_needs_hut_and_tent(), "a clan is founded with the hut, its clan tent and a name, rates its hunts and survives a save")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
 	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
@@ -92,6 +93,17 @@ func _forge_recipes_need_forge_and_metal() -> bool:
 	var short := not progress.buy("item_armor_shock")
 	return before_built and short and progress.buy("item_armor") and progress.owns("item_armor") and progress.tusks == 500 \
 		and progress.items["item_metal_plate"] == 5 and progress.items["item_component"] == 0 and not progress.buy("item_armor")
+
+
+func _clan_stew_lasts_and_grows() -> bool:
+	var clan := Progress.Clan.new()
+	clan.name = "Stew"
+	var first := clan.eat_stew(1000) and not clan.eat_stew(1000 + 7199) and clan.stew_active(1000 + 7199)
+	var worn_off := not clan.stew_active(1000 + 7200)
+	clan.deeds["hunts"] = 100  # rating 10000: Common, level 1
+	var stronger := clan.eat_stew(9000) and clan.stew_until == 9000 + 3 * 3600 and is_equal_approx(clan.stew_bonus()["stamina"], 0.2)
+	var back := Progress.Clan.from_dict(clan.to_dict())
+	return first and worn_off and stronger and back.stew_until == clan.stew_until
 
 
 func _clan_needs_hut_and_tent() -> bool:
