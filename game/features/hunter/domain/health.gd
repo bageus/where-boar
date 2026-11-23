@@ -18,3 +18,8 @@ func take(damage: int) -> void:
 
 func is_down() -> bool:
 	return value == 0
+
+
+## The hired healer (issue #12) tops health up again, never past MAX.
+func heal(amount: int) -> void:
+	value = mini(MAX, value + maxi(0, amount))
