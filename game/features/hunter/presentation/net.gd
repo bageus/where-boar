@@ -23,6 +23,7 @@ func _on_body_entered(body: Node) -> void:
 	if _landed:
 		return
 	_landed = true
+	$Model.spinning = false
 	Sfx.play(self, "net_fell", 0.0, 20.0)
 	# Anything but a boar or helper animal (tree, rock): drop straight down, never freeze mid-air.
 	if not body.has_method("net_hit") and not body.get_parent() is BoarBody:

@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## The hunters the player can be (owner's references, 2026-11-02), picked in the settings: the body
-## that casts the shadow and the forearm seen in first person (tools/build_peak_cavemen.py).
+## that casts the shadow (tools/build_peak_cavemen.py). First person shows no arms (owner, 2026-11-23).
 
 const DEFAULT := "bearded"
 const KINDS: Array[String] = ["bearded", "plump", "lanky"]
@@ -20,7 +20,3 @@ static func known(kind: String) -> String:
 
 static func body(kind: String) -> PackedScene:
 	return load("res://assets/models/peak_cavemen/%s.glb" % known(kind))
-
-
-static func arm(kind: String) -> PackedScene:
-	return load("res://assets/models/peak_cavemen/arm_%s.glb" % known(kind))

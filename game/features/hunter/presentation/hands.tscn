@@ -1,13 +1,12 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://game/features/hunter/presentation/hands.gd" id="1_hands"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_cavemen/arm_bearded.glb" id="2_hand"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/spear.tscn" id="3_spear"]
+[ext_resource type="PackedScene" path="res://assets/models/weapon_new/spear.tscn" id="3_spear"]
 [ext_resource type="PackedScene" path="res://game/features/hunter/presentation/net_model.tscn" id="4_net"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/club.tscn" id="5_club"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/sling.tscn" id="6_sling"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/bow.tscn" id="7_bow"]
-[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/knife.tscn" id="8_knife"]
+[ext_resource type="PackedScene" path="res://assets/models/weapon_new/club.tscn" id="5_club"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/presentation/sling_model.tscn" id="6_sling"]
+[ext_resource type="PackedScene" path="res://game/features/hunter/presentation/bow_model.tscn" id="7_bow"]
+[ext_resource type="PackedScene" path="res://assets/models/weapon_new/knife.tscn" id="8_knife"]
 
 [node name="Hands" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.35, -0.5)
@@ -18,18 +17,12 @@ transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -0.3)
 
 [node name="Model" parent="Spear" instance=ExtResource("3_spear")]
 
-[node name="Hand" parent="Spear" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, -0.35, 0)
-
 [node name="Net" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.12, -0.1)
 visible = false
 
 [node name="Model" parent="Net" instance=ExtResource("4_net")]
-transform = Transform3D(0.45, 0, 0, 0, 0.45, 0, 0, 0, 0.45, 0.06, -0.33, 0.16)
-
-[node name="Hand" parent="Net" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, -0.04, 0.1)
+transform = Transform3D(0.45, 0, 0, 0, 0.45, 0, 0, 0, 0.45, 0, 0.05, 0)
 
 [node name="Club" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.8, 0.6, 0, -0.6, 0.8, 0, 0.05, 0)
@@ -37,34 +30,22 @@ visible = false
 
 [node name="Model" parent="Club" instance=ExtResource("5_club")]
 
-[node name="Hand" parent="Club" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 0.8, -0.6, 0, 0.6, 0.8, 0, -0.25, 0)
-
 [node name="Sling" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.2, 0)
 visible = false
 
 [node name="Model" parent="Sling" instance=ExtResource("6_sling")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
-
-[node name="Hand" parent="Sling" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0, 0.2, 0)
+transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0, 0)
 
 [node name="Bow" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.1, -0.1)
 visible = false
 
 [node name="Model" parent="Bow" instance=ExtResource("7_bow")]
-transform = Transform3D(0.6428, 0, -0.766, 0, 1, 0, 0.766, 0, 0.6428, 0, 0, 0)
-
-[node name="Hand" parent="Bow" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.2275, -0.1414, -0.625, 0.04835, 0.6651, -0.1329, 0.639, 0, 0.2326, 0, 0, 0)
 
 [node name="Knife" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.1, 0)
 visible = false
 
 [node name="Model" parent="Knife" instance=ExtResource("8_knife")]
-
-[node name="Hand" parent="Knife" instance=ExtResource("2_hand")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.02)

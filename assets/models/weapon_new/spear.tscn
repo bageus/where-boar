@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/weapon_new/Stone_Spear.glb" id="1_glb"]
+
+[node name="Spear" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_glb")]
+transform = Transform3D(0, -0.83, 0, 0.83, 0, 0, 0, 0, 0.83, 0, -0.0208, 0)

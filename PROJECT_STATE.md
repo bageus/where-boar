@@ -3,10 +3,10 @@ state_version: 1
 status: IMPLEMENTATION
 current_phase: 3
 current_milestone: P3_VERTICAL_SLICE
-active_task_id: P3-113
+active_task_id: P3-115
 last_completed_task_id: P3-055
 build_status: PASS
-updated: 2026-11-22
+updated: 2026-11-23
 ---
 
 # Project State
@@ -27,7 +27,7 @@ P3_VERTICAL_SLICE — объём MVP в сером виде (GAME_SPEC разд�
 
 ## Active task
 
-None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) done. P3-101 (planning mode stage 1) done; P3-109 (forest gatherables placed, collecting not yet) done; P3-110 (owner's new camp building models, huts for sale, forge build, quest board, sell resources) done; next stages P3-102..P3-107.
+None. P3-001..P3-080 P3-091..P3-098 done. P3-099 (cyborg boars) done. P3-101 (planning mode stage 1) done; P3-109 (forest gatherables placed, collecting not yet) done; P3-110 (owner's new camp building models, huts for sale, forge build, quest board, sell resources) done; P3-115 (owner's new weapon models, no arms in first person, procedural bowstring and slingshot bands, net hangs and unfolds with spin) done; next stages P3-102..P3-107.
 
 ## Last completed work
 
