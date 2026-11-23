@@ -16,6 +16,7 @@ const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const ClanPanel = preload("res://game/presentation/camp/hud/clan_panel.gd")
+const PenWander = preload("res://game/presentation/camp/props/pen_wander.gd")
 const ClanTent = preload("res://game/presentation/camp/props/clan_tent.gd")
 const ShamanRitual = preload("res://game/presentation/camp/props/shaman_ritual.gd")
 const BeautyPanel = preload("res://game/presentation/camp/hud/beauty_panel.gd")
@@ -242,6 +243,9 @@ func _fill_pen() -> void:
 		boar.position = Vector3(PEN_SPOTS[i].x, 0.0, PEN_SPOTS[i].y)
 		boar.rotation.y = PEN_SPOTS[i].z
 		boar.scale = Vector3.ONE / pens.scale.x  # the pen model is scaled down, the boars are not
+		var wander := PenWander.new()
+		wander.boar = boar
+		boar.add_child(wander)
 	if not penned.is_empty():
 		get_tree().create_timer(randf_range(0.0, PEN_VOICE_SECONDS.y)).timeout.connect(_pen_voice.bind(penned))
 	for spot: Vector2 in RAIL_SADDLES:
@@ -348,10 +352,27 @@ func _window_open() -> bool:
 
 
 func _station_in_reach() -> Node3D:
+	var best: Node3D = null
+	var best_score := INF
 	for station: Node3D in $Stations.get_children():
-		if station.distance_to(hunter.global_position) <= (USE_RADIUS_SOLID if station.solid else USE_RADIUS):
-			return station
-	return null
+		var distance: float = station.distance_to(hunter.global_position)
+		if distance > (USE_RADIUS_SOLID if station.solid else USE_RADIUS):
+			continue
+		# Nearest wins; standing inside a walk-in tent must not beat the chest by its door.
+		var score := distance + (0.5 if station.walk_in else 0.0)
+		if score < best_score:
+			best = station
+			best_score = score
+	return best
+
+
+## Esc closes the open window (and gives the mouse back to the game) instead of opening the pause menu over it.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause") and _window_open():
+		for panel: Control in [_shop, _clan_panel, _box, _signpost, _beauty]:
+			if panel.visible:
+				panel.close()
+		get_viewport().set_input_as_handled()
 
 
 func _use(station: Node3D) -> void:
@@ -406,7 +427,7 @@ func _dress_huts() -> void:
 			hut.set_model(HUT_VARIANTS[hut.get_meta("variant")])
 		if mine and progress.paint.has("hut"):
 			BoarModel.tint(hut.get_node("Model"), Color(ShopCatalog.PAINTS[progress.paint["hut"]]["color"]))
-		hut.title = "Your hut" if mine else "For sale\n%d tusks" % ShopCatalog.ITEMS["item_hut"]["price"]
+		hut.title = "Your hut" if mine else ("Not for clan leaders" if progress.owns("item_clan_tent") else "For sale\n%d tusks" % ShopCatalog.ITEMS["item_hut"]["price"])
 		hut.get_node("Label").text = hut.title
 
 

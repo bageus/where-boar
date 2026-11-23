@@ -87,7 +87,7 @@ func show_requirements() -> void:
 	_box.add_child(row)
 	for item_id in ["item_hut", "item_clan_tent"]:
 		var button := Button.new()
-		var owned := progress.owns(item_id)
+		var owned := progress.owns(item_id) or progress.owns("item_clan_tent")
 		var label := "Buy a hut" if item_id == "item_hut" else "Upgrade the hut"
 		button.text = "%s\n%s" % [label, "done" if owned else "%d tusks" % ShopCatalog.price(item_id)]
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -100,7 +100,7 @@ func show_requirements() -> void:
 				purchased.emit(item_id)
 			show_requirements())
 		row.add_child(button)
-	if progress.owns("item_hut") and progress.owns("item_clan_tent"):
+	if progress.owns("item_clan_tent"):
 		var create := _button("Create clan", show_form)
 		create.custom_minimum_size.y = 56
 		create.add_theme_font_size_override("font_size", 24)

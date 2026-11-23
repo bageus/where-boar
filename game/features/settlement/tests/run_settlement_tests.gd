@@ -134,6 +134,7 @@ func _clan_needs_hut_and_tent() -> bool:
 	progress.tusks = 8000
 	var no_tent_first := not progress.buy("item_clan_tent") and progress.buy("item_hut") and not progress.found_clan("Tusks")
 	var founded := progress.buy("item_clan_tent") and not progress.found_clan("  ") and progress.found_clan(" Tusks ")
+	var leader_no_hut := not progress.owns("item_hut") and not progress.buy("item_hut") and progress.hut_slot == -1
 	progress.clan.rules = {"hunts": 5}
 	var hunt := Hunt.new(3)
 	hunt.record("common_brown", BoarOutcome.Kind.DEAD)
@@ -142,7 +143,7 @@ func _clan_needs_hut_and_tent() -> bool:
 	progress.add_hunt(hunt)
 	progress.add_hunt(Hunt.new(1))  # nothing killed or caught: not a hunt for the clan
 	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
-	return no_tent_first and founded and back.clan.name == "Tusks" and back.clan.rules == {"hunts": 5} \
+	return no_tent_first and founded and leader_no_hut and back.clan.name == "Tusks" and back.clan.rules == {"hunts": 5} \
 		and back.clan.rating() == 100 + 20 + 50 + 200 and back.clan.achievements() == ["First hunt", "First boar caught", "First terminator"] \
 		and back.clan.tier_name() == "New" and Progress.from_dict({}).clan == null
 

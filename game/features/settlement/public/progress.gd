@@ -112,6 +112,10 @@ func buy(item_id: String) -> bool:
 			if ShopCatalog.ITEMS[other].get("crew", false):
 				items.erase(other)
 	items[item_id] = mini(items.get(item_id, 0) + item.get("pack", 1), item.get("max", 1 << 30))
+	if item_id == "item_clan_tent":  # the hut became the tent: a clan leader owns no hut and cannot buy one
+		items.erase("item_hut")
+		hut_slot = -1
+		hut_variant = -1
 	carry(item_id)  # new gear goes straight into the pack while it fits
 	return true
 
@@ -150,7 +154,7 @@ func paint_target(target: String, color_id: String) -> bool:
 
 ## Founding a clan takes the hut and its clan tent upgrade and a name (issue #27); false and no clan otherwise.
 func found_clan(clan_name: String) -> bool:
-	if clan or clan_name.strip_edges() == "" or not owns("item_hut") or not owns("item_clan_tent"):
+	if clan or clan_name.strip_edges() == "" or not owns("item_clan_tent"):
 		return false
 	clan = Clan.new()
 	clan.name = clan_name.strip_edges()
@@ -168,6 +172,8 @@ func has_parts(item_id: String) -> bool:
 
 ## A saddle needs a caught boar of its type in the pens (D021); a forge recipe needs the forge built.
 func unlocked(item_id: String) -> bool:
+	if item_id == "item_hut" and owns("item_clan_tent"):
+		return false
 	if ShopCatalog.ITEMS.get(item_id, {}).has("parts"):
 		return forge_built()
 	if ShopCatalog.ITEMS.get(item_id, {}).has("requires_item"):

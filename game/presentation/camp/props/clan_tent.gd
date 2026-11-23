@@ -8,6 +8,8 @@ const Station = preload("res://game/presentation/camp/props/station.tscn")
 const BUILDINGS := "res://assets/models/buildings/"
 const TENT = preload(BUILDINGS + "Prehistoric_Ochre_Clan_Tent.glb")
 const CAULDRON = preload(BUILDINGS + "Tripod_Cauldron_and_Hearth.glb")
+const FLAME = preload("res://assets/fire/flame.tscn")
+const EMBERS = preload("res://assets/fire/embers.tres")
 const TOTEM = preload(BUILDINGS + "Chunky_Boar_Log_Totem.glb")
 const CHEST = preload(BUILDINGS + "Primitive_Stick_Chest.glb")
 ## Free ground between the campfire, the hunting hut and the tavern; the door faces the campfire.
@@ -40,6 +42,8 @@ static func raise(stations: Node3D, clan: RefCounted) -> void:
 			decor.position = part[1]
 			decor.scale = Vector3.ONE * part[2]
 			tent.add_child(decor)
+			if part[0] == CAULDRON:
+				_light_hearth(decor)
 		var chest: Node3D = Station.instantiate()
 		chest.name = "ClanChest"
 		chest.station_id = "chest"
@@ -50,7 +54,25 @@ static func raise(stations: Node3D, clan: RefCounted) -> void:
 		chest.rotation.y = YAW
 		chest.scale = Vector3.ONE * 0.6
 		stations.add_child(chest)
-	tent.scale = Vector3.ONE * (1.0 + 0.08 * clan.level())
+	tent.scale = Vector3.ONE * (1.3 + 0.08 * clan.level())  # 30% bigger than first drawn (issue #23)
 	tent.title = "%s\n%s tent" % [clan.name, clan.tier_name()]
 	tent.get_node("Label").text = tent.title
 	tent.get_node("Label").modulate = TIER_COLORS[clan.level()]
+
+
+## Shader flame and glowing coals in the cauldron's stone hearth (cauldron model units; hearth centre by AABB, unchecked by eye).
+static func _light_hearth(cauldron: Node3D) -> void:
+	var coals := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.55
+	disc.bottom_radius = 0.55
+	disc.height = 0.05
+	disc.material = EMBERS
+	coals.mesh = disc
+	coals.position = Vector3(0.0, 0.12, -0.28)
+	coals.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	cauldron.add_child(coals)
+	var flame: Node3D = FLAME.instantiate()
+	flame.position = Vector3(0.0, 0.13, -0.28)
+	flame.scale = Vector3.ONE * 1.1
+	cauldron.add_child(flame)
