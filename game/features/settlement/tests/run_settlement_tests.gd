@@ -22,6 +22,7 @@ func _init() -> void:
 	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
+	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
 	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
 	print("settlement tests: %d failure(s)" % failures)
@@ -74,6 +75,17 @@ func _round_trip() -> bool:
 	progress.items = {"item_bow": 1}
 	var back := Progress.from_dict(JSON.parse_string(JSON.stringify(progress.to_dict())))
 	return back.tusks == 7 and back.caught == {"common_brown": 2} and back.owns("item_bow")
+
+
+func _forge_recipes_need_forge_and_metal() -> bool:
+	var progress := Progress.new()
+	progress.tusks = 2500
+	progress.items = {"item_metal_plate": 25, "item_component": 5, "item_metal_tusk": 10}
+	var before_built := not progress.buy("item_armor")
+	progress.forge = ShopCatalog.FORGE_COST
+	var short := not progress.buy("item_armor_shock")
+	return before_built and short and progress.buy("item_armor") and progress.owns("item_armor") and progress.tusks == 500 \
+		and progress.items["item_metal_plate"] == 5 and progress.items["item_component"] == 0 and not progress.buy("item_armor")
 
 
 func _bad_data_falls_back() -> bool:

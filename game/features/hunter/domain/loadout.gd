@@ -41,6 +41,8 @@ const TRAP_SETTER_ID := "item_trap_setter"
 ## Camp meals and their stamina bonus; one of each kind is eaten at hunt start (M012, ASSUMPTION).
 const MEALS := {"item_feast": 50.0, "item_roast": 35.0, "item_stew": 20.0}
 const WATER_BAG_ID := "item_water_bag"
+## Forge armor and the damage it takes each hunt; the best one owned is worn (issue #11, ASSUMPTION).
+const ARMORS := {"item_armor_shock": 300, "item_armor": 200}
 ## Sips the bag holds; unused water stays in camp stock (owner, 2026-10-27).
 const WATER_SIPS := 3
 ## A hired porter carries more nets and arrows (M013, ASSUMPTION).
@@ -81,6 +83,8 @@ var bait_id: String = BAIT_IDS[0]
 var trap_id: String = TRAP_IDS[0]
 var water_sips := 0
 var _meals: Dictionary = {}
+## Damage the worn forge armor takes each hunt; 0 without armor.
+var armor := 0
 ## Boar type ids with a saddle bought in camp (D021).
 var saddled: Array[String] = []
 var _bought: Array[Weapon] = []
@@ -105,6 +109,10 @@ func equip(items: Dictionary) -> void:
 	for item_id in MEALS:
 		_meals[item_id] = items.get(item_id, 0)
 	water_sips = mini(items.get(WATER_ID, 0), WATER_SIPS) if items.get(WATER_BAG_ID, 0) > 0 else 0
+	armor = 0
+	for item_id in ARMORS:
+		if items.get(item_id, 0) > 0:
+			armor = maxi(armor, ARMORS[item_id])
 	saddled.clear()
 	for item_id in items:
 		if item_id.begins_with(SADDLE_PREFIX) and items[item_id] > 0:

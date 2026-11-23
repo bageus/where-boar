@@ -71,8 +71,11 @@ func buy(item_id: String) -> bool:
 		companion = item["companion"]
 		return true
 	if item.is_empty() or sold_out(item_id) or not unlocked(item_id) or (forge_built() and item.has("donate")) \
-			or not spend(ShopCatalog.price(item_id)):
+			or not has_parts(item_id) or not spend(ShopCatalog.price(item_id)):
 		return false
+	var parts := ShopCatalog.parts(item_id)
+	for part_id in parts:
+		items[part_id] -= parts[part_id]
 	if item.has("donate"):
 		forge += item["donate"]
 		return true
@@ -89,8 +92,19 @@ func sold_out(item_id: String) -> bool:
 	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
 
 
-## A saddle needs a caught boar of its type in the pens (D021).
+## True when the stock holds every part a forge recipe takes.
+func has_parts(item_id: String) -> bool:
+	var parts := ShopCatalog.parts(item_id)
+	for part_id in parts:
+		if items.get(part_id, 0) < parts[part_id]:
+			return false
+	return true
+
+
+## A saddle needs a caught boar of its type in the pens (D021); a forge recipe needs the forge built.
 func unlocked(item_id: String) -> bool:
+	if ShopCatalog.ITEMS.get(item_id, {}).has("parts"):
+		return forge_built()
 	var animal: String = ShopCatalog.ITEMS.get(item_id, {}).get("companion", "")
 	if animal != "":
 		return helpers.get(animal, 0) > 0
