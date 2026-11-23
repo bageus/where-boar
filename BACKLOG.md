@@ -172,3 +172,4 @@ Unapproved ideas and possible future features belong here.
 | P3-118 | 3 | Issues #16, #17, #13, #15: pick the ridden boar in the pens; sell caught birds at the cages and baits at the hunting hut; hunting hut tabs (baits, traps, other); gear box at the chest: pack vs box, 2 weapon kinds + club + knife, 3 baits / 1 trap (6 / 2 with a helper), 1 armor, 1 tool (forge upgrade) | P3-110 | DONE |
 | P3-121 | 3 | Huts can be walked into (#22): mesh-exact hut walls, doorway open (`station.gd` `walk_in`) | P3-110 | DONE |
 | P3-122 | 3 | Hut interior decor (#22; no decor anywhere yet) | P3-121 | TODO |
+| P3-123 | 3 | Gather forest finds with E (issues #21, #25, #26): pocket limits per hunt, finds go to camp materials for selling and quests, icons on results and camp HUD | P3-109 | DONE |
