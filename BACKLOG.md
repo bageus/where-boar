@@ -169,3 +169,5 @@ Unapproved ideas and possible future features belong here.
 | P3-120 | 3 | Tavern hires warriors (issue #12): trap setter, warrior or healer, one per hunt; team line at the bottom of the tavern; the warrior strikes running boars near the hunter, the healer heals when the hunter stands by him | P3-110 | DONE |
 | P3-116 | 3 | Effects of the forge recipes (issue #11): stun sling, spear thrower and its spears at the armory, booster, jumper, war cry, ram shield; shock armor stops ram knockback | P3-111 | TODO |
 | P3-117 | 3 | Camp features behind the new buildings, part 2: beauty hut painting (#18), shaman ritual (#20), trophies (#19), gear chest, which birds can be trained (owner: only bought ones; needs a rule for buying birds) | P3-110 | TODO |
+| P3-121 | 3 | Huts can be walked into (#22): mesh-exact hut walls, doorway open (`station.gd` `walk_in`) | P3-110 | DONE |
+| P3-122 | 3 | Hut interior decor (#22; no decor anywhere yet) | P3-121 | TODO |
