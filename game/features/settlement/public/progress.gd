@@ -153,12 +153,13 @@ func forge_built() -> bool:
 
 ## Sells up to count of a material (or bird, or bait) for pay tusks per units; only whole lots go.
 ## Returns tusks earned.
+@warning_ignore("integer_division")
 func sell(material_id: String, count: int, units: int, pay := 1) -> int:
-	var store := stock(material_id)
-	var sold := mini(count, store.get(material_id, 0)) / units * units
+	var bin := stock(material_id)
+	var sold := mini(count, bin.get(material_id, 0)) / units * units
 	if sold <= 0:
 		return 0
-	store[material_id] -= sold
+	bin[material_id] -= sold
 	_fit_carried()
 	tusks += sold / units * pay
 	return sold / units * pay

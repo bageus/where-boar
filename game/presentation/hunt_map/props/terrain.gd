@@ -306,8 +306,8 @@ func _place_cliff_rocks() -> void:
 			var x := best.x - (w - 1) * 0.5
 			var z := best.y - (d - 1) * 0.5
 			var down := _normal(best.x, best.y)  # the wall's face (+z) looks down the slope
-			var basis := Basis(Vector3.UP, atan2(down.x, down.z) + rng.randf_range(-0.2, 0.2)).scaled(Vector3.ONE * size)
-			var spot := Transform3D(basis, Vector3(x, height_at(x, z) - box.size.y * size * 0.45, z))
+			var rot := Basis(Vector3.UP, atan2(down.x, down.z) + rng.randf_range(-0.2, 0.2)).scaled(Vector3.ONE * size)
+			var spot := Transform3D(rot, Vector3(x, height_at(x, z) - box.size.y * size * 0.45, z))
 			spots[k].append(spot)
 			var shape := CollisionShape3D.new()
 			shape.shape = hulls[k]

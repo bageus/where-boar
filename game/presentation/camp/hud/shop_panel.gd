@@ -107,9 +107,9 @@ func _item_rows() -> void:
 		_tab_buttons(ids)
 	for item_id in ids:
 		var item: Dictionary = ShopCatalog.ITEMS[item_id]
-		var hidden: bool = (item.get("tab", "") != _tab if progress.forge_built() else not item.has("donate")) \
+		var is_hidden: bool = (item.get("tab", "") != _tab if progress.forge_built() else not item.has("donate")) \
 				if _shop_id == "forge" else item.get("tab", _tab) != _tab
-		if hidden:
+		if is_hidden:
 			continue
 		var button := Button.new()
 		var owned: bool = progress.sold_out(item_id)

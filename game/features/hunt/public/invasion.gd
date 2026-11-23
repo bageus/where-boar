@@ -52,9 +52,9 @@ func record_boar(dead: bool, captured: bool, leader: bool) -> bool:
 
 
 ## A terminator is gone; killed ones drop their loot.
-func record_terminator(killed: bool) -> void:
+func record_terminator(was_killed: bool) -> void:
 	left = maxi(0, left - 1)
-	if killed:
+	if was_killed:
 		self.killed += 1
 		for item_id in LOOT:
 			loot[item_id] = loot.get(item_id, 0) + LOOT[item_id]

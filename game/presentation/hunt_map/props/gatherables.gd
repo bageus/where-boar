@@ -81,8 +81,8 @@ func populate(terrain: Node3D, hosts: Dictionary) -> void:
 
 func _still(glb: String, at: Vector3, scale_range: Vector2, tilt := 0.0) -> void:
 	var meshes := _load_meshes(glb)
-	var basis := Basis.from_euler(Vector3(_rng.randf_range(-tilt, tilt), _rng.randf() * TAU, _rng.randf_range(-tilt, tilt)))
-	var spot := Transform3D(basis.scaled(Vector3.ONE * _rng.randf_range(scale_range.x, scale_range.y)), at - Vector3.UP * 0.02)
+	var tilt_basis := Basis.from_euler(Vector3(_rng.randf_range(-tilt, tilt), _rng.randf() * TAU, _rng.randf_range(-tilt, tilt)))
+	var spot := Transform3D(tilt_basis.scaled(Vector3.ONE * _rng.randf_range(scale_range.x, scale_range.y)), at - Vector3.UP * 0.02)
 	var key := ["poison" if glb == "Poisonous_Berries" else "atlas", Vector2i(floori(at.x / CELL), floori(at.z / CELL))]
 	if not _batches.has(key):
 		_batches[key] = []

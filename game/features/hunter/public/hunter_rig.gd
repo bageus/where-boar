@@ -57,6 +57,7 @@ static func _free_belly(mi: MeshInstance3D, skeleton: Skeleton3D) -> Mesh:
 		var arrays := mesh.surface_get_arrays(s)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+		@warning_ignore("integer_division")
 		var per := bones.size() / vertices.size()
 		for v in vertices.size():
 			if chest < 0 or (mi.transform * vertices[v]).y > shoulder - BELOW_ARM:
