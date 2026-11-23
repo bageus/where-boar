@@ -28,6 +28,11 @@ func show_results(hunt: Hunt, total_tusks: int) -> void:
 		lines.append("Terminator loot: %s metal tusks %d, %s metal plates %d, %s components %d" % [
 			ItemIcons.bbcode("item_metal_tusk"), loot.get("item_metal_tusk", 0), ItemIcons.bbcode("item_metal_plate"),
 			loot.get("item_metal_plate", 0), ItemIcons.bbcode("item_component"), loot.get("item_component", 0)])
+	var finds := PackedStringArray()
+	for material_id: String in hunt.gathered:
+		finds.append("%s %d" % [ItemIcons.bbcode(material_id), hunt.gathered[material_id]])
+	if not finds.is_empty():
+		lines.append("Gathered: " + "   ".join(finds))
 	lines.append("")
 	lines.append("%sTusks earned: %d   (tribe total: %d)" % [ItemIcons.bbcode("tusk"), hunt.tusks(), total_tusks])
 	%Summary.text = "[center]%s[/center]" % "\n".join(lines)

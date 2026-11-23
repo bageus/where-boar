@@ -15,6 +15,7 @@ const HuntMusic = preload("res://game/presentation/hunt_map/props/hunt_music.gd"
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
 const InvasionDirector = preload("res://game/presentation/hunt_map/props/invasion_director.gd")
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
+const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const WILD_SCENES := [
 	preload("res://game/features/companions/public/wild_rooster.tscn"),
 	preload("res://game/features/companions/public/wild_turkey.tscn"),
@@ -26,6 +27,9 @@ signal hunt_ended(hunt: Hunt)
 ## ASSUMPTION (D013, section 11): two herds, six groups and loners. The first boar of the biggest herd leads it (issue 8).
 const GROUP_SIZES := [15, 12, 4, 4, 3, 3, 3, 1, 1, 1]
 const RETURN_RADIUS := 3.0
+## Forest finds are picked up within this many metres of a point this far ahead of the hunter (issue #26).
+const GATHER_REACH := 1.3
+const GATHER_AHEAD := 0.9
 ## ASSUMPTION (D013): how far a shout carries, metres.
 const SHOUT_RADIUS := 15.0
 ## The hired trap setter covers this many escape zones, this far in front of each (ASSUMPTION).
@@ -409,10 +413,31 @@ func _on_interacted() -> void:
 		if animal.try_grab(_hunter.global_position):
 			Sfx.play(_hunter, "pickup_bird")
 			return
-	if hunt.is_over() or _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
+	if hunt.is_over():
+		return
+	if _hunter.global_position.distance_to($ReturnPoint.global_position) > RETURN_RADIUS:
+		_gather()  # at the return point E goes back to camp, so a find there never blocks leaving
 		return
 	hunt.returned = true
 	_end()
+
+
+## Picks up the forest find in front of the hunter into the pockets, if there is one in reach.
+func _gather() -> void:
+	var gatherables: Node3D = _terrain.get_node_or_null("Gatherables")
+	if gatherables == null:
+		return
+	var found: Dictionary = gatherables.find(_hunter.global_position - _hunter.global_basis.z * GATHER_AHEAD, GATHER_REACH)
+	if found.is_empty():
+		return
+	var material_id: String = found["material"]
+	var name_: String = ShopCatalog.MATERIAL_NAMES[material_id]
+	if not hunt.gather(material_id):
+		_hunter.show_gain("No room for more %s" % name_.to_lower())
+		return
+	gatherables.remove(found)
+	_hunter.show_gain("+1 %s (%d/%d)" % [name_, hunt.gathered[material_id], Hunt.POCKET[material_id]])
+	Sfx.play(_hunter, "rustle", -6.0)
 
 
 ## Zero health: back to camp with what was caught, no defeat screen (section 10).

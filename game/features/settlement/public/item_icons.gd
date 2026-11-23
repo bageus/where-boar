@@ -11,6 +11,9 @@ const FILES := {
 	"item_sling": "sling", "item_bow": "bow", "item_knife": "knife", "item_arrow": "arrow", "item_stone": "stone",
 	"rooster": "rooster", "turkey": "turkey", "tusk": "tusk",
 	"item_metal_tusk": "metal_tusk", "item_metal_plate": "metal_plate", "item_component": "component",
+	# forest finds (material ids, shop_catalog.gd MATERIAL_NAMES)
+	"grass": "grass", "stick": "sticks", "feather": "feather", "berry": "berries", "poison_berry": "dark_berries",
+	"daisy": "flower", "mushroom": "mushroom", "frog": "frog", "larva": "grub", "stone": "stone",
 }
 
 

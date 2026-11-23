@@ -261,6 +261,12 @@ func _show_progress() -> void:
 		lines.append("%s: %d in pens" % [type.display_name if type else type_id, caught[type_id]])
 	for animal_id in progress.helpers:
 		lines.append("%s%s: %d in pens" % [ItemIcons.bbcode(animal_id), animal_id, progress.helpers[animal_id]])
+	var finds := PackedStringArray()
+	for material_id: String in progress.materials:
+		if progress.materials[material_id] > 0:
+			finds.append("%s%d" % [ItemIcons.bbcode(material_id, 22), progress.materials[material_id]])
+	if not finds.is_empty():
+		lines.append(" ".join(finds))
 	if progress.hunts == 0:
 		lines.append("First time? Walk to Start hunt (north) and press E.\nShops: Armory (west), Hunting hut (east), Campfire, Tavern (south-east), Pens and Cages (south-west), Well (water), Quests (by the gate).")
 	$Hud/Progress.text = "[right]%s[/right]" % "\n".join(lines)

@@ -42,7 +42,7 @@ var quests := QuestBoard.new()
 var clan: Clan = null
 
 
-## Adds a finished hunt's tusks and live catches and takes spent consumables out of stock.
+## Adds a finished hunt's tusks, live catches and forest finds and takes spent consumables out of stock.
 func add_hunt(hunt: Hunt) -> void:
 	hunts += 1
 	tusks += hunt.tusks()
@@ -50,6 +50,8 @@ func add_hunt(hunt: Hunt) -> void:
 		helpers[animal_id] = helpers.get(animal_id, 0) + hunt.helpers_caught[animal_id]
 	for item_id in hunt.invasion.loot:  # metal from terminators (issue 8)
 		items[item_id] = items.get(item_id, 0) + hunt.invasion.loot[item_id]
+	for material_id in hunt.gathered:
+		materials[material_id] = materials.get(material_id, 0) + hunt.gathered[material_id]
 	for item_id in hunt.used_items:
 		items[item_id] = maxi(0, items.get(item_id, 0) - hunt.used_items[item_id])
 	_fit_carried()

@@ -21,6 +21,7 @@ func _init() -> void:
 	failures += _check(_extra_spears_stop_at_two(), "spears stack to three, arrows come in packs, new games get the starter kit once")
 	failures += _check(_saddle_needs_caught_boar(), "a saddle needs a caught boar of its type")
 	failures += _check(_pen_holds_five_newest(), "the camp pen keeps the five newest caught boars, oldest out first")
+	failures += _check(_hunt_brings_finds_home(), "forest finds of a hunt join the camp materials")
 	failures += _check(_sell_whole_tusks_only(), "selling pays whole tusks and keeps the rest of the stack")
 	failures += _check(_forge_takes_gifts_until_built(), "the forge takes gifts until its cost is reached")
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
@@ -169,6 +170,16 @@ func _saddle_needs_caught_boar() -> bool:
 	var locked := not progress.buy("item_saddle_runner_grey")
 	progress.caught = {"runner_grey": 1}
 	return locked and progress.tusks == 100 and progress.buy("item_saddle_runner_grey") and progress.tusks == 50
+
+
+func _hunt_brings_finds_home() -> bool:
+	var progress := Progress.new()
+	progress.materials = {"stick": 5}
+	var hunt := Hunt.new()
+	hunt.gather("stick")
+	hunt.gather("frog")
+	progress.add_hunt(hunt)
+	return progress.materials == {"stick": 6, "frog": 1}
 
 
 func _sell_whole_tusks_only() -> bool:
