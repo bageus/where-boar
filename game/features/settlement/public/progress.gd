@@ -9,6 +9,7 @@ const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
 
 const PEN_MAX := 5
+const SADDLE := "item_saddle_"
 
 var tusks := 0
 ## type_id -> animals caught alive and kept in camp.
@@ -23,6 +24,10 @@ var helpers: Dictionary = {}
 var hunts := 0
 ## Helper animal taken on the next hunt ("rooster", "turkey" or "" for the first one in the pen).
 var companion := ""
+## Saddled boar type ridden on the next hunt ("" for the first saddle bought; issue #16).
+var mount := ""
+## Slotted item_id -> count packed for the hunt (issue #15); the rest of items stays in the gear box.
+var carried: Dictionary = {}
 ## material id -> forest finds carried to camp (sticks, feathers, berries...), sold at shops (issue #21).
 var materials: Dictionary = {}
 ## The bought hut: its camp slot and its look (one of the five variants, kept for good; issue #22); -1 = none.
@@ -44,6 +49,7 @@ func add_hunt(hunt: Hunt) -> void:
 		items[item_id] = items.get(item_id, 0) + hunt.invasion.loot[item_id]
 	for item_id in hunt.used_items:
 		items[item_id] = maxi(0, items.get(item_id, 0) - hunt.used_items[item_id])
+	_fit_carried()
 	quests.add_hunt(hunt)
 	for type_id in hunt.type_ids():
 		var alive := hunt.count(type_id, BoarOutcome.Kind.CAPTURED)
@@ -65,10 +71,13 @@ func spend(cost: int) -> bool:
 ## Buys one catalog item; false when unknown, already owned (unique), locked or too expensive.
 func buy(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
-	if item.has("companion"):
+	if item.has("companion") or item.has("mount"):
 		if not unlocked(item_id):
 			return false
-		companion = item["companion"]
+		if item.has("mount"):
+			mount = item["mount"]
+		else:
+			companion = item["companion"]
 		return true
 	if item.is_empty() or sold_out(item_id) or not unlocked(item_id) or (forge_built() and item.has("donate")) \
 			or not has_parts(item_id) or not spend(ShopCatalog.price(item_id)):
@@ -84,6 +93,7 @@ func buy(item_id: String) -> bool:
 			if ShopCatalog.ITEMS[other].get("crew", false):
 				items.erase(other)
 	items[item_id] = mini(items.get(item_id, 0) + item.get("pack", 1), item.get("max", 1 << 30))
+	carry(item_id)  # new gear goes straight into the pack while it fits
 	return true
 
 
@@ -92,6 +102,8 @@ func sold_out(item_id: String) -> bool:
 	var item: Dictionary = ShopCatalog.ITEMS.get(item_id, {})
 	if item.has("companion"):
 		return companion == item["companion"]
+	if item.has("mount"):
+		return riding() == item["mount"]
 	var have: int = items.get(item_id, 0)
 	return (item.get("unique", false) and have > 0) or have >= item.get("max", 1 << 30)
 
@@ -112,6 +124,9 @@ func unlocked(item_id: String) -> bool:
 	var animal: String = ShopCatalog.ITEMS.get(item_id, {}).get("companion", "")
 	if animal != "":
 		return helpers.get(animal, 0) > 0
+	var ride: String = ShopCatalog.ITEMS.get(item_id, {}).get("mount", "")
+	if ride != "":
+		return owns(SADDLE + ride)
 	var needs: String = ShopCatalog.ITEMS.get(item_id, {}).get("requires_caught", "")
 	return needs == "" or caught.get(needs, 0) > 0 or ShopCatalog.free_for_testing
 
@@ -120,14 +135,115 @@ func forge_built() -> bool:
 	return forge >= ShopCatalog.FORGE_COST
 
 
-## Sells up to count of a material for 1 tusk per units; only whole tusks' worth goes. Returns tusks earned.
-func sell(material_id: String, count: int, units: int) -> int:
-	var sold := mini(count, materials.get(material_id, 0)) / units * units
+## Sells up to count of a material (or bird, or bait) for pay tusks per units; only whole lots go.
+## Returns tusks earned.
+func sell(material_id: String, count: int, units: int, pay := 1) -> int:
+	var store := stock(material_id)
+	var sold := mini(count, store.get(material_id, 0)) / units * units
 	if sold <= 0:
 		return 0
-	materials[material_id] -= sold
-	tusks += sold / units
-	return sold / units
+	store[material_id] -= sold
+	_fit_carried()
+	tusks += sold / units * pay
+	return sold / units * pay
+
+
+## Where a sellable id is kept: caught birds in the cages, catalog items in gear, the rest in forest finds.
+func stock(id: String) -> Dictionary:
+	if id in ShopCatalog.BIRD_IDS:
+		return helpers
+	return items if ShopCatalog.ITEMS.has(id) else materials
+
+
+## Boar type ridden on the next hunt: the picked one while its saddle is owned, else the first saddle.
+func riding() -> String:
+	if mount != "" and owns(SADDLE + mount):
+		return mount
+	for item_id in items:
+		if item_id.begins_with(SADDLE) and items[item_id] > 0:
+			return item_id.trim_prefix(SADDLE)
+	return ""
+
+
+## A hired helper (porter or any tavern crewman) doubles the baits and traps taken (issue #15).
+func helped() -> bool:
+	return owns("item_porter") or ShopCatalog.ITEMS.keys().any(func(id: String) -> bool: return ShopCatalog.ITEMS[id].get("crew", false) and owns(id))
+
+
+func slot_cap(slot: String) -> int:
+	return ShopCatalog.HELPER_SLOTS.get(slot, ShopCatalog.SLOTS[slot]) if helped() else ShopCatalog.SLOTS[slot]
+
+
+## Room used in a slot: pieces for baits and traps, kinds for the rest (all spears are one kind).
+func slot_used(slot: String) -> int:
+	var kinds := {}
+	var pieces := 0
+	for item_id in carried:
+		var item: Dictionary = ShopCatalog.ITEMS[item_id]
+		if item["slot"] == slot:
+			pieces += carried[item_id]
+			kinds[item.get("group", item_id)] = true
+	return pieces if slot in ["bait", "trap"] else kinds.size()
+
+
+## Left in the gear box (owned, not packed).
+func in_box(item_id: String) -> int:
+	return items.get(item_id, 0) - carried.get(item_id, 0)
+
+
+## Packs item_id from the box: one bait or trap, or the whole stack of a weapon. Returns how many moved.
+func carry(item_id: String) -> int:
+	var slot: String = ShopCatalog.ITEMS.get(item_id, {}).get("slot", "")
+	if slot == "" or in_box(item_id) <= 0:
+		return 0
+	var item: Dictionary = ShopCatalog.ITEMS[item_id]
+	var group: String = item.get("group", item_id)
+	var kind_packed := carried.keys().any(func(id: String) -> bool: return ShopCatalog.ITEMS[id].get("group", id) == group)
+	var moved := 0
+	if slot in ["bait", "trap"]:
+		moved = 1 if slot_used(slot) < slot_cap(slot) else 0
+	elif kind_packed or slot_used(slot) < slot_cap(slot):
+		moved = in_box(item_id)
+	if moved > 0:
+		carried[item_id] = carried.get(item_id, 0) + moved
+	return moved
+
+
+## Puts item_id back into the box: one bait or trap, or the whole stack of a weapon.
+func store(item_id: String) -> void:
+	var have: int = carried.get(item_id, 0)
+	if have <= 0:
+		return
+	var slot: String = ShopCatalog.ITEMS[item_id]["slot"]
+	carried[item_id] = have - 1 if slot in ["bait", "trap"] else 0
+	if carried[item_id] == 0:
+		carried.erase(item_id)
+
+
+## Gear the next hunt takes: slotted items only as packed, and only the ridden boar's saddle.
+func hunt_items() -> Dictionary:
+	var taken := {}
+	for item_id in items:
+		if ShopCatalog.ITEMS.get(item_id, {}).has("slot"):
+			taken[item_id] = carried.get(item_id, 0)
+		elif not item_id.begins_with(SADDLE) or item_id == SADDLE + riding():
+			taken[item_id] = items[item_id]
+	return taken
+
+
+## Packs everything that fits, in catalog order (new games and saves from before the gear box).
+func pack_all() -> void:
+	for item_id in ShopCatalog.ITEMS:
+		while carry(item_id) > 0:
+			pass
+
+
+## Spent or sold gear leaves the pack too.
+func _fit_carried() -> void:
+	for item_id in carried.keys():
+		carried[item_id] = mini(carried[item_id], items.get(item_id, 0))
+		if carried[item_id] <= 0:
+			carried.erase(item_id)
 
 
 ## Pays a claimed quest's reward; gathering quests hand their materials over (issue #25).
@@ -152,7 +268,8 @@ func owns(item_id: String) -> bool:
 
 func to_dict() -> Dictionary:
 	return {"tusks": tusks, "caught": caught.duplicate(), "items": items.duplicate(), "helpers": helpers.duplicate(),
-		"pen": pen.duplicate(), "hunts": hunts, "kit": true, "companion": companion, "materials": materials.duplicate(),
+		"pen": pen.duplicate(), "hunts": hunts, "kit": true, "companion": companion, "mount": mount,
+		"carried": carried.duplicate(), "materials": materials.duplicate(),
 		"hut_slot": hut_slot, "hut_variant": hut_variant, "forge": forge, "quests": quests.to_dict()}
 
 
@@ -174,6 +291,7 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	progress.pen = progress.pen.slice(maxi(0, progress.pen.size() - PEN_MAX))
 	progress.helpers = _counts(data.get("helpers", {}))
 	progress.companion = str(data.get("companion", ""))
+	progress.mount = str(data.get("mount", ""))
 	progress.materials = _counts(data.get("materials", {}))
 	var slot := int(data.get("hut_slot", -1))
 	var variant := int(data.get("hut_variant", -1))
@@ -187,6 +305,14 @@ static func from_dict(data: Dictionary) -> RefCounted:
 	if not data.get("kit", false):
 		for item_id in ShopCatalog.STARTER_KIT:
 			progress.items[item_id] = maxi(progress.items.get(item_id, 0), ShopCatalog.STARTER_KIT[item_id])
+	if data.get("carried") is Dictionary:
+		var saved := _counts(data["carried"])
+		for item_id in saved:
+			if ShopCatalog.ITEMS.get(item_id, {}).has("slot"):
+				progress.carried[item_id] = saved[item_id]
+		progress._fit_carried()
+	else:
+		progress.pack_all()
 	return progress
 
 

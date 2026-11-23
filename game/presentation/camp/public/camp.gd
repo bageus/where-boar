@@ -13,6 +13,7 @@ const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
+const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
 const BUILDINGS := "res://assets/models/buildings/"
 ## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
 const HUT_VARIANTS: Array[PackedScene] = [
@@ -82,7 +83,6 @@ var planning := false
 ## Shop windows' extra line for stations whose own features come later.
 const INFO := {
 	"totem": "Clans come later: here you will see the clans and their rating, and found your own (it takes a hut and its clan tent).",
-	"chest": "Your gear store comes later: swap weapons, baits and traps here.",
 	"beauty_hut": "Paint and decorations come later; they change only the look.",
 	"shaman_hut": "Rituals come later.",
 }
@@ -91,6 +91,7 @@ var _open_station: Node3D
 
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
+var _box := BoxPanel.new()
 
 
 func _ready() -> void:
@@ -102,10 +103,14 @@ func _ready() -> void:
 		_dress()
 		return
 	hunter.interacted.connect(_on_interacted)
-	hunter.equip(progress.items)
+	hunter.equip(progress.hunt_items())
 	_shop.progress = progress
 	_shop.purchased.connect(_on_purchased)
 	_shop.closed.connect(_on_shop_closed)
+	_box.progress = progress
+	$Hud.add_child(_box)
+	_box.changed.connect(_on_purchased.bind("box"))
+	_box.closed.connect(_on_shop_closed)
 	_dress_huts()
 	_dress_forge()
 	_show_progress()
@@ -210,7 +215,7 @@ func _ambience() -> void:
 
 
 func _process(_delta: float) -> void:
-	hunter.point_at(null if _shop.visible else _station_in_reach())
+	hunter.point_at(null if _shop.visible or _box.visible else _station_in_reach())
 	var at := hunter.global_position
 	var east := Vector3(DROP_EAST, 0.0, clampf(at.z, -DROP_EAST, DROP_EAST))
 	var south := Vector3(clampf(at.x, DROP_SOUTH_FROM, DROP_EAST), 0.0, DROP_EAST)
@@ -264,7 +269,7 @@ func _show_progress() -> void:
 
 func _on_interacted() -> void:
 	var station := _station_in_reach()
-	if station and not _shop.visible:
+	if station and not _shop.visible and not _box.visible:
 		_use(station)
 
 
@@ -284,6 +289,9 @@ func _use(station: Node3D) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.ui(self, "shop")
 	_open_station = station
+	if station.station_id == "chest":
+		_box.open()
+		return
 	_shop.info = INFO.get(station.station_id, "")
 	if station.station_id == "hut" and _is_my_hut(station):
 		_shop.info = "Your hut. The clan tent upgrade (5000 tusks) comes with clans."
@@ -297,7 +305,7 @@ func _on_purchased(item_id: String) -> void:
 		_dress_huts()
 	elif item_id.begins_with("item_forge") and progress.forge_built():
 		_dress_forge()
-	hunter.equip(progress.items)
+	hunter.equip(progress.hunt_items())
 	_show_progress()
 	purchased.emit()
 

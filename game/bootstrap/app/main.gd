@@ -154,7 +154,7 @@ func _save() -> void:
 func start_hunt() -> void:
 	var map := MapScene.instantiate()
 	map.layout = _layout("hunt")
-	map.items = progress.items
+	map.items = progress.hunt_items()  # only the packed gear and the ridden boar's saddle (issues #15, #16)
 	map.helpers = progress.helpers
 	map.companion = progress.companion
 	map.first_hunt = progress.hunts == 0
