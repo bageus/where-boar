@@ -6,8 +6,15 @@ extends Node3D
 ## they swap the model, the goal and what he does there.
 
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
-const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
+const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
+const Helper = preload("res://assets/models/hunter/young_hunter.glb")
 const HammerMesh = preload("res://assets/models/peak_gear/hammer.res")
+const Hammer = preload("res://assets/models/weapon_new/Stone_Hammer.glb")
+const Backpack = preload("res://assets/models/weapon_new/wooden_frame_backpack.glb")
+## Gear on the rigged helper, in bone space. The backpack's frame spans y 0..0.95 and z -0.34..0.46 (straps
+## in front), the hammer's handle runs along x with the head at +x; the grip is a little before its middle.
+const BACKPACK_ON_CHEST := Transform3D(Basis.IDENTITY * 0.7, Vector3(0.0, -0.4, 0.0))
+const HAMMER_IN_HAND := Transform3D(Basis(Vector3.UP, PI) * 0.8, Vector3.ZERO)
 const Footsteps = preload("res://game/core/sfx/public/footsteps.gd")
 
 const WALK_SPEED := 3.5
@@ -24,18 +31,32 @@ var _player: AnimationPlayer
 
 
 func _ready() -> void:
-	var body: Node3D = _body().instantiate()
+	var scene := _body()
+	var body: Node3D = HunterRig.instance(scene) if scene == Helper else scene.instantiate()
 	body.rotation.y = PI  # the model faces +z, look_at points -z at the goal
 	add_child(body)
 	var hammer := body.find_child("hammer") as MeshInstance3D
 	if hammer:
 		hammer.mesh = HammerMesh  # PEAK-style stone hammer, same hand mount
+	elif scene == Helper:
+		_wear(body, "chest", Backpack, BACKPACK_ON_CHEST)
+		_wear(body, "hand.R", Hammer, HAMMER_IN_HAND)
 	_player = body.find_child("AnimationPlayer") as AnimationPlayer
 	_player.animation_finished.connect(func(anim: StringName) -> void: _player.play(anim))
 	var steps := Footsteps.new()
 	steps.grass = "character_step_grass"
 	steps.volume_db = -10.0
 	add_child(steps)
+
+
+func _wear(body: Node3D, bone: String, scene: PackedScene, offset: Transform3D) -> void:
+	var skeleton: Skeleton3D = body.find_child("Skeleton3D")
+	var mount := BoneAttachment3D.new()
+	mount.bone_name = bone
+	skeleton.add_child(mount)
+	var item: Node3D = scene.instantiate()
+	item.transform = offset
+	mount.add_child(item)
 
 
 # shortcut: walks straight over the ground with no collision or pathing, so it can pass through rocks;
@@ -82,7 +103,7 @@ func _stop_at(site: Node3D, distance: float) -> float:
 ## Works at the target once there; returns the animation to play.
 func _work(site: Node3D, delta: float) -> String:
 	BuildSite.build(site, delta)
-	return "hammer"
+	return "hammer" if _player.has_animation("hammer") else "strong_attack"
 
 
 func _nearest_ghost() -> Node3D:
