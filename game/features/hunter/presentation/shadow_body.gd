@@ -31,7 +31,7 @@ func set_kind(kind: String) -> void:
 	_kind = kind
 	if _body:
 		_body.queue_free()
-	_body = Looks.body(kind).instantiate()
+	_body = Looks.body(kind)
 	_body.rotation.y = PI  # the model faces +z, the hunter looks along -z
 	add_child(_body)
 	_shadow_only(_body)

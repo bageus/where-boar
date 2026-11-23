@@ -1,0 +1,190 @@
+extends RefCounted
+
+## The owner's rigged hunters (assets/models/hunter/*.glb, owner 2026-11-23) come without animations: this
+## gives each instance an AnimationPlayer with idle, walk, run, sneak, ride, sit, attack (spear throw),
+## strong_attack (two-handed smash) and bow_shot, built from poses on their 24-bone rig (root, pelvis,
+## spine, chest, neck, head, clavicle/upper_arm/forearm/hand/thumb.L|R, thigh/shin/foot/toe.L|R).
+## Poses are rotations in the model's rest frame (+X the left hand, +Y up, +Z the front), each applied
+## before the parent's: a bone's local rotation is parent_rest⁻¹ · pose · rest. Right side mirrors left.
+
+const LOOPS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "sit"]
+const LOOSE_TIME := 34.0 / 30.0  # bow_shot: string released, as the cavemen's (tools/rig_cavemen.py)
+const ARM_DOWN := -72.0  # T-pose arms lowered to the sides
+
+## Model scene path -> its AnimationLibrary, shared by every instance.
+static var _libraries := {}
+
+
+static func instance(scene: PackedScene) -> Node3D:
+	var model: Node3D = scene.instantiate()
+	var skeleton: Skeleton3D = model.find_child("Skeleton3D")
+	var player := AnimationPlayer.new()
+	player.name = "AnimationPlayer"
+	model.add_child(player)  # root_node ".." is the model
+	player.owner = model  # find_child() only finds owned nodes
+	if not _libraries.has(scene.resource_path):
+		_libraries[scene.resource_path] = _build(skeleton, String(model.get_path_to(skeleton)))
+	player.add_animation_library("", _libraries[scene.resource_path])
+	return model
+
+
+static func _build(skeleton: Skeleton3D, path: String) -> AnimationLibrary:
+	var library := AnimationLibrary.new()
+	var sit_drop := skeleton.get_bone_global_rest(skeleton.find_bone("thigh.L")).origin.y \
+			- skeleton.get_bone_global_rest(skeleton.find_bone("shin.L")).origin.y
+	var clips := {
+		"idle": [3.0, [[0.0, _stand()], [1.5, _stand({"chest": rx(3.0), "head": rx(-2.0)})], [3.0, _stand()]]],
+		"walk": [1.1, _gait(1.1, 25.0, 35.0, 20.0, 15.0, 0.03, 3.0, 0.0, 0.0, 5.0)],
+		"run": [0.65, _gait(0.65, 45.0, 75.0, 40.0, 80.0, 0.06, 12.0, -0.03, -8.0, 10.0)],
+		"sneak": [1.3, _gait(1.3, 18.0, 25.0, 10.0, 40.0, 0.02, 25.0, -0.16, -45.0, 70.0)],
+		"ride": [0.8, _ride()],
+		"sit": [4.0, _sit(sit_drop)],
+		"attack": [1.0, _throw()],
+		"strong_attack": [1.2, _smash()],
+		"bow_shot": [1.6, _bow()],
+	}
+	for clip: String in clips:
+		library.add_animation(clip, _clip(skeleton, path, clips[clip][0], clips[clip][1], clip in LOOPS))
+	return library
+
+
+static func rx(degrees: float) -> Quaternion:
+	return Quaternion(Vector3.RIGHT, deg_to_rad(degrees))
+
+
+static func ry(degrees: float) -> Quaternion:
+	return Quaternion(Vector3.UP, deg_to_rad(degrees))
+
+
+static func rz(degrees: float) -> Quaternion:
+	return Quaternion(Vector3.BACK, deg_to_rad(degrees))
+
+
+## The right side's rotation for a left side one: mirrored across the body's middle plane.
+static func mirror(q: Quaternion) -> Quaternion:
+	return Quaternion(q.x, -q.y, -q.z, q.w)
+
+
+## Arms down, elbows a little bent; extra overrides bones (".L" entries also set ".R" mirrored unless given).
+static func _stand(extra := {}) -> Dictionary:
+	var pose := {"upper_arm.L": rz(ARM_DOWN), "forearm.L": ry(-12.0)}
+	pose.merge(extra, true)
+	for bone: String in pose.keys():
+		if bone.ends_with(".L") and not pose.has(bone.trim_suffix(".L") + ".R"):
+			pose[bone.trim_suffix(".L") + ".R"] = mirror(pose[bone])
+	return pose
+
+
+## A walking cycle as 8 keys: legs swing by swing degrees, knees bend while a leg swings forward, arms
+## swing against the legs; lean bends the spine forward, crouch lowers the pelvis (m), thigh/knee are the
+## base bends (sneak).
+static func _gait(length: float, swing: float, knee: float, arm: float, elbow: float, bob: float,
+		lean: float, crouch: float, thigh: float, base_knee: float) -> Array:
+	var keys := []
+	for i in 9:
+		var phase := TAU * i / 8.0
+		var s := sin(phase)
+		var c := cos(phase)
+		keys.append([length * i / 8.0, {
+			"thigh.L": rx(thigh - swing * s), "thigh.R": rx(thigh + swing * s),
+			"shin.L": rx(base_knee + knee * maxf(0.0, c)), "shin.R": rx(base_knee + knee * maxf(0.0, -c)),
+			"foot.L": rx(-base_knee * 0.5), "foot.R": rx(-base_knee * 0.5),
+			"upper_arm.L": rx(arm * s) * rz(ARM_DOWN), "upper_arm.R": rx(-arm * s) * mirror(rz(ARM_DOWN)),
+			"forearm.L": ry(-elbow), "forearm.R": ry(elbow),
+			"spine": rx(lean * 0.6), "chest": rx(lean * 0.4) * ry(arm * 0.15 * s),
+			"pelvis": crouch - bob * (1.0 - cos(phase * 2.0)) * 0.5,
+		}])
+	return keys
+
+
+## Astride a boar: legs forward and apart, hands forward on the bristles, rocking with the gallop.
+static func _ride() -> Array:
+	var keys := []
+	for i in 3:
+		var dip := 0.03 if i == 1 else 0.0
+		keys.append([0.4 * i, _stand({
+			"thigh.L": rx(-70.0) * rz(25.0), "shin.L": rx(85.0),
+			"upper_arm.L": rx(-50.0 - dip * 200.0) * rz(ARM_DOWN), "forearm.L": ry(-35.0),
+			"spine": rx(15.0 + dip * 100.0), "pelvis": -dip,
+		})])
+	return keys
+
+
+## On a bench at a table: thighs level, shins down, forearms on the table, now and then looking about.
+static func _sit(drop: float) -> Array:
+	var base := {"thigh.L": rx(-88.0), "shin.L": rx(88.0), "upper_arm.L": rx(-35.0) * rz(-78.0),
+			"forearm.L": ry(-75.0), "spine": rx(6.0), "pelvis": -drop}
+	var keys := []
+	for k: Array in [[0.0, 0.0, 0.0], [1.2, 3.0, 25.0], [2.4, 0.0, -20.0], [4.0, 0.0, 0.0]]:
+		var pose := base.duplicate()
+		pose["chest"] = rx(k[1])
+		pose["head"] = ry(k[2])
+		keys.append([k[0], _stand(pose)])
+	return keys
+
+
+## Spear thrown with the right hand: wound up over the shoulder, hurled forward, follow-through.
+static func _throw() -> Array:
+	return [
+		[0.0, _stand()],
+		[0.35, _stand({"upper_arm.R": rx(-30.0) * rz(-60.0), "forearm.R": ry(70.0),
+				"upper_arm.L": rx(-60.0) * rz(ARM_DOWN), "chest": ry(-25.0), "spine": rx(-8.0)})],
+		[0.55, _stand({"upper_arm.R": rx(-90.0) * rz(-ARM_DOWN), "forearm.R": ry(5.0),
+				"upper_arm.L": rx(-20.0) * rz(ARM_DOWN), "chest": ry(20.0), "spine": rx(15.0)})],
+		[0.8, _stand({"upper_arm.R": rx(-45.0) * rz(-ARM_DOWN), "chest": ry(15.0), "spine": rx(18.0)})],
+		[1.0, _stand()],
+	]
+
+
+## Two-handed smash: both arms up over the head, then down in front, bending forward.
+static func _smash() -> Array:
+	return [
+		[0.0, _stand()],
+		[0.45, _stand({"upper_arm.L": rx(-25.0) * rz(80.0), "forearm.L": ry(-60.0), "spine": rx(-12.0)})],
+		[0.7, _stand({"upper_arm.L": rx(-75.0) * rz(-60.0), "forearm.L": ry(-10.0), "spine": rx(30.0),
+				"pelvis": -0.08, "thigh.L": rx(-15.0), "shin.L": rx(25.0)})],
+		[0.95, _stand({"upper_arm.L": rx(-70.0) * rz(-60.0), "forearm.L": ry(-10.0), "spine": rx(28.0),
+				"pelvis": -0.08, "thigh.L": rx(-15.0), "shin.L": rx(25.0)})],
+		[1.2, _stand()],
+	]
+
+
+## Bow raised in the left hand, the right draws the string to the chin and lets go at LOOSE_TIME.
+static func _bow() -> Array:
+	var aim := {"upper_arm.L": rx(-90.0) * rz(-15.0), "forearm.L": ry(-5.0), "chest": ry(20.0), "head": ry(-15.0)}
+	var drawn := aim.duplicate()
+	drawn.merge({"upper_arm.R": rx(-85.0) * ry(-25.0), "forearm.R": ry(140.0)}, true)
+	var loose := aim.duplicate()
+	loose.merge({"upper_arm.R": rx(-80.0) * ry(-45.0), "forearm.R": ry(100.0)}, true)
+	var nock := aim.duplicate()
+	nock.merge({"upper_arm.R": rx(-85.0) * rz(-ARM_DOWN - 10.0), "forearm.R": ry(20.0)}, true)
+	return [
+		[0.0, _stand()], [0.3, _stand(nock)], [0.55, _stand(nock)], [1.0, _stand(drawn)],
+		[LOOSE_TIME - 0.03, _stand(drawn)], [LOOSE_TIME + 0.05, _stand(loose)], [1.4, _stand(loose)],
+		[1.6, _stand()],
+	]
+
+
+## One clip from [time, pose] keys; a bone missing from a key is at rest then, "pelvis" is its drop (m).
+static func _clip(skeleton: Skeleton3D, path: String, length: float, keys: Array, loop: bool) -> Animation:
+	var anim := Animation.new()
+	anim.length = length
+	anim.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	var bones := {}
+	for key: Array in keys:
+		for bone: String in key[1]:
+			bones[bone] = true
+	for bone: String in bones:
+		var b := skeleton.find_bone(bone)
+		var track := anim.add_track(Animation.TYPE_POSITION_3D if bone == "pelvis" else Animation.TYPE_ROTATION_3D)
+		anim.track_set_path(track, NodePath("%s:%s" % [path, bone]))
+		anim.track_set_interpolation_type(track, Animation.INTERPOLATION_CUBIC)
+		var rest := skeleton.get_bone_global_rest(b).basis.get_rotation_quaternion()
+		var parent := skeleton.get_bone_parent(b)
+		var parent_rest := skeleton.get_bone_global_rest(parent).basis.get_rotation_quaternion() if parent >= 0 else Quaternion.IDENTITY
+		for key: Array in keys:
+			if bone == "pelvis":
+				anim.position_track_insert_key(track, key[0], skeleton.get_bone_rest(b).origin + Vector3(0.0, key[1].get(bone, 0.0), 0.0))
+			else:
+				anim.rotation_track_insert_key(track, key[0], (parent_rest.inverse() * key[1].get(bone, Quaternion.IDENTITY) * rest).normalized())
+	return anim

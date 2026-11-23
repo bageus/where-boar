@@ -5,8 +5,8 @@ extends Node3D
 signal closed
 
 const MODELS := {
-	"Bearded": preload("res://assets/models/peak_cavemen/bearded.glb"),
-	"Plump": preload("res://assets/models/peak_cavemen/plump.glb"),
+	"Bearded": preload("res://assets/models/hunter/prehistoric_hunter.glb"),
+	"Plump": preload("res://assets/models/hunter/plump_hunter.glb"),
 	"Lanky": preload("res://assets/models/peak_cavemen/lanky.glb"),
 }
 const ANIMATIONS: Array[String] = ["idle", "walk", "run", "sneak", "ride", "attack", "strong_attack", "bow_shot"]
@@ -17,6 +17,9 @@ const BIRDS := {
 	"Turkey": preload("res://game/features/companions/public/turkey_model.tscn"),
 }
 const BIRD_ANIMATIONS: Array[String] = ["idle", "walk", "run", "peck"]
+## The owner's rigged hunters (no clips of their own) and their names for the cavemen's bones.
+const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
+const HUNTER_BONES := {"hips": "pelvis", "hand_r": "hand.R", "hand_l": "hand.L", "fingers_r": "hand.R", "fingers_l": "hand.L"}
 const BoarModel = preload("res://game/features/boar/public/boar_model.tscn")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Club = preload("res://assets/models/club.glb")
@@ -61,7 +64,8 @@ func _ready() -> void:
 
 func show_model(model_name: String) -> void:
 	_clear()
-	character = MODELS[model_name].instantiate()
+	var scene: PackedScene = MODELS[model_name]
+	character = HunterRig.instance(scene) if scene.resource_path.begins_with("res://assets/models/hunter/") else scene.instantiate()
 	add_child(character)
 	player = character.find_child("AnimationPlayer") as AnimationPlayer
 	_skeleton = character.find_child("Skeleton3D") as Skeleton3D
@@ -125,7 +129,7 @@ func play(anim: String) -> void:
 	_club.visible = anim != "bow_shot"
 	_bow.visible = anim == "bow_shot"
 	_boar.visible = anim == "ride"
-	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone("hips")).origin.y
+	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone(_bone("hips"))).origin.y
 	# On the saddle, as in mount.gd.
 	character.position.y = _boar.top() * 0.85 + 0.12 - hips_height if anim == "ride" else 0.0
 
@@ -141,12 +145,17 @@ func _process(_delta: float) -> void:
 
 
 func _bone_position(bone: String) -> Vector3:
-	return _skeleton.global_transform * _skeleton.get_bone_global_pose(_skeleton.find_bone(bone)).origin
+	return _skeleton.global_transform * _skeleton.get_bone_global_pose(_skeleton.find_bone(_bone(bone))).origin
+
+
+## A caveman bone's name in the shown skeleton.
+func _bone(bone: String) -> String:
+	return bone if _skeleton.find_bone(bone) >= 0 else HUNTER_BONES.get(bone, bone)
 
 
 func _attach(scene: PackedScene, bone: String, offset: Transform3D) -> Node3D:
 	var socket := BoneAttachment3D.new()
-	socket.bone_name = bone
+	socket.bone_name = _bone(bone)
 	_skeleton.add_child(socket)
 	var item: Node3D = scene.instantiate()
 	item.transform = offset

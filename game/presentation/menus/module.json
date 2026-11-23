@@ -17,6 +17,7 @@
     "features.boar",
     "features.companions",
     "features.hunt",
-    "features.settlement"
+    "features.settlement",
+    "features.hunter"
   ]
 }

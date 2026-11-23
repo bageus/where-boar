@@ -1,7 +1,8 @@
 extends Node3D
 
-## A boar type's rigged model (assets/models/boar_<id>.glb, tools/rig_boars.py) with its animations:
-## idle, walk and run by speed, eat at bait, attack and death once.
+## A boar type's rigged model (assets/models/boar/boar_<id>.glb, tools/rig_boars.py, or the owner's
+## assets/models/boar_new/*.glb, see _adopt) with its animations: idle, walk and run by speed, eat at bait,
+## attack and death once.
 
 const WALK_SPEED := 1.5  # ground speed the walk cycle was keyed for, m/s (ASSUMPTION)
 const RUN_SPEED := 9.0
@@ -14,6 +15,13 @@ const CHOMP_SECONDS := Vector2(0.9, 1.6)
 const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
 const SADDLE_HEIGHT := 1.1  # and its height, m
 const SADDLE_PAD := 0.3  # saddle height of the underside of its pad
+## The owner's boar_new clips (the importer drops "_loop") under this file's names; the first one found wins.
+const NEW_CLIPS := {
+	"walk": ["Walk"], "run": ["Run"], "eat": ["Eat"], "attack": ["Tusk_attack"],
+	"death": ["Death_left", "Death_side"],
+}
+## Back bone the saddle rides on: blocky boars, then boar_new rigs.
+const BACK_BONES: Array[String] = ["spine_1", "Body", "Chest"]
 
 var _player: AnimationPlayer
 var _back_height := 0.85
@@ -34,6 +42,7 @@ func show_type(boar_type: Resource) -> void:
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		mesh.mesh = _one_surface(mesh.mesh)
 	_player = model.find_child("AnimationPlayer") as AnimationPlayer
+	_adopt(_player.get_animation_library(""))
 	for anim in ["idle", "walk", "run", "eat"]:
 		_player.get_animation(anim).loop_mode = Animation.LOOP_LINEAR
 	_add_net_fall()
@@ -55,6 +64,23 @@ func move(speed: float, eating := false) -> void:
 	if anim == "eat" and Time.get_ticks_msec() >= _next_chomp:
 		_next_chomp = Time.get_ticks_msec() + roundi(randf_range(CHOMP_SECONDS.x, CHOMP_SECONDS.y) * 1000.0)
 		Sfx.play(self, "chomping", -6.0, 15.0)
+
+
+## boar_new models name their clips differently and have no idle: their clips are renamed once per
+## (shared) library, and idle is the walk's first frame held.
+static func _adopt(library: AnimationLibrary) -> void:
+	if library.has_animation("idle"):
+		return
+	for anim: String in NEW_CLIPS:
+		for clip: String in NEW_CLIPS[anim]:
+			if library.has_animation(clip) and not library.has_animation(anim):
+				library.rename_animation(clip, anim)
+	var idle: Animation = library.get_animation("walk").duplicate()
+	for track in idle.get_track_count():
+		for key in range(idle.track_get_key_count(track) - 1, 0, -1):
+			idle.track_remove_key(track, key)
+	idle.length = 1.0
+	library.add_animation("idle", idle)
 
 
 ## Whole model flashes white and fades back (hurt).
@@ -176,10 +202,14 @@ func _add_net_fall() -> void:
 	var skeleton := _player.get_parent().find_child("Skeleton3D") as Skeleton3D
 	var anim := Animation.new()
 	anim.length = 1.2
-	var pose := {"spine_0": -8.0, "spine_1": -10.0, "chest": -12.0, "neck": -28.0, "head": -10.0}
+	var pose := {"spine_0": -8.0, "spine_1": -10.0, "chest": -12.0, "neck": -28.0, "head": -10.0,
+			"Body": -10.0, "Chest": -12.0, "Head": -20.0}
 	for leg in ["fl", "fr"]:
 		pose["leg_" + leg] = 40.0
 		pose["shin_" + leg] = -95.0
+	for leg in ["Front_L_", "Front_R_", "Fore_L_", "Fore_R_"]:  # boar_new front legs
+		pose[leg + "Upper"] = 40.0
+		pose[leg + "Lower"] = -95.0
 	for bone in pose:
 		var i := skeleton.find_bone(bone)
 		if i < 0:
@@ -211,7 +241,8 @@ func top() -> float:
 ## Straps the saddle (assets/models/peak_gear/saddle.tscn) on the middle of the back, scaled to the boar's length and height (the smaller ratio, so small and low boars get a small saddle); it follows the spine bone.
 func put_saddle() -> void:
 	var skeleton: Skeleton3D = find_children("*", "Skeleton3D", true, false)[0]
-	var bone := skeleton.find_bone("spine_1")
+	var back: String = BACK_BONES.filter(func(b: String) -> bool: return skeleton.find_bone(b) >= 0)[0]
+	var bone := skeleton.find_bone(back)
 	var box := AABB()
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
@@ -220,7 +251,7 @@ func put_saddle() -> void:
 	var on_back := Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * fit),
 			Vector3(0.0, top() * _back_height - SADDLE_PAD * fit, box.get_center().z - 0.05))
 	var attachment := BoneAttachment3D.new()
-	attachment.bone_name = "spine_1"
+	attachment.bone_name = back
 	skeleton.add_child(attachment)
 	var rest := global_transform.affine_inverse() * skeleton.global_transform * skeleton.get_bone_global_rest(bone)
 	var saddle: Node3D = Saddle.instantiate()

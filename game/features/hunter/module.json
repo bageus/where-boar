@@ -8,7 +8,8 @@
   ],
   "public_api": [
     "public/hunter.tscn",
-    "public/hunter.gd"
+    "public/hunter.gd",
+    "public/hunter_rig.gd"
   ],
   "dependencies": [
     "core.sfx",

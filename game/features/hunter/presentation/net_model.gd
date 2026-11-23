@@ -56,13 +56,19 @@ func wrap(boar_model: Node3D) -> void:
 	if skeletons.is_empty():
 		return
 	_boar = skeletons[0]
-	var mesh: MeshInstance3D = _boar.find_children("*", "MeshInstance3D", false, false)[0]
+	# The body: blocky boars are one mesh, boar_new ones many parts (tusks, eyes, legs) round the hide.
+	var meshes := _boar.find_children("*", "MeshInstance3D", false, false)
+	var mesh: MeshInstance3D = meshes[0]
+	for part: MeshInstance3D in meshes:
+		if part.get_aabb().get_volume() > mesh.get_aabb().get_volume():
+			mesh = part
 	var sil := _silhouette(mesh)
 	_player.active = false
 	var points := _drape(sil)
 	var movable := PackedInt32Array()
 	for b in _boar.get_bone_count():
-		if not _boar.get_bone_name(b).begins_with("leg_") and not _boar.get_bone_name(b).begins_with("shin_"):
+		var bone_name := _boar.get_bone_name(b)  # legs: leg_/shin_ (blocky), *_L_*/*_R_* (boar_new)
+		if not bone_name.begins_with("leg_") and not bone_name.begins_with("shin_") and not "_L_" in bone_name and not "_R_" in bone_name:
 			movable.append(b)
 	# Points on the ground stay with the root bone, so the folding front legs do not lift them.
 	var root := _boar.get_parentless_bones()[0]
@@ -183,9 +189,9 @@ static func _silhouette(mesh: MeshInstance3D) -> Dictionary:
 					continue
 				var i := iz * nx + ix
 				heights[i] = maxf(heights[i], a.y * u + b.y * v + c.y * (1.0 - u - v))
-	heights = _close(heights, nx, nz, bounds.position.y)
+	heights = _close(heights, nx, nz, minf(bounds.position.y, 0.0))
 	var sil := {"origin": Vector2(bounds.position.x, bounds.position.z), "cell": cell, "nx": nx, "nz": nz,
-		"heights": heights, "ground": bounds.position.y, "size": bounds.size}
+		"heights": heights, "ground": minf(bounds.position.y, 0.0), "size": bounds.size}  # boar_new hides end above the hooves
 	_silhouettes[mesh.mesh] = sil
 	return sil
 
