@@ -128,10 +128,11 @@ static func _throw() -> Array:
 	return [
 		[0.0, _stand()],
 		[0.35, _stand({"upper_arm.R": rx(-30.0) * rz(-60.0), "forearm.R": ry(70.0),
-				"upper_arm.L": rx(-60.0) * rz(ARM_DOWN), "chest": ry(-25.0), "spine": rx(-8.0)})],
-		[0.55, _stand({"upper_arm.R": rx(-90.0) * rz(-ARM_DOWN), "forearm.R": ry(5.0),
-				"upper_arm.L": rx(-20.0) * rz(ARM_DOWN), "chest": ry(20.0), "spine": rx(15.0)})],
-		[0.8, _stand({"upper_arm.R": rx(-45.0) * rz(-ARM_DOWN), "chest": ry(15.0), "spine": rx(18.0)})],
+				"upper_arm.L": rx(-50.0) * rz(ARM_DOWN + 30.0), "chest": ry(-25.0), "spine": rx(-8.0)})],
+		# Arms wide of the body: the plump hunter's belly swallowed them close in.
+		[0.55, _stand({"upper_arm.R": rx(-80.0) * rz(-ARM_DOWN - 30.0), "forearm.R": ry(5.0),
+				"upper_arm.L": rx(-20.0) * rz(ARM_DOWN + 15.0), "chest": ry(10.0), "spine": rx(15.0)})],
+		[0.8, _stand({"upper_arm.R": rx(-45.0) * rz(-ARM_DOWN - 30.0), "forearm.R": ry(10.0), "chest": ry(5.0), "spine": rx(18.0)})],
 		[1.0, _stand()],
 	]
 
@@ -140,10 +141,12 @@ static func _throw() -> Array:
 static func _smash() -> Array:
 	return [
 		[0.0, _stand()],
-		[0.45, _stand({"upper_arm.L": rx(-25.0) * rz(80.0), "forearm.L": ry(-60.0), "spine": rx(-12.0)})],
-		[0.7, _stand({"upper_arm.L": rx(-75.0) * rz(-60.0), "forearm.L": ry(-10.0), "spine": rx(30.0),
+		# Up through the sides and kept wide over the head: straight up, the arms went through head and belly.
+		[0.2, _stand({"upper_arm.L": rx(-10.0) * rz(-5.0), "forearm.L": ry(-10.0), "spine": rx(-5.0)})],
+		[0.45, _stand({"upper_arm.L": rx(-30.0) * rz(55.0), "forearm.L": ry(-20.0), "spine": rx(-12.0)})],
+		[0.7, _stand({"upper_arm.L": rx(-75.0) * rz(-40.0), "forearm.L": ry(-10.0), "spine": rx(30.0),
 				"pelvis": -0.08, "thigh.L": rx(-15.0), "shin.L": rx(25.0)})],
-		[0.95, _stand({"upper_arm.L": rx(-70.0) * rz(-60.0), "forearm.L": ry(-10.0), "spine": rx(28.0),
+		[0.95, _stand({"upper_arm.L": rx(-70.0) * rz(-40.0), "forearm.L": ry(-10.0), "spine": rx(28.0),
 				"pelvis": -0.08, "thigh.L": rx(-15.0), "shin.L": rx(25.0)})],
 		[1.2, _stand()],
 	]
@@ -153,11 +156,11 @@ static func _smash() -> Array:
 static func _bow() -> Array:
 	var aim := {"upper_arm.L": rx(-90.0) * rz(-15.0), "forearm.L": ry(-5.0), "chest": ry(20.0), "head": ry(-15.0)}
 	var drawn := aim.duplicate()
-	drawn.merge({"upper_arm.R": rx(-85.0) * ry(-25.0), "forearm.R": ry(140.0)}, true)
+	drawn.merge({"upper_arm.R": rx(-85.0) * ry(-35.0) * rz(-20.0), "forearm.R": ry(120.0)}, true)  # fist by the cheek, not in it
 	var loose := aim.duplicate()
-	loose.merge({"upper_arm.R": rx(-80.0) * ry(-45.0), "forearm.R": ry(100.0)}, true)
+	loose.merge({"upper_arm.R": rx(-80.0) * ry(-50.0) * rz(-20.0), "forearm.R": ry(85.0)}, true)
 	var nock := aim.duplicate()
-	nock.merge({"upper_arm.R": rx(-85.0) * rz(-ARM_DOWN - 10.0), "forearm.R": ry(20.0)}, true)
+	nock.merge({"upper_arm.R": rx(-85.0) * rz(-ARM_DOWN - 35.0), "forearm.R": ry(40.0)}, true)
 	return [
 		[0.0, _stand()], [0.3, _stand(nock)], [0.55, _stand(nock)], [1.0, _stand(drawn)],
 		[LOOSE_TIME - 0.03, _stand(drawn)], [LOOSE_TIME + 0.05, _stand(loose)], [1.4, _stand(loose)],
