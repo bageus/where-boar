@@ -51,9 +51,18 @@ func _draw() -> void:
 	if hunter:
 		var at := _to_px(Vector2(hunter.global_position.x, hunter.global_position.z))
 		var forward := Vector2(-hunter.global_basis.z.x, -hunter.global_basis.z.z).normalized()
+		# Arrow with a notch at the back; the tip is bright yellow so the front is obvious.
+		var side := forward.orthogonal()
+		var tip := at + forward * 9.0
 		draw_colored_polygon(PackedVector2Array([
-			at + forward * 7.0, at + forward.orthogonal() * 4.0, at - forward.orthogonal() * 4.0,
+			tip, at - forward * 6.0 + side * 5.0, at - forward * 2.5, at - forward * 6.0 - side * 5.0,
 		]), Color.WHITE)
+		draw_colored_polygon(PackedVector2Array([
+			tip, at + forward * 2.0 + side * 2.5, at + forward * 2.0 - side * 2.5,
+		]), Color(1.0, 0.8, 0.1))
+		draw_polyline(PackedVector2Array([
+			tip, at - forward * 6.0 + side * 5.0, at - forward * 2.5, at - forward * 6.0 - side * 5.0, tip,
+		]), Color(0.05, 0.05, 0.05), 1.5, true)
 
 
 func _to_px(world: Vector2) -> Vector2:

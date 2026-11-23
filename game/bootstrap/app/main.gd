@@ -24,8 +24,10 @@ var save_store := SaveStore.new()
 var progress: Progress
 ## Settings live in their own file, apart from progress (section 18).
 var settings_store := _settings_store()
-var settings := {"quality": "high", "fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded", "time_of_day": "day"}
+var settings := {"quality": "high", "fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded", "time_of_day": "day", "brightness": 1.0}
 var _pause: CanvasLayer
+## Full-screen tint over everything: black below brightness 1, additive white above.
+var _dim := ColorRect.new()
 
 
 static func _settings_store() -> SaveStore:
@@ -46,6 +48,14 @@ func _ready() -> void:
 	DayNight.set_time(settings["time_of_day"])
 	Sfx.preload_all()
 	_apply_volume()
+	var overlay := CanvasLayer.new()
+	overlay.layer = 100
+	_dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dim.material = CanvasItemMaterial.new()
+	overlay.add_child(_dim)
+	add_child(overlay)
+	_apply_brightness()
 	_pause = PauseScene.instantiate()
 	add_child(_pause)
 	_pause.resumed.connect(_resume)
@@ -83,10 +93,17 @@ func _apply_volume() -> void:
 	AudioServer.set_bus_volume_db(0, linear_to_db(settings["sfx_volume"]))
 
 
+func _apply_brightness() -> void:
+	var b: float = settings["brightness"]
+	_dim.color = Color(0, 0, 0, 1.0 - b) if b < 1.0 else Color(1, 1, 1, (b - 1.0) * 0.5)
+	(_dim.material as CanvasItemMaterial).blend_mode = CanvasItemMaterial.BLEND_MODE_MIX if b < 1.0 else CanvasItemMaterial.BLEND_MODE_ADD
+
+
 func _on_settings_changed(changed: Dictionary) -> void:
 	settings = changed
 	settings_store.save_data(settings)
 	_apply_volume()
+	_apply_brightness()
 	SunFx.set_quality(settings["quality"], get_tree())
 	DayNight.set_time(settings["time_of_day"], get_tree())
 	if current and current.has_node("Hunter"):
@@ -97,6 +114,12 @@ func show_start() -> void:
 	var start := StartScene.instantiate()
 	_swap(start)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var slider: HSlider = start.get_node("%Brightness")
+	slider.value = settings["brightness"] * 100.0
+	slider.value_changed.connect(func(value: float) -> void:
+		settings["brightness"] = value / 100.0
+		settings_store.save_data(settings)
+		_apply_brightness())
 	start.get_node("%Start").pressed.connect(show_camp)
 	start.get_node("%Animations").pressed.connect(show_viewer)
 	start.get_node("%PlanHunt").pressed.connect(show_planning.bind("hunt"))

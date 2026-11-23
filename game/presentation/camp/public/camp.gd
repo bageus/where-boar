@@ -299,13 +299,15 @@ func _seat_helper() -> void:
 	var helper := HunterRig.instance(Helper)
 	tavern.add_child(helper)
 	helper.position = HELPER_SEAT
-	helper.scale = Vector3.ONE / tavern.scale.x  # the tavern model is scaled, the helper is not
+	helper.scale /= tavern.scale.x  # the tavern model is scaled, the helper is not (HunterRig sets his own height)
+	helper.position.y += 0.9 * (1.0 - helper.scale.x * tavern.scale.x) / tavern.scale.x  # smaller: keep the hips on the bench (ASSUMPTION)
 	helper.rotation.y = PI  # faces the table
 	helper.find_child("AnimationPlayer").play("sit")
 	var guest := HunterRig.instance(load(TAVERN_GUESTS.pick_random()))
 	tavern.add_child(guest)
 	guest.position = GUEST_SEAT
-	guest.scale = Vector3.ONE / tavern.scale.x
+	guest.scale /= tavern.scale.x
+	guest.position.y += 0.9 * (1.0 - guest.scale.x * tavern.scale.x) / tavern.scale.x
 	guest.find_child("AnimationPlayer").play("sit")
 
 

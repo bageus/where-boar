@@ -255,9 +255,8 @@ func mount_node() -> Node3D:
 
 
 ## Called when a hunt starts: camp meals are eaten and raise max stamina and health for the hunt (M012, #9),
-## and the first saddled boar waits beside the hunter; the backpack goes on.
+## and the first saddled boar waits beside the hunter.
 func start_hunt() -> void:
-	$ShadowBody.wear_backpack()
 	if not loadout.saddled.is_empty():
 		$Rider.bring_mount(loadout.saddled[0])
 	var meals := loadout.eat_meals()

@@ -28,8 +28,15 @@ const ARM_BONES: Array[String] = ["clavicle", "upper_arm", "forearm", "hand", "t
 const BELOW_ARM := 0.18  # m under the T-pose arm: no arm vertex is that low
 
 
+## Height scale per model file (owner, 2026-11-23): the raw models stand 2.37 (prehistoric), 2.44 (lanky), 2.46 (plump)
+## and 2.53 m (young). Wanted: prehistoric 2.37, lanky half a head taller (2.54), plump a little shorter (2.32),
+## young a head (0.35 m) below plump (1.97).
+const HEIGHT_SCALE := {"lanky_hunter": 1.04, "plump_hunter": 0.943, "young_hunter": 0.78}
+
+
 static func instance(scene: PackedScene) -> Node3D:
 	var model: Node3D = scene.instantiate()
+	model.scale = Vector3.ONE * HEIGHT_SCALE.get(scene.resource_path.get_file().get_basename(), 1.0)
 	var skeleton: Skeleton3D = model.find_child("Skeleton3D")
 	var player := AnimationPlayer.new()
 	player.name = "AnimationPlayer"

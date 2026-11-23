@@ -15,6 +15,8 @@ const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const CHOMP_SECONDS := Vector2(0.9, 1.6)
 const SADDLE_LENGTH := 1.9  # boar length the saddle was modelled for (common boar), m
 const SADDLE_HEIGHT := 1.1  # and its height, m
+const SADDLE_SCALE := 0.6  # the saddle was 40% too big (owner, 2026-11-23)
+const SADDLE_SINK := 0.1  # pressed into the back, in saddle-size units: it sat too high
 const SADDLE_PAD := 0.03  # saddle height of the underside of its pad (boar_saddle.glb: pad bottom at 0.016)
 ## The owner's boar_new clips (the importer drops "_loop") under this file's names; the first one found wins.
 const NEW_CLIPS := {
@@ -264,10 +266,10 @@ func put_saddle() -> void:
 	var box := AABB()
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
-	var fit := clampf(minf(box.size.z / SADDLE_LENGTH, top() / SADDLE_HEIGHT), 0.4, 1.3)
+	var fit := clampf(minf(box.size.z / SADDLE_LENGTH, top() / SADDLE_HEIGHT), 0.4, 1.3) * SADDLE_SCALE
 	# Saddle front is +Z, the boar's is -Z. The back is a share of the top, below ears and bristles (BoarType.back_height).
 	var on_back := Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * fit),
-			Vector3(0.0, top() * _back_height - SADDLE_PAD * fit, box.get_center().z - 0.05))
+			Vector3(0.0, top() * _back_height - (SADDLE_PAD + SADDLE_SINK) * fit, box.get_center().z - 0.05))
 	var attachment := BoneAttachment3D.new()
 	attachment.bone_name = back
 	skeleton.add_child(attachment)
