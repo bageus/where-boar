@@ -1,7 +1,6 @@
 class_name Boar
 extends RefCounted
 
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 enum State { WANDER, FLEE, PANIC, CHARGE, TRAPPED, CAPTURED, DEAD, ESCAPED }
 

@@ -3,7 +3,6 @@ extends RefCounted
 ## Riding a saddled boar (D021, owner's choice "верхом"): the mount's type sets speed and perk;
 ## no stamina is spent; every weapon works from the saddle.
 
-const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 
 ## Mount types that can be saddled (D021: three kinds).

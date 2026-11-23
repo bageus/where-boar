@@ -5,7 +5,6 @@ extends Node3D
 ## Terminators are children of this node, kept out of $Boars (the cyborg body is its own thread's work).
 
 const TeleportEgg = preload("res://game/presentation/hunt_map/props/teleport_egg.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const CYBORG_PATH := "res://game/features/boar/public/cyborg_body.tscn"
 const VARIANTS := ["cannon", "machinegun"]
 

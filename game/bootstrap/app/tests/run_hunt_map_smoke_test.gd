@@ -4,7 +4,6 @@ extends SceneTree
 ## react to a thrown net and spear, the goal counts the capture and returning to camp shows results.
 
 const MainScene = preload("res://game/bootstrap/app/main.tscn")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
 

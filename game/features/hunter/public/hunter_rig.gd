@@ -37,17 +37,17 @@ static func instance(scene: PackedScene) -> Node3D:
 
 ## Vertices well below the T-pose arms lose their arm weights to the chest: raising an arm then no longer
 ## pulls the belly out after it.
-static func _free_belly(instance: MeshInstance3D, skeleton: Skeleton3D) -> Mesh:
-	var mesh := instance.mesh as ArrayMesh
-	if mesh == null or instance.skin == null:
-		return instance.mesh
+static func _free_belly(mi: MeshInstance3D, skeleton: Skeleton3D) -> Mesh:
+	var mesh := mi.mesh as ArrayMesh
+	if mesh == null or mi.skin == null:
+		return mi.mesh
 	if _freed.has(mesh):
 		return _freed[mesh]
 	var shoulder := skeleton.get_bone_global_rest(skeleton.find_bone("upper_arm.L")).origin.y
 	var chest := -1
 	var arm := {}
-	for bind in instance.skin.get_bind_count():
-		var bone_name := String(instance.skin.get_bind_name(bind))
+	for bind in mi.skin.get_bind_count():
+		var bone_name := String(mi.skin.get_bind_name(bind))
 		if bone_name == "chest":
 			chest = bind
 		if bone_name.get_basename() in ARM_BONES:
@@ -57,10 +57,9 @@ static func _free_belly(instance: MeshInstance3D, skeleton: Skeleton3D) -> Mesh:
 		var arrays := mesh.surface_get_arrays(s)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
-		var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
 		var per := bones.size() / vertices.size()
 		for v in vertices.size():
-			if chest < 0 or (instance.transform * vertices[v]).y > shoulder - BELOW_ARM:
+			if chest < 0 or (mi.transform * vertices[v]).y > shoulder - BELOW_ARM:
 				continue
 			for k in per:
 				if arm.has(bones[v * per + k]):

@@ -3,7 +3,6 @@ extends RefCounted
 ## Steers a fleeing or panicking boar (owner, 2026-11-02): eases toward its flight heading, and while the
 ## hunter runs at it, dodges by BoarDodge and checks for a wall on its escape side.
 
-const BoarDodge = preload("res://game/features/boar/domain/boar_dodge.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 
 ## Turn rate toward the flight heading when not pressed, radians per second (ASSUMPTION).

@@ -2,13 +2,9 @@ extends CharacterBody3D
 
 ## Boar agent on a hunt map: holds the domain Boar and steers by its state (M002).
 
-const Boar = preload("res://game/features/boar/domain/boar.gd")
-const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarIdle = preload("res://game/features/boar/domain/boar_idle.gd")
 const BoarHide = preload("res://game/features/boar/domain/boar_hide.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
-const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 const StunStars = preload("res://game/features/boar/presentation/stun_stars.gd")
 const BoarFlight = preload("res://game/features/boar/presentation/boar_flight.gd")

@@ -3,7 +3,6 @@ extends RefCounted
 
 ## Results of one hunt (M007): outcome counts per boar type and when the hunt is over.
 
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 

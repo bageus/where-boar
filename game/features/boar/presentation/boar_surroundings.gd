@@ -2,8 +2,6 @@ extends RefCounted
 
 ## Reads a boar's herd mates, nearby bait nodes, tall grass and sight lines into plain values for the domain.
 
-const Boar = preload("res://game/features/boar/domain/boar.gd")
-const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 
 
 ## XZ positions of the boar's living herd mates; only fleeing, panicking or charging ones when scared_only,

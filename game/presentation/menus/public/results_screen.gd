@@ -2,8 +2,6 @@ extends CenterContainer
 
 ## Hunt results (M007): boars killed, caught and escaped per type, and the tusks earned.
 
-const Hunt = preload("res://game/features/hunt/public/hunt.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")

@@ -4,8 +4,6 @@ extends Node3D
 
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const BoarScene = preload("res://game/features/boar/public/boar_body.tscn")
-const Hunt = preload("res://game/features/hunt/public/hunt.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarTypes = preload("res://game/features/boar/public/boar_types.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
@@ -105,7 +103,7 @@ func _ready() -> void:
 		return
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, get_node_or_null("Surroundings"), $Props, $Bridge].filter(
-			func(n: Node) -> bool: return n != null) as Array[Node], Vector3.ZERO, 240.0)
+			func(n: Node) -> bool: return n != null), Vector3.ZERO, 240.0)
 	_ambience()
 	_music = HuntMusic.new()
 	_music.boars = $Boars

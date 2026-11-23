@@ -6,7 +6,6 @@ extends CharacterBody3D
 ## Spawned by the invasion (game/presentation/hunt_map/props/invasion_director.gd).
 
 const Cyborg = preload("res://game/features/boar/domain/cyborg.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const Surroundings = preload("res://game/features/boar/presentation/boar_surroundings.gd")
 const CyborgShot = preload("res://game/features/boar/presentation/cyborg_shot.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")

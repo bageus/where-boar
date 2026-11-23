@@ -5,7 +5,6 @@ extends RefCounted
 ## tusks. Hunt quests count hunts finished after accepting; gathering quests are met by the materials carried.
 ## Plain data in and out (to_dict/from_dict) so the save adapter never sees this class.
 
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 const RENEW_SECONDS := 12 * 3600
 const POOL_SIZE := 5

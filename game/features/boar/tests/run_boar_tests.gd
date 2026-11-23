@@ -1,7 +1,5 @@
 extends SceneTree
 
-const Boar = preload("res://game/features/boar/domain/boar.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const BoarAlert = preload("res://game/features/boar/domain/boar_alert.gd")
 const BoarIdle = preload("res://game/features/boar/domain/boar_idle.gd")
 const BoarHide = preload("res://game/features/boar/domain/boar_hide.gd")

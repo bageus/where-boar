@@ -1,7 +1,5 @@
 extends SceneTree
 
-const Boar = preload("res://game/features/boar/domain/boar.gd")
-const BoarSenses = preload("res://game/features/boar/domain/boar_senses.gd")
 
 
 func _init() -> void:

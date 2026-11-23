@@ -3,8 +3,6 @@ extends RefCounted
 ## Lasting progress between hunts (section 13): tusks to spend and animals caught alive.
 ## Plain data in and out (to_dict/from_dict) so the save adapter never sees this class.
 
-const Hunt = preload("res://game/features/hunt/public/hunt.gd")
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const QuestBoard = preload("res://game/features/settlement/public/quest_board.gd")
 const Clan = preload("res://game/features/settlement/public/clan.gd")

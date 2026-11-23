@@ -144,7 +144,7 @@ func _ready() -> void:
 	_dress()
 	# The camp ground and the forest floor behind the palisade.
 	BakedShadow.bake(self, $Sun, [get_node_or_null("Scenery"), get_node_or_null("Dressing"), $Stations, $Longhouse].filter(
-			func(n: Node) -> bool: return n != null) as Array[Node],
+			func(n: Node) -> bool: return n != null),
 			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp
 
 

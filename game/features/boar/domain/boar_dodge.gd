@@ -128,14 +128,14 @@ func steer(delta: float, heading: Vector2, boar_pos: Vector2, hunter_pos: Vector
 ## Rolls once per press whether the boar turns on the hunter: when its escape side is walled off
 ## (corner_odds), or, for a cunning type, when met head-on (cunning_odds). A cornered boar that does not
 ## attack dodges to the other side instead. roll is in [0, 1).
-func turns_on_hunter(blocked: bool, head_on: bool, roll: float, corner_odds: float, cunning_odds: float) -> bool:
+func turns_on_hunter(blocked: bool, is_head_on: bool, roll: float, corner_odds: float, cunning_odds: float) -> bool:
 	if blocked and not _corner_rolled:
 		_corner_rolled = true
 		if roll < corner_odds:
 			return true
 		_jink = -turn_side * CORNER_CUT
 		_jink_left = JINK_SECONDS
-	if head_on and not _cunning_rolled and cunning_odds > 0.0:
+	if is_head_on and not _cunning_rolled and cunning_odds > 0.0:
 		_cunning_rolled = true
 		return roll < cunning_odds
 	return false

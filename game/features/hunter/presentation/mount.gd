@@ -2,7 +2,6 @@ extends StaticBody3D
 
 ## A saddled boar waiting for its rider on the hunt map (D021).
 
-const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 
 var boar_type: BoarType
 

@@ -21,7 +21,7 @@ static func vertex_ground() -> ShaderMaterial:
 ## Bakes the shadows of the static meshes under roots onto the ground square of side size around centre,
 ## leaving out their parts below min_y. The render happens on the next frame, of copies in a world of their
 ## own; the texture lives as long as the returned viewport (a child of host).
-static func bake(host: Node, sun: DirectionalLight3D, roots: Array[Node], centre: Vector3, size: float, min_y := -100000.0) -> SubViewport:
+static func bake(host: Node, sun: DirectionalLight3D, roots: Array, centre: Vector3, size: float, min_y := -100000.0) -> SubViewport:
 	var silhouette := ShaderMaterial.new()
 	silhouette.shader = BakeSilhouette
 	silhouette.set_shader_parameter("min_y", min_y)

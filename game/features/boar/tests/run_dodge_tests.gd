@@ -1,7 +1,5 @@
 extends SceneTree
 
-const Boar = preload("res://game/features/boar/domain/boar.gd")
-const BoarDodge = preload("res://game/features/boar/domain/boar_dodge.gd")
 
 # The boar runs along +X from the origin in every case.
 const AHEAD := Vector2.RIGHT

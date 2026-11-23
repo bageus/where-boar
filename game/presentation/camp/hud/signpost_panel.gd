@@ -151,12 +151,12 @@ func _clear() -> void:
 		child.queue_free()
 
 
-func _label(text: String, size: int, parent: Control = _body) -> Label:
+func _label(text: String, font_size: int, parent: Control = _body) -> Label:
 	var label := Label.new()
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_font_size_override("font_size", font_size)
 	parent.add_child(label)
 	return label
 

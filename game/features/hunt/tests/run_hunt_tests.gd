@@ -1,7 +1,5 @@
 extends SceneTree
 
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
-const Hunt = preload("res://game/features/hunt/public/hunt.gd")
 const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 
 

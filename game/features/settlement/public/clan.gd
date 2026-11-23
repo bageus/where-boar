@@ -4,7 +4,6 @@ extends RefCounted
 ## Single player until co-op (GAME_SPEC 19), so the chief is the only member and the join rules are kept
 ## for later; the rating counts the clan's deeds since it was founded. Plain data in and out (to_dict/from_dict).
 
-const BoarOutcome = preload("res://game/features/boar/public/boar_outcome.gd")
 
 ## Icons a chief can pick: file names in assets/icon/items/.
 const ICONS: Array[String] = ["tusk", "spear", "bow", "club", "rooster", "turkey", "feather", "flower", "frog", "mushroom"]

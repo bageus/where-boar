@@ -2,7 +2,6 @@ extends RefCounted
 
 ## The five MVP boar types (D022), the owner's rare variants (P3-025) and rarity-weighted picks.
 
-const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 
 const ALL: Array[BoarType] = [
 	preload("res://game/features/boar/content/boar_common_brown.tres"),
