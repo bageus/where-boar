@@ -9,6 +9,7 @@ const BoarModel = preload("res://game/features/boar/public/boar_model.gd")
 const CompanionRules = preload("res://game/features/companions/public/companion_rules.gd")
 const RoosterScene = preload("res://game/features/companions/public/rooster_driver.tscn")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
+const QuestTracker = preload("res://game/presentation/hunt_map/hud/quest_tracker.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 const HuntMusic = preload("res://game/presentation/hunt_map/props/hunt_music.gd")
 const ShoutWaveScene = preload("res://game/presentation/hunt_map/props/shout_wave.tscn")
@@ -97,6 +98,11 @@ func _enter_tree() -> void:
 	$Terrain.ground_paint = layout.get("paint", {})
 
 
+## The camp's quest board and materials, injected before the map enters the tree (null: no list).
+var quests: RefCounted
+var materials: Dictionary = {}
+
+
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
 	add_child(SunFx.new())
@@ -108,6 +114,7 @@ func _ready() -> void:
 		set_process(false)
 		set_process_unhandled_input(false)
 		return
+	_show_quests()
 	_batch_props()
 	BakedShadow.bake(self, $Sun, [$Terrain, get_node_or_null("Surroundings"), $Props, $Bridge].filter(
 			func(n: Node) -> bool: return n != null), Vector3.ZERO, 240.0)
@@ -553,3 +560,13 @@ func stats_text() -> String:
 		hunt.count_all(BoarOutcome.Kind.ESCAPED),
 		hunt.invasion.left,
 	]
+
+
+func _show_quests() -> void:
+	if quests == null:
+		return
+	var tracker := QuestTracker.new()
+	tracker.board = quests
+	tracker.materials = materials
+	tracker.map = self
+	$Hud.add_child(tracker)

@@ -7,6 +7,7 @@ extends Node3D
 const BakedShadow = preload("res://game/core/baked_shadow/public/baked_shadow.gd")
 const SfxLoop = preload("res://game/core/sfx/public/sfx_loop.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
+const QuestTracker = preload("res://game/presentation/hunt_map/hud/quest_tracker.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 
 ## Fact: the hunter went back to camp or was downed; hunt.gathering is set, so it is not counted as a hunt.
@@ -25,6 +26,9 @@ var hunt := Hunt.new()
 ## Camp gear (item_id -> count), injected before the map enters the tree.
 var items: Dictionary = {}
 var _cliffs: Array[Vector3] = []
+## The camp's quest board and materials, injected before the map enters the tree.
+var quests: RefCounted
+var materials: Dictionary = {}
 
 @onready var _hunter: CharacterBody3D = $Hunter
 @onready var _terrain: StaticBody3D = $Terrain
@@ -50,6 +54,13 @@ func _ready() -> void:
 	$Hud/Minimap.hunter = _hunter
 	$Hud/Minimap.return_point = Vector2($ReturnPoint.position.x, $ReturnPoint.position.z)
 	_show_goal()
+	if quests != null:
+		var tracker := QuestTracker.new()
+		tracker.board = quests
+		tracker.materials = materials
+		tracker.hunting = false
+		tracker.map = self
+		$Hud.add_child(tracker)
 
 
 ## Jungle birds all around, as on the hunt and in camp; the wind near the crags (owner: sounds from both).

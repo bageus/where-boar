@@ -84,18 +84,41 @@ func claimed_count() -> int:
 ## Counts a finished hunt towards the accepted hunt quests.
 func add_hunt(hunt: RefCounted) -> void:
 	for quest in quests:
+		if quest["state"] == "accepted" and quest["kind"] in HUNT_KINDS:
+			quest["have"] = progress_with(quest, hunt)
+
+
+## A hunt quest's count if this hunt (finished or still running) were added to it.
+func progress_with(quest: Dictionary, hunt: RefCounted) -> int:
+	match quest["kind"]:
+		"catch":
+			return quest["have"] + hunt.count_all(BoarOutcome.Kind.CAPTURED)
+		"kill":
+			return quest["have"] + hunt.count_all(BoarOutcome.Kind.DEAD)
+		"tusks":
+			return maxi(quest["have"], hunt.tusks())
+		"bird":
+			var birds: int = quest["have"]
+			for animal_id in hunt.helpers_caught:
+				birds += hunt.helpers_caught[animal_id]
+			return birds
+	return quest["have"]
+
+
+## Accepted, unclaimed quests as {"text", "have", "amount", "hunt" (is a hunt quest)} for the in-hunt list;
+## the running hunt's catches and pocket finds count too. Quests of the map's own kind come first.
+func active(materials: Dictionary, hunt: RefCounted, hunting: bool) -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
+	for i in quests.size():
+		var quest := quests[i]
 		if quest["state"] != "accepted":
 			continue
-		match quest["kind"]:
-			"catch":
-				quest["have"] += hunt.count_all(BoarOutcome.Kind.CAPTURED)
-			"kill":
-				quest["have"] += hunt.count_all(BoarOutcome.Kind.DEAD)
-			"tusks":
-				quest["have"] = maxi(quest["have"], hunt.tusks())
-			"bird":
-				for animal_id in hunt.helpers_caught:
-					quest["have"] += hunt.helpers_caught[animal_id]
+		var is_hunt: bool = quest["kind"] in HUNT_KINDS
+		var got: int = progress_with(quest, hunt) if is_hunt else \
+			materials.get(quest["kind"], 0) + hunt.gathered.get(quest["kind"], 0)
+		list.append({"text": text(i), "have": mini(got, quest["amount"]), "amount": quest["amount"], "hunt": is_hunt})
+	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["hunt"] == hunting and b["hunt"] != hunting)
+	return list
 
 
 func to_dict() -> Dictionary:

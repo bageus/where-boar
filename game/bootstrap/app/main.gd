@@ -187,6 +187,8 @@ func start_hunt() -> void:
 	map.layout = _layout("hunt")
 	map.items = progress.hunt_items()  # only the packed gear and the ridden boar's saddle (issues #15, #16)
 	map.helpers = progress.helpers
+	map.quests = progress.quests
+	map.materials = progress.materials
 	map.companion = progress.companion
 	map.first_hunt = progress.hunts == 0
 	map.hunts_done = progress.hunts
@@ -205,6 +207,8 @@ func start_hunt() -> void:
 func start_gather() -> void:
 	var map := GatherScene.instantiate()
 	map.items = progress.hunt_items()
+	map.quests = progress.quests
+	map.materials = progress.materials
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 	map.get_node("Hunter").apply_settings(settings)
