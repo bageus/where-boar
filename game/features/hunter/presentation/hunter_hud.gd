@@ -56,7 +56,8 @@ func show_interact(on: bool) -> void:
 		_prompt_pulse.tween_property(prompt, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_SINE)
 
 
-func show_health(value: int) -> void:
+func show_health(value: int, top: int) -> void:
+	$Health.max_value = top
 	$Health.value = value
 
 
