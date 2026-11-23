@@ -40,7 +40,10 @@ const ITEMS := {
 	"item_roast": {"name": "Roast (+35 stamina)", "shop": "campfire", "price": 18, "unique": false},
 	"item_feast": {"name": "Feast (+50 stamina)", "shop": "campfire", "price": 25, "unique": false},
 	"item_porter": {"name": "Porter (carries +2 nets, +6 arrows)", "shop": "tavern", "price": 60, "unique": true},
-	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true},
+	# Only one of the crew goes on a hunt (issue #12): hiring one sends the other home.
+	"item_trap_setter": {"name": "Trap setter (sets 2 traps at escape zones)", "shop": "tavern", "price": 80, "unique": true, "crew": true},
+	"item_warrior": {"name": "Warrior (attacks boars with you)", "shop": "tavern", "price": 100, "unique": true, "crew": true},
+	"item_healer": {"name": "Healer (heals you when you walk up to him)", "shop": "tavern", "price": 90, "unique": true, "crew": true},
 	# Pick which helper animal goes on the next hunt (owner, 2026-10-27); free, needs one in the pen.
 	"item_take_rooster": {"name": "Take the rooster on the hunt", "shop": "cages", "price": 0, "unique": true, "companion": "rooster"},
 	"item_take_turkey": {"name": "Take the turkey on the hunt", "shop": "cages", "price": 0, "unique": true, "companion": "turkey"},
@@ -84,8 +87,8 @@ const PART_NAMES := {"item_metal_tusk": "metal tusks", "item_metal_plate": "meta
 ## Tusks the forge needs before it opens (issue #11).
 const FORGE_COST := 100000
 
-## Gear box (issue #15): how much of each slot the hunter takes on a hunt; a hired helper (porter or trap
-## setter) doubles baits and traps. "weapon" counts kinds (all spears are one), "bait" and "trap" count
+## Gear box (issue #15): how much of each slot the hunter takes on a hunt; a hired helper (porter or tavern
+## crewman) doubles baits and traps. "weapon" counts kinds (all spears are one), "bait" and "trap" count
 ## pieces. The knife is always carried; "main" is the club; "tool" is one forge upgrade. Items with no slot
 ## always go along.
 const SLOTS := {"main": 1, "weapon": 2, "bait": 3, "trap": 1, "armor": 1, "tool": 1}

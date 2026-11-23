@@ -5,6 +5,7 @@ extends CharacterBody3D
 const Stamina = preload("res://game/features/hunter/domain/stamina.gd")
 const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const Health = preload("res://game/features/hunter/domain/health.gd")
+const Crew = preload("res://game/features/hunter/presentation/crew.gd")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const BoarType = preload("res://game/features/boar/public/boar_type.gd")
 const Ride = preload("res://game/features/hunter/domain/ride.gd")
@@ -18,7 +19,6 @@ const Landing = preload("res://game/features/hunter/presentation/landing.gd")
 const Highlight = preload("res://game/features/hunter/presentation/highlight.gd")
 const BaitScene = preload("res://game/features/hunter/presentation/bait.tscn")
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
-const TrapSetter = preload("res://game/features/hunter/presentation/trap_setter.gd")
 const TrapPlacement = preload("res://game/features/hunter/presentation/trap_placement.gd")
 const TRAP_SCENES := {
 	"item_pit": preload("res://game/features/hunter/presentation/traps/pit.tscn"),
@@ -292,13 +292,9 @@ func show_helper(text: String) -> void:
 	_hud.show_helper(text)
 
 
-## The hired trap setter comes along and builds every trap ghost (M013).
-func bring_trap_setter() -> void:
-	var setter := TrapSetter.new()
-	setter.hunter = self
-	setter.top_level = true
-	add_child(setter)
-	setter.global_position = ground_at(global_position + global_basis.x * 2.0)
+## The hired crewman comes along (M013, issue #12).
+func bring_crew(items: Dictionary) -> void:
+	Crew.bring(self, items)
 
 
 ## Scares boars in earshot sideways (M014); limited by a short cooldown.

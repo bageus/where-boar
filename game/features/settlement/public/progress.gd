@@ -88,6 +88,10 @@ func buy(item_id: String) -> bool:
 	if item.has("donate"):
 		forge += item["donate"]
 		return true
+	if item.get("crew", false):  # one crewman per hunt (issue #12)
+		for other in ShopCatalog.ITEMS:
+			if ShopCatalog.ITEMS[other].get("crew", false):
+				items.erase(other)
 	items[item_id] = mini(items.get(item_id, 0) + item.get("pack", 1), item.get("max", 1 << 30))
 	carry(item_id)  # new gear goes straight into the pack while it fits
 	return true
@@ -161,9 +165,9 @@ func riding() -> String:
 	return ""
 
 
-## A porter or trap setter doubles the baits and traps taken (issue #15).
+## A hired helper (porter or any tavern crewman) doubles the baits and traps taken (issue #15).
 func helped() -> bool:
-	return owns("item_porter") or owns("item_trap_setter")
+	return owns("item_porter") or ShopCatalog.ITEMS.keys().any(func(id: String) -> bool: return ShopCatalog.ITEMS[id].get("crew", false) and owns(id))
 
 
 func slot_cap(slot: String) -> int:
@@ -247,6 +251,15 @@ func claim_quest(index: int) -> bool:
 	var reward := quests.claim(index, materials)
 	tusks += reward
 	return reward > 0
+
+
+## Names of the hired tavern team (porter and crewman), shown at the bottom of the tavern (issue #12).
+func team() -> PackedStringArray:
+	var names := PackedStringArray()
+	for item_id in ShopCatalog.for_shop("tavern"):
+		if owns(item_id):
+			names.append(ShopCatalog.ITEMS[item_id]["name"].get_slice(" (", 0))
+	return names
 
 
 func owns(item_id: String) -> bool:

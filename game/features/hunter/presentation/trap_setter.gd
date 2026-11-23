@@ -2,7 +2,8 @@ extends Node3D
 
 ## The hired helper (M013, owner 2026-10-29): the tavern's tribesman follows the hunter, walking or
 ## running to keep up, and at every trap ghost crouches and hammers the ground until it is built.
-## Boars sense only the hunter, so they never notice him.
+## Boars sense only the hunter, so they never notice him. The warrior and the healer extend him (issue #12):
+## they swap the model, the goal and what he does there.
 
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 const Helper = preload("res://assets/models/peak_cavemen/helper.glb")
@@ -23,10 +24,12 @@ var _player: AnimationPlayer
 
 
 func _ready() -> void:
-	var body: Node3D = Helper.instantiate()
+	var body: Node3D = _body().instantiate()
 	body.rotation.y = PI  # the model faces +z, look_at points -z at the goal
 	add_child(body)
-	(body.find_child("hammer") as MeshInstance3D).mesh = HammerMesh  # PEAK-style stone hammer, same hand mount
+	var hammer := body.find_child("hammer") as MeshInstance3D
+	if hammer:
+		hammer.mesh = HammerMesh  # PEAK-style stone hammer, same hand mount
 	_player = body.find_child("AnimationPlayer") as AnimationPlayer
 	_player.animation_finished.connect(func(anim: StringName) -> void: _player.play(anim))
 	var steps := Footsteps.new()
@@ -38,15 +41,10 @@ func _ready() -> void:
 # shortcut: walks straight over the ground with no collision or pathing, so it can pass through rocks;
 # give it a NavigationAgent3D if playtest shows it.
 func _physics_process(delta: float) -> void:
-	var site := _nearest_ghost()
+	var site := _target()
 	var goal := site.global_position if site else hunter.global_position
-	# At a ghost he stops at its nearest edge, whichever side he comes from, not at the middle.
 	var to_goal := Vector3(goal.x - global_position.x, 0.0, goal.z - global_position.z)
-	var stop := FOLLOW_DISTANCE
-	if site:
-		# Measured to the trap's footprint edge, so every side (the snare's loop too) is a build spot.
-		var edge := BuildSite.edge_distance(site, global_position)
-		stop = maxf(to_goal.length() - edge + BUILD_REACH * 0.8, 0.0)
+	var stop := _stop_at(site, to_goal.length())
 	var anim := "idle"
 	if to_goal.length() > stop:
 		var running := to_goal.length() > RUN_DISTANCE
@@ -58,10 +56,33 @@ func _physics_process(delta: float) -> void:
 	elif site:
 		if to_goal.length() > 0.1:
 			look_at(global_position + to_goal, Vector3.UP)
-		BuildSite.build(site, delta)
-		anim = "hammer"
+		anim = _work(site, delta)
 	if _player.current_animation != anim:
 		_player.play(anim, 0.2)
+
+
+func _body() -> PackedScene:
+	return Helper
+
+
+## Where he goes; null follows the hunter.
+func _target() -> Node3D:
+	return _nearest_ghost()
+
+
+## How far from the target (or the hunter) he stops, given how far it is now.
+func _stop_at(site: Node3D, distance: float) -> float:
+	if not site:
+		return FOLLOW_DISTANCE
+	# At a ghost he stops at its nearest edge, whichever side he comes from, not at the middle;
+	# measured to the trap's footprint edge, so every side (the snare's loop too) is a build spot.
+	return maxf(distance - BuildSite.edge_distance(site, global_position) + BUILD_REACH * 0.8, 0.0)
+
+
+## Works at the target once there; returns the animation to play.
+func _work(site: Node3D, delta: float) -> String:
+	BuildSite.build(site, delta)
+	return "hammer"
 
 
 func _nearest_ghost() -> Node3D:

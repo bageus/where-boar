@@ -11,7 +11,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 var _frame := 0
 var _failures := 0
 ## A script error skips the rest of a frame silently; counting checks catches that.
-const EXPECTED_CHECKS := 37
+const EXPECTED_CHECKS := 38
 var _checks := 0
 var _main: Node
 var _map: Node3D
@@ -195,7 +195,7 @@ func _check_trap_setter() -> void:
 	var BuildSite = hunter.BuildSite
 	var was_ghost: bool = placing and BuildSite.is_ghost(ghost) and hunter.loadout.traps["item_snare"] == 0
 	_check(was_ghost and BuildSite.build(ghost, hunter.TRAP_BUILD_SECONDS["item_snare"]) and not BuildSite.is_ghost(ghost) \
-			and hunter.get_children().any(func(n: Node) -> bool: return n.get_script() == hunter.TrapSetter), "a placed trap is a ghost until built; the setter comes along")
+			and hunter.get_children().any(func(n: Node) -> bool: return n.get_script() == hunter.Crew.HIRES["item_trap_setter"]), "a placed trap is a ghost until built; the setter comes along")
 	# A tripwire goes down in two presses: the rope runs from the first peg to the second, at most 10 m.
 	hunter.loadout.traps["item_tripwire"] = 1
 	hunter.loadout.trap_id = "item_tripwire"
@@ -213,6 +213,7 @@ func _check_trap_setter() -> void:
 	hunter.get_node("Rider").toggle()
 	_check(hunter.ride.is_riding() and not mount.visible and hunter.ride.speed(4.0) == 10.0, "E mounts the runner")
 	map.free()
+	_check_healer()
 
 
 ## Uses the armory with enough tusks and buys the first item, the club.
@@ -244,3 +245,19 @@ func _check(ok: bool, name: String) -> void:
 	if not ok:
 		_failures += 1
 		push_error("FAIL: " + name)
+
+
+## A hired healer comes along instead of the trap setter and heals the hunter standing next to him (issue #12).
+func _check_healer() -> void:
+	var map: Node3D = MapScene.instantiate()
+	map.items = {"item_healer": 1}
+	root.add_child(map)
+	var hunter: CharacterBody3D = map.get_node("Hunter")
+	var mates := hunter.get_children().filter(func(n: Node) -> bool: return n.get_script() in hunter.Crew.HIRES.values())
+	var healer: Node3D = mates[0] if mates.size() == 1 else null
+	hunter.health.value = 50
+	if healer:
+		healer.global_position = hunter.global_position + Vector3(1.0, 0.0, 0.0)
+		healer._physics_process(1.0)
+	_check(healer and healer.get_script() == hunter.Crew.HIRES["item_healer"] and hunter.health.value == 60, "a hired healer comes along and heals")
+	map.free()

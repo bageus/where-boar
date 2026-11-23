@@ -58,6 +58,9 @@ func _refresh() -> void:
 	%Tusks.text = "Tusks: %d" % progress.tusks
 	if _shop_id == "forge":
 		_forge_header()
+	if _shop_id == "tavern":
+		var team := progress.team()
+		info = "In your team: %s" % (", ".join(team) if not team.is_empty() else "nobody yet")
 	%Info.text = info
 	%Info.visible = info != "" or _shop_id == "quests"
 	%Sell.visible = ShopCatalog.SELL.has(_shop_id)
