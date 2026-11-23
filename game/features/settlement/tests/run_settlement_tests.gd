@@ -27,6 +27,9 @@ func _init() -> void:
 	failures += _check(_forge_recipes_need_forge_and_metal(), "forge recipes need the built forge, tusks and metal parts")
 	failures += _check(_quests_accept_progress_claim(), "quests are drawn, accepted, met by hunts or materials and claimed once")
 	failures += _check(_hut_and_board_survive_save(), "the bought hut, forge gifts, materials and quests survive a save")
+	failures += _check(_ride_a_saddled_boar(), "the pens pick which saddled boar is ridden; only its saddle goes on the hunt")
+	failures += _check(_sell_birds_and_baits(), "cages sell caught birds, the hunting hut sells baits back")
+	failures += _check(_gear_box_caps(), "the gear box packs 2 weapon kinds, 3 baits, 1 trap; a helper doubles baits and traps")
 	print("settlement tests: %d failure(s)" % failures)
 	quit(1 if failures else 0)
 
@@ -218,3 +221,47 @@ func _hut_and_board_survive_save() -> bool:
 	return back.hut_slot == 3 and back.hut_variant == 4 and back.forge == 1200 and back.materials == {"frog": 5} \
 		and back.quests.quests.size() == QuestBoard.POOL_SIZE and back.quests.quests[1]["state"] == "accepted" \
 		and back.quests.renews_at == progress.quests.renews_at and bad.hut_slot == -1 and bad.quests.quests.is_empty()
+
+
+func _ride_a_saddled_boar() -> bool:
+	var progress := Progress.new()
+	var locked := not progress.buy("item_ride_armored_black")
+	progress.items = {"item_saddle_runner_grey": 1, "item_saddle_armored_black": 1}
+	var first := progress.riding() == "runner_grey"
+	var picked := progress.buy("item_ride_armored_black") and progress.sold_out("item_ride_armored_black")
+	var taken := progress.hunt_items()
+	var back := Progress.from_dict(progress.to_dict())
+	return locked and first and picked and taken.has("item_saddle_armored_black") and not taken.has("item_saddle_runner_grey") \
+		and back.riding() == "armored_black"
+
+
+func _sell_birds_and_baits() -> bool:
+	var progress := Progress.new()
+	progress.helpers = {"rooster": 2}
+	progress.items = {"item_mango": 3}
+	progress.carried = {"item_mango": 3}
+	var rate := ShopCatalog.sell_rate("cages", "rooster")
+	var birds: bool = progress.sell("rooster", 1, rate.x, rate.y) == 10 and progress.helpers["rooster"] == 1
+	rate = ShopCatalog.sell_rate("hunting_hut", "item_mango")
+	var bait: bool = progress.sell("item_mango", 2, rate.x, rate.y) == 12 and progress.items["item_mango"] == 1
+	return birds and bait and progress.carried["item_mango"] == 1 and ShopCatalog.sell_rate("pens", "grass") == Vector2i(12, 1)
+
+
+func _gear_box_caps() -> bool:
+	var progress := Progress.new()
+	progress.items = {"item_spear": 2, "item_spear_wood": 1, "item_net": 3, "item_bow": 1, "item_club": 1, "item_acorns": 5,
+		"item_pit": 2, "item_snare": 1, "item_feast": 1}
+	var weapons := progress.carry("item_spear") == 2 and progress.carry("item_spear_wood") == 1 and progress.carry("item_net") == 3 \
+		and progress.carry("item_bow") == 0 and progress.carry("item_club") == 1 and progress.slot_used("weapon") == 2
+	for i in 5:
+		progress.carry("item_acorns")
+	var baits: bool = progress.carried["item_acorns"] == 3 and progress.in_box("item_acorns") == 2
+	var traps := progress.carry("item_pit") == 1 and progress.carry("item_snare") == 0
+	var taken := progress.hunt_items()
+	var hunt_kit: bool = taken["item_bow"] == 0 and taken["item_feast"] == 1 and taken["item_acorns"] == 3
+	progress.store("item_net")
+	var swapped := progress.carry("item_bow") == 1
+	progress.items["item_porter"] = 1
+	var helped := progress.carry("item_acorns") == 1 and progress.carry("item_snare") == 1 and progress.carry("item_pit") == 0
+	var fresh := Progress.from_dict({})
+	return weapons and baits and traps and hunt_kit and swapped and helped and fresh.carried == {"item_spear": 1, "item_net": 3}
