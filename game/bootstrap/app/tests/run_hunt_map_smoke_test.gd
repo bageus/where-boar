@@ -37,9 +37,7 @@ func _physics_process(_delta: float) -> bool:
 		var camp: Node3D = _main.current
 		_check_pause_and_settings(camp)
 		camp.hunter.global_position = camp.get_node("Stations/StartHunt").global_position + Vector3(0, 0, 1.5)
-		camp.hunter.interacted.emit()
-		_map = _main.current
-		_check(_map.name == "HuntMap", "start hunt station in camp opens the hunt")
+		_map = _start_at_signpost(camp)
 		return false
 	if _frame == 122:
 		_check(_main.current.name == "ResultsScreen", "returning to camp shows results")
@@ -261,3 +259,12 @@ func _check_healer() -> void:
 		healer._physics_process(1.0)
 	_check(healer and healer.get_script() == hunter.Crew.HIRES["item_healer"] and hunter.health.value == 60, "a hired healer comes along and heals")
 	map.free()
+
+
+## E at the signpost opens its window; Start (with the countdown cut to nothing) opens the hunt (issue #24).
+func _start_at_signpost(camp: Node3D) -> Node:
+	camp.hunter.interacted.emit()
+	var signpost_open: bool = camp._signpost.visible
+	camp._launch("public", 0, PackedStringArray())
+	_check(signpost_open and _main.current.name == "HuntMap", "the signpost opens its window, then its hunt starts")
+	return _main.current

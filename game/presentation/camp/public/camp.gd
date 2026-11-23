@@ -2,7 +2,7 @@ extends Node3D
 
 ## First-person camp hub (section 07, settlement): the hunter walks between stations and uses them with E.
 
-## Fact: the hunter used the Start hunt station.
+## Fact: the signpost's countdown ran out with the hunter in its circle (issue #24).
 signal hunt_requested
 ## Fact: something was bought; the game saves (section 18).
 signal purchased
@@ -14,6 +14,10 @@ const ItemIcons = preload("res://game/features/settlement/public/item_icons.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
 const ShopCatalog = preload("res://game/features/settlement/public/shop_catalog.gd")
 const BoxPanel = preload("res://game/presentation/camp/hud/box_panel.gd")
+const SignpostPanel = preload("res://game/presentation/camp/hud/signpost_panel.gd")
+const HuntLobby = preload("res://game/features/settlement/public/hunt_lobby.gd")
+## The circle around the signpost: who stands in it when the countdown ends goes on the hunt (issue #24).
+const HUNT_CIRCLE := 4.0
 const BUILDINGS := "res://assets/models/buildings/"
 ## A free hut shows any of the five looks; a bought one keeps its own (issue #22).
 const HUT_VARIANTS: Array[PackedScene] = [
@@ -92,6 +96,12 @@ var _open_station: Node3D
 @onready var hunter: CharacterBody3D = $Hunter
 @onready var _shop: PanelContainer = $Hud/ShopPanel
 var _box := BoxPanel.new()
+var _signpost := SignpostPanel.new()
+var _countdown := Label.new()
+## Seconds until the hunt starts, < 0 when no countdown runs; the chosen mode and invited names.
+var _hunt_left := -1.0
+var _hunt_mode := ""
+var _hunt_invited := PackedStringArray()
 
 
 func _ready() -> void:
@@ -111,6 +121,12 @@ func _ready() -> void:
 	$Hud.add_child(_box)
 	_box.changed.connect(_on_purchased.bind("box"))
 	_box.closed.connect(_on_shop_closed)
+	_signpost.progress = progress
+	$Hud.add_child(_signpost)
+	_signpost.purchased.connect(_on_purchased)
+	_signpost.closed.connect(_on_shop_closed)
+	_signpost.launched.connect(_launch)
+	_hunt_circle()
 	_dress_huts()
 	_dress_forge()
 	_show_progress()
@@ -214,8 +230,13 @@ func _ambience() -> void:
 	add_child(cliff)
 
 
-func _process(_delta: float) -> void:
-	hunter.point_at(null if _shop.visible or _box.visible else _station_in_reach())
+func _process(delta: float) -> void:
+	hunter.point_at(null if _menu_open() else _station_in_reach())
+	if _hunt_left >= 0.0:
+		_hunt_left -= delta
+		_countdown.text = "The hunt starts in %d s: stay in the circle" % ceili(_hunt_left)
+		if _hunt_left <= 0.0:
+			_start_hunt()
 	var at := hunter.global_position
 	var east := Vector3(DROP_EAST, 0.0, clampf(at.z, -DROP_EAST, DROP_EAST))
 	var south := Vector3(clampf(at.x, DROP_SOUTH_FROM, DROP_EAST), 0.0, DROP_EAST)
@@ -269,7 +290,7 @@ func _show_progress() -> void:
 
 func _on_interacted() -> void:
 	var station := _station_in_reach()
-	if station and not _shop.visible and not _box.visible:
+	if station and not _menu_open():
 		_use(station)
 
 
@@ -281,14 +302,14 @@ func _station_in_reach() -> Node3D:
 
 
 func _use(station: Node3D) -> void:
-	if station.station_id == "start_hunt":
-		hunt_requested.emit()
-		return
-	# Every other station is a shop: freeze the hunter and free the mouse while it is open.
+	# Every station opens a window: freeze the hunter and free the mouse while it is open.
 	hunter.set_physics_process(false)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.ui(self, "shop")
 	_open_station = station
+	if station.station_id == "start_hunt":
+		_signpost.open()
+		return
 	if station.station_id == "chest":
 		_box.open()
 		return
@@ -337,3 +358,52 @@ func _dress_forge() -> void:
 func _on_shop_closed() -> void:
 	hunter.set_physics_process(true)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _menu_open() -> bool:
+	return _shop.visible or _box.visible or _signpost.visible
+
+
+## A ring on the ground around the signpost and the countdown line at the top of the screen (issue #24).
+func _hunt_circle() -> void:
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = HUNT_CIRCLE - 0.12
+	torus.outer_radius = HUNT_CIRCLE
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = Color(1.0, 0.85, 0.3)
+	torus.material = glow
+	ring.mesh = torus
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ring.scale.y = 0.2  # flat on the ground
+	add_child(ring)
+	ring.global_position = $Stations/StartHunt.global_position + Vector3(0.0, 0.03, 0.0)
+	_countdown.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_countdown.offset_top = 20.0
+	_countdown.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_countdown.add_theme_font_size_override("font_size", 26)
+	$Hud.add_child(_countdown)
+
+
+func _launch(mode: String, seconds: int, invited: PackedStringArray) -> void:
+	_on_shop_closed()
+	_hunt_mode = mode
+	_hunt_invited = invited
+	_hunt_left = seconds
+	if seconds <= 0:  # tests start at once
+		_start_hunt()
+
+
+## Who stands in the circle goes; a crowd would split into several hunts, one player is one hunt for now.
+func _start_hunt() -> void:
+	_hunt_left = -1.0
+	_countdown.text = ""
+	# shortcut: one player, so the circle holds only you; co-op fills it from the network (GAME_SPEC 19).
+	var me := {"name": "you", "clan": "", "pass": progress.owns(HuntLobby.PASS_ID)}
+	var in_circle := [me] if hunter.global_position.distance_to($Stations/StartHunt.global_position) <= HUNT_CIRCLE else []
+	var groups := HuntLobby.split(HuntLobby.entrants(_hunt_mode, me, in_circle, _hunt_invited))
+	if groups.any(func(group: Array) -> bool: return me in group):
+		hunt_requested.emit()
+	else:
+		hunter.show_gain("You left the circle: no hunt")

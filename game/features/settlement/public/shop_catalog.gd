@@ -54,6 +54,8 @@ const ITEMS := {
 	"item_ride_runner_grey": {"name": "Ride the Runner", "shop": "pens", "price": 0, "unique": true, "mount": "runner_grey"},
 	"item_ride_aggressive_red": {"name": "Ride the Angry boar", "shop": "pens", "price": 0, "unique": true, "mount": "aggressive_red"},
 	"item_ride_armored_black": {"name": "Ride the Armored boar", "shop": "pens", "price": 0, "unique": true, "mount": "armored_black"},
+	# Private hunts from the signpost need it, for every player (issue #24); bought on its private tab.
+	"item_team_pass": {"name": "Team pass", "shop": "signpost", "price": 2000, "unique": true},
 	# A hut of one's own (issue #22); the clan tent upgrade comes with clans.
 	"item_hut": {"name": "Buy this hut", "shop": "hut", "price": 3000, "unique": true},
 	# The forge is built from everyone's gifts (issue #11): each purchase gives its price to the build.
