@@ -12,6 +12,11 @@ const NATURE := {
 	"PeakBush": [3, ""], "PeakShrub": [3, ""], "PeakRock": [8, "box"], "PeakCliff": [5, "box"],
 	"PeakSpire": [3, "box"], "PeakStump": [1, "box"], "PeakLog": [4, "box"],
 }
+## Planning palette tab of each nature model (planner.gd TABS).
+const NATURE_TAB := {
+	"PeakTree": "trees", "PeakPine": "trees", "PeakDead": "trees", "PeakPalm": "trees", "PeakBush": "trees", "PeakShrub": "trees",
+	"PeakRock": "stones", "PeakCliff": "stones", "PeakSpire": "stones", "PeakStump": "landscape", "PeakLog": "landscape",
+}
 const NATURE_DIR := "res://assets/nature/meshes/peak/"
 ## Original transform of an authored node, kept so only real moves are saved.
 const START_META := "layout_start"
@@ -55,8 +60,8 @@ static func nature_palette() -> Array[Dictionary]:
 	for prefix: String in NATURE:
 		for n in NATURE[prefix][0]:
 			entries.append({"name": "%s %d" % [prefix.trim_prefix("Peak"), n + 1], "res": "%s%s%d.res" % [NATURE_DIR, prefix, n + 1],
-					"solid": NATURE[prefix][1]})
-	entries.append({"name": "Tall grass (wheat)", "res": "res://assets/nature/meshes/Wheat.res", "solid": ""})
+					"solid": NATURE[prefix][1], "tab": NATURE_TAB[prefix]})
+	entries.append({"name": "Tall grass (wheat)", "res": "res://assets/nature/meshes/Wheat.res", "solid": "", "tab": "grass"})
 	return entries
 
 

@@ -104,7 +104,8 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		return
 	_batch_props()
-	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings, $Props, $Bridge] as Array[Node], Vector3.ZERO, 240.0)
+	BakedShadow.bake(self, $Sun, [$Terrain, get_node_or_null("Surroundings"), $Props, $Bridge].filter(
+			func(n: Node) -> bool: return n != null) as Array[Node], Vector3.ZERO, 240.0)
 	_ambience()
 	_music = HuntMusic.new()
 	_music.boars = $Boars
@@ -184,13 +185,18 @@ func planning_centre() -> Vector3:
 ## The map's own props (a tree or bush picks its model by name; a bush hides the hunter), then the shared nature models.
 func planning_palette() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = [
-		{"name": "Map tree", "res": "res://game/presentation/hunt_map/props/tree.tscn", "solid": ""},
-		{"name": "Map bush (cover)", "res": "res://game/presentation/hunt_map/props/bush.tscn", "solid": ""},
-		{"name": "Map rock", "res": "res://game/presentation/hunt_map/props/rock.tscn", "solid": ""},
-		{"name": "Stone pile (loot)", "res": "res://game/presentation/hunt_map/props/stone_pile.tscn", "solid": ""},
+		{"name": "Map tree", "res": "res://game/presentation/hunt_map/props/tree.tscn", "solid": "", "tab": "trees"},
+		{"name": "Map bush (cover)", "res": "res://game/presentation/hunt_map/props/bush.tscn", "solid": "", "tab": "trees"},
+		{"name": "Map rock", "res": "res://game/presentation/hunt_map/props/rock.tscn", "solid": "", "tab": "stones"},
+		{"name": "Stone pile (loot)", "res": "res://game/presentation/hunt_map/props/stone_pile.tscn", "solid": "", "tab": "stones"},
 	]
 	entries.append_array(LevelLayout.nature_palette())
 	return entries
+
+
+## What "Clear level" removes as a whole: the cliffs, hills and woods around the grounds.
+func planning_decor() -> Array[Node]:
+	return [$Surroundings] if has_node("Surroundings") else []
 
 
 ## Props and escape zones may go; the return point and the bridge only move.
@@ -469,7 +475,7 @@ func _on_shouted(at: Vector3) -> void:
 	# A wave shows the shout's reach, and the minimap points out where the saddled boar waits (owner, 2026-10-27).
 	var wave: Node3D = ShoutWaveScene.instantiate()
 	wave.radius = SHOUT_RADIUS
-	wave.surfaces.assign([$Terrain, $Surroundings, $Props])
+	wave.surfaces.assign([$Terrain, get_node_or_null("Surroundings"), $Props].filter(func(n: Node) -> bool: return n != null))
 	wave.position = at
 	add_child(wave)
 	$Hud/Minimap.show_mount(_hunter.mount_node())

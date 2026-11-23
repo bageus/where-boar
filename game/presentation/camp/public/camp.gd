@@ -143,7 +143,8 @@ func _ready() -> void:
 	_ambience()
 	_dress()
 	# The camp ground and the forest floor behind the palisade.
-	BakedShadow.bake(self, $Sun, [$Scenery, $Dressing, $Stations, $Longhouse] as Array[Node],
+	BakedShadow.bake(self, $Sun, [get_node_or_null("Scenery"), get_node_or_null("Dressing"), $Stations, $Longhouse].filter(
+			func(n: Node) -> bool: return n != null) as Array[Node],
 			Vector3(-10.0, 0.0, -20.0), 120.0, -0.3)  # the wall and drop-off rocks reach far below the camp
 
 
@@ -152,7 +153,10 @@ func _dress() -> void:
 	for station: Node3D in $Stations.get_children():
 		if station.name not in ["StartHunt", "Campfire"]:
 			buildings.append(station)
-	$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings, $Scenery.rim_rocks)
+	var scenery := get_node_or_null("Scenery")  # a cleared level has neither
+	if has_node("Dressing"):
+		$Dressing.dress($Stations/Campfire.global_position, $Stations/StartHunt.global_position, buildings,
+				scenery.rim_rocks if scenery else [] as Array[Rect2])
 
 
 ## Objects planning mode may move, turn, scale, copy and delete: the longhouse and stations.
@@ -175,9 +179,18 @@ func planning_centre() -> Vector3:
 func planning_palette() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	for model: String in PALETTE + CLAN_MODELS:
-		entries.append({"name": model.get_file().capitalize(), "res": BUILDINGS + model + ".glb", "solid": ""})
+		entries.append({"name": model.get_file().capitalize(), "res": BUILDINGS + model + ".glb", "solid": "", "tab": "buildings"})
 	entries.append_array(LevelLayout.nature_palette())
 	return entries
+
+
+## What "Clear level" removes as a whole: the cliffs, palisade and forest, and the plants and props between the huts.
+func planning_decor() -> Array[Node]:
+	var nodes: Array[Node] = []
+	for node_name in ["Scenery", "Dressing"]:
+		if has_node(node_name):
+			nodes.append(get_node(node_name))
+	return nodes
 
 
 ## Tents and stations are used by the camp itself, so only added objects may go.

@@ -12,7 +12,11 @@ const MUD := Color(0.5, 0.36, 0.2)
 const SAND := Color(0.74, 0.64, 0.42)
 const WET_SAND := Color(0.6, 0.52, 0.34)
 ## Ground cover the planning brush paints.
-const PAINT := {"grass": GRASS, "sand": SAND, "mud": MUD, "rock": ROCK}
+const PATH := Color(0.63, 0.52, 0.34)
+const TRAIL := Color(0.42, 0.33, 0.2)
+const PATCH := Color(0.55, 0.45, 0.3)
+## Paths (packed light earth), trampled trails and bare patches stop grass like sand and mud do.
+const PAINT := {"grass": GRASS, "sand": SAND, "mud": MUD, "rock": ROCK, "path": PATH, "trail": TRAIL, "patch": PATCH}
 ## Water surface height and the z band the river (and the Water plane in hunt_map.tscn) covers.
 const WATER_Y := -0.5
 const RIVER_BAND := Vector2(-38.0, -2.0)

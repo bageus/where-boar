@@ -8,7 +8,7 @@ const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn"
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Planner = preload("res://game/presentation/planning/public/planner.gd")
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
-const EXPECTED_CHECKS := 11
+const EXPECTED_CHECKS := 15
 
 var _frame := 0
 var _failures := 0
@@ -100,17 +100,27 @@ func _physics_process(_delta: float) -> bool:
 			_check(_raised.y > before + 1.5, "the brush raises the ground")
 			planner._brush = "paint:sand"
 			planner.sculpt(Vector3(-20, 0, 20), 0.1)
+			planner._brush = "paint:path"
+			planner.sculpt(Vector3(-30, 0, 20), 0.1)
 			data = planner._layout()
 			_fresh_level(MapScene, data)
 		5:
 			_check(is_equal_approx(_fresh.planning_terrain().height_at(_raised.x, _raised.z), _raised.y), "a fresh hunt map has the raised ground")
 			_check(not _fresh.planning_terrain().grassy_at(-20, 20), "a fresh hunt map has the sand painted, with no grass")
+			_check(not _fresh.planning_terrain().grassy_at(-30, 20), "a fresh hunt map has the path painted, with no grass")
 			_verify("hunt")
 			_main.show_planning("camp")
 		7:
 			_fresh_level(CampScene, _edit("camp"))
 		9:
 			_verify("camp")
+			_planner()._clear()
+			_check(_planner()._targets.all(func(t: Node) -> bool: return not _main.current.planning_removable(t)), "Clear level removes every removable object")
+			_fresh_level(CampScene, _planner()._layout())
+		10:
+			_check(not _fresh.has_node("Scenery") and not _fresh.has_node("Dressing"), "a cleared camp has no cliffs, palisade or plants")
+			_check(_fresh.has_node("Stations/Campfire"), "a cleared camp keeps its stations")
+			_fresh.queue_free()
 		11:
 			_planner().closed.emit()
 			_check(_main.current.has_node("%PlanHunt"), "Exit goes back to the start screen")

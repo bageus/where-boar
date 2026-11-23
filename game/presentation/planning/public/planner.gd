@@ -3,7 +3,7 @@ extends Node3D
 ## Planning mode (issue #29): a free camera over a level. Click an object to pick it, drag it over the ground,
 ## raise, turn, scale, copy or delete it with keys, add new ones from the palette, then save the layout:
 ## the level applies it whenever it is played. The level (injected) answers planning_targets(),
-## planning_parent(), planning_centre(), planning_palette() and planning_removable(node); a level with
+## planning_parent(), planning_centre(), planning_palette(), planning_decor() and planning_removable(node); a level with
 ## planning_terrain() also gets the ground brush (raise, lower, flatten, paint), saved with the layout.
 
 const LevelLayout = preload("res://game/core/level_layout/public/level_layout.gd")
@@ -24,6 +24,17 @@ const GROW := 1.1
 const PICK_REACH := 2.5
 ## Tall-grass and bush cover (terrain.gd COVER_LAYER) is not ground and holds nothing to pick.
 const RAY_MASK := 0xFFFFFFFF & ~(1 << 4)
+## Palette tabs: id -> [title, brushes [title, brush, radius]]. Objects go on the tab named by their "tab" entry key.
+## Brushes need the level's ground (planning_terrain); radius is the size picked with the brush.
+const TABS := {
+	"buildings": ["Buildings", []],
+	"trees": ["Trees, bushes", []],
+	"landscape": ["Landscape", [["Raise", "raise", 6.0], ["Lower", "lower", 6.0], ["Flatten", "flatten", 6.0]]],
+	"stones": ["Stones, cliffs", []],
+	"grass": ["Grass", [["Grass", "paint:grass", 6.0]]],
+	"ground": ["Ground", [["Sand", "paint:sand", 6.0], ["Mud", "paint:mud", 6.0], ["Rock", "paint:rock", 6.0],
+			["Path", "paint:path", 1.5], ["Trampled trail", "paint:trail", 2.0], ["Bare patch", "paint:patch", 6.0]]],
+}
 ## Ground brush: metres a second at the centre, share a second for flatten, radius range and redraw period.
 const SCULPT_RATE := 2.0
 const FLATTEN_RATE := 3.0
@@ -45,8 +56,12 @@ var _box := MeshInstance3D.new()
 var _dragging := false
 ## The picked object's height over the ground under it, kept while dragging.
 var _lift := 0.0
+var _all_entries: Array[Dictionary] = []
+## The entries of the open tab, in list order.
 var _palette_entries: Array[Dictionary] = []
 var _palette := ItemList.new()
+var _tabs := TabBar.new()
+var _brushes := HBoxContainer.new()
 var _status := Label.new()
 var _terrain: Node3D
 ## "" picks objects; else "raise", "lower", "flatten" or "paint:<kind>" (terrain.gd PAINT).
@@ -103,10 +118,7 @@ func _build_ui() -> void:
 	bar.position = Vector2(8, 8)
 	ui.add_child(bar)
 	for pair in [["Save", save], ["Export (copy JSON)", _export], ["Reset level", reset_requested.emit],
-			["To centre", to_centre], ["Exit", closed.emit]] + ([["Objects", _use_brush.bind("")], ["Raise", _use_brush.bind("raise")],
-			["Lower", _use_brush.bind("lower")], ["Flatten", _use_brush.bind("flatten")], ["Grass", _use_brush.bind("paint:grass")],
-			["Sand", _use_brush.bind("paint:sand")], ["Mud", _use_brush.bind("paint:mud")], ["Rock", _use_brush.bind("paint:rock")]]
-			if _terrain else []):
+			["Clear level", _clear], ["To centre", to_centre], ["Objects", _use_brush.bind("")], ["Exit", closed.emit]]:
 		var button := Button.new()
 		button.text = pair[0]
 		button.focus_mode = Control.FOCUS_NONE
@@ -114,13 +126,20 @@ func _build_ui() -> void:
 		bar.add_child(button)
 	_status.position = Vector2(8, 48)
 	ui.add_child(_status)
-	_palette.position = Vector2(8, 80)
-	_palette.size = Vector2(220, 520)
+	_all_entries = level.planning_palette()
+	_tabs.position = Vector2(8, 80)
+	_tabs.focus_mode = Control.FOCUS_NONE
+	for id: String in TABS:
+		_tabs.add_tab(TABS[id][0])
+	_tabs.tab_changed.connect(_open_tab)
+	ui.add_child(_tabs)
+	_brushes.position = Vector2(8, 112)
+	ui.add_child(_brushes)
+	_palette.position = Vector2(8, 144)
+	_palette.size = Vector2(220, 456)
 	_palette.focus_mode = Control.FOCUS_NONE
-	_palette_entries = level.planning_palette()
-	for entry in _palette_entries:
-		_palette.add_item(entry["name"])
 	ui.add_child(_palette)
+	_open_tab(0)
 	var help := Label.new()
 	help.text = HELP
 	help.anchor_top = 1.0
@@ -129,6 +148,27 @@ func _build_ui() -> void:
 	help.offset_top = -80.0
 	ui.add_child(help)
 	_say("Pick an object, or choose one in the list and click the ground to add it.")
+
+
+## Fills the list with the tab's objects and the row above it with the tab's ground brushes.
+func _open_tab(index: int) -> void:
+	var id: String = TABS.keys()[index]
+	_palette.clear()
+	_palette_entries.clear()
+	for entry in _all_entries:
+		if entry.get("tab", "buildings") == id:
+			_palette_entries.append(entry)
+			_palette.add_item(entry["name"])
+	for button in _brushes.get_children():
+		button.queue_free()
+	if not _terrain:
+		return
+	for brush: Array in TABS[id][1]:
+		var button := Button.new()
+		button.text = brush[0]
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(_use_brush.bind(brush[1], brush[2]))
+		_brushes.add_child(button)
 
 
 func _say(text: String) -> void:
@@ -143,8 +183,9 @@ func to_centre() -> void:
 	_camera.global_position = centre + _camera.global_basis.z * 30.0
 
 
-func _use_brush(brush: String) -> void:
+func _use_brush(brush: String, radius := 0.0) -> void:
 	_brush = brush
+	_radius = radius if radius > 0.0 else _radius
 	_see_through = _target_bodies() if brush != "" else []
 	_pick(null)
 	_palette.deselect_all()
@@ -352,11 +393,28 @@ func _delete() -> void:
 	if not level.planning_removable(_selected):
 		_say("%s is part of the level: move it instead" % _selected.name)
 		return
-	if not _selected.has_meta(LevelLayout.ADDED_META):
-		_removed.append(String(level.get_path_to(_selected)))
-	_targets.erase(_selected)
-	_selected.queue_free()
+	_remove(_selected)
+
+
+func _remove(node: Node3D) -> void:
+	if not node.has_meta(LevelLayout.ADDED_META):
+		_removed.append(String(level.get_path_to(node)))
+	_targets.erase(node)
+	node.queue_free()
 	_pick(null)
+
+
+## Empties the level for planning from scratch: every object that may go, then the cliffs and woods around it.
+## Reset level brings the original back.
+func _clear() -> void:
+	for target in _targets.duplicate():
+		if is_instance_valid(target) and level.planning_removable(target):
+			_remove(target)
+	for node: Node in level.planning_decor():
+		if not node.is_queued_for_deletion():
+			_removed.append(String(level.get_path_to(node)))
+			node.queue_free()
+	_say("Level cleared (cliffs and woods included). Save to keep it, Reset level to undo.")
 
 
 func _ray(at: Vector2, exclude: Array[RID] = []) -> Dictionary:
