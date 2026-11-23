@@ -244,6 +244,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hut2" parent="Stations" instance=ExtResource("5_station")]
@@ -252,6 +253,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hut3" parent="Stations" instance=ExtResource("5_station")]
@@ -260,6 +262,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hut4" parent="Stations" instance=ExtResource("5_station")]
@@ -268,6 +271,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hut5" parent="Stations" instance=ExtResource("5_station")]
@@ -276,6 +280,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hut6" parent="Stations" instance=ExtResource("5_station")]
@@ -284,6 +289,7 @@ station_id = "hut"
 title = "For sale"
 model = ExtResource("4_round_tent")
 solid = true
+walk_in = true
 
 
 [node name="Hunter" parent="." instance=ExtResource("6_hunter")]
