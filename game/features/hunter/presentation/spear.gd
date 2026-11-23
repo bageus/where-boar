@@ -15,7 +15,7 @@ var kind := "flint":
 		kind = value
 		if has_node("Mesh"):
 			var old: Node3D = $Mesh
-			var model: Node3D = load("res://assets/models/peak_weapons/%s.tscn" % SCENES[kind]).instantiate()
+			var model: Node3D = load("res://assets/models/weapon_new/%s.tscn" % SCENES[kind]).instantiate()
 			model.transform = old.transform
 			remove_child(old)
 			old.free()

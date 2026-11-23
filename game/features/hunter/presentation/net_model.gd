@@ -1,23 +1,32 @@
 extends Node3D
 
-## The owner's rigged net (assets/models/boar_net_rigged.glb, a 9 x 7 grid of bones N_<x>_<z>), owner 2026-10-30:
-## hangs from the hand, opens flat in flight and drapes over a caught boar's shape, riding its fall.
+## The owner's weighted net (assets/models/weapon_new/Weighted_Net_Rigged.glb, a 5 x 5 grid of knot bones
+## Knot_<row>_<column>, no animations), owner 2026-11-23: hangs loosely from the hand by one edge; thrown, it
+## unfolds from hanging to a flat spinning sheet; on a caught boar it drapes over its shape, riding its fall.
+## The stray trailing rope was cut out of the model's index buffer (degenerate triangles).
 
-const COLUMNS := 9
-const ROWS := 7
+const COLUMNS := 5
+const ROWS := 5
 const OPEN_SECONDS := 0.4
+const SPIN := 4.0  # radians per second while flying
 const CLEARANCE := 0.06  # net above the fur, boar model units: the mesh sags between bones
 const CELLS := 24  # resolution of the boar's top-down silhouette along its length
 const CREASE_CELLS := 3  # dips narrower than this many cells (between the hams, behind the head) are bridged
-## PEAK-like look, matching the baked weapons (tools/bake_peak_weapons.gd): plain bright rope, no texture, no shine.
-const ROPE := Color(0.95, 0.8, 0.48)
+## Hanging: rows below the held one drop this far apart, gathered sideways; the folds sway out of plane.
+const HANG_DROP := 0.36
+const HANG_GATHER := 0.3
+const HANG_FOLD := 0.07
 
 ## Top-down silhouettes of boar meshes, by mesh: built once from the vertices.
 static var _silhouettes := {}
 
+## While flying: spins around its vertical axis.
+var spinning := false
 var _skeleton: Skeleton3D
-var _player: AnimationPlayer
 var _bones := PackedInt32Array()
+var _flat := PackedVector3Array()
+var _hanging := PackedVector3Array()
+var _opening: Tween
 ## While draped: the boar skeleton, and per net bone the boar bone it rides on and the offset from it.
 var _boar: Skeleton3D
 var _anchors := PackedInt32Array()
@@ -26,28 +35,34 @@ var _offsets := PackedVector3Array()
 
 func _ready() -> void:
 	_skeleton = find_children("*", "Skeleton3D", true, false)[0]
-	_player = find_children("*", "AnimationPlayer", true, false)[0]
-	var rope := StandardMaterial3D.new()
-	rope.albedo_color = ROPE
-	rope.roughness = 1.0
-	rope.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
-		mesh.material_override = rope
 	for z in ROWS:
 		for x in COLUMNS:
-			_bones.append(_skeleton.find_bone("N_%d_%d" % [x, z]))
+			var bone := _skeleton.find_bone("Knot_%02d_%02d" % [z, x])
+			_bones.append(bone)
+			var rest := _skeleton.get_bone_rest(bone).origin
+			_flat.append(rest)
+			# Held by row 0: each lower row drops and spreads a little wider, folds alternate in and out.
+			var gather := HANG_GATHER + 0.15 * z / (ROWS - 1)
+			var fold := HANG_FOLD * (1.0 if (x + z) % 2 == 0 else -1.0) * float(z > 0)
+			_hanging.append(Vector3(rest.x * gather, -HANG_DROP * z, fold))
 	hang()
 
 
 ## Held by its top edge, hanging down.
 func hang() -> void:
-	_player.play("Hold_Two_Hands_demo")
-	_player.seek(_player.current_animation_length, true)
+	_set_pose(0.0)
 
 
-## Thrown: spreads from the hanging bunch to a flat sheet.
+## Thrown: spreads from the hanging bunch to a flat sheet and spins.
 func open() -> void:
-	_player.play("Settle_Flat_demo", -1, _player.get_animation("Settle_Flat_demo").length / OPEN_SECONDS)
+	spinning = true
+	_opening = create_tween()
+	_opening.tween_method(_set_pose, 0.0, 1.0, OPEN_SECONDS).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+
+func _set_pose(t: float) -> void:
+	for i in _bones.size():
+		_skeleton.set_bone_pose_position(_bones[i], _hanging[i].lerp(_flat[i], t))
 
 
 ## Caught a boar: lies over its back and hangs down its sides to the ground, following its bones from now on.
@@ -56,6 +71,9 @@ func wrap(boar_model: Node3D) -> void:
 	if skeletons.is_empty():
 		return
 	_boar = skeletons[0]
+	spinning = false
+	if _opening:
+		_opening.kill()
 	# The body: blocky boars are one mesh, boar_new ones many parts (tusks, eyes, legs) round the hide.
 	var meshes := _boar.find_children("*", "MeshInstance3D", false, false)
 	var mesh: MeshInstance3D = meshes[0]
@@ -63,7 +81,6 @@ func wrap(boar_model: Node3D) -> void:
 		if part.get_aabb().get_volume() > mesh.get_aabb().get_volume():
 			mesh = part
 	var sil := _silhouette(mesh)
-	_player.active = false
 	var points := _drape(sil)
 	var movable := PackedInt32Array()
 	for b in _boar.get_bone_count():
@@ -86,7 +103,9 @@ func wrap(boar_model: Node3D) -> void:
 	_follow()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if spinning:
+		rotate_y(SPIN * delta)
 	if _boar != null:
 		_follow()
 

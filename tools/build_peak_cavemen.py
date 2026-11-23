@@ -4,8 +4,8 @@ settings (bearded, plump, lanky) and the helper in a hamster hat and patchwork t
 
 Builds each T-pose from simple faceted parts (tools/peak_caveman_parts.py), then rigs and animates it
 with tools/rig_cavemen.py (same 25-bone skeleton and animations as before, so the backpack, the
-helper's hammer and every animation name still work). Writes assets/models/peak_cavemen/<kind>.glb
-and, for hunters, arm_<kind>.glb (the first-person forearm and fist). Needs `pip install bpy`.
+helper's hammer and every animation name still work). Writes assets/models/peak_cavemen/<kind>.glb.
+Needs `pip install bpy`.
     python tools/build_peak_cavemen.py bearded [--preview DIR]
     python tools/build_peak_cavemen.py all
 """
@@ -255,8 +255,6 @@ def build(kind: str, preview_dir: Path | None) -> None:
     skin(mesh, rig)
     OUT.mkdir(parents=True, exist_ok=True)
     R.OUT = OUT
-    if kind != "helper":
-        R.export_arm(mesh, rig, f"arm_{kind}")
     actions = [R.animate(rig, name, R.ANIMATIONS[name]()) for name in spec.get("animations", R.DEFAULT_ANIMATIONS)]
     if "hammer" in spec:
         R.add_hammer(rig, spec["hammer"])

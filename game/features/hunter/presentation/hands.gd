@@ -1,13 +1,16 @@
 extends Node3D
 
-## First-person view of what the hunter holds (playtest 2026-10-27): one simple model per weapon,
-## a quick strike, and the spear raised over the shoulder while aiming a throw.
+## First-person view of what the hunter holds (playtest 2026-10-27): one model per weapon, no arms (owner,
+## 2026-11-23), a quick strike, and the spear raised over the shoulder while aiming a throw. The bow and the
+## slingshot stay in view when out of ammo and draw their own string and bands.
 
-const Looks = preload("res://game/features/hunter/presentation/hunter_looks.gd")
+const Loadout = preload("res://game/features/hunter/domain/loadout.gd")
 const REST := Vector3(0.3, -0.35, -0.5)
 ## Aiming: raised as for a swing; pulled further back the stronger the throw.
 const RAISED := Vector3(0.3, -0.05, -0.3)
 const PULL_BACK := 0.25
+## Drawing the bow or slingshot: held up near the middle of the view; the string or bands pull back, not the hands.
+const DRAWN := Vector3(0.12, -0.3, -0.55)
 const RAISED_TILT := 0.25
 const STAB_REACH := 0.45
 const STAB_SECONDS := 0.18
@@ -15,41 +18,9 @@ const FOLLOW_RATE := 14.0
 
 var _striking := false
 var _spear_kind := "flint"
-var _kind := Looks.DEFAULT
 
 ## Children in Loadout.Weapon order: spear, net, club, sling, bow, knife.
 @onready var _models: Array[Node] = [$Spear, $Net, $Club, $Sling, $Bow, $Knife]
-
-
-## The shadow body already casts the arm's shadow.
-func _ready() -> void:
-	for hand in find_children("Hand", "", true, false):
-		_no_shadow(hand)
-
-
-## The forearm of this kind of hunter (bearded, plump, lanky) on every weapon, same grip.
-func set_kind(kind: String) -> void:
-	kind = Looks.known(kind)
-	if kind == _kind:
-		return
-	_kind = kind
-	var arm := Looks.arm(kind)
-	for old: Node3D in find_children("Hand", "", true, false):
-		var hand: Node3D = arm.instantiate()
-		hand.transform = old.transform
-		var parent := old.get_parent()
-		var index := old.get_index()
-		parent.remove_child(old)
-		old.free()
-		parent.add_child(hand)
-		parent.move_child(hand, index)
-		hand.name = "Hand"
-		_no_shadow(hand)
-
-
-func _no_shadow(hand: Node) -> void:
-	for mesh: GeometryInstance3D in hand.find_children("*", "GeometryInstance3D", true, false):
-		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## Swaps the spear model in hand to the kind carried (flint, bone, wood).
@@ -58,7 +29,7 @@ func set_spear_kind(kind: String) -> void:
 		return
 	_spear_kind = kind
 	var old: Node = $Spear/Model
-	var model: Node3D = load("res://assets/models/peak_weapons/%s.tscn" % {"flint": "spear", "bone": "spear_bone", "wood": "spear_wood"}[kind]).instantiate()
+	var model: Node3D = load("res://assets/models/weapon_new/%s.tscn" % {"flint": "spear", "bone": "spear_bone", "wood": "spear_wood"}[kind]).instantiate()
 	var parent := old.get_parent()
 	var index := old.get_index()
 	parent.remove_child(old)
@@ -68,17 +39,21 @@ func set_spear_kind(kind: String) -> void:
 	model.name = "Model"
 
 
-## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets or arrows).
-## Aiming with power 0..1 raises the spear.
+## weapon: the selected Loadout.Weapon; armed: false when it is spent (spear thrown, no nets, stones or arrows).
+## Aiming with power 0..1 raises the spear and draws the bow or slingshot.
 func pose(weapon: int, armed: bool, aiming: bool, power: float, delta: float) -> void:
 	for i in _models.size():
-		_models[i].visible = armed and i == weapon
+		_models[i].visible = i == weapon and (armed or i in [Loadout.Weapon.SLING, Loadout.Weapon.BOW])
+	$Sling/Model.pose(armed, aiming and weapon == Loadout.Weapon.SLING, power, delta)
+	$Bow/Model.pose(armed, aiming and weapon == Loadout.Weapon.BOW, power, delta)
 	if _striking:
 		return
 	var target := RAISED + Vector3(0.0, 0.0, PULL_BACK * power) if aiming else REST
+	if aiming and weapon in [Loadout.Weapon.SLING, Loadout.Weapon.BOW]:
+		target = DRAWN
 	var t := minf(1.0, FOLLOW_RATE * delta)
 	position = position.lerp(target, t)
-	rotation.x = lerpf(rotation.x, RAISED_TILT if aiming else 0.0, t)
+	rotation.x = lerpf(rotation.x, RAISED_TILT if aiming and target != DRAWN else 0.0, t)
 
 
 ## A short jab forward and back (stab, club swing, net cast, sling or bow shot).

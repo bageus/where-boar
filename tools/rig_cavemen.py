@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Rig, skin and animate the owner's caveman models into assets/models/caveman_<kind>.glb.
 
-The "hunter" kind is the player's body (shadow only) and also writes hunter_arm.glb, its right
-forearm and fist for the first-person view. The "helper" kind is the tavern's tribesman
+The "hunter" kind is the player's body (shadow only; first person shows no arms, owner 2026-11-23). The "helper" kind is the tavern's tribesman
 (tribal_character_04_12000.glb): his own animations (walk, run, sneak, crouch, hammer, sit) and the
 owner's stone hammer in his right fist.
 
@@ -42,7 +41,6 @@ MODELS = {
         "fingers": [(0.51, 0, 0.60), (0.54, 0, 0.60), (0.57, 0, 0.60)],
         "thumb": [(0.47, -0.03, 0.59), (0.49, -0.06, 0.55)],
         "leg": [(0.11, 0.02, 0.22), (0.13, 0.02, 0.135), (0.14, 0.03, 0.05), (0.16, -0.12, 0.02)],
-        "arm_out": "hunter_arm",
     },
     "skinny": {
         "height": 1.8,
@@ -452,55 +450,6 @@ def add_hammer(rig: bpy.types.Object, source: Path) -> None:
                                   @ rig.data.bones["hand_r"].matrix_local.to_3x3().to_4x4()).inverted()
 
 
-def export_arm(mesh: bpy.types.Object, rig: bpy.types.Object, name: str) -> None:
-    """The right forearm and fist at full detail for the first-person view (hands.tscn): posed into
-    a fist, cut at the elbow, fist at the origin, thumb up and the forearm reaching back to the
-    bottom right of the view."""
-    action = animate(rig, "fist", [(0, {})])
-    bpy.context.scene.frame_set(0)
-    arm = mesh.copy()
-    arm.data = mesh.data.copy()
-    bpy.context.scene.collection.objects.link(arm)
-    bpy.ops.object.select_all(action="DESELECT")
-    arm.select_set(True)
-    bpy.context.view_layer.objects.active = arm
-    bpy.ops.object.modifier_apply(modifier=arm.modifiers[0].name)
-    arm.parent = None
-    names = {g.index: g.name for g in arm.vertex_groups}
-    owner = lambda v: names[max(v.groups, key=lambda g: g.weight).group] if v.groups else ""
-    keep = {f"{n}_r" for n in ("forearm", "hand", "fingers", "fingertips", "thumb")}
-    fist = [v.co.copy() for v in arm.data.vertices if owner(v) in keep - {"forearm_r"}]
-    thumb = [v.co.copy() for v in arm.data.vertices if owner(v) == "thumb_r"]
-    drop = [v.index for v in arm.data.vertices if owner(v) not in keep]
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="DESELECT")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    for i in drop:
-        arm.data.vertices[i].select = True
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.delete(type="VERT")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    arm.vertex_groups.clear()
-    smooth = arm.modifiers.new("smooth", "SUBSURF")  # the source has about 300 triangles here; seen up close
-    smooth.levels = 1
-    bpy.ops.object.modifier_apply(modifier=smooth.name)
-    bpy.ops.object.shade_smooth()
-    centre = sum(fist, Vector()) / len(fist)
-    back = (_fk(rig, FISTS)["forearm_r"][0] - centre).normalized()
-    up = sum(thumb, Vector()) / len(thumb) - centre
-    # Blender axes of hand.glb's forearm (glTF (0.05, -0.11, 0.29)): back toward the camera, down, right.
-    to_back = Vector((0.05, -0.29, -0.11)).normalized()
-    to_up = Vector((0, 0, 1))
-    basis = lambda b, u: Matrix((b, (u - b * u.dot(b)).normalized(), b.cross((u - b * u.dot(b)).normalized()))).transposed()
-    turn = basis(to_back, to_up) @ basis(back, up).inverted()
-    arm.data.transform(turn.to_4x4() @ Matrix.Translation(-centre))
-    print(name, "triangles:", sum(len(p.vertices) - 2 for p in arm.data.polygons))
-    bpy.ops.export_scene.gltf(filepath=str(OUT / f"{name}.glb"), export_format="GLB", export_image_format="JPEG",
-                              export_animations=False, export_skins=False, use_selection=True)
-    bpy.data.objects.remove(arm)
-    bpy.data.actions.remove(action)
-
-
 def preview(rig: bpy.types.Object, actions: list, out_dir: Path, kind: str) -> None:
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"  # Workbench needs EGL, which headless machines often lack
@@ -542,8 +491,6 @@ def main() -> None:
     mesh, place = build_mesh(source, spec)
     rig = build_skeleton(spec, place)
     skin(mesh, rig)
-    if "arm_out" in spec:
-        export_arm(mesh, rig, spec["arm_out"])
     cut(mesh)
     actions = [animate(rig, name, ANIMATIONS[name]()) for name in spec.get("animations", DEFAULT_ANIMATIONS)]
     if "hammer" in spec:

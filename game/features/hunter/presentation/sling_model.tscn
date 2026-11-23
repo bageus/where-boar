@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/features/hunter/presentation/sling_model.gd" id="1_sling"]
+[ext_resource type="PackedScene" path="res://assets/models/weapon_new/Slingshot_No_Bands.glb" id="2_sling"]
+[ext_resource type="PackedScene" path="res://assets/models/peak_weapons/stone.tscn" id="3_stone"]
+
+[node name="SlingModel" type="Node3D"]
+script = ExtResource("1_sling")
+
+[node name="Model" parent="." instance=ExtResource("2_sling")]
+
+[node name="Stone" parent="." instance=ExtResource("3_stone")]
+transform = Transform3D(0.55, 0, 0, 0, 0.55, 0, 0, 0, 0.55, 0, 0, 0)
+visible = false

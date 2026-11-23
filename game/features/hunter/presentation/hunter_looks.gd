@@ -1,8 +1,8 @@
 extends RefCounted
 
 ## The hunters the player can be (owner's references, 2026-11-02), picked in the settings: the body
-## that casts the shadow and the forearm seen in first person (tools/build_peak_cavemen.py). Bearded and
-## plump wear the owner's rigged hunters (assets/models/hunter/, 2026-11-23), animated by HunterRig.
+## that casts the shadow (tools/build_peak_cavemen.py). First person shows no arms (owner, 2026-11-23).
+## Bearded and plump wear the owner's rigged hunters (assets/models/hunter/, 2026-11-23), animated by HunterRig.
 
 const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
 const DEFAULT := "bearded"
@@ -33,7 +33,3 @@ static func body(kind: String) -> Node3D:
 	if HUNTERS.has(kind):
 		return HunterRig.instance(load(HUNTERS[kind]))
 	return load("res://assets/models/peak_cavemen/%s.glb" % kind).instantiate()
-
-
-static func arm(kind: String) -> PackedScene:
-	return load("res://assets/models/peak_cavemen/arm_%s.glb" % known(kind))
