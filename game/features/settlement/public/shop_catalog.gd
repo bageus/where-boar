@@ -119,7 +119,7 @@ const SELL := {
 	"pens": {"grass": 12, "mushroom": 10},
 	# ASSUMPTION (D013): a caught bird sells for a few tusks, a bait for half its price.
 	"cages": {"rooster": [1, 10], "turkey": [1, 15]},
-	"hunting_hut": {"item_acorns": [2, 5], "item_red_berries": [1, 3], "item_blueberries": [1, 3], "item_apple": [1, 4],
+	"hunting_hut": {"bait": 2, "item_acorns": [2, 5], "item_red_berries": [1, 3], "item_blueberries": [1, 3], "item_apple": [1, 4],
 		"item_pear": [1, 4], "item_bananas": [1, 5], "item_mandarin": [1, 5], "item_mango": [1, 6], "item_mixed_berries": [1, 7]},
 }
 ## Ids SELL takes out of the cages (Progress.helpers) rather than the forest finds.
@@ -127,7 +127,7 @@ const BIRD_IDS := ["rooster", "turkey"]
 const MATERIAL_NAMES := {
 	"stone": "Stones", "feather": "Feathers", "stick": "Sticks", "mushroom": "Mushrooms", "berry": "Berries",
 	"daisy": "Daisies", "poison_berry": "Poisonous berries", "larva": "Larvae", "frog": "Frogs", "grass": "Grass",
-	"rooster": "Roosters", "turkey": "Turkeys",
+	"rooster": "Roosters", "turkey": "Turkeys", "bait": "Baits",
 }
 
 

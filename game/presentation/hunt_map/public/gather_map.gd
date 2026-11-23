@@ -93,6 +93,9 @@ func _find_cliffs() -> void:
 
 
 func _process(_delta: float) -> void:
+	var finds: Node3D = _terrain.get_node_or_null("Gatherables")
+	if finds != null:
+		finds.glow(_hunter.global_position - _hunter.global_basis.z * GATHER_AHEAD, GATHER_REACH)
 	var at := _hunter.global_position
 	var best := Vector3(0.0, -1000.0, 0.0)
 	for spot in _cliffs:
@@ -116,7 +119,7 @@ func _on_interacted() -> void:
 	var material_id: String = found["material"]
 	var name_: String = ShopCatalog.MATERIAL_NAMES[material_id]
 	if not hunt.gather(material_id):
-		_hunter.show_gain("No room for more %s" % name_.to_lower())
+		_hunter.show_gain("Can't carry more %s" % name_.to_lower())
 		return
 	gatherables.remove(found)
 	_hunter.show_gain("+1 %s (%d/%d)" % [name_, hunt.gathered[material_id], Hunt.POCKET[material_id]])

@@ -288,6 +288,9 @@ func _place_river_sound() -> void:
 
 
 func _process(delta: float) -> void:
+	var finds: Node3D = _terrain.get_node_or_null("Gatherables")
+	if finds != null:
+		finds.glow(_hunter.global_position - _hunter.global_basis.z * GATHER_AHEAD, GATHER_REACH)
 	_place_river_sound()
 	_scout_left -= delta
 	if _scouting and _scout_left <= 0.0:
@@ -458,7 +461,7 @@ func _gather() -> void:
 	var material_id: String = found["material"]
 	var name_: String = ShopCatalog.MATERIAL_NAMES[material_id]
 	if not hunt.gather(material_id):
-		_hunter.show_gain("No room for more %s" % name_.to_lower())
+		_hunter.show_gain("Can't carry more %s" % name_.to_lower())
 		return
 	gatherables.remove(found)
 	_hunter.show_gain("+1 %s (%d/%d)" % [name_, hunt.gathered[material_id], Hunt.POCKET[material_id]])

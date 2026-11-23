@@ -8,7 +8,7 @@ const Invasion = preload("res://game/features/hunt/public/invasion.gd")
 
 ## How many of each forest find fit in the pockets on one hunt (issue #26).
 const POCKET := {"grass": 12, "stick": 12, "feather": 12, "poison_berry": 6, "daisy": 10, "berry": 10,
-	"mushroom": 10, "frog": 6, "larva": 4}
+	"mushroom": 10, "frog": 6, "larva": 4, "stone": 12, "bait": 5}
 
 ## Boars on the map when the hunt started.
 var total := 0

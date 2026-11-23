@@ -6,6 +6,7 @@ extends Node3D
 ## picking one up (find + remove) rebuilds that cell's mesh without it.
 
 const Trunk = preload("res://game/presentation/hunt_map/props/trunk.gd")
+const Highlight = preload("res://game/features/hunter/public/highlight.gd")
 const DIR := "res://assets/models/props/"
 const CELL := 40.0
 const RANGE := 60.0
@@ -17,11 +18,21 @@ const GROUND := {
 	"Mushrooms": [80, Vector2(0.4, 0.8)],
 	"Poisonous_Berries": [35, Vector2(0.35, 0.55)],
 	"Feather": [70, Vector2(0.25, 0.55)],
+	"Stone": [130, Vector2(0.8, 1.3)],
+	"Bait": [26, Vector2(1.0, 1.5)],
 }
+## Finds that are not an atlas glb in DIR: meshes picked at random.
+const MESH_FILES := {
+	"Stone": ["res://assets/models/peak_weapons/stone.res"],
+	"Bait": ["res://assets/models/peak_fruit/01_acorns.res", "res://assets/models/peak_fruit/04_apple.res",
+		"res://assets/models/peak_fruit/05_pear.res", "res://assets/models/peak_fruit/02_red_berries.res"],
+}
+## Batch group (one material each) of a find; the rest share the atlas.
+const GROUP := {"Poisonous_Berries": "poison", "Stone": "stone", "Bait": "bait"}
 ## glb (or "frog", "grub") -> material id the find becomes in the pockets (shop_catalog.gd MATERIAL_NAMES).
 const MATERIAL := {
 	"Grass_Tufts": "grass", "Daisies_6_Colors": "daisy", "Berries_6_Colors": "berry", "Mushrooms": "mushroom",
-	"Poisonous_Berries": "poison_berry", "Feather": "feather", "Sticks_3_Variants": "stick", "frog": "frog", "grub": "larva",
+	"Poisonous_Berries": "poison_berry", "Feather": "feather", "Stone": "stone", "Bait": "bait", "Sticks_3_Variants": "stick", "frog": "frog", "grub": "larva",
 }
 ## Berries on a bush hang up to this high over the hunter's feet and can still be reached.
 const REACH_UP := 2.5
@@ -31,9 +42,12 @@ const MUSHROOMS_ON_WOOD := 45
 const STICKS := 140
 const STICK_RING := Vector2(1.5, 5.0)
 const FROGS := 12
-const GRUBS := 18
+const GRUBS := 30
 const FROG_SCALE := 0.28
-const GRUB_SCALE := 0.16
+const GRUB_SCALE := 0.22
+## Wood tops are sampled on a TOP_N x TOP_N grid; a spot is flat when its four neighbours are within FLAT_TOL (model units).
+const TOP_N := 20
+const FLAT_TOL := 0.05
 const FROG_ANIMS := ["Jump", "Jump_001", "Jump_002"]
 const GRUB_ANIMS := ["Crawl", "Crawl_001"]
 const Frog = preload("res://game/presentation/hunt_map/props/frog.gd")
@@ -45,6 +59,9 @@ var _meshes := {}  # glb name -> Array[Mesh]
 var _batches := {}  # [material group, cell] -> Array of [Mesh, Transform3D, material id]
 var _nodes := {}  # same key -> its baked MeshInstance3D
 var _critters: Array[Node3D] = []  # frogs and grubs, with meta "material"
+var _tops := {}  # Mesh -> PackedFloat32Array of the highest upward surface per grid cell (-INF: none)
+var _glow: Node3D  # outline copy of the still find in reach
+var _glit: Node3D  # the critter outlined now
 
 
 ## `hosts` holds [mesh, Transform3D] lists for "stumps", "logs", "trees" and "shrubs" the terrain placed;
@@ -64,7 +81,9 @@ func populate(terrain: Node3D, hosts: Dictionary, amount := 1.0) -> void:
 		_on_shrub("Poisonous_Berries", hosts.shrubs)
 	var wood: Array = hosts.stumps + hosts.logs
 	for _n in roundi(MUSHROOMS_ON_WOOD * _rng.randf_range(0.6, 1.4) * amount):
-		_still("Mushrooms", _wood_top(wood), Vector2(0.3, 0.6))
+		var top: Variant = _wood_top(wood)
+		if top != null:
+			_still("Mushrooms", top, Vector2(0.3, 0.6))
 	for _n in roundi(STICKS * _rng.randf_range(0.6, 1.4) * amount):
 		var tree: Array = hosts.trees[_rng.randi() % hosts.trees.size()]
 		var at: Vector3 = (tree[1] as Transform3D).origin + _ring(_rng.randf_range(STICK_RING.x, STICK_RING.y))
@@ -84,7 +103,7 @@ func _still(glb: String, at: Vector3, scale_range: Vector2, tilt := 0.0) -> void
 	var meshes := _load_meshes(glb)
 	var tilt_basis := Basis.from_euler(Vector3(_rng.randf_range(-tilt, tilt), _rng.randf() * TAU, _rng.randf_range(-tilt, tilt)))
 	var spot := Transform3D(tilt_basis.scaled(Vector3.ONE * _rng.randf_range(scale_range.x, scale_range.y)), at - Vector3.UP * 0.02)
-	var key := ["poison" if glb == "Poisonous_Berries" else "atlas", Vector2i(floori(at.x / CELL), floori(at.z / CELL))]
+	var key := [GROUP.get(glb, "atlas"), Vector2i(floori(at.x / CELL), floori(at.z / CELL))]
 	if not _batches.has(key):
 		_batches[key] = []
 	_batches[key].append([meshes[_rng.randi() % meshes.size()], spot, MATERIAL[glb]])
@@ -99,18 +118,61 @@ func _on_shrub(glb: String, shrubs: Array) -> void:
 	_still(glb, (shrub[1] as Transform3D) * local, Vector2(0.25, 0.4))
 
 
-## A random point on the top of a stump or log.
-func _wood_top(wood: Array) -> Vector3:
-	var host: Array = wood[_rng.randi() % wood.size()]
-	var box := (host[0] as Mesh).get_aabb()
-	var along := 0 if box.size.x > box.size.z else 2  # a log lies along its longer horizontal side
-	var local := box.get_center()
-	local[along] += _rng.randf_range(-0.35, 0.35) * box.size[along]
-	local.y = box.end.y * 0.95
-	return (host[1] as Transform3D) * local
+## A random flat point on the real top surface of a stump or log (not a branch tip), or null after a few misses.
+func _wood_top(wood: Array) -> Variant:
+	for _try in 12:
+		var host: Array = wood[_rng.randi() % wood.size()]
+		var mesh: Mesh = host[0]
+		var grid := _top_grid(mesh)
+		var box := mesh.get_aabb()
+		var i := _rng.randi_range(2, TOP_N - 3)
+		var j := _rng.randi_range(2, TOP_N - 3)
+		var y := grid[j * TOP_N + i]
+		if y == -INF:
+			continue
+		if [grid[j * TOP_N + i - 1], grid[j * TOP_N + i + 1], grid[(j - 1) * TOP_N + i], grid[(j + 1) * TOP_N + i]].any(func(n: float) -> bool: return absf(n - y) > FLAT_TOL):
+			continue
+		var local := Vector3(box.position.x + (i + 0.5) * box.size.x / TOP_N, y, box.position.z + (j + 0.5) * box.size.z / TOP_N)
+		return (host[1] as Transform3D) * local
+	return null
+
+
+## Height of the highest surface facing up or down in each grid cell of mesh's footprint.
+func _top_grid(mesh: Mesh) -> PackedFloat32Array:
+	if _tops.has(mesh):
+		return _tops[mesh]
+	var grid := PackedFloat32Array()
+	grid.resize(TOP_N * TOP_N)
+	grid.fill(-INF)
+	var box := mesh.get_aabb()
+	var step := Vector2(box.size.x, box.size.z) / TOP_N
+	var f := mesh.get_faces()
+	for t in range(0, f.size(), 3):
+		var a := f[t]
+		var b := f[t + 1]
+		var c := f[t + 2]
+		var n := (b - a).cross(c - a)
+		if absf(n.y) < 0.5 * n.length():
+			continue
+		var lo := Vector2(minf(a.x, minf(b.x, c.x)) - box.position.x, minf(a.z, minf(b.z, c.z)) - box.position.z) / step
+		var hi := Vector2(maxf(a.x, maxf(b.x, c.x)) - box.position.x, maxf(a.z, maxf(b.z, c.z)) - box.position.z) / step
+		for j in range(clampi(floori(lo.y), 0, TOP_N - 1), clampi(floori(hi.y), 0, TOP_N - 1) + 1):
+			for i in range(clampi(floori(lo.x), 0, TOP_N - 1), clampi(floori(hi.x), 0, TOP_N - 1) + 1):
+				var px := box.position.x + (i + 0.5) * step.x
+				var pz := box.position.z + (j + 0.5) * step.y
+				var d1 := (px - b.x) * (a.z - b.z) - (a.x - b.x) * (pz - b.z)
+				var d2 := (px - c.x) * (b.z - c.z) - (b.x - c.x) * (pz - c.z)
+				var d3 := (px - a.x) * (c.z - a.z) - (c.x - a.x) * (pz - a.z)
+				if (d1 < 0 or d2 < 0 or d3 < 0) and (d1 > 0 or d2 > 0 or d3 > 0):
+					continue
+				grid[j * TOP_N + i] = maxf(grid[j * TOP_N + i], a.y - (n.x * (px - a.x) + n.z * (pz - a.z)) / n.y)
+	_tops[mesh] = grid
+	return grid
 
 
 func _load_meshes(glb: String) -> Array:
+	if MESH_FILES.has(glb) and not _meshes.has(glb):
+		_meshes[glb] = MESH_FILES[glb].map(func(path: String) -> Mesh: return load(path))
 	if not _meshes.has(glb):
 		var scene: Node = load(DIR + glb + ".glb").instantiate()
 		_meshes[glb] = scene.find_children("*", "MeshInstance3D", true, false).map(func(m: Node) -> Mesh: return (m as MeshInstance3D).mesh)
@@ -142,6 +204,27 @@ func find(near: Vector3, reach: float) -> Dictionary:
 	return best
 
 
+## Outlines the find find() would return (and only it), as arrows, nets and stones are; call every frame.
+func glow(near: Vector3, reach: float) -> void:
+	var found := find(near, reach)
+	var node: Node3D = found.get("node")
+	if _glit != null and is_instance_valid(_glit) and _glit != node:
+		Highlight.set_on(_glit, false)
+	_glit = node
+	if node != null:
+		Highlight.set_on(node, true)
+	if _glow == null:
+		_glow = Node3D.new()
+		_glow.add_child(MeshInstance3D.new())
+		add_child(_glow)
+		Highlight.set_on(_glow, true)
+	_glow.visible = found.has("key")
+	if _glow.visible:
+		var item: Array = _batches[found["key"]][found["index"]]
+		(_glow.get_child(0) as MeshInstance3D).mesh = item[0]
+		_glow.transform = (item[1] as Transform3D) * Transform3D(Basis.from_scale(Vector3.ONE * 1.03), Vector3.ZERO)
+
+
 ## Takes a find returned by find() off the map.
 func remove(found: Dictionary) -> void:
 	if found.has("node"):
@@ -171,7 +254,13 @@ func _bake_cell(key: Array) -> void:
 	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for item: Array in _batches[key]:
 		tool.append_from(item[0], 0, item[1])
-	tool.set_material((_batches[key][0][0] as Mesh).surface_get_material(0))
+	if key[0] == "bait":  # the fruit colours live in vertex colours (bait.gd)
+		var paint := StandardMaterial3D.new()
+		paint.vertex_color_use_as_albedo = true
+		paint.roughness = 0.82
+		tool.set_material(paint)
+	else:
+		tool.set_material((_batches[key][0][0] as Mesh).surface_get_material(0))
 	var node := MeshInstance3D.new()
 	node.mesh = tool.commit()
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -221,8 +310,9 @@ func _grub(wood: Array, trees: Array) -> void:
 	grub.set_meta("material", MATERIAL["grub"])
 	_critters.append(grub)
 	add_child(grub)
-	if _rng.randf() < 0.5:
-		grub.position = _wood_top(wood)
+	var top: Variant = _wood_top(wood) if _rng.randf() < 0.5 else null
+	if top != null:
+		grub.position = top
 		grub.rotation.y = _rng.randf() * TAU
 	else:
 		var tree: Array = trees[_rng.randi() % trees.size()]

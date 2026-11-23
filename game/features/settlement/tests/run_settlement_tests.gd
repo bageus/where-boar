@@ -260,7 +260,7 @@ func _quests_accept_progress_claim() -> bool:
 	board.renew_if_due(2000, rng)
 	var kept: bool = board.quests.map(func(q: Dictionary) -> String: return q["kind"]) == kinds
 	board.quests = [{"kind": "catch", "amount": 2, "reward": 20, "have": 0, "state": "open"},
-		{"kind": "stick", "amount": 24, "reward": 3, "have": 0, "state": "open"}]
+		{"kind": "stick", "amount": 12, "reward": 2, "have": 0, "state": "open"}]
 	var progress := Progress.new()
 	progress.quests = board
 	var hunt := Hunt.new(2)
@@ -274,7 +274,7 @@ func _quests_accept_progress_claim() -> bool:
 	progress.materials = {"stick": 30}
 	var before := progress.tusks
 	var claimed := progress.claim_quest(0) and progress.claim_quest(1) and not progress.claim_quest(1)
-	return drawn and kept and half and claimed and progress.tusks == before + 23 and progress.materials["stick"] == 6 \
+	return drawn and kept and half and claimed and progress.tusks == before + 22 and progress.materials["stick"] == 18 \
 		and board.claimed_count() == 2
 
 

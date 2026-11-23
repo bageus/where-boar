@@ -73,6 +73,13 @@ const FERNS: Array[Mesh] = [
 	preload("res://assets/nature/meshes/peak/PeakShrub3.res"),
 ]
 const FERN_COUNT := 260
+## Bushes the forest berries hang on: seen from further than ferns.
+const BUSHES: Array[Mesh] = [
+	preload("res://assets/nature/meshes/peak/PeakBush1.res"), preload("res://assets/nature/meshes/peak/PeakBush2.res"),
+	preload("res://assets/nature/meshes/peak/PeakBush3.res"),
+]
+const BUSH_COUNT := 90
+const BUSH_RANGE := 70.0
 const FERN_RANGE := 35.0
 ## Trees added on top of the authored ones (owner, 2026-10-28: more trees), PEAK-like (tools/bake_peak_trees.gd).
 const TREES: Array[Mesh] = [
@@ -143,7 +150,8 @@ func _ready() -> void:
 	var stumps := _scatter([STUMP], roundi(STUMPS * density), Vector2(1.0, 1.4), false, 13, true, clear)
 	var logs := _scatter(LOGS, roundi(LOG_COUNT * density), Vector2(1.0, 1.4), false, 14, true, clear)
 	var trees := _scatter(TREES, roundi(EXTRA_TREES * density), Vector2(6.0, 10.0), true, 15, true, clear)
-	var shrubs := _scatter(FERNS, roundi(FERN_COUNT * density), Vector2(1.0, 1.6), false, 16, false, 1.5 / sqrt(density))
+	_scatter(FERNS, roundi(FERN_COUNT * density), Vector2(1.0, 1.6), false, 16, false, 1.5 / sqrt(density))
+	var shrubs := _scatter(BUSHES, roundi(BUSH_COUNT * density), Vector2(1.0, 1.5), false, 17, false, 2.5 / sqrt(density), BUSH_RANGE)
 	_plant_grass()
 	_place_cliff_rocks()
 	if Engine.is_editor_hint():
@@ -327,7 +335,7 @@ func _place_cliff_rocks() -> void:
 ## collision shape on this body: a box for stumps and logs, a trunk for trees (fit_height: size_range is the
 ## height, else a scale). The rest (ferns) are drawn only near the camera, like grass.
 func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: bool, rng_seed: int,
-		solid := true, clear := CLEAR_RADIUS) -> Array:
+		solid := true, clear := CLEAR_RADIUS, draw_range := FERN_RANGE) -> Array:
 	var placed_spots := []  # [mesh, Transform3D] of everything placed
 	var w := _shape.map_width
 	var d := _shape.map_depth
@@ -385,7 +393,7 @@ func _scatter(meshes: Array[Mesh], count: int, size_range: Vector2, fit_height: 
 		shape.set_meta("shake", [batches[k], spots[k].size() - 1])  # a boar running into it shakes it (boar_bump.gd)
 		add_child(shape)
 	for k in meshes.size():
-		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else FERN_RANGE, batches[k])
+		_add_multimesh(meshes[k], spots[k], Vector3.ZERO, null, 0.0 if solid else draw_range, batches[k])
 	return placed_spots
 
 
