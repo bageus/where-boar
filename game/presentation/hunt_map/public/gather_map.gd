@@ -34,6 +34,8 @@ func _ready() -> void:
 	hunt.gathering = true
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
 	add_child(SunFx.new())
+	add_child(AmbientFx.new())
+	add_child(DayNight.new())
 	BakedShadow.bake(self, $Sun, [$Terrain, $Surroundings], Vector3.ZERO, 240.0)
 	for node: Node3D in [_hunter, $ReturnPoint]:
 		node.position.y = _terrain.height_at(node.position.x, node.position.z) + 0.1

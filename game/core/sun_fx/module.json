@@ -1,10 +1,15 @@
 {
   "id": "core.sun_fx",
   "layer": "core",
-  "purpose": "Anti-aliasing, glow, warm tone mapping and sun effects (disc, lens glow, light shafts, sun scatter) shared by camp, hunt and gather scenes; one quality switch.",
+  "purpose": "Anti-aliasing, glow, warm tone mapping and sun effects (disc, lens glow, light shafts, sun scatter) shared by camp, hunt and gather scenes; one quality switch. Also ambient effects on the same switch: wind in trees (Wind), falling leaves, river glints, campfire light and night fireflies (AmbientFx), and the day-night cycle for camp and gather (DayNight).",
   "state_owner": [],
   "public_api": [
-    "public/sun_fx.gd"
+    "public/sun_fx.gd",
+    "public/ambient_fx.gd",
+    "public/day_night.gd",
+    "public/wind.gd",
+    "public/water_glint.gdshaderinc",
+    "public/foliage_sway.gdshader"
   ],
   "dependencies": []
 }

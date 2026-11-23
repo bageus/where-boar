@@ -19,6 +19,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	%Continue.pressed.connect(resumed.emit)
 	%Quit.pressed.connect(quit_requested.emit)
+	%TimeOfDay.item_selected.connect(func(index: int) -> void: _change("time_of_day", DayNight.TIMES[index]))
 	%Quality.item_selected.connect(func(index: int) -> void: _change("quality", SunFx.QUALITIES[index]))
 	%Character.item_selected.connect(func(index: int) -> void: _change("character", CHARACTERS[index]))
 	%Fov.value_changed.connect(func(value: float) -> void: _change("fov", value))
@@ -28,10 +29,13 @@ func _ready() -> void:
 
 
 ## stats: the hunt's boar counts shown above the buttons (owner, 2026-10-28); "" hides them.
-func open(settings: Dictionary, stats := "") -> void:
+func open(settings: Dictionary, stats := "", show_time := false) -> void:
 	_settings = settings.duplicate()
 	%Stats.text = stats
 	%Stats.visible = stats != ""
+	%TimeLabel.visible = show_time  # only where the day can change: camp and gather
+	%TimeOfDay.visible = show_time
+	%TimeOfDay.select(maxi(0, DayNight.TIMES.find(settings["time_of_day"])))
 	%Quality.select(maxi(0, SunFx.QUALITIES.find(settings["quality"])))
 	%Character.select(maxi(0, CHARACTERS.find(settings["character"])))
 	%Fov.set_value_no_signal(settings["fov"])

@@ -17,6 +17,7 @@ var _sun: DirectionalLight3D
 var _material: ShaderMaterial
 var _layer: CanvasLayer
 var _rect: ColorRect
+var _daylight := 1.0  # 1 by day, 0 at night (DayNight): no light shafts, sun scatter or sun disc glow
 
 
 ## Sets the quality for the live scene and for those created later.
@@ -24,12 +25,14 @@ static func set_quality(level: String, tree: SceneTree = null) -> void:
 	quality = level if level in QUALITIES else "high"
 	if tree:
 		tree.call_group(GROUP, "restyle")
+		tree.call_group("ambient_fx", "restyle")
 
 
 func _ready() -> void:
 	add_to_group(GROUP)
 	_env = (get_parent().get_node("Environment") as WorldEnvironment).environment
 	_sun = get_parent().get_node("Sun")
+	_sun.light_color = Color(1.0, 0.95, 0.84)  # warm; DayNight changes it later
 	_material = ShaderMaterial.new()
 	_material.shader = SHAFTS
 	_layer = CanvasLayer.new()
@@ -41,6 +44,13 @@ func _ready() -> void:
 	_layer.add_child(_rect)
 	add_child(_layer)
 	restyle()
+
+
+## DayNight sets how much sun is left: 1 day, 0 night.
+func set_daylight(value: float) -> void:
+	_daylight = value
+	if _material:
+		restyle()
 
 
 func restyle() -> void:
@@ -60,10 +70,9 @@ func restyle() -> void:
 	_env.glow_bloom = 0.08
 	_env.glow_hdr_threshold = 0.85
 	_env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
-	_env.fog_sun_scatter = 0.25 if level >= 1 else 0.0
-	_sun.light_color = Color(1.0, 0.95, 0.84)
-	_material.set_shader_parameter("shafts", 1.0 if level >= 2 else 0.0)
-	_rect.visible = true
+	_env.fog_sun_scatter = (0.25 if level >= 1 else 0.0) * _daylight
+	_material.set_shader_parameter("shafts", (1.0 if level >= 2 else 0.0) * _daylight)
+	_rect.visible = _daylight > 0.0
 
 
 func _process(_delta: float) -> void:

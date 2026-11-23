@@ -24,7 +24,7 @@ var save_store := SaveStore.new()
 var progress: Progress
 ## Settings live in their own file, apart from progress (section 18).
 var settings_store := _settings_store()
-var settings := {"quality": "high", "fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded"}
+var settings := {"quality": "high", "fov": 80.0, "mouse_sensitivity": 0.002, "camera_motion": true, "sfx_volume": 1.0, "character": "bearded", "time_of_day": "day"}
 var _pause: CanvasLayer
 
 
@@ -43,6 +43,7 @@ func _ready() -> void:
 		if saved.has(key) and typeof(saved[key]) == typeof(settings[key]):  # JSON numbers load as floats
 			settings[key] = saved[key]
 	SunFx.set_quality(settings["quality"])
+	DayNight.set_time(settings["time_of_day"])
 	Sfx.preload_all()
 	_apply_volume()
 	_pause = PauseScene.instantiate()
@@ -62,7 +63,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not get_tree().paused and current and current.has_node("Hunter"):
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		_pause.open(settings, current.stats_text() if current.has_method("stats_text") else "")
+		_pause.open(settings, current.stats_text() if current.has_method("stats_text") else "", get_tree().has_group(DayNight.GROUP))
 
 
 func _resume() -> void:
@@ -87,6 +88,7 @@ func _on_settings_changed(changed: Dictionary) -> void:
 	settings_store.save_data(settings)
 	_apply_volume()
 	SunFx.set_quality(settings["quality"], get_tree())
+	DayNight.set_time(settings["time_of_day"], get_tree())
 	if current and current.has_node("Hunter"):
 		current.get_node("Hunter").apply_settings(settings)
 

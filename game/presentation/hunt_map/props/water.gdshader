@@ -3,6 +3,8 @@ shader_type spatial;
 // no shadows on it (owner, 2026-10-28).
 render_mode shadows_disabled, cull_disabled, depth_draw_never;
 
+#include "res://game/core/sun_fx/public/water_glint.gdshaderinc"
+
 uniform vec3 shallow : source_color = vec3(0.35, 0.75, 0.8);
 uniform vec3 deep : source_color = vec3(0.05, 0.35, 0.65);
 // Water depth in metres at which it turns fully deep and opaque.
@@ -30,7 +32,9 @@ void fragment() {
 	float a = texture(noise, world.xz * 0.04 - TIME * flow * 0.03).r;
 	float b = texture(noise, world.xz * vec2(0.03, 0.09) - TIME * flow * 0.06 + 0.37).r;
 	float ripple = smoothstep(0.58, 0.72, a * 0.55 + b * 0.55);
-	ALBEDO = mix(shallow, deep, t) + ripple * 0.22;
+	float glint = water_glint(world.xz, 1.2, TIME);
+	ALBEDO = mix(shallow, deep, t) + ripple * 0.22 + glint;
+	EMISSION = vec3(1.0, 0.95, 0.8) * glint * 1.5;
 	ALPHA = mix(0.15, 0.9, t);
 	ROUGHNESS = 0.15;
 	SPECULAR = 0.4;

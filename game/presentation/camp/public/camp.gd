@@ -120,6 +120,10 @@ func _ready() -> void:
 		_dress()
 		return
 	add_child(SunFx.new())
+	var ambient := AmbientFx.new()
+	ambient.campfire = $Stations/Campfire
+	add_child(ambient)
+	add_child(DayNight.new())
 	hunter.interacted.connect(_on_interacted)
 	hunter.equip(progress.hunt_items())
 	_shop.progress = progress

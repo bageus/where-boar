@@ -171,3 +171,7 @@ baked_shadow_strength={
 "type": "float",
 "value": 0.0
 }
+glint_strength={
+"type": "float",
+"value": 0.0
+}

@@ -100,6 +100,7 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	add_child(preload("res://game/core/clouds/public/clouds.gd").new())
 	add_child(SunFx.new())
+	add_child(AmbientFx.new())  # always day on the hunt: no DayNight
 	LevelLayout.apply(self, layout)
 	if planning:
 		$Hunter.free()

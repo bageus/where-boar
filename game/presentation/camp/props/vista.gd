@@ -3,6 +3,7 @@ extends Node3D
 ## The view from the camp's drop-off (owner, 2026-10-29): hills, a river and woods far below, out of reach,
 ## hinting at the hunting grounds; toy clouds drift over it and birds fly between perches (birds.gd).
 
+const WATER := preload("res://game/presentation/camp/props/vista_water.gdshader")
 const CloudsScript = preload("res://game/core/clouds/public/clouds.gd")
 const BirdsScript = preload("res://game/presentation/camp/props/birds.gd")
 ## Stylized broadleaves and pines like in PEAK (owner, 2026-11-02), tools/bake_peak_trees.gd.
@@ -97,10 +98,8 @@ func _land() -> void:
 func _water() -> void:
 	var mesh := PlaneMesh.new()
 	mesh.size = SIZE
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.25, 0.55, 0.75)
-	material.metallic = 0.3
-	material.roughness = 0.15
+	var material := ShaderMaterial.new()  # the old blue, plus sun glints (the river is seen from far above: big cells)
+	material.shader = WATER
 	mesh.material = material
 	var water := MeshInstance3D.new()
 	water.mesh = mesh

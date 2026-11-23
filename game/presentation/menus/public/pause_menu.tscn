@@ -58,6 +58,21 @@ popup/item_1/id = 1
 popup/item_2/text = "Lanky"
 popup/item_2/id = 2
 
+[node name="TimeLabel" type="Label" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Time of day"
+
+[node name="TimeOfDay" type="OptionButton" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "Day"
+popup/item_1/text = "Evening"
+popup/item_1/id = 1
+popup/item_2/text = "Night"
+popup/item_2/id = 2
+
 [node name="QualityLabel" type="Label" parent="Center/Box"]
 layout_mode = 2
 text = "Graphics quality"
