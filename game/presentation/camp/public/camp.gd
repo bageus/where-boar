@@ -4,6 +4,8 @@ extends Node3D
 
 ## Fact: the signpost's countdown ran out with the hunter in its circle (issue #24).
 signal hunt_requested
+## Fact: the player chose gathering at the signpost.
+signal gather_requested
 ## Fact: something was bought; the game saves (section 18).
 signal purchased
 
@@ -143,6 +145,9 @@ func _ready() -> void:
 	_signpost.purchased.connect(_on_purchased)
 	_signpost.closed.connect(_on_shop_closed)
 	_signpost.launched.connect(_launch)
+	_signpost.gather_chosen.connect(func() -> void:
+		_on_shop_closed()
+		gather_requested.emit())
 	_hunt_circle()
 	_dress_huts()
 	_dress_forge()

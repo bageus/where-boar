@@ -7,6 +7,7 @@ const ResultsScene = preload("res://game/presentation/menus/public/results_scree
 const PauseScene = preload("res://game/presentation/menus/public/pause_menu.tscn")
 const ViewerScene = preload("res://game/presentation/menus/public/animation_viewer.tscn")
 const MapScene = preload("res://game/presentation/hunt_map/public/hunt_map.tscn")
+const GatherScene = preload("res://game/presentation/hunt_map/public/gather_map.tscn")
 const CampScene = preload("res://game/presentation/camp/public/camp.tscn")
 const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 const Progress = preload("res://game/features/settlement/public/progress.gd")
@@ -147,6 +148,7 @@ func show_camp() -> void:
 	camp.hunter.apply_settings(settings)
 	camp.purchased.connect(_save)
 	camp.hunt_requested.connect(start_hunt)
+	camp.gather_requested.connect(start_gather)
 
 
 func _save() -> void:
@@ -167,6 +169,15 @@ func start_hunt() -> void:
 		map.blessing = Shaman.HEALTH_SHARE
 	if progress.paint.has("mount"):
 		map.mount_paint = Color(ShopCatalog.PAINTS[progress.paint["mount"]]["color"])
+	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
+	_swap(map)
+	map.get_node("Hunter").apply_settings(settings)
+
+
+## The gathering woods: the packed gear goes along, the finds come back like a hunt's (not counted as one).
+func start_gather() -> void:
+	var map := GatherScene.instantiate()
+	map.items = progress.hunt_items()
 	map.hunt_ended.connect(_show_results, CONNECT_DEFERRED)
 	_swap(map)
 	map.get_node("Hunter").apply_settings(settings)

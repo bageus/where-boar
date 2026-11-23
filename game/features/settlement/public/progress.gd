@@ -50,9 +50,9 @@ var paints: Dictionary = {}
 
 
 ## Adds a finished hunt's tusks, live catches and forest finds and takes spent consumables out of stock.
-## rng rolls the hunt's trophies (issue #19).
+## rng rolls the hunt's trophies (issue #19). A gathering trip keeps its finds but is not counted as a hunt.
 func add_hunt(hunt: Hunt, rng := RandomNumberGenerator.new()) -> void:
-	hunts += 1
+	hunts += 0 if hunt.gathering else 1
 	var earned := hunt.count_all(BoarOutcome.Kind.DEAD) + hunt.count_all(BoarOutcome.Kind.CAPTURED) > 0
 	last_trophies = Trophies.roll(earned, rng)
 	for trophy_id in last_trophies:

@@ -10,6 +10,8 @@ const Sfx = preload("res://game/core/sfx/public/sfx.gd")
 
 ## Fact: the player started a hunt countdown.
 signal launched(mode: String, seconds: int, invited: PackedStringArray)
+## Fact: the player chose to go gathering (no countdown: one goes alone).
+signal gather_chosen
 ## Fact: the team pass was bought; the game saves.
 signal purchased(item_id: String)
 signal closed
@@ -61,7 +63,9 @@ func _choice_page() -> void:
 	var row := HBoxContainer.new()
 	_body.add_child(row)
 	_button(row, "Hunt", _hunt_page)
-	_button(row, "Gather (comes later)", Callable()).disabled = true
+	_button(row, "Gather", func() -> void:
+		hide()
+		gather_chosen.emit())
 	_button(row, "Close", close)
 
 

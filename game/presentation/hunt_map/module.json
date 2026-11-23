@@ -4,7 +4,8 @@
   "purpose": "Grey-box hunt map scene: props, escape and return zones, boar spawn points, the hunter, goal HUD and minimap (D011, D017, M007).",
   "state_owner": [],
   "public_api": [
-    "public/hunt_map.tscn"
+    "public/hunt_map.tscn",
+    "public/gather_map.tscn"
   ],
   "dependencies": [
     "core.level_layout",

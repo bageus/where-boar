@@ -13,6 +13,8 @@ const POCKET := {"grass": 12, "stick": 12, "feather": 12, "poison_berry": 6, "da
 ## Boars on the map when the hunt started.
 var total := 0
 var returned := false
+## A trip to the gathering woods (no boars): its finds count, but not as a hunt.
+var gathering := false
 ## item_id -> consumables (bait, traps) spent during the hunt.
 var used_items: Dictionary = {}
 ## Boars held in traps right now; not free, counted as caught when the hunt ends (M007).

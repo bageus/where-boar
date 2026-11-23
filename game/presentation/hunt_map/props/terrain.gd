@@ -99,6 +99,11 @@ var _holes := PackedVector4Array()
 var height_edits: Dictionary = {}
 ## Injected before _ready: planned ground cover, "i,j" -> a PAINT key; grass grows only on painted "grass".
 var ground_paint: Dictionary = {}
+## Vegetation density: stumps, logs, trees, undergrowth and tall-grass patches times this, packed this much closer
+## (the gathering woods are denser than Green Valley, owner 2026-11-23).
+@export var density := 1.0
+## Forest finds times this (gatherables.gd).
+@export var loot := 1.0
 
 @onready var _shape: HeightMapShape3D = $Collision.shape
 
@@ -134,10 +139,11 @@ func _ready() -> void:
 	for node in get_parent().find_children("*", "Node3D", true, false):
 		if node != self and not is_ancestor_of(node):
 			_taken.append((node as Node3D).global_position)
-	var stumps := _scatter([STUMP], STUMPS, Vector2(1.0, 1.4), false, 13)
-	var logs := _scatter(LOGS, LOG_COUNT, Vector2(1.0, 1.4), false, 14)
-	var trees := _scatter(TREES, EXTRA_TREES, Vector2(6.0, 10.0), true, 15)
-	var shrubs := _scatter(FERNS, FERN_COUNT, Vector2(1.0, 1.6), false, 16, false, 1.5)
+	var clear := CLEAR_RADIUS / sqrt(density)
+	var stumps := _scatter([STUMP], roundi(STUMPS * density), Vector2(1.0, 1.4), false, 13, true, clear)
+	var logs := _scatter(LOGS, roundi(LOG_COUNT * density), Vector2(1.0, 1.4), false, 14, true, clear)
+	var trees := _scatter(TREES, roundi(EXTRA_TREES * density), Vector2(6.0, 10.0), true, 15, true, clear)
+	var shrubs := _scatter(FERNS, roundi(FERN_COUNT * density), Vector2(1.0, 1.6), false, 16, false, 1.5 / sqrt(density))
 	_plant_grass()
 	_place_cliff_rocks()
 	if Engine.is_editor_hint():
@@ -145,7 +151,7 @@ func _ready() -> void:
 	var gatherables := Gatherables.new()
 	gatherables.name = "Gatherables"
 	add_child(gatherables)
-	gatherables.populate(self, {"stumps": stumps, "logs": logs, "trees": trees, "shrubs": shrubs})
+	gatherables.populate(self, {"stumps": stumps, "logs": logs, "trees": trees, "shrubs": shrubs}, loot)
 
 
 ## Planning brush: ground within radius of at rises by amount (lowers when negative), or with flatten moves
@@ -232,7 +238,7 @@ func _plant_grass() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var patches: Array[Vector3] = []  # x, z, radius
-	while patches.size() < TALL_PATCHES:
+	while patches.size() < roundi(TALL_PATCHES * density):
 		var i := rng.randi_range(10, w - 11)
 		var j := rng.randi_range(10, d - 11)
 		if _grassy(i, j):

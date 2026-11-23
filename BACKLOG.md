@@ -157,7 +157,7 @@ Unapproved ideas and possible future features belong here.
 | P3-104 | 3 | Planning mode: procedural objects editable (terrain-scattered trees, stumps, logs, ferns, cliffs, tall-grass patches; camp dressing) | P3-101 | TODO |
 | P3-105 | 3 | Planning mode: scatter loot by group with a count (stones now; sticks and berries need items first) | P3-101 | TODO |
 | P3-106 | 3 | Planning mode: redraw the river course | P3-102 | TODO |
-| P3-107 | 3 | Gathering level (third level from issue #29): needs a spec, does not exist yet | — | TODO |
+| P3-107 | 3 | Gathering level (third level from issue #29): separate 160 m map with hills rising into crags, dense woods, scattered finds, entry from the signpost, nature sounds | P3-123 | DONE |
 | P3-108 | 3 | Inventory icons from the three owner atlases (hotbar, bait slot, rings, camp HUD, results) | P3-101 | DONE |
 | P3-109 | 3 | Forest gatherables on the hunt map (issues #21, #26): grass, daisies, berries, mushrooms, poisonous berries, feathers, sticks scattered at random; hopping frogs, crawling grubs. Collecting them is not done | — | DONE |
 | P3-110 | 3 | Owner's new camp building models (issues #11-#28): all stations, six huts for sale with a kept variant, longhouse to walk into, forge building site with gifts, quest board (random pool, 12 h), unified Sell resources window; clan tents only in the planning palette | P3-101 | DONE |

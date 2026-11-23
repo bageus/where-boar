@@ -47,35 +47,36 @@ var _nodes := {}  # same key -> its baked MeshInstance3D
 var _critters: Array[Node3D] = []  # frogs and grubs, with meta "material"
 
 
-## `hosts` holds [mesh, Transform3D] lists for "stumps", "logs", "trees" and "shrubs" the terrain placed.
-func populate(terrain: Node3D, hosts: Dictionary) -> void:
+## `hosts` holds [mesh, Transform3D] lists for "stumps", "logs", "trees" and "shrubs" the terrain placed;
+## every count is times `amount`.
+func populate(terrain: Node3D, hosts: Dictionary, amount := 1.0) -> void:
 	_terrain = terrain
 	_rng.randomize()
 	for glb: String in GROUND:
 		var range_: Vector2 = GROUND[glb][1]
-		for _n in roundi(GROUND[glb][0] * _rng.randf_range(0.6, 1.4)):
+		for _n in roundi(GROUND[glb][0] * _rng.randf_range(0.6, 1.4) * amount):
 			var at: Variant = terrain.free_spot(_rng)
 			if at != null:
 				_still(glb, at, range_)
-	for _n in roundi(BERRIES_ON_SHRUBS * _rng.randf_range(0.6, 1.4)):
+	for _n in roundi(BERRIES_ON_SHRUBS * _rng.randf_range(0.6, 1.4) * amount):
 		_on_shrub("Berries_6_Colors", hosts.shrubs)
-	for _n in roundi(POISON_ON_SHRUBS * _rng.randf_range(0.6, 1.4)):
+	for _n in roundi(POISON_ON_SHRUBS * _rng.randf_range(0.6, 1.4) * amount):
 		_on_shrub("Poisonous_Berries", hosts.shrubs)
 	var wood: Array = hosts.stumps + hosts.logs
-	for _n in roundi(MUSHROOMS_ON_WOOD * _rng.randf_range(0.6, 1.4)):
+	for _n in roundi(MUSHROOMS_ON_WOOD * _rng.randf_range(0.6, 1.4) * amount):
 		_still("Mushrooms", _wood_top(wood), Vector2(0.3, 0.6))
-	for _n in roundi(STICKS * _rng.randf_range(0.6, 1.4)):
+	for _n in roundi(STICKS * _rng.randf_range(0.6, 1.4) * amount):
 		var tree: Array = hosts.trees[_rng.randi() % hosts.trees.size()]
 		var at: Vector3 = (tree[1] as Transform3D).origin + _ring(_rng.randf_range(STICK_RING.x, STICK_RING.y))
 		if terrain.grassy_at(at.x, at.z):
 			at.y = terrain.height_at(at.x, at.z)
 			_still("Sticks_3_Variants", at, Vector2(0.4, 0.9))
 	_bake()
-	for _n in FROGS:
+	for _n in roundi(FROGS * amount):
 		var at: Variant = terrain.free_spot(_rng)
 		if at != null:
 			_frog(at)
-	for _n in GRUBS:
+	for _n in roundi(GRUBS * amount):
 		_grub(wood, hosts.trees)
 
 
