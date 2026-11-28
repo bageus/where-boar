@@ -26,11 +26,13 @@ jobs:
           unzip -q godot.zip
           sudo mv Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
 
+      - name: Import project
+        run: godot --headless --path . --editor --quit
+
       - name: Run domain tests
         run: |
           for t in game/*/*/tests/run_*_tests.gd; do timeout 120 godot --headless --path . -s "$t"; done
 
-      - name: Import project and run smoke tests
+      - name: Run smoke tests
         run: |
-          godot --headless --path . --editor --quit
           for t in game/*/*/tests/run_*_smoke_test.gd; do timeout 120 godot --headless --path . -s "$t"; done

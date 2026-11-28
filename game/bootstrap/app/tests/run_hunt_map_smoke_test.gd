@@ -154,9 +154,15 @@ func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D
 ## Relief (owner, 2026-10-27): the lookout mesa's cliff hides a hunter on top from a boar below;
 ## things set on its gentle east slope lie on the ground.
 func _check_relief(hunter: CharacterBody3D, boar: CharacterBody3D) -> void:
-	boar.global_position = _on_ground(Vector3(-30, 0, 15))
-	hunter.global_position = _on_ground(Vector3(-30, 0, 25))
-	_check(hunter.global_position.y - boar.global_position.y > 4.0 and not boar._sight_clear(),
+	# The cliff's slope is now wider; stand at its base rather than halfway up.
+	boar.global_position = _on_ground(Vector3(-30, 0, 13))
+	hunter.global_position = _on_ground(Vector3(-30, 0, 20))
+	var ray := PhysicsRayQueryParameters3D.create(boar.global_position + Vector3.UP * boar.EYE_RISE,
+			hunter.global_position + Vector3.UP * boar.HUNTER_RISE, boar.collision_mask | boar.COVER_LAYER,
+			[boar.get_rid(), hunter.get_rid()])
+	var hit := boar.get_world_3d().direct_space_state.intersect_ray(ray)
+	var blocked: bool = hit.get("collider") == _map.get_node("Terrain")
+	_check(hunter.global_position.y - boar.global_position.y > 4.0 and blocked,
 			"a hunter on the lookout is out of sight of a boar under the cliff")
 	var slope := Vector3(-18, 0, 25)
 	var set_down: Vector3 = hunter.ground_at(slope + Vector3.UP * (_on_ground(slope).y + 1.0))

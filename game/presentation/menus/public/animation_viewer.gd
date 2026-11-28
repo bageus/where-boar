@@ -158,9 +158,13 @@ func play(anim: String) -> void:
 	if CLIP_WEAPONS.has(anim) and weapon not in CLIP_WEAPONS[anim]:
 		show_weapon(CLIP_WEAPONS[anim][0])
 	_boar.visible = anim == "ride"
-	var hips_height := _skeleton.get_bone_global_rest(_skeleton.find_bone(_bone("hips"))).origin.y
-	# On the saddle, as in mount.gd.
-	character.position.y = _boar.top() * 0.85 + 0.12 - hips_height if anim == "ride" else 0.0
+	character.position.y = 0.0
+	if anim == "ride":
+		# Align the posed hips, not the unscaled rest rig or the model origin.
+		player.advance(0.0)
+		var hips := _skeleton.get_bone_global_pose(_skeleton.find_bone(_bone("hips"))).origin
+		var hips_height := character.to_local(_skeleton.to_global(hips)).y * character.scale.y
+		character.position.y = _boar.top() * 0.85 + 0.12 - hips_height
 
 
 # The arrow lies from the drawing fist through the bow grip until the string is released.
