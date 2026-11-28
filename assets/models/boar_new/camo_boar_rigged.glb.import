@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dbwje6mh3qcsi"
-path="res://.godot/imported/Prehistoric_Ochre_Clan_Tent.glb-e0e32051115629fb3849504b691edb22.scn"
+uid="uid://ohat4eci5w68"
+path="res://.godot/imported/camo_boar_rigged.glb-e723e99676ad7ec9276368f59c347a65.scn"
 
 [deps]
 
-source_file="res://assets/models/buildings/Prehistoric_Ochre_Clan_Tent.glb"
-dest_files=["res://.godot/imported/Prehistoric_Ochre_Clan_Tent.glb-e0e32051115629fb3849504b691edb22.scn"]
+source_file="res://assets/models/boar_new/camo_boar_rigged.glb"
+dest_files=["res://.godot/imported/camo_boar_rigged.glb-e723e99676ad7ec9276368f59c347a65.scn"]
 
 [params]
 

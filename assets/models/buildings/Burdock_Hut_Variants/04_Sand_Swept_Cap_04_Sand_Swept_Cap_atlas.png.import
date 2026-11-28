@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://daq2gbky2lv70"
-path="res://.godot/imported/04_Sand_Swept_Cap_04_Sand_Swept_Cap_atlas.png-b742b49713ddba5de1723ae870bd278c.ctex"
+path.s3tc="res://.godot/imported/04_Sand_Swept_Cap_04_Sand_Swept_Cap_atlas.png-b742b49713ddba5de1723ae870bd278c.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "760ada93d3dc7a82eb256a0e8d3946c1"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/buildings/Burdock_Hut_Variants/04_Sand_Swept_Cap_04_Sand_Swept_Cap_atlas.png"
-dest_files=["res://.godot/imported/04_Sand_Swept_Cap_04_Sand_Swept_Cap_atlas.png-b742b49713ddba5de1723ae870bd278c.ctex"]
+dest_files=["res://.godot/imported/04_Sand_Swept_Cap_04_Sand_Swept_Cap_atlas.png-b742b49713ddba5de1723ae870bd278c.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

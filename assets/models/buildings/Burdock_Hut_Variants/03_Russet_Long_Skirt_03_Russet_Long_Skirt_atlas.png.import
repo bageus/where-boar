@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bs1t2jlowr34"
-path="res://.godot/imported/03_Russet_Long_Skirt_03_Russet_Long_Skirt_atlas.png-af2adddea51dfc0f7f967f39ae303f59.ctex"
+path.s3tc="res://.godot/imported/03_Russet_Long_Skirt_03_Russet_Long_Skirt_atlas.png-af2adddea51dfc0f7f967f39ae303f59.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bbe03df16125753a446d766cf7a0bf41"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/buildings/Burdock_Hut_Variants/03_Russet_Long_Skirt_03_Russet_Long_Skirt_atlas.png"
-dest_files=["res://.godot/imported/03_Russet_Long_Skirt_03_Russet_Long_Skirt_atlas.png-af2adddea51dfc0f7f967f39ae303f59.ctex"]
+dest_files=["res://.godot/imported/03_Russet_Long_Skirt_03_Russet_Long_Skirt_atlas.png-af2adddea51dfc0f7f967f39ae303f59.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
