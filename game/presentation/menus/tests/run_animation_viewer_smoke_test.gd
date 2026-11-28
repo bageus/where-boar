@@ -30,7 +30,11 @@ func _process(_delta: float) -> bool:
 			_check(viewer.player.current_animation == anim, "%s plays %s" % [model_name, anim])
 			_check(viewer.get_node("%Boar").visible == (anim == "ride"), "boar only for ride (%s)" % anim)
 		viewer.play("ride")
-		_check(viewer.character.position.y > 0.3, "%s sits on the boar" % model_name)
+		var skeleton: Skeleton3D = viewer._skeleton
+		var hips := skeleton.get_bone_global_pose(skeleton.find_bone(viewer._bone("hips"))).origin
+		var seat_height: float = viewer.get_node("%Boar").top() * 0.85 + 0.12
+		_check(viewer.get_node("%Boar").visible and absf(skeleton.to_global(hips).y - seat_height) < 0.05,
+				"%s sits on the boar" % model_name)
 	for boar_type: Resource in viewer.BoarTypes.ALL:
 		viewer.show_boar(boar_type.id)
 		for anim: String in viewer.BOAR_ANIMATIONS:

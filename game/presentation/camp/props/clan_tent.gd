@@ -6,7 +6,7 @@ extends RefCounted
 
 const Station = preload("res://game/presentation/camp/props/station.tscn")
 const BUILDINGS := "res://assets/models/buildings/"
-const TENT = preload(BUILDINGS + "Prehistoric_Ochre_Clan_Tent.glb")
+const TENT = preload(BUILDINGS + "Clan tent/Prehistoric_Ochre_Clan_Tent.glb")
 const CAULDRON = preload(BUILDINGS + "Tripod_Cauldron_and_Hearth.glb")
 const HearthFire = preload("res://game/presentation/camp/props/hearth_fire.gd")
 const TOTEM = preload(BUILDINGS + "Chunky_Boar_Log_Totem.glb")

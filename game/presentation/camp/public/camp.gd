@@ -37,7 +37,7 @@ const HUT_VARIANTS: Array[PackedScene] = [
 ]
 const FORGE_BUILT = preload(BUILDINGS + "Primitive_Blacksmith_Shelter.glb")
 ## Clan building models for the planning palette (the real clan tent rises with a clan, issue #23).
-const CLAN_MODELS := ["Prehistoric_Ochre_Clan_Tent", "Chunky_Boar_Log_Totem", "Tripod_Cauldron_and_Hearth"]
+const CLAN_MODELS := ["Clan tent/Prehistoric_Ochre_Clan_Tent", "Chunky_Boar_Log_Totem", "Tripod_Cauldron_and_Hearth"]
 const PALETTE := ["Prehistoric_Communal_Longhouse", "Burdock_Hut_Variants/01_Coral_High_Peak",
 	"Burdock_Hut_Variants/02_Ochre_Wide_Entrance", "Burdock_Hut_Variants/03_Russet_Long_Skirt",
 	"Burdock_Hut_Variants/04_Sand_Swept_Cap", "Burdock_Hut_Variants/05_Prehistoric_Burdock_Tent", "Prehistoric_Stone_Well",
@@ -61,7 +61,7 @@ const PEN_SPOTS: Array[Vector3] = [Vector3(-4.5, 3.0, 0.5), Vector3(1.0, 4.5, 2.
 const RAIL_SADDLES := [Vector2(-7.0, 0.0), Vector2(-4.5, 0.1), Vector2(7.0, -0.1)]
 const RAIL_Z := 8.07
 const RAIL_TOP := 1.56
-const Saddle = preload("res://assets/models/peak_gear/saddle.tscn")
+const Saddle = preload("res://assets/models/weapon_new/boar_saddle.glb")
 const BoarModel = preload("res://game/features/boar/public/boar_model.gd")
 const BoarModelScene = preload("res://game/features/boar/public/boar_model.tscn")
 const Helper = preload("res://assets/models/hunter/young_hunter.glb")
@@ -253,8 +253,8 @@ func _fill_pen() -> void:
 	for spot: Vector2 in RAIL_SADDLES:
 		var saddle: Node3D = Saddle.instantiate()
 		pens.add_child(saddle)
-		saddle.position = Vector3(spot.x, RAIL_TOP - 0.3 / pens.scale.x, RAIL_Z)
-		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail, stirrups hang on both sides
+		saddle.position = Vector3(spot.x, RAIL_TOP - 0.03 / pens.scale.x, RAIL_Z)
+		saddle.rotation.y = PI / 2 + spot.y  # spine along the rail
 		saddle.scale = Vector3.ONE / pens.scale.x
 
 

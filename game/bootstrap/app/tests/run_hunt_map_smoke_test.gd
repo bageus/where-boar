@@ -15,9 +15,14 @@ var _checks := 0
 var _main: Node
 var _map: Node3D
 var _hunt: RefCounted
+var _net_target: CharacterBody3D
+var _spear_target: CharacterBody3D
+var _pit_target: CharacterBody3D
+var _relief_target: CharacterBody3D
 
 
 func _initialize() -> void:
+	seed(59)  # Repeatable herd types and AI choices in the smoke fixture.
 	ShopCatalog.free_for_testing = false
 	_main = MainScene.instantiate()
 	# Keep the player's real save out of the test.
@@ -81,48 +86,69 @@ func _physics_process(_delta: float) -> bool:
 			hunter._place_bait()
 			_check(boars[3].baits.size() == 1 and hunter.loadout.used == {"item_pear": 1}, "placed bait is shown to boars")
 		5:
+			# Keep references: node order can change as the hunt progresses.
+			_net_target = boars[1]
+			_spear_target = boars[2]
+			_pit_target = boars[3]
+			_relief_target = boars[4]
 			# Park every boar far away so none wanders into the throws below.
 			for i in boars.size():
 				boars[i].set_physics_process(false)
 				boars[i].global_position = _on_ground(Vector3(-40 + i * 2, 0, -60))
-			_freeze_and_aim(hunter, boars[1], Vector3(-3, 0, 20), hunter.NET_SPEED)
+			# Keep the pit target clear of the parked herd before enabling the trap.
+			_pit_target.global_position = _on_ground(Vector3(0, 0, -35))
+			_freeze_and_aim(hunter, _net_target, Vector3(-3, 0, 20), hunter.NET_SPEED)
 			hunter.weapon = hunter.Weapon.NET
 			hunter._attack()
 		60:
-			_check(boars[1].state_name() == "CAPTURED", "thrown net captures boar")
+			_check(_net_target.state_name() == "CAPTURED", "thrown net captures boar")
 			# A pit dug under a parked boar holds it.
 			var pit: Node3D = hunter.TRAP_SCENES["item_pit"].instantiate()
 			_map.add_child(pit)
-			pit.global_position = boars[3].global_position
-			boars[3].set_physics_process(true)
-			# Helpers: a netted wild rooster goes to the pen; pen animals can be summoned once.
-			_map.get_node("Wild").get_child(0).net_hit()
-			_check(_map.hunt.helpers_caught == {"rooster": 1}, "a netted wild rooster is caught")
-			var turkey: Node3D = _map.get_node("Wild").get_child(1)
-			hunter.global_position = turkey.global_position + Vector3(1.0, 0.0, 0.0)
-			_map._on_interacted()
-			_check(_map.hunt.helpers_caught == {"rooster": 1, "turkey": 1}, "a wild turkey within reach is grabbed with E")
-			_map.helpers = {"rooster": 1, "turkey": 1}
-			_map.summon("turkey")
-			_map.summon("rooster")
-			_check(not _map.get_node("Hud/Minimap").marked.is_empty() and _map.get_node_or_null("RoosterDriver") == null,
-					"turkey marks a group on the minimap; only one helper per hunt")
-			_freeze_and_aim(hunter, boars[2], Vector3(3, 0, 20))
+			pit.global_position = _pit_target.global_position
+			_pit_target.set_physics_process(true)
+			_check_wild_birds(hunter)
+			_freeze_and_aim(hunter, _spear_target, Vector3(3, 0, 20), hunter.SPEAR_MAX_SPEED, 4.0)
+		62:
+			# Give the physics server two ticks to synchronize the moved static hitbox.
+			_aim_at_target(hunter, _spear_target, hunter.SPEAR_MAX_SPEED, 4.0)
 			hunter.weapon = hunter.Weapon.SPEAR
 			Input.action_press("aim")
 			hunter._aim_power = 1.0  # a fully charged throw
 			hunter._attack()
 			Input.action_release("aim")
 		120:
-			_check(boars[2].state_name() == "PANIC", "thrown spear hits and panics boar")
-			_check_stuck_items(hunter, boars[2], boars[1])
+			_check(_spear_target.state_name() == "PANIC", "thrown spear hits and panics boar")
+			_check_stuck_items(hunter, _spear_target, _net_target)
 			_check(_map.hunt.remaining() == _map.hunt.total - 2 and _map.hunt.count_all(BoarOutcome.Kind.CAPTURED) == 1, "goal counts the capture")
-			_check(_map.hunt.held == 1, "pit holds a boar")  # wide opening: a herd mate of the parked boar may drop in first
+			_check(_map.hunt.held == 1 and _pit_target.state_name() == "TRAPPED", "pit holds its target boar")
 			_hunt = _map.hunt
-			_check(boars[2].get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
-			_check_relief(hunter, boars[4])
+			_check(_spear_target.get_node("HealthBar/Fill").scale.x < 1.0, "health bar shrinks after a hit")
+			_check_relief(hunter, _relief_target)
 			_gather_and_return(hunter)
 	return false
+
+
+## Net a rooster, grab the isolated turkey, then check the one-helper limit.
+func _check_wild_birds(hunter: CharacterBody3D) -> void:
+	# Helpers: a netted wild rooster goes to the pen; pen animals can be summoned once.
+	_map.get_node("Wild").get_child(0).net_hit()
+	_check(_map.hunt.helpers_caught == {"rooster": 1}, "a netted wild rooster is caught")
+	var turkey: Node3D = _map.get_node("Wild").get_child(1)
+	# Isolate the intended bird: neighbours, including the queued rooster,
+	# must not win the same-frame interaction depending on random wander.
+	for animal: Node3D in _map.get_node("Wild").get_children():
+		animal.set_physics_process(false)
+		animal.global_position = _on_ground(Vector3(55, 0, -55))
+	turkey.global_position = _on_ground(Vector3(12, 0, 30))
+	hunter.global_position = turkey.global_position + Vector3(1.0, 0.0, 0.0)
+	_map._on_interacted()
+	_check(_map.hunt.helpers_caught == {"rooster": 1, "turkey": 1}, "a wild turkey within reach is grabbed with E")
+	_map.helpers = {"rooster": 1, "turkey": 1}
+	_map.summon("turkey")
+	_map.summon("rooster")
+	_check(not _map.get_node("Hud/Minimap").marked.is_empty() and _map.get_node_or_null("RoosterDriver") == null,
+			"turkey marks a group on the minimap; only one helper per hunt")
 
 
 ## E next to a frog puts a find in the pockets (issue #26), then E at the return point ends the hunt.
@@ -154,9 +180,15 @@ func _check_stuck_items(hunter: CharacterBody3D, running: Node3D, caught: Node3D
 ## Relief (owner, 2026-10-27): the lookout mesa's cliff hides a hunter on top from a boar below;
 ## things set on its gentle east slope lie on the ground.
 func _check_relief(hunter: CharacterBody3D, boar: CharacterBody3D) -> void:
-	boar.global_position = _on_ground(Vector3(-30, 0, 15))
-	hunter.global_position = _on_ground(Vector3(-30, 0, 25))
-	_check(hunter.global_position.y - boar.global_position.y > 4.0 and not boar._sight_clear(),
+	# The cliff's slope is now wider; stand at its base rather than halfway up.
+	boar.global_position = _on_ground(Vector3(-30, 0, 13))
+	hunter.global_position = _on_ground(Vector3(-30, 0, 20))
+	var ray := PhysicsRayQueryParameters3D.create(boar.global_position + Vector3.UP * boar.EYE_RISE,
+			hunter.global_position + Vector3.UP * boar.HUNTER_RISE, boar.collision_mask | boar.COVER_LAYER,
+			[boar.get_rid(), hunter.get_rid()])
+	var hit := boar.get_world_3d().direct_space_state.intersect_ray(ray)
+	var blocked: bool = hit.get("collider") == _map.get_node("Terrain")
+	_check(hunter.global_position.y - boar.global_position.y > 4.0 and blocked,
 			"a hunter on the lookout is out of sight of a boar under the cliff")
 	var slope := Vector3(-18, 0, 25)
 	var set_down: Vector3 = hunter.ground_at(slope + Vector3.UP * (_on_ground(slope).y + 1.0))
@@ -235,15 +267,20 @@ func _buy_club(camp: Node3D) -> void:
 	_check("item_club" in FileAccess.get_file_as_string(_main.save_store.path), "purchase is saved")
 
 
-## Moves the target to open ground at spot and puts the hunter 6 m south of it, aiming at its body.
-func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vector3, speed: float = 18.0) -> void:
+## Moves the target to open ground and uses the current camera and target transforms.
+func _freeze_and_aim(hunter: CharacterBody3D, boar: CharacterBody3D, spot: Vector3, speed: float = 18.0, distance := 6.0) -> void:
 	boar.global_position = _on_ground(spot)
-	hunter.global_position = _on_ground(spot + Vector3(0, 0, 6)) + Vector3(0, 0.05, 0)
+	boar.rotation = Vector3.ZERO
+	hunter.global_position = _on_ground(spot + Vector3(0, 0, distance)) + Vector3(0, 0.05, 0)
 	hunter.rotation = Vector3.ZERO
-	# Eye 1.6 m, boar body 0.5 m, the throw's drop over 6 m at this speed, plus the ground's rise.
-	var drop := 4.9 * pow(6.0 / speed, 2.0)
-	var rise := hunter.global_position.y - boar.global_position.y
-	hunter.get_node("Camera").rotation = Vector3(-atan((1.1 - drop + rise) / 6.0), 0, 0)
+	_aim_at_target(hunter, boar, speed, distance)
+
+
+func _aim_at_target(hunter: CharacterBody3D, boar: CharacterBody3D, speed: float, distance: float) -> void:
+	var camera: Camera3D = hunter.get_node("Camera")
+	var target: Vector3 = boar.get_node("Hitbox/Shape").global_position
+	var drop := 4.9 * pow(distance / speed, 2.0)
+	camera.look_at(target + Vector3.UP * drop, Vector3.UP)
 
 
 func _check(ok: bool, name: String) -> void:

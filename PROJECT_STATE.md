@@ -6,7 +6,7 @@ current_milestone: P3_VERTICAL_SLICE
 active_task_id: P3-107
 last_completed_task_id: P3-055
 build_status: PASS
-updated: 2026-11-23
+updated: 2026-11-28
 ---
 
 # Project State
@@ -14,6 +14,8 @@ updated: 2026-11-23
 This is the compact current truth about project progress. Update it after every material work session.
 
 ## Current outcome
+
+Обновление моделей от 2026-11-28: устранены ошибки загрузки удалённых ресурсов молота и седла, обновлён путь шатра клана в предлагаемом PR. В локальной копии проект запускается; валидация и тесты охотника проходят. DEFERRED: тест лагеря фиксирует пересечение выставочной ямы с Hut6 после изменения размеров хижин. Требуется отдельная правка размещения.
 
 Первый играбельный прототип: охотник от первого лица на серой карте, кабаны убегают и паникуют по доменным правилам, копьё и сеть работают.
 
