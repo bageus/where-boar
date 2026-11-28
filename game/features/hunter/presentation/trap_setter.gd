@@ -8,7 +8,6 @@ extends Node3D
 const BuildSite = preload("res://game/features/hunter/presentation/traps/build_site.gd")
 const HunterRig = preload("res://game/features/hunter/public/hunter_rig.gd")
 const Helper = preload("res://assets/models/hunter/young_hunter.glb")
-const HammerMesh = preload("res://assets/models/peak_gear/hammer.res")
 const Hammer = preload("res://assets/models/weapon_new/Stone_Hammer.glb")
 const Backpack = preload("res://assets/models/weapon_new/wooden_frame_backpack.glb")
 ## Gear on the rigged helper, in bone space. The backpack's frame spans y 0..0.95 and z -0.34..0.46 (straps
@@ -35,10 +34,7 @@ func _ready() -> void:
 	var body: Node3D = HunterRig.instance(scene) if scene == Helper else scene.instantiate()
 	body.rotation.y = PI  # the model faces +z, look_at points -z at the goal
 	add_child(body)
-	var hammer := body.find_child("hammer") as MeshInstance3D
-	if hammer:
-		hammer.mesh = HammerMesh  # PEAK-style stone hammer, same hand mount
-	elif scene == Helper:
+	if scene == Helper:
 		_wear(body, "chest", Backpack, BACKPACK_ON_CHEST)
 		_wear(body, "hand.R", Hammer, HAMMER_IN_HAND)
 	_player = body.find_child("AnimationPlayer") as AnimationPlayer
